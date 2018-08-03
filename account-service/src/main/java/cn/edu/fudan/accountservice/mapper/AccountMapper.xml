@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.fudan.accountservice.mapper.AccountMapper">
+
+    <resultMap id="account" type="Account">
+        <id property="uuid" column="uuid"/>
+        <result property="accountName" column="accountName"/>
+        <result property="password" column="password"/>
+        <result property="name" column="name"/>
+        <result property="email" column="email"/>
+    </resultMap>
+
+    <select id="getAccountIdByAccountName" parameterType="String" resultType="String">
+        select uuid from account where accountName = #{accountName}
+    </select>
+
+    <select id="login" resultMap="account">
+        select *
+        from
+        account
+        where
+        accountName=#{accountName} and password=#{password}
+    </select>
+</mapper>

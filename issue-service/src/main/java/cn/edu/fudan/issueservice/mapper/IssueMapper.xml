@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.fudan.issueservice.mapper.IssueMapper">
+
+    <resultMap id="issue" type="Issue">
+        <id property="id" column="id"/>
+        <id property="uuid" column="uuid"/>
+        <result property="type" column="type"/>
+        <result property="start_commit" column="start_commit"/>
+        <result property="end_commit" column="end_commit"/>
+        <result property="raw_issue_start" column="raw_issue_start"/>
+        <result property="raw_issue_end" column="raw_issue_end"/>
+        <result property="project_id" column="project_id"/>
+        <result property="target_files" column="target_files"/>
+    </resultMap>
+
+    <resultMap id="issue2" type="Issue">
+        <id property="id" column="id"/>
+        <id property="uuid" column="uuid"/>
+        <result property="type" column="type"/>
+        <result property="start_commit" column="start_commit"/>
+        <result property="end_commit" column="end_commit"/>
+        <result property="raw_issue_start" column="raw_issue_start"/>
+        <result property="raw_issue_end" column="raw_issue_end"/>
+        <result property="project_id" column="project_id"/>
+        <result property="target_files" column="target_files"/>
+        <result property="start_commit_time" column="start_commit_time" />
+        <result property="end_commit_time" column="start_commit_time" />
+    </resultMap>
+
+
+    <insert id="insertIssueList" parameterType="List">
+        insert into issue
+        (
+        uuid,
+        type,
+        start_commit,
+        end_commit,
+        raw_issue_start,
+        raw_issue_end,
+        project_id,
+        target_files
+        )
+        VALUES
+        <foreach collection="list" item="item" index="index" separator =",">
+            (
+            #{item.uuid},
+            #{item.type},
+            #{item.start_commit},
+            #{item.end_commit},
+            #{item.raw_issue_start},
+            #{item.raw_issue_end},
+            #{item.project_id},
+            #{item.target_files}
+            )
+        </foreach>
+    </insert>
+    
+    <select id="getIssueList" parameterType="Map" resultMap="issue2">
+        select a.* , b.commit_time as start_commit_time , c.commit_time as end_commit_time from issue as a
+        inner join commit as b on a.start_commit = b.commit_id
+        inner join commit as c on a.end_commit = c.commit_id
+        <where>
+            <if test="project_id != null">
+                 a.project_id = #{project_id}
+            </if>
+            <if test="type != null">
+                and a.type = #{type}
+            </if>
+        </where>
+        <if test="start != null  and size != null ">
+            limit #{start},#{size}
+        </if>
+	</select>
+
+    <select id="getIssueByID" parameterType="String" resultMap="issue">
+        select * from issue where uuid = #{uuid}
+    </select>
+
+    <select id="getIssueCount" parameterType="Map" resultType="Integer">
+        select count(id) from issue
+        <where>
+            <if test="project_id != null">
+                project_id = #{project_id}
+            </if>
+            <if test="type != null">
+                and type = #{type}
+            </if>
+        </where>
+    </select>
+
+    <update id="batchUpdateIssue" parameterType="List">
+        update issue
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="start_commit = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    <if test="item.start_commit != null">
+                        when uuid=#{item.uuid} then #{item.start_commit}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="end_commit = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    <if test="item.end_commit != null">
+                        when uuid=#{item.uuid} then #{item.end_commit}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="raw_issue_start = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    <if test="item.raw_issue_start != null">
+                        when uuid=#{item.uuid} then #{item.raw_issue_start}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="raw_issue_end = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    <if test="item.raw_issue_end != null">
+                        when uuid=#{item.uuid} then #{item.raw_issue_end}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="target_files = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    <if test="item.target_files != null">
+                        when uuid=#{item.uuid} then #{item.target_files}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        <where>
+            <foreach collection="list" separator="or" item="item">
+                uuid = #{item.uuid}
+            </foreach>
+        </where>
+    </update>
+
+    <delete id="deleteIssueByProjectId" parameterType="String">
+        delete from issue where project_id = #{projectId}
+    </delete>
+
+
+
+</mapper>
