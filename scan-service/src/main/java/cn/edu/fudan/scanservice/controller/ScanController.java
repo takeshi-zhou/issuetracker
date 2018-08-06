@@ -30,7 +30,7 @@ public class ScanController {
     @PostMapping(value = {"/doScan"})
     public Object scan(@RequestBody JSONObject requestParam){
         try{
-            kafkaService.sendScanMessage(requestParam);
+            kafkaService.scanByRequest(requestParam);
             return new ResponseBean(200,"scan msg send success!",null);
         }catch (Exception e){
             return new ResponseBean(401,e.getMessage(),null);
@@ -70,10 +70,4 @@ public class ScanController {
             return new ResponseBean(401,"scan update failed",null);
         }
     }
-
-    @GetMapping(value = {"/lastScannedCommit/{projectId}"})
-    public Object getLastScannedCommit(@PathVariable("projectId")String projectId){
-        return scanService.getLatestScannedCommitId(projectId);
-    }
-
 }

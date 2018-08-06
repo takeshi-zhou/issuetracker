@@ -27,10 +27,6 @@ public class CommitDao {
         return commitMapper.getCommitByCommitId(commit_id);
     }
 
-    public void updateCommitScanStatus(Commit commit){
-        commitMapper.updateCommitScanStatus(commit);
-    }
-
     public void deleteCommitByProjectId(String projectId) {
         commitMapper.deleteCommitByProjectId(projectId);
     }

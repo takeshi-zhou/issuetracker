@@ -5,7 +5,9 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 public interface KafkaService {
 
-    void sendScanMessage(JSONObject requestParam);
+    void scanByRequest(JSONObject requestParam);
+
+    void scanByMQ(ConsumerRecord<String, String> consumerRecord);
 
     void updateCommitScanStatus(ConsumerRecord<String, String> consumerRecord);
 }

@@ -26,21 +26,6 @@ public class CommitServiceImpl implements CommitService {
     }
 
     @Override
-    public Commit getCommitByCommitId(String commit_id) {
-        return commitDao.getCommitByCommitId(commit_id);
-    }
-
-    @Override
-    public void updateCommitScanStatus(Commit commit) {
-        commitDao.updateCommitScanStatus(commit);
-    }
-
-    @Override
-    public void deleteCommitByProjectId(String projectId) {
-        commitDao.deleteCommitByProjectId(projectId);
-    }
-
-    @Override
     public Date getCommitDate(String commit_id) {
         return commitDao.getCommitDate(commit_id);
     }

@@ -1,4 +1,4 @@
-package cn.edu.fudan.scanscheduler.domain;
+package cn.edu.fudan.scanservice.domain;
 
 /**
  * @author WZY

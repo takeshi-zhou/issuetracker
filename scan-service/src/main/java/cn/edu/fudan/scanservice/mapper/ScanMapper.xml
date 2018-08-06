@@ -59,4 +59,8 @@
     <select id="getLatestScannedCommitId" parameterType="String" resultType="String">
         select commit_id from scan where project_id = #{project_id} and  end_time = (select max(end_time) from scan where project_id = #{project_id});
     </select>
+
+    <select id="getScanCountByCommitId" parameterType="String" resultType="Integer">
+        select count(uuid) from scan where commit_id = #{commit_id}
+    </select>
 </mapper>

@@ -12,12 +12,6 @@ public interface CommitService {
 
     List<Commit> getCommitList(String project_id);
 
-    Commit getCommitByCommitId(String commit_id);
-
-    void updateCommitScanStatus(Commit commit);
-
-    void deleteCommitByProjectId(String projectId);
-
     Date getCommitDate(String commit_id);
 
     Date getTillCommitDate(String repo_id);

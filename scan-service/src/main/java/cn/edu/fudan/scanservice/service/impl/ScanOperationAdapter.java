@@ -1,12 +1,15 @@
-package cn.edu.fudan.scanscheduler.service.impl;
+package cn.edu.fudan.scanservice.service.impl;
 
-import cn.edu.fudan.scanscheduler.domain.Scan;
-import cn.edu.fudan.scanscheduler.domain.ScanInitialInfo;
-import cn.edu.fudan.scanscheduler.domain.ScanResult;
-import cn.edu.fudan.scanscheduler.service.ScanOperation;
-import cn.edu.fudan.scanscheduler.util.DateTimeUtil;
-import cn.edu.fudan.scanscheduler.util.ExcuteShellUtil;
+import cn.edu.fudan.scanservice.dao.ScanDao;
+import cn.edu.fudan.scanservice.domain.Scan;
+import cn.edu.fudan.scanservice.domain.ScanInitialInfo;
+import cn.edu.fudan.scanservice.domain.ScanResult;
+import cn.edu.fudan.scanservice.service.ScanOperation;
+import cn.edu.fudan.scanservice.util.DateTimeUtil;
+import cn.edu.fudan.scanservice.util.ExcuteShellUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,14 +22,14 @@ import java.util.UUID;
 @Service
 public class ScanOperationAdapter implements ScanOperation {
 
+    private final static Logger logger= LoggerFactory.getLogger(ScanOperationAdapter.class);
+
     @Value("${commit.service.path}")
     private String commitServicePath;
     @Value("${project.service.path}")
     private String projectServicePath;
     @Value("${issue.service.path}")
     private String issueServicePath;
-    @Value("${scan.service.path}")
-    private String scanServicePath;
 
     protected RestTemplate restTemplate;
 
@@ -35,10 +38,16 @@ public class ScanOperationAdapter implements ScanOperation {
         this.restTemplate = restTemplate;
     }
 
+    private ScanDao scanDao;
+
+    @Autowired
+    public void setScanDao(ScanDao scanDao) {
+        this.scanDao = scanDao;
+    }
 
     @Override
     public  boolean isScanned(String commitId){
-        return restTemplate.getForObject(commitServicePath+"/isScanned/"+commitId,Integer.class)==1;
+        return scanDao.isScanned(commitId);
     }
 
     @Override
@@ -74,7 +83,7 @@ public class ScanOperationAdapter implements ScanOperation {
 
     @Override
     public boolean mapping(String projectId,String commitId) {
-        String pre_commit_id=restTemplate.getForObject(scanServicePath+"/lastScannedCommit/"+projectId,String.class);
+        String pre_commit_id=scanDao.getLatestScannedCommitId(projectId);
         JSONObject requestParam=new JSONObject();
         requestParam.put("project_id",projectId);
         if(pre_commit_id!=null)
@@ -82,8 +91,9 @@ public class ScanOperationAdapter implements ScanOperation {
         else
             requestParam.put("pre_commit_id",commitId);
         requestParam.put("current_commit_id",commitId);
+        logger.info("mapping between "+requestParam.toJSONString());
         JSONObject result=restTemplate.postForEntity(issueServicePath+"/Issue/mapping",requestParam,JSONObject.class).getBody();
-        return result.getIntValue("code")==200;
+        return result!=null&&result.getIntValue("code")==200;
     }
 
     @Override
@@ -97,6 +107,7 @@ public class ScanOperationAdapter implements ScanOperation {
         if(till_commit_object!=null){
             till_commit=till_commit_object.toString();
         }
+        //如果当前commit是当前项目扫描的第一个commit或者当前commit的时间在till_commit时间之后，需要更新till_commit
         if(till_commit==null||commit_time.compareTo(till_commit)>0){
             JSONObject requestParam =new JSONObject();
             requestParam.put("uuid",scan.getProject_id());
@@ -107,17 +118,7 @@ public class ScanOperationAdapter implements ScanOperation {
         //更新当前Scan的状态
         scan.setStatus("done");//设为结束状态
         scan.setEnd_time(new Date());
-        JSONObject param=new JSONObject();
-        param.put("uuid",scan.getUuid());
-        param.put("name",scan.getName());
-        param.put("start_time",DateTimeUtil.format(scan.getStart_time()));
-        param.put("end_time",DateTimeUtil.format(scan.getEnd_time()));
-        param.put("status",scan.getStatus());
-        param.put("result_summary",scan.getResult_summary());
-        param.put("project_id",scan.getUuid());
-        param.put("commit_id",scan.getCommit_id());
-        JSONObject result=restTemplate.postForEntity(scanServicePath+"/add",param,JSONObject.class).getBody();
-        //restTemplate.postForEntity(scanServicePath+"/update",scan,JSONObject.class).getBody();
-        return result.getIntValue("code")==200;
+        scanDao.insertOneScan(scan);
+        return true;
     }
 }

@@ -9,6 +9,11 @@ public class ScanResult {
     public ScanResult() {
     }
 
+    public ScanResult(String status, String description) {
+        this.status = status;
+        this.description = description;
+    }
+
     public ScanResult(String projectId, String commitId, String status, String description) {
         this.projectId = projectId;
         this.commitId = commitId;

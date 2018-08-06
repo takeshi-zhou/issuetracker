@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ScanMapper {
 
+     Integer getScanCountByCommitId(String commit_id);
+
      void insertOneScan(Scan scan);
 
      void deleteScanByProjectId(@Param("projectId")String projectId) ;

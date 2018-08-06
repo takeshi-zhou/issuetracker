@@ -9,7 +9,6 @@
         <result property="message" column="message" />
         <result property="developer" column="developer" />
         <result property="commit_time" column="commit_time" />
-        <result property="is_scanned" column="is_scanned" />
         <result property="project_id" column="project_id" />
         <result property="repo_id" column="repo_id" />
     </resultMap>
@@ -24,35 +23,21 @@
     </select>
 
     <select id="getTillCommitDate" parameterType="String" resultType="java.util.Date">
-        select max(commit_time) from commit where is_scanned = 1 and repo_id = #{repo_id}
+        select max(commit_time) from commit as a inner join scan as b on a.commit_id = b.commit_id where repo_id = #{repo_id}
     </select>
 
     <select id="getCommitByCommitId" parameterType="String" resultType="Commit">
         select * from commit where commit_id = #{commit_id}
     </select>
 
-    <update id="updateCommitScanStatus" parameterType="Commit" >
-        update commit
-        <set>
-            <if test="is_scanned != null">
-                is_scanned = #{is_scanned},
-            </if>
-        </set>
-        where commit_id = #{commit_id}
-    </update>
-
     <delete id="deleteCommitByProjectId" parameterType="String">
         delete from commit where project_id = #{projectId}
     </delete>
 
     <select id="getScannedCommits" parameterType="String" resultMap="commit">
-        select
-              *
-        from
-              commit
-        where
-              project_id = #{project_id}
-        and  is_scanned = 1
+        select a.* from commit as a
+        inner join scan as b on a.commit_id = b.commit_id
+        where a.project_id = #{project_id}
         order by commit_time
     </select>
 

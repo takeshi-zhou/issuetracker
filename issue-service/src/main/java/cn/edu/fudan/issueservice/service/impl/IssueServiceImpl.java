@@ -47,7 +47,7 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public void insertIssueList(List<Issue> list) {
-         issueDao.insertIssueList(list);
+        issueDao.insertIssueList(list);
     }
 
     @Override

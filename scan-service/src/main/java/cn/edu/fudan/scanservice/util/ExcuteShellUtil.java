@@ -1,7 +1,6 @@
-package cn.edu.fudan.scanscheduler.util;
+package cn.edu.fudan.scanservice.util;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class ExcuteShellUtil {

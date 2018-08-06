@@ -8,9 +8,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ScanDao {
 
-    @Autowired
+
     private ScanMapper scanMapper;
 
+    @Autowired
+    public void setScanMapper(ScanMapper scanMapper) {
+        this.scanMapper = scanMapper;
+    }
 
     public void insertOneScan(Scan scan){
         scanMapper.insertOneScan(scan);
@@ -26,6 +30,11 @@ public class ScanDao {
 
     public String getLatestScannedCommitId(String project_id){
         return scanMapper.getLatestScannedCommitId(project_id);
+    }
+
+    public boolean isScanned(String commit_id){
+        Integer count=scanMapper.getScanCountByCommitId(commit_id);
+        return count!=null&&count>0;
     }
 
 }

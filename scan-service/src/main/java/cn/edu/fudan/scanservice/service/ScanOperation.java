@@ -1,7 +1,7 @@
-package cn.edu.fudan.scanscheduler.service;
+package cn.edu.fudan.scanservice.service;
 
-import cn.edu.fudan.scanscheduler.domain.ScanInitialInfo;
-import cn.edu.fudan.scanscheduler.domain.ScanResult;
+import cn.edu.fudan.scanservice.domain.ScanInitialInfo;
+import cn.edu.fudan.scanservice.domain.ScanResult;
 
 public interface ScanOperation {
 

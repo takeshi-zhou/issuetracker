@@ -15,7 +15,6 @@
     <modules>
         <module>account-service</module>
         <module>project-manager</module>
-        <module>scan-scheduler</module>
         <module>scan-service</module>
         <module>commit-service</module>
         <module>issue-service</module>

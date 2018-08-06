@@ -19,8 +19,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Value("${account.service.path}")
     private String accountServicePath;
-    @Value("${commit.service.path}")
-    private String commitServicePath;
     @Value("${issue.service.path}")
     private String issueServicePath;
     @Value("${scan.service.path}")
@@ -90,10 +88,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
 	public void remove(String projectId) {
-        restTemplate.delete(issueServicePath+"/Location/delete/"+projectId);
         restTemplate.delete(issueServicePath+"/RawIssue/delete/"+projectId);
         restTemplate.delete(issueServicePath+"/Issue/delete/"+projectId);
-        restTemplate.delete(commitServicePath+"/delete/"+projectId);
         restTemplate.delete(scanServicePath+"/delete/"+projectId);
 		projectDao.remove(projectId);
 	}

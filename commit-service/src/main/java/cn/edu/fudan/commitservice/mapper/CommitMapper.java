@@ -20,8 +20,6 @@ public interface CommitMapper {
 
      Date getTillCommitDate(String repo_id);
 
-     void updateCommitScanStatus(Commit commit);
-
      List<Commit> getScannedCommits(String project_id);
 
 }

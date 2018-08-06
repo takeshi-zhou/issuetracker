@@ -1,4 +1,4 @@
-package cn.edu.fudan.scanscheduler.util;
+package cn.edu.fudan.scanservice.util;
 
 import org.eclipse.jdt.core.dom.*;
 
@@ -26,7 +26,7 @@ public class ASTUtil {
 
     private static String getFieldName(FieldDeclaration fd){
         Object o=fd.fragments().get(0);
-        if(o instanceof  VariableDeclarationFragment){
+        if(o instanceof VariableDeclarationFragment){
             return ((VariableDeclarationFragment)o).getName().toString();
         }else{
             return fd.toString().trim();

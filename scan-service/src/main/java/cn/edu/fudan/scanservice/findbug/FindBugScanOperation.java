@@ -1,9 +1,11 @@
-package cn.edu.fudan.scanscheduler.findbug;
+package cn.edu.fudan.scanservice.findbug;
 
-import cn.edu.fudan.scanscheduler.domain.*;
-import cn.edu.fudan.scanscheduler.service.impl.ScanOperationAdapter;
-import cn.edu.fudan.scanscheduler.util.ASTUtil;
-import cn.edu.fudan.scanscheduler.util.ExcuteShellUtil;
+import cn.edu.fudan.scanservice.domain.Scan;
+import cn.edu.fudan.scanservice.domain.ScanInitialInfo;
+import cn.edu.fudan.scanservice.domain.ScanResult;
+import cn.edu.fudan.scanservice.service.impl.ScanOperationAdapter;
+import cn.edu.fudan.scanservice.util.ASTUtil;
+import cn.edu.fudan.scanservice.util.ExcuteShellUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
@@ -86,7 +88,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
             if(bugLineBuilder.length()>0)
                 bugLines=bugLineBuilder.deleteCharAt(0).toString();
 
-            String code = ASTUtil.getFullCode(repoHome + filePath);
+            String code = ASTUtil.getCode(start,end,repoHome + filePath);
             JSONObject location=new JSONObject();
             location.put("uuid",UUID.randomUUID().toString());
             location.put("start_line",start);
@@ -114,9 +116,9 @@ public class FindBugScanOperation extends ScanOperationAdapter {
 
             Iterator<Element> iterator=root.elementIterator("BugInstance");
             List<JSONObject> rawIssues=new ArrayList<>();
-            List<JSONObject> locations=new ArrayList<>();
             while(iterator.hasNext()){
                 Element bugInstance=iterator.next();
+                List<JSONObject> locations=new ArrayList<>();//每个rawIssue会有多个location
                 String rawIssueUUID=UUID.randomUUID().toString();
                 //解析当前bugInstance中的location
                 String fileName=analyzeLocations(rawIssueUUID,projectName,bugInstance,locations);
@@ -129,17 +131,13 @@ public class FindBugScanOperation extends ScanOperationAdapter {
                     rawIssue.put("scan_id",scan.getUuid());
                     rawIssue.put("commit_id",scan.getCommit_id());
                     rawIssue.put("uuid",rawIssueUUID);
+                    rawIssue.put("locations",locations);
                     rawIssues.add(rawIssue);
                 }
             }
             if(!rawIssues.isEmpty()){
                 //插入所有的rawIssue
                 restTemplate.postForEntity(issueServicePath+"/RawIssue/add",rawIssues,JSONObject.class).getBody();
-            }
-
-            if(!locations.isEmpty()){
-                //插入所有的location
-                restTemplate.postForEntity(issueServicePath+"/Location/add",locations,JSONObject.class).getBody();
             }
             return true;
         } catch (Exception e) {
