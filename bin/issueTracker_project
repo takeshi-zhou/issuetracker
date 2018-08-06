@@ -1,0 +1,37 @@
+#!/bin/bash
+
+usage="ERROR\nUsage: issueTracker_project.sh (add|list|delete|load) <args....> \nERROR"
+
+# if no args specified, show usage
+if [ $# -le 0 ]; then
+  echo -e $usage
+  exit 1
+fi
+
+ip="10.141.221.80"
+port="8004"
+token=`cat authentication`
+option=$1
+projectId=$2
+
+case $option in
+
+  (add)
+	curl -H "token:$token" http://$ip:$port/Project/add?url=$2 -s | grep -Po 'msg[":]+\K[^"]+'
+	;;
+  (list)
+    curl -H "token:$token" http://$ip:$port/Project/list -s
+    ;;
+  (delete)
+	curl -H "token:$token" http://$ip:$port/Project/delete/$2 -s | grep -Po 'msg[":]+\K[^"]+'
+    ;;
+  (load)
+	echo -e "$projectId\n" >> project
+    ;;
+  (*)
+	echo -e "No option $1"
+    echo -e $usage
+    exit 1
+    ;;
+
+esac
