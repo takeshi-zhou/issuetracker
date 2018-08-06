@@ -58,9 +58,7 @@ def get_project_info(url):
                      'Authorization': 'token ' + config.get('GithubToken', 'token')}
             split = url.split('/')
             response = requests.get('https://api.github.com/repos/' + split[3] + '/' + split[4], timeout=15, headers=header).json()
-            print(response)
-        except Exception as e:
-            print(e)
+        except Exception:
             flag += 1
             if flag > 3:
                 return None
@@ -121,7 +119,7 @@ def log(string, mode='redirect', index=1):
             print("[%s]%s" % (t, string), file=f)
 
 
-log('start consumer', mode='test')
+log('start consumer')
 consumer = KafkaConsumer('ProjectManager',
                          bootstrap_servers=['10.141.221.84:9092'],
                          group_id='test-consumer-group',
@@ -136,7 +134,7 @@ for msg in consumer:
         json_data = json.loads(msg.value.decode())
 
     except Exception as e:
-        log(e.__str__(), mode='test')
+        log(e.__str__())
 
     else:
         if 'command' in json_data and json_data['command'] == 'stop-consumer' :
@@ -149,7 +147,6 @@ for msg in consumer:
             try:
                 project_info = download(url, projectId)
             except Exception as e:
-                print(e)
                 producer = KafkaProducer(bootstrap_servers='10.141.221.84:9092', api_version=(0, 9))
                 new_msg = {
                     'projectId':projectId,
@@ -161,7 +158,6 @@ for msg in consumer:
                 producer.send('RepoManager', json.dumps(new_msg).encode())
                 producer.close()
             else:
-                print(2)
                 producer = KafkaProducer(bootstrap_servers='10.141.221.84:9092', api_version=(0, 9))
                 producer.send('CompleteDownload', json.dumps({'message':'Download Completed'}).encode())
                 new_msg = {
