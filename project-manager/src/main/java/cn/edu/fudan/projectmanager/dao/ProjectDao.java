@@ -30,6 +30,10 @@ public class ProjectDao {
 		return projectMapper.getProjectByID(projectId);
 	}
 
+	public boolean hasBeenAdded(String account_id,String url){
+		return projectMapper.getProjectByURLAndAccountId(account_id,url)!=null;
+	}
+
 	public void updateProjectStatus(Project project){
 		projectMapper.updateProjectStatus(project);
 	}

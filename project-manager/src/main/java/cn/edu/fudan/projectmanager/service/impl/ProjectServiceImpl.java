@@ -54,6 +54,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void addOneProject(String userToken,String url) {
         String account_id=restTemplate.getForObject(accountServicePath+"/accountId?userToken="+userToken,String.class);
+        if(projectDao.hasBeenAdded(account_id,url)){
+            throw new RuntimeException("The project has been added!");
+        }
         String projectName=url.substring(url.lastIndexOf("/")+1);
         String projectId= UUID.randomUUID().toString();
         Project project=new Project();

@@ -26,8 +26,7 @@ public class ProjectController {
             projectService.addOneProject(userToken,url);
             return new ResponseBean(200,"add success",null);
         }catch (Exception e){
-            e.printStackTrace();
-            return new ResponseBean(401,"add failed",null);
+            return new ResponseBean(401,"add failed :"+e.getMessage(),null);
         }
     }
 

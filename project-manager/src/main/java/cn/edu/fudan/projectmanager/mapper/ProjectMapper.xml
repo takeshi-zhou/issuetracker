@@ -59,6 +59,10 @@
 		select name from project where uuid = #{projectId}
 	</select>
 
+    <select id="getProjectByURLAndAccountId" parameterType="String" resultType="project">
+        select * from project where account_id = #{account_id} and url = #{url}
+    </select>
+
     <select id="getRepoPath" parameterType="String" resultType="String">
         select b.local_addr from project as a
         inner join repository as b on a.repo_id = b.uuid
