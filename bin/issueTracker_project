@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage="ERROR\nUsage: issueTracker_project.sh (add|list|delete|load) <args....> \nERROR"
+usage="ERROR\nUsage: issueTracker_project.sh (add|list|delete|load) <url | projectId> \nERROR"
 
 # if no args specified, show usage
 if [ $# -le 0 ]; then
@@ -10,9 +10,9 @@ fi
 
 ip="10.141.221.80"
 port="8004"
-token=`cat authentication`
+baseDir="$ISSUETRACKER_HOME/bin"
+token=`cat $baseDir/authentication`
 option=$1
-projectId=$2
 
 case $option in
 
@@ -20,13 +20,17 @@ case $option in
 	curl -H "token:$token" http://$ip:$port/Project/add?url=$2 -s | grep -Po 'msg[":]+\K[^"]+'
 	;;
   (list)
+   # need Formatted output display
     curl -H "token:$token" http://$ip:$port/Project/list -s
     ;;
   (delete)
+
 	curl -H "token:$token" http://$ip:$port/Project/delete/$2 -s | grep -Po 'msg[":]+\K[^"]+'
     ;;
   (load)
-	echo -e "$projectId\n" >> project
+   ### 需要检查用户是否有这个project，暂时未做检查
+	echo $2 > $baseDir/project
+	echo -e "successful loaded"
     ;;
   (*)
 	echo -e "No option $1"

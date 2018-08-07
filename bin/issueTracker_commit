@@ -1,0 +1,15 @@
+#!/bin/bash
+#issue_tracker_show_commits
+
+usage="ERROR\nUsage: issueTracker_commit (show) <args....> \nERROR"
+
+# if no args specified, show usage
+if [ $# -le 0 ]; then
+  echo -e $usage
+  exit 1
+fi
+
+ip="10.141.221.80"
+port=""
+
+curl $url
