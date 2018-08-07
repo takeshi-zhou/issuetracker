@@ -4,15 +4,15 @@ public class NeedDownload {
 
 
     private String projectId;
-    private String URL;
+    private String url;
 
 
     public NeedDownload() {
     }
 
-    public NeedDownload(String projectId, String URL) {
+    public NeedDownload(String projectId, String url) {
         this.projectId = projectId;
-        this.URL = URL;
+        this.url = url;
     }
 
     public String getProjectId() {
@@ -23,11 +23,11 @@ public class NeedDownload {
         this.projectId = projectId;
     }
 
-    public String getURL() {
-        return URL;
+    public String getUrl() {
+        return url;
     }
 
-    public void setURL(String URL) {
-        this.URL = URL;
+    public void setUrl(String url) {
+        this.url = url;
     }
 }
