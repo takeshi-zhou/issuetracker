@@ -1,0 +1,43 @@
+#!/bin/bash
+
+usage="\nUsage: issueTracker_login (sighin|sighup|sighout) <student ID> <password>\n"
+
+baseDir="$ISSUETRACKER_HOME/bin"
+
+# if no args specified, show usage
+if [ $# -le 0 ]; then
+  echo -e $usage
+  exit 1
+fi
+
+ip="10.141.221.80"
+port="8001"
+
+username=$1
+password=$2
+
+url="http://$ip:$port/User/login?username=$username&password=$password"
+
+option=$1
+case $option in
+
+  (sighin)
+	curl $url -s > $baseDir/authentication1
+	grep -Po 'msg[":]+\K[^"]+' $baseDir/authentication1
+	grep -Po 'data[":]+\K[^"]+' $baseDir/authentication1 > $baseDir/authentication
+	rm -f $baseDir/authentication1
+	;;
+  (sighup)
+    # need to be done 
+    ;;
+  (sighout)
+	echo null > $baseDir/authentication
+    ;;
+
+  (*)
+	echo -e "No option $1"
+    echo -e $usage
+    exit 1
+    ;;
+
+esac
