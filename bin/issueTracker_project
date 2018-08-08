@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage="ERROR\nUsage: issueTracker_project.sh (add|list|delete|load) <url | projectId> \nERROR"
+usage="\nUsage: issueTracker_project.sh (add|list|delete|load) <url | projectId> \n"
 
 # if no args specified, show usage
 if [ $# -le 0 ]; then
@@ -18,13 +18,14 @@ case $option in
 
   (add)
 	curl -H "token:$token" http://$ip:$port/Project/add?url=$2 -s | grep -Po 'msg[":]+\K[^"]+'
+	exit 1
 	;;
   (list)
    # need Formatted output display
     curl -H "token:$token" http://$ip:$port/Project/list -s
+	exit 1
     ;;
   (delete)
-
 	curl -H "token:$token" http://$ip:$port/Project/delete/$2 -s | grep -Po 'msg[":]+\K[^"]+'
     ;;
   (load)

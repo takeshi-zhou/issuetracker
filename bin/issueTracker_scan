@@ -1,5 +1,4 @@
 #!/bin/bash
-#issueTracker_scan <findbugs|clone|...> <commit_id>,...
 
 usage="ERROR! \nUsage: issueTracker_scan (findbugs|clone) <commit_id> \n ERROR"
 
@@ -15,13 +14,14 @@ option=$1
 commit_id=$2
 ip="10.141.221.80"
 port="8005"
-projectId=`cat $baseDir/projectId`
+projectId=`cat $baseDir/project`
 commitId=$2
+token=`cat $baseDir/authentication`
 case $option in
 
   (findbugs)
    #post
-	curl -H "Content-Type:application/json" -X POST -d '{"projectId": "$projectId", "commitId":"$commitId"}' http://$ip:$port/Scan/doScan -s | grep -Po 'msg[":]+\K[^"]+'
+	curl -H "Content-Type:application/json" -H "token:$token" -X POST -d '{"projectId": "$projectId", "commitId":"$commitId"}' http://$ip:$port/Scan/doScan -s | grep -Po 'msg[":]+\K[^"]+'
 	;;
   (clone)
    # need to be done
@@ -35,3 +35,4 @@ case $option in
     ;;
 
 esac
+

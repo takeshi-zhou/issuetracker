@@ -1,7 +1,6 @@
 #!/bin/bash
-#issue_tracker_show_commits
 
-usage="ERROR\nUsage: issueTracker_commit (show) <args....> \nERROR"
+usage="\nUsage: issueTracker_commitShow (all|scaned)  \n"
 
 # if no args specified, show usage
 if [ $# -le 0 ]; then
@@ -10,6 +9,28 @@ if [ $# -le 0 ]; then
 fi
 
 ip="10.141.221.80"
-port=""
+port="8002"
+baseDir="$ISSUETRACKER_HOME/bin"
+token=`cat $baseDir/authentication`
+project_id=`cat $baseDir/project`
+option=$1
 
-curl $url
+case $option in
+
+  (all)
+	curl -H "token:$token" http://$ip:$port/Commit/commitList?project_id=$project_id -s
+	exit 1
+	;;
+  (scaned)
+   # need Formatted output display
+    curl -H "token:$token" http://$ip:$port/Commit/scannedCommits?project_id=$project_id -s
+	exit 1
+    ;;
+  (*)
+   ## /commitDate/{commit_id}   /tillCommitDate/{repo_id}
+	echo -e "No option $1"
+    echo -e $usage
+    exit 1
+    ;;
+
+esac

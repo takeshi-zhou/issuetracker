@@ -69,13 +69,13 @@ public class IssueServiceImpl implements IssueService {
     public Object getIssueList(Map<String, Object> map) {
         Map<String,Object> result=new HashMap<>();
         if(map.get("project_id")==null||map.get("project_id").equals("")) {
-            result.put("msg", "查询失败，请提供project_id！");
+            result.put("msg", "query failed，please provide project_id！");
             return result;
         }else if(map.get("page")==null||map.get("size")==null) {
-            result.put("msg", "查询失败，请提供page(当前页码)和size(每页显示的个数)！");
+            result.put("msg", "query failed，please provide page(current page number)and size(the number of list in one page)！");
             return result;
         }else {
-            result.put("msg", "查询成功！");
+            result.put("msg", "successful query！");
             int page=(int) map.get("page");
             int size=(int)map.get("size");
             int count=issueDao.getIssueCount(map);
