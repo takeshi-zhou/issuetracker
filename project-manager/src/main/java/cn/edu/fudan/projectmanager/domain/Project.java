@@ -16,6 +16,15 @@ public class Project {
     private Date till_commit_time;
     private Date last_scan_time;
     private String description;
+    private String repo_id;
+
+    public String getRepo_id() {
+        return repo_id;
+    }
+
+    public void setRepo_id(String repo_id) {
+        this.repo_id = repo_id;
+    }
 
     public String getUuid() {
         return uuid;

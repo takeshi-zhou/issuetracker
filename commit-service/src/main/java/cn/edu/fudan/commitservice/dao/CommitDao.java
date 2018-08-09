@@ -19,8 +19,8 @@ public class CommitDao {
         this.commitMapper = commitMapper;
     }
 
-    public List<Commit> getCommitByProjectID(String project_id){
-        return commitMapper.getCommitByProjectID(project_id);
+    public List<Commit> getCommitListByProjectID(String project_id){
+        return commitMapper.getCommitListByProjectID(project_id);
     }
 
     public Commit getCommitByCommitId(String commit_id){

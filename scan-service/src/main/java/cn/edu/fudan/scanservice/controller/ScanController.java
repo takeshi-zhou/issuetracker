@@ -49,7 +49,7 @@ public class ScanController {
         }
     }
 
-    @DeleteMapping(value = {"/detele/{projectId}"})
+    @DeleteMapping(value = {"/delete/{projectId}"})
     public Object deleteScans(@PathVariable("projectId")String projectId){
         try{
             scanService.deleteScanByProjectId(projectId);

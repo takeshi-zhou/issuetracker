@@ -22,7 +22,7 @@ public class CommitServiceImpl implements CommitService {
 
     @Override
     public List<Commit> getCommitList(String project_id) {
-        return commitDao.getCommitByProjectID(project_id);
+        return commitDao.getCommitListByProjectID(project_id);
     }
 
     @Override

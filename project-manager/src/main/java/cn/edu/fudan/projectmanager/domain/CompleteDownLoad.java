@@ -8,6 +8,16 @@ public class CompleteDownLoad {
     private String status;
     private String description;
 
+    public String getRepo_id() {
+        return repo_id;
+    }
+
+    public void setRepo_id(String repo_id) {
+        this.repo_id = repo_id;
+    }
+
+    private String repo_id;
+
     public String getProjectId() {
         return projectId;
     }

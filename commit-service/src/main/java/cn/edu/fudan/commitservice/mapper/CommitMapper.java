@@ -12,7 +12,7 @@ public interface CommitMapper {
 
      void deleteCommitByProjectId(@Param("projectId") String projectId) ;
 
-     List<Commit> getCommitByProjectID(String project_id);
+     List<Commit> getCommitListByProjectID(String project_id);
 
      Commit getCommitByCommitId(String commit_id);
 

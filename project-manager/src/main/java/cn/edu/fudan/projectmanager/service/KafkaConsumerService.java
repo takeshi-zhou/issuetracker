@@ -34,6 +34,7 @@ public class KafkaConsumerService {
         currentProject.setVcs_type(completeDownLoad.getVcs_type());
         currentProject.setDownload_status(completeDownLoad.getStatus());
         currentProject.setDescription(completeDownLoad.getDescription());
+        currentProject.setRepo_id(completeDownLoad.getRepo_id());
         projectService.updateProjectStatus(currentProject);
     }
 }

@@ -14,8 +14,8 @@
     </resultMap>
 
 
-    <select id="getCommitByProjectID" parameterType="String" resultMap="commit">
-        select * from commit where project_id = #{project_id} order by commit_time desc
+    <select id="getCommitListByProjectID" parameterType="String" resultMap="commit">
+        select * from commit where repo_id = (select repo_id from project where uuid = #{project_id} ) order by commit_time desc
     </select>
 
     <select id="getCommitDate" parameterType="String" resultType="java.util.Date">

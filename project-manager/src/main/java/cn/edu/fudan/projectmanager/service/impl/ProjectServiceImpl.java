@@ -66,6 +66,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setAccount_id(account_id);
         project.setDownload_status("Downloading");
         project.setScan_status("Not Scanned");
+        //project.setRepo_id();
         projectDao.addOneProject(project);
         //向RepoManager这个Topic发送消息，请求开始下载
         send(projectId,url);
@@ -93,7 +94,7 @@ public class ProjectServiceImpl implements ProjectService {
 	public void remove(String projectId) {
         restTemplate.delete(issueServicePath+"/RawIssue/delete/"+projectId);
         restTemplate.delete(issueServicePath+"/Issue/delete/"+projectId);
-        restTemplate.delete(scanServicePath+"/delete/"+projectId);
+        restTemplate.delete(scanServicePath+"/Scan/delete/"+projectId);
 		projectDao.remove(projectId);
 	}
 
