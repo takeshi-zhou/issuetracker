@@ -1,7 +1,7 @@
 #coding:utf-8
 
 import json
-import MysqlOperation
+import mysqlOperation
 from kafka import KafkaConsumer
 import configparser
 import re
@@ -80,7 +80,7 @@ for msg in consumer:
         for _ in range(len(description_ret)):
             uuids.append(uuid.uuid1().__str__())
             repo_id_list.append(repo_id)
-        MysqlOperation.insert_into_mysql(
+        mysqlOperation.insert_into_mysql(
             tablename='commit',
             params={
                 'uuid':uuids,
