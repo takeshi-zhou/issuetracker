@@ -1,16 +1,15 @@
 #coding:utf-8
 
 import json
-import MysqlOperation
-from kafka import KafkaProducer
+import mysqlOperation
 from kafka import KafkaConsumer
 import configparser
 import re
 import os
 import uuid
-import pymysql
 from datetime import datetime
 import pytz
+import time
 
 def local_to_utc(time_str, utc_format='%a %b %d %H:%M:%S %Y %z'):
     if int(time_str[-5:]) // 100 >= 0 :
@@ -22,9 +21,13 @@ def local_to_utc(time_str, utc_format='%a %b %d %H:%M:%S %Y %z'):
     local_dt = utc_dt.replace(tzinfo=timezone).astimezone(pytz.utc)
     return local_dt.strftime(local_format)
 
+def log(string):
+    t = time.strftime(r"%Y-%m-%d-%H:%M:%S", time.localtime())
+    print("[%s]%s" % (t, string))
+
 config = configparser.ConfigParser()
 config.read('config.conf')
-path = config.get('TestPath', 'path')
+path = config.get('Path', 'path')
 
 consumer = KafkaConsumer('CompleteDownload',
                          bootstrap_servers=['10.141.221.84:9092'],
@@ -32,11 +35,13 @@ consumer = KafkaConsumer('CompleteDownload',
                          max_poll_records=10)
 
 for msg in consumer:
+    recv = "%s:%d:%d: key=%s value=%s" % (msg.topic, msg.partition, msg.offset, msg.key, msg.value)
+    log(recv)
     json_data = json.loads(msg.value.decode())
     repo_id = json_data['repoId']
     project_id = json_data['projectId']
     project_url = MysqlOperation.get_data_from_mysql('project', {'uuid': project_id}, ['url'])
-    new_path = path + '/' + project_url[0][0].split('/')[3] + '/' + project_url[0][0].split('/')[4]
+    new_path = path + '/' + json_data['local_addr']
     os.chdir(new_path)
     os.system('git log > commit_log.log')
     commit_pattern = 'commit ([\w\d]{40,40})'
@@ -75,7 +80,7 @@ for msg in consumer:
         for _ in range(len(description_ret)):
             uuids.append(uuid.uuid1().__str__())
             repo_id_list.append(repo_id)
-        MysqlOperation.insert_into_mysql(
+        mysqlOperation.insert_into_mysql(
             tablename='commit',
             params={
                 'uuid':uuids,

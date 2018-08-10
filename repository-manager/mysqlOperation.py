@@ -3,7 +3,7 @@ import configparser
 config = configparser.ConfigParser()
 config.read('config.conf')
 
-def insert_into_mysql(tablename, params={}):
+def insert_into_mysql(tablename, params={}, mode='single'):
     conn = pymysql.connect(
         host=config.get('IssueTrackerMysqlDB', 'host'),
         db=config.get('IssueTrackerMysqlDB', 'db'),
@@ -17,10 +17,38 @@ def insert_into_mysql(tablename, params={}):
     values = list(params.values())                        #值组合，由元组转换为数组
     sql += " values (%s)" % ','.join(['%s']*len(values))  #配置相应的占位符
     cur = conn.cursor()
-    cur.execute(sql, values)
-    conn.commit()
-    cur.close()
-    conn.close()
+    if mode == 'single':
+        cur.execute(sql, values)
+        conn.commit()
+        cur.close()
+        conn.close()
+    elif mode == 'multiple':
+        insert_items = []
+        flag = 0
+        index = 0
+        while True:
+            temp = []
+            for key in keys:
+                if index == len(params[key]):
+                    flag = 1
+                    break
+                temp.append(params[key][index])
+            if flag == 1:
+                break
+            insert_items.append(temp)
+            index += 1
+
+        cnt = 0
+        for item in insert_items:
+            cur.execute(sql, item)
+            cnt += 1
+            if cnt % 30 == 0:
+                conn.commit()
+        conn.commit()
+        cur.close()
+        conn.close()
+    else:
+        raise Exception
 
 def delete_from_mysql(tablename, params={}):
     conn = pymysql.connect(
