@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/Project")
+@RequestMapping("/project")
 public class ProjectController {
 
     private ProjectService projectService;
@@ -19,8 +19,13 @@ public class ProjectController {
         this.projectService = projectService;
     }
 
-    @GetMapping(value={"/add"})
-    public Object add(HttpServletRequest request, @RequestParam("url")String url){
+    //add
+    //post /projects/
+
+    //modify    put
+     //   /projects/{id}
+    @GetMapping
+    public Object addProject(HttpServletRequest request, @RequestParam("url")String url){
         String userToken=request.getHeader("token");
         try{
             projectService.addOneProject(userToken,url);
@@ -30,13 +35,15 @@ public class ProjectController {
         }
     }
 
+    //get
+    //  /projects
     @GetMapping(value = {"/list"})
     public Object query(HttpServletRequest request){
         String userToken=request.getHeader("token");
         return projectService.getProjectList(userToken);
     }
 
-    @DeleteMapping(value={"/delete/{projectId}"})
+    @DeleteMapping(value={"/{projectId}"})
     public Object delete(@PathVariable("projectId")String projectId){
         try{
             projectService.remove(projectId);

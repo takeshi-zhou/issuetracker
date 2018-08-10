@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 @RestController
-@RequestMapping("/User")
+@RequestMapping("/user")
 public class AccountController {
 
 
@@ -32,6 +32,7 @@ public class AccountController {
         return responseBean;
     }
 
+    //delete
     @GetMapping(value="/accountId")
     @CrossOrigin
     public Object getAccountID(@RequestParam("userToken")String userToken){

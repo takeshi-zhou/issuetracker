@@ -39,6 +39,8 @@
         inner join scan as b on a.commit_id = b.commit_id
         where a.project_id = #{project_id}
         order by commit_time
+
+        select * from scan where project_id=#{project_id}
     </select>
 
 
