@@ -24,7 +24,7 @@ public class ProjectController {
 
     //modify    put
      //   /projects/{id}
-    @GetMapping
+    @PostMapping
     public Object addProject(HttpServletRequest request, @RequestParam("url")String url){
         String userToken=request.getHeader("token");
         try{
@@ -37,7 +37,7 @@ public class ProjectController {
 
     //get
     //  /projects
-    @GetMapping(value = {"/list"})
+    @GetMapping
     public Object query(HttpServletRequest request){
         String userToken=request.getHeader("token");
         return projectService.getProjectList(userToken);
@@ -70,7 +70,7 @@ public class ProjectController {
         return projectService.getRepoPath(project_id);
     }
 
-    @GetMapping(value = {"/project/{project_id}"})
+    @GetMapping(value = {"/{project_id}"})
     public Object getProject(@PathVariable("project_id")String project_id){
         return projectService.getProjectByID(project_id);
     }
