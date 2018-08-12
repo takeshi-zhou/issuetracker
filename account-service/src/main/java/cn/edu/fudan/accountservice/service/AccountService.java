@@ -15,4 +15,5 @@ public interface AccountService {
 
      String getAccountIdByAccountName(String accountName);
 
+     void addAccount(Account account);
 }

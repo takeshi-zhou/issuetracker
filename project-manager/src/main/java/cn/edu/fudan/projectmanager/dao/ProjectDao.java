@@ -51,4 +51,8 @@ public class ProjectDao {
 	public String getRepoPath(String project_id){
 		return projectMapper.getRepoPath(project_id);
 	}
+
+    public String getRepoId(String project_id) {
+		return projectMapper.getRepoId(project_id);
+    }
 }

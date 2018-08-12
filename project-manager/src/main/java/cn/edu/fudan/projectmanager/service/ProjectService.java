@@ -18,4 +18,6 @@ public interface ProjectService {
     String getProjectNameById(String projectId);
 
     String getRepoPath(String project_id);
+
+    String getRepoId(String project_id);
 }

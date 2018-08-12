@@ -14,12 +14,24 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/user")
 public class AccountController {
 
-
     private AccountService accountService;
 
     @Autowired
     public void setAccountService(AccountService accountService) {
         this.accountService = accountService;
+    }
+
+    @PostMapping
+    @CrossOrigin
+    public Object createUser(@RequestBody Account account){
+        //need check out account is legal or not
+        try{
+            accountService.addAccount(account);
+            return new ResponseBean(200,"Congratulations！successful registration.",null);
+        }catch(Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"sigh up failed!",null);
+        }
     }
 
     @GetMapping(value = {"/login"})
@@ -32,7 +44,7 @@ public class AccountController {
         return responseBean;
     }
 
-    //delete
+    //used in project service for get user project list
     @GetMapping(value="/accountId")
     @CrossOrigin
     public Object getAccountID(@RequestParam("userToken")String userToken){

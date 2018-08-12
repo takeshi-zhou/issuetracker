@@ -18,4 +18,12 @@ public class AccountDao {
     public Account login(String accountName, String password){
         return accountMapper.login(accountName,password);
     }
+
+    public boolean isAccountLegal() {
+        return  false;
+    }
+
+    public void addAccount(Account account) {
+        return;
+    }
 }

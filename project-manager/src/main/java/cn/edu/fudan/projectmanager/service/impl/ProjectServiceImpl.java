@@ -21,8 +21,11 @@ public class ProjectServiceImpl implements ProjectService {
     private String accountServicePath;
     @Value("${issue.service.path}")
     private String issueServicePath;
+    @Value("${rawIssue.service.path}")
+    private String rawIssueServicePath;
     @Value("${scan.service.path}")
     private String scanServicePath;
+
 
     private KafkaTemplate kafkaTemplate;
 
@@ -92,9 +95,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
 	public void remove(String projectId) {
-        restTemplate.delete(issueServicePath+"/RawIssue/delete/"+projectId);
-        restTemplate.delete(issueServicePath+"/Issue/delete/"+projectId);
-        restTemplate.delete(scanServicePath+"/Scan/delete/"+projectId);
+        restTemplate.delete(issueServicePath+"/"+projectId);
+        restTemplate.delete(rawIssueServicePath+"/"+projectId);
+        restTemplate.delete(scanServicePath+"/"+projectId);
 		projectDao.remove(projectId);
 	}
 
@@ -106,5 +109,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public String getRepoPath(String project_id) {
         return projectDao.getRepoPath(project_id);
+    }
+
+    @Override
+    public String getRepoId(String project_id) {
+        return projectDao.getRepoId(project_id);
     }
 }

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
  * @version 1.0
  **/
 @RestController
-@RequestMapping("/Commit")
+@RequestMapping("/commit")
 public class CommitController {
 
     private CommitService commitService;
@@ -19,10 +19,15 @@ public class CommitController {
         this.commitService = commitService;
     }
 
-    @GetMapping(value = "/commitList")
-    public Object getCommitList(@RequestParam("project_id")String project_id) {
-        return commitService.getCommitList(project_id);
-    }
+    /**
+     *  由思聪提供
+     *      @GetMapping(value = "/commitList")
+     *     public Object getCommitList(@RequestParam("project_id")String project_id) {
+     *         return commitService.getCommitList(project_id);
+     *     }
+     *
+     * */
+
 
     @GetMapping(value={"/scannedCommits/{project_id}"})
     public Object scannedCommits(@PathVariable("project_id")String project_id){

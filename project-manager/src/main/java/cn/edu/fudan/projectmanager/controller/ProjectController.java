@@ -18,25 +18,28 @@ public class ProjectController {
     public void setProjectService(ProjectService projectService) {
         this.projectService = projectService;
     }
+    /**
+     *     add
+     *     post /projects/
+     *
+     *     modify    put
+     *     /projects/{id}
+     *
+     *
+     * */
 
-    //add
-    //post /projects/
-
-    //modify    put
-     //   /projects/{id}
     @PostMapping
-    public Object addProject(HttpServletRequest request, @RequestParam("url")String url){
+    public Object addProject(HttpServletRequest request, @RequestBody Project project){
         String userToken=request.getHeader("token");
         try{
-            projectService.addOneProject(userToken,url);
+            projectService.addOneProject(userToken,project.getUrl());
             return new ResponseBean(200,"add success",null);
         }catch (Exception e){
             return new ResponseBean(401,"add failed :"+e.getMessage(),null);
         }
     }
 
-    //get
-    //  /projects
+    //get project list
     @GetMapping
     public Object query(HttpServletRequest request){
         String userToken=request.getHeader("token");
@@ -54,7 +57,7 @@ public class ProjectController {
         }
     }
 
-    @PostMapping(value={"/update"})
+    @PutMapping
     public Object updateProject(@RequestBody Project project){
         try{
             projectService.updateProjectStatus(project);
@@ -74,4 +77,10 @@ public class ProjectController {
     public Object getProject(@PathVariable("project_id")String project_id){
         return projectService.getProjectByID(project_id);
     }
+
+    @GetMapping(value = {"/repo-id/{project_id}"})
+    public String getRepoId(@PathVariable("project_id")String project_id){
+        return projectService.getRepoId(project_id);
+    }
+
 }

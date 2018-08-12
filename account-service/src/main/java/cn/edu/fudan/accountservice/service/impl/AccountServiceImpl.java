@@ -56,4 +56,12 @@ public class AccountServiceImpl implements AccountService {
     public String getAccountIdByAccountName(String accountName) {
         return accountDao.getAccountIdByAccountName(accountName);
     }
+
+    @Override
+    public void addAccount(Account account) {
+        if(accountDao.isAccountLegal())
+            accountDao.addAccount(account);
+    }
+
+
 }

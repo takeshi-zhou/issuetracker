@@ -71,6 +71,9 @@
         inner join repository as b on a.repo_id = b.uuid
         where a.uuid = #{project_id}
     </select>
+    <select id="getRepoId" parameterType="String" resultType="String">
+        select repo_id from project where uuid = #{project_id}
+    </select>
 
     <delete id="remove" parameterType="String" >
         delete from project where uuid = #{projectId}
