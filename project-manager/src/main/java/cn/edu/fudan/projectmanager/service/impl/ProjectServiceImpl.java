@@ -112,7 +112,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public String getRepoId(String project_id) {
-        return projectDao.getRepoId(project_id);
+    public String getRepoId(String projectId) {
+        return projectDao.getRepoId(projectId);
     }
 }

@@ -19,5 +19,5 @@ public interface ProjectService {
 
     String getRepoPath(String project_id);
 
-    String getRepoId(String project_id);
+    String getRepoId(String projectId);
 }

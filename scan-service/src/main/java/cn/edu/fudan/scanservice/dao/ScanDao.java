@@ -37,4 +37,7 @@ public class ScanDao {
         return count!=null&&count>0;
     }
 
+    public Object getTillCommitDateByProjectId(String projectId) {
+        return scanMapper.getTillCommitDateByProjectId(projectId);
+    }
 }

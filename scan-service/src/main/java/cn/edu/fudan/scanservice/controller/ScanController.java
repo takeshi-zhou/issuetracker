@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/Scan")
+@RequestMapping("/scan")
 public class ScanController {
 
 
@@ -27,6 +27,11 @@ public class ScanController {
         this.kafkaService = kafkaService;
     }
 
+
+    /**
+     *  requestParam:  projectId  commitId
+     *  doScan ??  scan 的区别
+     * */
     @PostMapping(value = {"/doScan"})
     public Object scan(@RequestBody JSONObject requestParam){
         try{
@@ -38,7 +43,7 @@ public class ScanController {
 
     }
 
-    @PostMapping(value = {"/add"})
+    @PostMapping
     public Object addScan(@RequestBody Scan scan){
         try{
             scanService.insertOneScan(scan);
@@ -60,7 +65,9 @@ public class ScanController {
         }
     }
 
-    @PostMapping(value = {"/update"})
+    //old
+    // (value = {"/update"})
+    @PutMapping
     public Object updateScan(@RequestBody Scan scan){
         try{
             scanService.updateOneScan(scan);
@@ -70,4 +77,10 @@ public class ScanController {
             return new ResponseBean(401,"scan update failed",null);
         }
     }
+
+    @GetMapping(value = {"/last-commit-date"})
+    public Object getTillCommitDateByProjectId(@RequestParam("project-id") String projectId ){
+        return scanService.getTillCommitDateByProjectId(projectId);
+    }
+
 }

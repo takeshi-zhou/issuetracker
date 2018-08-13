@@ -34,6 +34,12 @@ public class CommitController {
         return commitService.getScannedCommits(project_id);
     }
 
+    /**
+     * 接下来两块
+     *  由思聪提供完成
+     *
+     * */
+
     @GetMapping(value = "/commitDate/{commit_id}")
     public Object getCommitDate(@PathVariable("commit_id")String commit_id){
         return commitService.getCommitDate(commit_id);
@@ -43,6 +49,5 @@ public class CommitController {
     public Object getTillCommitDate(@PathVariable("repo_id")String repo_id){
         return commitService.getTillCommitDate(repo_id);
     }
-
 
 }

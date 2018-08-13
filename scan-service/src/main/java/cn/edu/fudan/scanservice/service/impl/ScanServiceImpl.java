@@ -39,4 +39,9 @@ public class ScanServiceImpl implements ScanService {
     public String getLatestScannedCommitId(String project_id) {
         return scanDao.getLatestScannedCommitId(project_id);
     }
+
+    @Override
+    public Object getTillCommitDateByProjectId(String projectId) {
+        return scanDao.getTillCommitDateByProjectId(projectId);
+    }
 }

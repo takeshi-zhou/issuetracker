@@ -18,15 +18,6 @@ public class ProjectController {
     public void setProjectService(ProjectService projectService) {
         this.projectService = projectService;
     }
-    /**
-     *     add
-     *     post /projects/
-     *
-     *     modify    put
-     *     /projects/{id}
-     *
-     *
-     * */
 
     @PostMapping
     public Object addProject(HttpServletRequest request, @RequestBody Project project){
@@ -57,6 +48,7 @@ public class ProjectController {
         }
     }
 
+    //need test
     @PutMapping
     public Object updateProject(@RequestBody Project project){
         try{
@@ -68,19 +60,19 @@ public class ProjectController {
         }
     }
 
-    @GetMapping(value="/repoPath/{project_id}")
+    @GetMapping(value="/repo-path/{project_id}")
     public Object getRepoPath(@PathVariable("project_id")String project_id){
         return projectService.getRepoPath(project_id);
     }
 
-    @GetMapping(value = {"/{project_id}"})
-    public Object getProject(@PathVariable("project_id")String project_id){
+    @GetMapping(value = {"/{project-id}"})
+    public Object getProject(@PathVariable("project-id")String project_id){
         return projectService.getProjectByID(project_id);
     }
 
-    @GetMapping(value = {"/repo-id/{project_id}"})
-    public String getRepoId(@PathVariable("project_id")String project_id){
-        return projectService.getRepoId(project_id);
+    @GetMapping(value = "/repo-id")
+    public String getRepoId(@RequestParam("project-id")String projectId){
+        return projectService.getRepoId(projectId);
     }
 
 }

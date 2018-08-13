@@ -26,5 +26,5 @@ public interface ProjectMapper {
 
 	 String getRepoPath(String project_id);
 
-    String getRepoId(@Param("projectId") String project_id);
+	 String getRepoId(@Param("projectId") String projectId);
 }

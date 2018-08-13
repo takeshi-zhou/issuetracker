@@ -36,7 +36,8 @@ public class KafkaServiceImpl implements KafkaService{
     @Value("${commit.service.path}")
     private String commitServicePath;
 
-    @Resource(name="findBug")//这边注入的是findBug的扫描的实现方式，如果是其它工具，可以换作其它实现
+    //这边注入的是findBug的扫描的实现方式，如果是其它工具，可以换作其它实现
+    @Resource(name="findBug")
     private ScanOperation scanOperation;
 
     private KafkaTemplate kafkaTemplate;
@@ -53,7 +54,7 @@ public class KafkaServiceImpl implements KafkaService{
         this.restTemplate = restTemplate;
     }
 
-    //初始化project的一些状态
+    //初始化project的一些状态,表示目前正在scan
     private void initialProject(String projectId){
         JSONObject postData = new JSONObject();
         postData.put("uuid", projectId);
@@ -61,9 +62,13 @@ public class KafkaServiceImpl implements KafkaService{
         postData.put("last_scan_time", DateTimeUtil.format(new Date()));
         updateProject(postData);
     }
+
+    @SuppressWarnings("unchecked")
     private void updateProject(JSONObject projectParam){
-        JSONObject json = restTemplate.postForEntity(projectServicePath+"/update", projectParam, JSONObject.class).getBody();
-        if(json==null||json.getIntValue("code")!=200){
+        //JSONObject json = restTemplate.postForEntity(projectServicePath+"/update", projectParam, JSONObject.class).getBody();
+        try{
+            restTemplate.put(projectServicePath,projectParam);
+        }catch (Exception e){
             throw new RuntimeException("project status initial failed!");
         }
     }
@@ -101,7 +106,10 @@ public class KafkaServiceImpl implements KafkaService{
         }
         logger.info("scan complete ->"+scanResult.getDescription());
         logger.info("start to mapping ......");
-        //扫描成功，开始映射
+        /**
+         * 扫描成功，开始映射
+         * 拆分成消息服务 unifying service
+         */
         if(!scanOperation.mapping(projectId,commitId)){
             send(projectId,commitId,"failed","check out failed");
             logger.error("Mapping Failed!");

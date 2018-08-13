@@ -63,4 +63,8 @@
     <select id="getScanCountByCommitId" parameterType="String" resultType="Integer">
         select count(uuid) from scan where commit_id = #{commit_id}
     </select>
+
+    <select id="getTillCommitDateByProjectId" parameterType="String" resultType="java.util.Date">
+        select max(commit_time) from  scan where  project_id = #{projectId}
+    </select>
 </mapper>

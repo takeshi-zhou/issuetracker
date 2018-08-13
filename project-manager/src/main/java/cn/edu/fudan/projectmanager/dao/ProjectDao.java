@@ -52,7 +52,7 @@ public class ProjectDao {
 		return projectMapper.getRepoPath(project_id);
 	}
 
-    public String getRepoId(String project_id) {
-		return projectMapper.getRepoId(project_id);
+    public String getRepoId(String projectId) {
+		return projectMapper.getRepoId(projectId);
     }
 }

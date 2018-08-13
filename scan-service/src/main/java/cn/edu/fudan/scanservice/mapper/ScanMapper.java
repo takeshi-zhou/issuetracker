@@ -17,4 +17,5 @@ public interface ScanMapper {
 
      String getLatestScannedCommitId(String project_id);
 
+    Object getTillCommitDateByProjectId(@Param("projectId") String projectId);
 }

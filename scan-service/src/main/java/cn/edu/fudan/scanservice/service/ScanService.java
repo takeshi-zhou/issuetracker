@@ -13,4 +13,5 @@ public interface ScanService {
 
     String getLatestScannedCommitId(String project_id);
 
+    Object getTillCommitDateByProjectId(String projectId);
 }
