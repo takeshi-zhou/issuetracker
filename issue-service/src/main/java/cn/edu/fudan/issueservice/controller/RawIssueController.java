@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/RawIssue")
+@RequestMapping("/raw-issue")
 public class RawIssueController {
 
 
@@ -20,7 +20,7 @@ public class RawIssueController {
         this.rawIssueService = rawIssueService;
     }
 
-    @PostMapping(value = {"/add"})
+    @PostMapping
     public Object addRawIssues(@RequestBody List<RawIssue> list){
         try{
             rawIssueService.insertRawIssueList(list);
@@ -31,7 +31,7 @@ public class RawIssueController {
         }
     }
 
-    @DeleteMapping(value={"/delete/{projectId}"})
+    @DeleteMapping(value={"/{projectId}"})
     public Object deleteRawIssue(@PathVariable("projectId")String projectId){
         try{
             rawIssueService.deleteRawIssueByProjectId(projectId);
@@ -42,7 +42,7 @@ public class RawIssueController {
         }
     }
 
-    @PostMapping(value={"/update"})
+    @PutMapping
     public Object updateRawIssues(@RequestBody List<RawIssue> issueList){
         try{
             rawIssueService.batchUpdateIssueId(issueList);
@@ -53,12 +53,13 @@ public class RawIssueController {
         }
     }
 
-    @GetMapping(value = {"/rawIssueListByIssue"})
+    @GetMapping(value = {"/list-by-issue"})
     public Object getRawIssueList(@RequestParam("issue_id")String issue_id) {
         return rawIssueService.getRawIssueByIssueId(issue_id);
     }
 
-    @GetMapping(value = {"/rawIssueListByCommit"})
+    // need or not
+    @GetMapping(value = {"/list-by-commit"})
     public Object getRawIssues(@RequestParam("commit_id")String commit_id){
         return rawIssueService.getRawIssueByCommitID(commit_id);
     }

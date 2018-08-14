@@ -91,6 +91,7 @@ public class KafkaServiceImpl implements KafkaService{
         logger.info("start to checkout -> "+commitId);
         //checkout,如果失败发送错误消息，直接返回
         if(!scanOperation.checkOut(projectId,commitId)){
+            // updateCommitScanStatus listen message
             send(projectId,commitId,"failed","check out failed");
             logger.error("Check Out Failed!");
             return;

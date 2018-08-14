@@ -31,8 +31,13 @@ public class ScanController {
     /**
      *  requestParam:  projectId  commitId
      *  doScan ??  scan 的区别
+     *  doscan ：
+     *     step 1：initialize project (update table project)   step 2：scan
+     *      when finished send message
+     *
+     *      (value = {"/doScan"})
      * */
-    @PostMapping(value = {"/doScan"})
+    @PostMapping
     public Object scan(@RequestBody JSONObject requestParam){
         try{
             kafkaService.scanByRequest(requestParam);
@@ -43,18 +48,24 @@ public class ScanController {
 
     }
 
-    @PostMapping
-    public Object addScan(@RequestBody Scan scan){
-        try{
-            scanService.insertOneScan(scan);
-            return new ResponseBean(200,"scan add success!",null);
-        }catch (Exception e){
-            e.printStackTrace();
-            return new ResponseBean(401,"scan add failed!",null);
-        }
-    }
+    /**
+     *      useless
+     *
+     *     @PostMapping
+     *     public Object addScan(@RequestBody Scan scan){
+     *         try{
+     *             scanService.insertOneScan(scan);
+     *             return new ResponseBean(200,"scan add success!",null);
+     *         }catch (Exception e){
+     *             e.printStackTrace();
+     *             return new ResponseBean(401,"scan add failed!",null);
+     *         }
+     *     }
+     *
+     * */
 
-    @DeleteMapping(value = {"/delete/{projectId}"})
+
+    @DeleteMapping(value = {"/{projectId}"})
     public Object deleteScans(@PathVariable("projectId")String projectId){
         try{
             scanService.deleteScanByProjectId(projectId);
@@ -65,8 +76,11 @@ public class ScanController {
         }
     }
 
-    //old
-    // (value = {"/update"})
+
+    /**
+     * old
+     *  (value = {"/update"})
+     */
     @PutMapping
     public Object updateScan(@RequestBody Scan scan){
         try{

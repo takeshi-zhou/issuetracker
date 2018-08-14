@@ -12,8 +12,15 @@ public class Scan {
     private String result_summary;
     private String project_id;
     private String commit_id;
+    private Date commit_time;
 
+    public Date getCommit_time() {
+        return commit_time;
+    }
 
+    public void setCommit_time(Date commit_time) {
+        this.commit_time = commit_time;
+    }
 
     public String getName() {
         return name;

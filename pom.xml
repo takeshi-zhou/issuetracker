@@ -16,8 +16,8 @@
         <module>account-service</module>
         <module>project-manager</module>
         <module>scan-service</module>
-        <module>commit-service</module>
         <module>issue-service</module>
+        <module>unifying-service</module>
     </modules>
 
     <parent>

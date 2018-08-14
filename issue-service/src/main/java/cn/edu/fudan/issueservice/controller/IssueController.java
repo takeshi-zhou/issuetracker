@@ -3,6 +3,7 @@ package cn.edu.fudan.issueservice.controller;
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.ResponseBean;
 import cn.edu.fudan.issueservice.service.IssueService;
+import cn.edu.fudan.issueservice.service.RawIssueService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,11 +12,18 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/Issue")
+@RequestMapping("/issue")
 public class IssueController {
 
 
     private IssueService issueService;
+
+    private RawIssueService rawIssueService;
+
+    @Autowired
+    public void setRawIssueService(RawIssueService rawIssueService) {
+        this.rawIssueService = rawIssueService;
+    }
 
     @Autowired
     public void setIssueService(IssueService issueService) {
@@ -73,6 +81,10 @@ public class IssueController {
             return new ResponseBean(401,"issues mapping failed!",null);
         }
     }
-    
+
+    @GetMapping(value = {"/raw-issue"})
+    public Object getRawIssueList(@RequestParam("issue_id")String issue_id) {
+        return rawIssueService.getRawIssueByIssueId(issue_id);
+    }
     
 }

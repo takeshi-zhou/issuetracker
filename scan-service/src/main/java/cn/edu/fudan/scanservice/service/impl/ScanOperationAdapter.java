@@ -52,15 +52,15 @@ public class ScanOperationAdapter implements ScanOperation {
 
     @Override
     public boolean checkOut(String projectId, String commitId){
-        String repoPath=restTemplate.getForObject(projectServicePath+"/repoPath/"+projectId,String.class);
+        String repoPath=restTemplate.getForObject(projectServicePath+"/repo-path/"+projectId,String.class);
         return ExcuteShellUtil.executeCheckout(repoPath,commitId);
     }
 
     @Override
     public ScanInitialInfo initialScan(String projectId, String commitId) {
         Date startTime=new Date();
-        String repoPath=restTemplate.getForObject(projectServicePath+"/repoPath/"+projectId,String.class);
-        JSONObject currentProject=restTemplate.getForObject(projectServicePath+"/project/"+projectId,JSONObject.class);
+        String repoPath=restTemplate.getForObject(projectServicePath+"/repo-path/"+projectId,String.class);
+        JSONObject currentProject=restTemplate.getForObject(projectServicePath+"/"+projectId,JSONObject.class);
         String projectName=currentProject.getString("name");
         String repoId=currentProject.getString("repo_id");
         //新建一个Scan对象
@@ -70,8 +70,11 @@ public class ScanOperationAdapter implements ScanOperation {
         scan.setStatus("doing...");
         scan.setProject_id(projectId);
         scan.setCommit_id(commitId);
+        //scan.set
         String uuid= UUID.randomUUID().toString();
         scan.setUuid(uuid);
+        //use api provided by commit-service
+        scan.setCommit_time(restTemplate.getForEntity(commitServicePath+"/commit-time/"+commitId,Date.class).getBody());
         return new ScanInitialInfo(scan,projectName,repoId, repoPath);
     }
 
@@ -92,18 +95,19 @@ public class ScanOperationAdapter implements ScanOperation {
             requestParam.put("pre_commit_id",commitId);
         requestParam.put("current_commit_id",commitId);
         logger.info("mapping between "+requestParam.toJSONString());
-        JSONObject result=restTemplate.postForEntity(issueServicePath+"/Issue/mapping",requestParam,JSONObject.class).getBody();
+        JSONObject result=restTemplate.postForEntity(issueServicePath+"/mapping",requestParam,JSONObject.class).getBody();
         return result!=null&&result.getIntValue("code")==200;
     }
 
     @Override
     public boolean updateScan(ScanInitialInfo scanInitialInfo) {
         Scan scan=scanInitialInfo.getScan();
-        String repoId=scanInitialInfo.getRepoId();
-        //更新till_commit_time
-        String commit_time=restTemplate.getForObject(commitServicePath+"/commitDate/"+scan.getCommit_id(),Object.class).toString();
+        //String repoId=scanInitialInfo.getRepoId();
+        //更新project 表 的till_commit_time
+        String commit_time=scan.getCommit_time().toString();
         String till_commit=null;
-        Object till_commit_object=restTemplate.getForObject(commitServicePath+"/tillCommitDate/"+repoId,Object.class);
+        //Object till_commit_object=restTemplate.getForObject(commitServicePath+"/tillCommitDate/"+repoId,Object.class);
+        Object till_commit_object = scanDao.getTillCommitDateByProjectId(scan.getProject_id());
         if(till_commit_object!=null){
             till_commit=till_commit_object.toString();
         }
@@ -112,7 +116,7 @@ public class ScanOperationAdapter implements ScanOperation {
             JSONObject requestParam =new JSONObject();
             requestParam.put("uuid",scan.getProject_id());
             requestParam.put("till_commit_time",commit_time);
-            restTemplate.postForEntity(projectServicePath+"/update",requestParam,JSONObject.class);
+            restTemplate.put(projectServicePath,requestParam,JSONObject.class);
         }
 
         //更新当前Scan的状态
