@@ -24,6 +24,9 @@ public class IssueServiceImpl implements IssueService {
     @Value("${commit.service.path}")
     private String commitServicePath;
 
+    @Value("${scan.service.path}")
+    private String scanServicePath;
+
     private IssueDao issueDao;
 
     @Autowired
@@ -86,6 +89,7 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void startMapping(String project_id, String pre_commit_id, String current_commit_id) {
         List<Issue> insertIssueList=new ArrayList<>();
@@ -106,7 +110,7 @@ public class IssueServiceImpl implements IssueService {
             List<RawIssue> rawIssues2=rawIssueDao.getRawIssueByCommitID(current_commit_id);
 
             //当前project已经扫描过的commit列表,是按commit_time从小到大排序的
-            JSONArray commits=restTemplate.getForObject(commitServicePath+"/scannedCommits/"+project_id, JSONArray.class);
+            JSONArray commits=restTemplate.getForObject(scanServicePath+"/commits?project_id="+project_id, JSONArray.class);
             Date start_commit_time=commits.getJSONObject(0).getDate("commit_time");
             Date end_commit_time=commits.getJSONObject(commits.size()-1).getDate("commit_time");
 

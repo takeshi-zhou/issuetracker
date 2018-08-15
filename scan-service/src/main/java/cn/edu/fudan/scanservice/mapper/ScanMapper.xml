@@ -13,9 +13,10 @@
         <result property="result_summary" column="result_summary"/>
         <result property="project_id" column="project_id"/>
         <result property="commit_id" column="commit_id"/>
+        <result property="commit_time" column="commit_time"/>
     </resultMap>
 
-
+    <!-- never used -->
     <insert id="insertOneScan" parameterType="Scan">
         insert into scan
                (
@@ -66,5 +67,9 @@
 
     <select id="getTillCommitDateByProjectId" parameterType="String" resultType="java.util.Date">
         select max(commit_time) from  scan where  project_id = #{projectId}
+    </select>
+
+    <select id="getScannedCommits" parameterType="String">
+        select commit_id,commit_time from scan where project_id=#{projectId} order by commit_time
     </select>
 </mapper>

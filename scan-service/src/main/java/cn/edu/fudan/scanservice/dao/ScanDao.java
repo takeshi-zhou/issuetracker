@@ -2,6 +2,7 @@ package cn.edu.fudan.scanservice.dao;
 
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.mapper.ScanMapper;
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -39,5 +40,9 @@ public class ScanDao {
 
     public Object getTillCommitDateByProjectId(String projectId) {
         return scanMapper.getTillCommitDateByProjectId(projectId);
+    }
+
+    public JSONArray getScannedCommits(String project_id) {
+        return  scanMapper.getScannedCommits(project_id);
     }
 }

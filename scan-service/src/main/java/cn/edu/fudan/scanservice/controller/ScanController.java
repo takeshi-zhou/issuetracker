@@ -4,6 +4,7 @@ import cn.edu.fudan.scanservice.domain.ResponseBean;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.service.KafkaService;
 import cn.edu.fudan.scanservice.service.ScanService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +31,7 @@ public class ScanController {
 
     /**
      *  requestParam:  projectId  commitId
-     *  doScan ??  scan 的区别
+     *  doScan  scan 的区别
      *  doscan ：
      *     step 1：initialize project (update table project)   step 2：scan
      *      when finished send message
@@ -95,6 +96,11 @@ public class ScanController {
     @GetMapping(value = {"/last-commit-date"})
     public Object getTillCommitDateByProjectId(@RequestParam("project-id") String projectId ){
         return scanService.getTillCommitDateByProjectId(projectId);
+    }
+
+    @GetMapping(value = {"/commits"})
+    public JSONArray getScannedCommits(@RequestParam("project_id") String project_id){
+        return scanService.getScannedCommits(project_id);
     }
 
 }

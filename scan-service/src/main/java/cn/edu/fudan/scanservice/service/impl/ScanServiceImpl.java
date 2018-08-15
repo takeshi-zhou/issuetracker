@@ -4,6 +4,7 @@ package cn.edu.fudan.scanservice.service.impl;
 import cn.edu.fudan.scanservice.dao.ScanDao;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.service.ScanService;
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,5 +44,10 @@ public class ScanServiceImpl implements ScanService {
     @Override
     public Object getTillCommitDateByProjectId(String projectId) {
         return scanDao.getTillCommitDateByProjectId(projectId);
+    }
+
+    @Override
+    public JSONArray getScannedCommits(String project_id) {
+        return scanDao.getScannedCommits(project_id);
     }
 }

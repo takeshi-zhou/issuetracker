@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,12 +31,23 @@ public class IssueController {
         this.issueService = issueService;
     }
 
-    @PostMapping(value={"/issueList"})
-    public Object getIssues(@RequestBody Map<String,Object>requestParam){
+    /**
+     *  project_id
+     *  page
+     *  size
+     * */
+    @GetMapping
+    public Object getIssues(@RequestParam("project-id") Object project_id,
+                            @RequestParam("page") Object page,
+                            @RequestParam("size") Object size){
+        Map<String,Object>requestParam = new HashMap<>();
+        requestParam.put("project_id",project_id);
+        requestParam.put("page",page);
+        requestParam.put("size",size);
     	return issueService.getIssueList(requestParam);
     }
 
-    @PostMapping(value = {"/addIssues"})
+    @PostMapping
     public Object addIssues(@RequestBody List<Issue> issueList){
         try{
           issueService.insertIssueList(issueList);
@@ -46,7 +58,7 @@ public class IssueController {
         }
     }
 
-    @DeleteMapping(value = {"/delete/{projectId}"})
+    @DeleteMapping(value = {"/{projectId}"})
     public Object deleteIssues(@PathVariable("projectId")String projectId){
         try{
             issueService.deleteIssueByProjectId(projectId);
@@ -57,7 +69,7 @@ public class IssueController {
         }
     }
 
-    @PostMapping(value={"/updateIsues"})
+    @PutMapping
     public Object updateIssues(@RequestBody List<Issue> issueList){
         try{
             issueService.batchUpdateIssue(issueList);

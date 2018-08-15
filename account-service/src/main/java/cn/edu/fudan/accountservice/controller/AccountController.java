@@ -21,6 +21,7 @@ public class AccountController {
         this.accountService = accountService;
     }
 
+    @SuppressWarnings("need check and complete")
     @PostMapping
     @CrossOrigin
     public Object createUser(@RequestBody Account account){
@@ -44,7 +45,7 @@ public class AccountController {
         return responseBean;
     }
 
-    //used in project service for get user project list
+    //used in project service for get user project list;;need modify
     @GetMapping(value="/accountId")
     @CrossOrigin
     public Object getAccountID(@RequestParam("userToken")String userToken){

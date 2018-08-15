@@ -1,6 +1,7 @@
 package cn.edu.fudan.scanservice.mapper;
 
 import cn.edu.fudan.scanservice.domain.Scan;
+import com.alibaba.fastjson.JSONArray;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -18,4 +19,6 @@ public interface ScanMapper {
      String getLatestScannedCommitId(String project_id);
 
     Object getTillCommitDateByProjectId(@Param("projectId") String projectId);
+
+    JSONArray getScannedCommits(@Param("projectId") String project_id);
 }
