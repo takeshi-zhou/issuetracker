@@ -30,7 +30,7 @@ paths:
       - "application/json"
       parameters:
       - in: "body"
-        name: "body"
+        name: "account"
         description: "Created user object"
         required: true
         schema:
@@ -68,6 +68,10 @@ paths:
           description: "failed"
           schema:
             $ref : "#/definitions/ResponseBean"
+        401:
+          description: "Incorrect username or password"
+          schema:
+            $ref : "#/definitions/ResponseBean"
   /user/auth/{userToken}:
     get:
       tags:
@@ -91,6 +95,31 @@ paths:
           description: "Invalid ID supplied"
           schema:
             $ref: "#/definitions/ResponseBean"
+        404:
+          description: "user not found"
+  /user/accountId:
+    get:
+      tags:
+      - "account-service"
+      summary: "get AccountID By userToken"
+      operationId: "getAccountID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "userToken"
+        in: "query"
+        description: "token of user for get accountID"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description : "succsssful"
+          schema:
+            type: "string"
+        400:
+          description: "failed"
+        401:
+          description: "Incorrect userToken"
 
   /project:
     post:
@@ -99,17 +128,20 @@ paths:
       summary: "add a project"
       description: "This can only be done by logged in user"
       operationId: "addProject"
-      consumes:
-      - "application/json"
       produces:
       - "application/json"
       parameters:
       - in: "body"
-        name: "body"
+        name: "project"
         description: "project that user want to add"
         required: true
         schema:
           $ref: "#/definitions/Project"
+      - in: "header"
+        name: "token"
+        description: "get userToken from Header"
+        required: true
+        type: "string"
       responses:
         200:
           description: "successful operation"
@@ -119,6 +151,259 @@ paths:
           description: "Invalid ID supplied"
           schema:
             $ref: "#/definitions/ResponseBean"
+    get:
+      tags:
+      - "project-service"
+      summary: "query Project list By userToken"
+      operationId: "query"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "token"
+        description: "get userToken from Header"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description : "succsssful"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Project"
+        400:
+          description: "failed"
+
+    put:
+      tags:
+      - "project-service"
+      summary: "update Project "
+      operationId: "updateProject"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "project"
+        description: " message about project "
+        required: true
+        schema:
+          $ref: '#/definitions/Project'
+      responses:
+        200:
+          description : "succsssful"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        401:
+          description: "failed"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+
+  /project/{projectId}:
+    delete:
+      tags:
+      - "project-service"
+      summary: "delet a project"
+      description: "delet a project by projectId"
+      operationId: "delete"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "projectId"
+        description: "project that user want to delet"
+        required: true
+        type : "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        401:
+          description: "Invalid ID supplied"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+    get:
+      tags:
+      - "project-service"
+      summary: "get a project"
+      description: "get a project by projectId"
+      operationId: "getProject"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "projectId"
+        description: "project that user want to get"
+        required: true
+        type : "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Project"
+        401:
+          description: "Invalid ID supplied"
+
+  /project/repo-path/{project_id}:
+    get:
+      tags:
+      - "project-service"
+      summary: "get Repo Path"
+      description: "get Repo Path by project_id"
+      operationId: "getRepoPath"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "project_id"
+        description: "project id"
+        required: true
+        type : "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+        401:
+          description: "Invalid ID supplied"
+
+  /project/repo-id:
+    get:
+      tags:
+      - "project-service"
+      summary: "get Repo id"
+      description: "get Repo id by project_id"
+      operationId: "getRepoId"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "project-id"
+        description: "project id"
+        required: true
+        type : "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+        401:
+          description: "Invalid ID supplied"
+
+  /scan:
+    post:
+      tags:
+      - "scan-service"
+      summary: "add a Scan"
+      description: " "
+      operationId: "addScan"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        401:
+          description: "failed operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+
+
+    put:
+      tags:
+      - "scan-service"
+      summary: "update a Scan"
+      description: "update a Scan record"
+      operationId: "updateScan"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "scan"
+        description: "a scan object"
+        required: true
+        schema:
+          $ref: "#/definitions/Scan"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        401:
+          description: "failed operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+
+
+  /scan/{projectId}:
+    delete:
+      tags:
+      - "scan-service"
+      summary: "delet  Scans by projectId"
+      operationId: "deleteScans"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "projectId"
+        description: "a project id"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        401:
+          description: "failed operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+
+  /scan/last-commit-date:
+    get:
+      tags:
+      - "scan-service"
+      summary: "get TillCommitDate by projectId"
+      operationId: "getTillCommitDateByProjectId"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "project-id"
+        description: "a project id"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+        401:
+          description: "failed operation"
+
+  /scan/commits:
+    get:
+      tags:
+      - "scan-service"
+      summary: "get commits by projectId"
+      operationId: "getScannedCommits"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "project-id"
+        description: "a project id"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+        401:
+          description: "failed operation"
+
 
 
 
@@ -148,7 +433,51 @@ definitions:
   Project:
     type: "object"
     properties:
+      uuid:
+        type: "string"
+      name:
+        type: "string"
+      language:
+        type: "string"
       url:
+        type: "string"
+      vcs_type:
+        type: "string"
+      account_id:
+        type: "string"
+      prev_scan_commit:
+        type: "string"
+      download_status:
+        type: "string"
+      scan_status:
+        type: "string"
+      till_commit_time:
+        type: "string"
+      last_scan_time:
+        type: "string"
+      description:
+        type: "string"
+      repo_id:
+        type: "string"
+
+  Scan:
+    type: "object"
+    properties:
+      uuid:
+        type: "string"
+      name:
+        type: "string"
+      start_time:
+        type: "string"
+      end_time:
+        type: "string"
+      status:
+        type: "string"
+      result_summary:
+        type: "string"
+      project_id:
+        type: "string"
+      commit_id:
         type: "string"
 
 
