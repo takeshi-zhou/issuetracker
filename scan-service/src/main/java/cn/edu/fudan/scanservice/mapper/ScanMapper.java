@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONArray;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ScanMapper {
 
@@ -20,5 +22,5 @@ public interface ScanMapper {
 
     Object getTillCommitDateByProjectId(@Param("projectId") String projectId);
 
-    JSONArray getScannedCommits(@Param("projectId") String project_id);
+    List<Scan> getScannedCommits(@Param("projectId") String project_id);
 }

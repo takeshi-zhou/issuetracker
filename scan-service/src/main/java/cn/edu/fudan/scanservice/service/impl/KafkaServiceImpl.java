@@ -33,8 +33,8 @@ public class KafkaServiceImpl implements KafkaService{
     @Value("${project.service.path}")
     private String projectServicePath;
 
-    @Value("${commit.service.path}")
-    private String commitServicePath;
+ //   @Value("${commit.service.path}")
+  //  private String commitServicePath;
 
     //这边注入的是findBug的扫描的实现方式，如果是其它工具，可以换作其它实现
     @Resource(name="findBug")
@@ -112,7 +112,7 @@ public class KafkaServiceImpl implements KafkaService{
          * 拆分成消息服务 unifying service
          */
         if(!scanOperation.mapping(projectId,commitId)){
-            send(projectId,commitId,"failed","check out failed");
+            send(projectId,commitId,"failed","Mapping failed");
             logger.error("Mapping Failed!");
             return;
         }

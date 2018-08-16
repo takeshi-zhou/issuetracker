@@ -27,7 +27,8 @@
                    status,
                    result_summary,
                    project_id,
-                   commit_id
+                   commit_id,
+                   commit_time
                )
         VALUES
               (
@@ -38,7 +39,8 @@
                    #{status},
                    #{result_summary},
                    #{project_id},
-                   #{commit_id}
+                   #{commit_id},
+                   #{commit_time}
               )
     </insert>
 
@@ -69,7 +71,7 @@
         select max(commit_time) from  scan where  project_id = #{projectId}
     </select>
 
-    <select id="getScannedCommits" parameterType="String">
-        select commit_id,commit_time from scan where project_id=#{projectId} order by commit_time
+    <select id="getScannedCommits" parameterType="String" resultMap="scan">
+        select * from scan where project_id=#{projectId} order by commit_time
     </select>
 </mapper>

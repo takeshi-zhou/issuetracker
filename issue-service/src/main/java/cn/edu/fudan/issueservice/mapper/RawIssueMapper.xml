@@ -59,10 +59,10 @@
 		delete from rawIssue where scan_id in (select uuid from scan where project_id = #{projectId})
 	</delete>
 
-	<update id="batchUpdateIssueId" parameterType="List">
+	<update id="batchUpdateIssueId" parameterType="java.util.List">
 		update rawIssue
 		<trim prefix="set" suffixOverrides=",">
-			<trim prefix="issue_id = case" suffix="end,">
+			<trim prefix="issue_id =case" suffix="end,">
 				<foreach collection="list" item="item">
 					<if test="item.issue_id != null">
 						when uuid=#{item.uuid} then #{item.issue_id}

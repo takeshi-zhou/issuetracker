@@ -6,6 +6,8 @@ import com.alibaba.fastjson.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class ScanDao {
 
@@ -43,6 +45,12 @@ public class ScanDao {
     }
 
     public JSONArray getScannedCommits(String project_id) {
-        return  scanMapper.getScannedCommits(project_id);
+        List<Scan> scans = scanMapper.getScannedCommits(project_id);
+        JSONArray jsonArray = new JSONArray();
+
+        for (Scan scan : scans) {
+            jsonArray.add(scan);
+        }
+        return jsonArray;
     }
 }

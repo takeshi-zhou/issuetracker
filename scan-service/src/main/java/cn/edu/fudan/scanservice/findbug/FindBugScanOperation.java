@@ -30,6 +30,8 @@ public class FindBugScanOperation extends ScanOperationAdapter {
     private String repoHome;
     @Value("${issue.service.path}")
     private String issueServicePath;
+    @Value("${rawIssue.service.path}")
+    private String rawIssueServicePath;
 
     @SuppressWarnings("unchecked")
     private String getJsonString(Element element){
@@ -137,7 +139,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
             }
             if(!rawIssues.isEmpty()){
                 //插入所有的rawIssue
-                restTemplate.postForEntity(issueServicePath+"/RawIssue/add",rawIssues,JSONObject.class).getBody();
+                restTemplate.postForEntity(rawIssueServicePath,rawIssues,JSONObject.class).getBody();
             }
             return true;
         } catch (Exception e) {
@@ -172,7 +174,10 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         logger.info("start to analyze resultFile......");
         //如果fingBug调用成功，开始解析XML文件
         String xmlPath=resultFileHome+projectName+".xml";
-        if(!analyzeXML(scan,projectName,xmlPath)){
+        /**
+         *  attention
+         * */
+        if(!analyzeXML(scan,repoPath,xmlPath)){
             logger.error("Result File Analyze Failed!");
             return new ScanResult("failed","analyze failed");
         }

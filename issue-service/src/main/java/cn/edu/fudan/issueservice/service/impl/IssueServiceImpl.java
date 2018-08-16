@@ -7,6 +7,7 @@ import cn.edu.fudan.issueservice.domain.RawIssue;
 import cn.edu.fudan.issueservice.service.IssueService;
 import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -96,6 +97,10 @@ public class IssueServiceImpl implements IssueService {
         if(pre_commit_id.equals(current_commit_id)){
             //当前project第一次扫描，所有的rawIssue都是issue
             List<RawIssue> rawIssues=rawIssueDao.getRawIssueByCommitID(current_commit_id);
+            /**
+             *             System.out.println("step one");
+             *             System.out.println(rawIssues);
+             * */
             for(RawIssue rawIssue:rawIssues){
                 String new_IssueId= UUID.randomUUID().toString();
                 rawIssue.setIssue_id(new_IssueId);
@@ -113,8 +118,8 @@ public class IssueServiceImpl implements IssueService {
             JSONArray commits=restTemplate.getForObject(scanServicePath+"/commits?project_id="+project_id, JSONArray.class);
             Date start_commit_time=commits.getJSONObject(0).getDate("commit_time");
             Date end_commit_time=commits.getJSONObject(commits.size()-1).getDate("commit_time");
-
-            Date commit_time=restTemplate.getForObject(commitServicePath+"/commitDate/"+current_commit_id,Date.class);
+            JSONObject jsonObject = restTemplate.getForObject(commitServicePath+"/commit-time/"+current_commit_id,JSONObject.class);
+            Date commit_time =jsonObject.getJSONObject("data").getDate("commit_time");
             //装需要更新的
             List<Issue> issues=new ArrayList<>();
 

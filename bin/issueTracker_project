@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage="\nUsage: issueTracker_project.sh (add|list|delete|load) <url | projectId> \n"
+usage="ERROR\nUsage: issueTracker_project.sh (add|list|delete|load) <url | projectId> \nERROR"
 
 # if no args specified, show usage
 if [ $# -le 0 ]; then
@@ -9,7 +9,7 @@ if [ $# -le 0 ]; then
 fi
 
 ip="10.141.221.80"
-port="8004"
+port="8002"
 baseDir="$ISSUETRACKER_HOME/bin"
 token=`cat $baseDir/authentication`
 option=$1
@@ -17,19 +17,19 @@ option=$1
 case $option in
 
   (add)
-	curl -H "token:$token" http://$ip:$port/Project/add?url=$2 -s | grep -Po 'msg[":]+\K[^"]+'
+	curl -H "token:$token" -X POST -d '{"url": "$2"}' http://$ip:$port/project -s | grep -Po 'msg[":]+\K[^"]+'
 	exit 1
 	;;
   (list)
    # need Formatted output display
-    curl -H "token:$token" http://$ip:$port/Project/list -s
+    curl -H "token:$token" http://$ip:$port/project -s
 	exit 1
     ;;
   (delete)
-	curl -H "token:$token" http://$ip:$port/Project/delete/$2 -s | grep -Po 'msg[":]+\K[^"]+'
+	curl -v -X DELETE -H "token:$token" http://$ip:$port/project/$2 -s | grep -Po 'msg[":]+\K[^"]+'
     ;;
   (load)
-   ### 需要检查用户是否有这个project，暂时未做检查
+   ### 需要检查用户是否有这个project，暂时未做检查，需要加上project的详情
 	echo $2 > $baseDir/project
 	echo -e "successful loaded"
     ;;

@@ -15,7 +15,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -57,7 +60,7 @@ public class ScanOperationAdapter implements ScanOperation {
     }
 
     @Override
-    public ScanInitialInfo initialScan(String projectId, String commitId) {
+    public ScanInitialInfo initialScan(String projectId, String commitId)  {
         Date startTime=new Date();
         String repoPath=restTemplate.getForObject(projectServicePath+"/repo-path/"+projectId,String.class);
         JSONObject currentProject=restTemplate.getForObject(projectServicePath+"/"+projectId,JSONObject.class);
@@ -74,7 +77,9 @@ public class ScanOperationAdapter implements ScanOperation {
         String uuid= UUID.randomUUID().toString();
         scan.setUuid(uuid);
         //use api provided by commit-service
-        scan.setCommit_time(restTemplate.getForEntity(commitServicePath+"/commit-time/"+commitId,Date.class).getBody());
+        JSONObject jsonObject = restTemplate.getForObject(commitServicePath+"/commit-time/"+commitId,JSONObject.class);
+        Date commit_time =jsonObject.getJSONObject("data").getDate("commit_time");
+        scan.setCommit_time(DateTimeUtil.formatedDate(commit_time));
         return new ScanInitialInfo(scan,projectName,repoId, repoPath);
     }
 
@@ -95,7 +100,7 @@ public class ScanOperationAdapter implements ScanOperation {
             requestParam.put("pre_commit_id",commitId);
         requestParam.put("current_commit_id",commitId);
         logger.info("mapping between "+requestParam.toJSONString());
-        JSONObject result=restTemplate.postForEntity(issueServicePath+"/mapping",requestParam,JSONObject.class).getBody();
+        JSONObject result=restTemplate.postForObject(issueServicePath+"/mapping",requestParam,JSONObject.class);
         return result!=null&&result.getIntValue("code")==200;
     }
 
@@ -115,7 +120,9 @@ public class ScanOperationAdapter implements ScanOperation {
         if(till_commit==null||commit_time.compareTo(till_commit)>0){
             JSONObject requestParam =new JSONObject();
             requestParam.put("uuid",scan.getProject_id());
-            requestParam.put("till_commit_time",commit_time);
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String dateString = formatter.format(scan.getCommit_time());
+            requestParam.put("till_commit_time",dateString);
             restTemplate.put(projectServicePath,requestParam,JSONObject.class);
         }
 

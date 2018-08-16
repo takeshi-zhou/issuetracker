@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 usage="\nUsage: issueTracker_commitShow (all|scaned)  \n"
@@ -9,7 +10,7 @@ if [ $# -le 0 ]; then
 fi
 
 ip="10.141.221.80"
-port="8002"
+port="8102"
 baseDir="$ISSUETRACKER_HOME/bin"
 token=`cat $baseDir/authentication`
 project_id=`cat $baseDir/project`
@@ -18,12 +19,12 @@ option=$1
 case $option in
 
   (all)
-	curl -H "token:$token" http://$ip:$port/Commit/commitList?project_id=$project_id -s
+	curl -H "token:$token" http://$ip:$port/commit/$project_id -s
 	exit 1
 	;;
   (scaned)
    # need Formatted output display
-    curl -H "token:$token" http://$ip:$port/Commit/scannedCommits?project_id=$project_id -s
+    curl -H "token:$token" http://$ip:8003/scan/commits?project_id=$project_id -s
 	exit 1
     ;;
   (*)
