@@ -18,6 +18,15 @@ public class Issue {
     private String project_id;
     private String target_files;
     private List<RawIssue> rawIssues;
+    private IssueType issueType;
+
+    public IssueType getIssueType() {
+        return issueType;
+    }
+
+    public void setIssueType(IssueType issueType) {
+        this.issueType = issueType;
+    }
 
     public Issue() {
     }

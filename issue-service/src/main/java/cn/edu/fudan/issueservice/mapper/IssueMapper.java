@@ -20,5 +20,5 @@ public interface IssueMapper {
 
 	Integer getIssueCount(Map<String, Object> map);
 	
-	 List<Issue> getIssueList(Map<String, Object> map);
+	List<Issue> getIssueList(Map<String, Object> map);
 }

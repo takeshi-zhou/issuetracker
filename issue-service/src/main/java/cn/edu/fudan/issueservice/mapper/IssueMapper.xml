@@ -27,6 +27,7 @@
         <result property="target_files" column="target_files"/>
         <result property="start_commit_time" column="start_commit_time" />
         <result property="end_commit_time" column="start_commit_time" />
+        <collection property="issueType" column="type" select="cn.edu.fudan.issueservice.mapper.IssueTypeMapper.getIssueTypeByTypeName"/>
     </resultMap>
 
 

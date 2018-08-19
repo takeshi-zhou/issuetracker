@@ -1,8 +1,10 @@
 package cn.edu.fudan.issueservice.service.impl;
 
 import cn.edu.fudan.issueservice.dao.IssueDao;
+import cn.edu.fudan.issueservice.dao.IssueTypeDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.domain.Issue;
+import cn.edu.fudan.issueservice.domain.IssueType;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 import cn.edu.fudan.issueservice.service.IssueService;
 import cn.edu.fudan.issueservice.util.LocationCompare;
@@ -80,11 +82,13 @@ public class IssueServiceImpl implements IssueService {
             return result;
         }else {
             result.put("msg", "successful query！");
-            int page=(int) map.get("page");
-            int size=(int)map.get("size");
+            int page=Integer.parseInt(map.get("page").toString()) ;
+            int size=Integer.parseInt(map.get("size").toString());
             int count=issueDao.getIssueCount(map);
             map.put("start", (page-1)*size);
             result.put("totalPage", count%size==0?count/size:count/size+1);
+            map.remove("size");
+            map.put("key",size);
             result.put("issueList", issueDao.getIssueList(map));
             return result;
         }
@@ -97,10 +101,6 @@ public class IssueServiceImpl implements IssueService {
         if(pre_commit_id.equals(current_commit_id)){
             //当前project第一次扫描，所有的rawIssue都是issue
             List<RawIssue> rawIssues=rawIssueDao.getRawIssueByCommitID(current_commit_id);
-            /**
-             *             System.out.println("step one");
-             *             System.out.println(rawIssues);
-             * */
             for(RawIssue rawIssue:rawIssues){
                 String new_IssueId= UUID.randomUUID().toString();
                 rawIssue.setIssue_id(new_IssueId);
