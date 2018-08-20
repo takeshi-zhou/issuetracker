@@ -46,6 +46,7 @@ public class ScanController {
      *      (value = {"/doScan"})
      * */
     @PostMapping
+    @CrossOrigin
     public Object scan(@RequestBody JSONObject requestParam){
         try{
             kafkaService.scanByRequest(requestParam);
@@ -74,6 +75,7 @@ public class ScanController {
 
 
     @DeleteMapping(value = {"/{projectId}"})
+    @CrossOrigin
     public Object deleteScans(@PathVariable("projectId")String projectId){
         try{
             scanService.deleteScanByProjectId(projectId);
@@ -90,6 +92,7 @@ public class ScanController {
      *  (value = {"/update"})
      */
     @PutMapping
+    @CrossOrigin
     public Object updateScan(@RequestBody Scan scan){
         try{
             scanService.updateOneScan(scan);
@@ -101,11 +104,13 @@ public class ScanController {
     }
 
     @GetMapping(value = {"/last-commit-date"})
+    @CrossOrigin
     public Object getTillCommitDateByProjectId(@RequestParam("project-id") String projectId ){
         return scanService.getTillCommitDateByProjectId(projectId);
     }
 
     @GetMapping(value = {"/commits"})
+    @CrossOrigin
     public JSONArray getScannedCommits(@RequestParam("project_id") String project_id){
         return scanService.getScannedCommits(project_id);
     }

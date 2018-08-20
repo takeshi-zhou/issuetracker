@@ -37,6 +37,7 @@ public class IssueController {
      *  size
      * */
     @GetMapping
+    @CrossOrigin
     public Object getIssues(@RequestParam("project-id") Object project_id,
                             @RequestParam("page") Object page,
                             @RequestParam("size") Object size){
@@ -48,6 +49,7 @@ public class IssueController {
     }
 
     @PostMapping
+    @CrossOrigin
     public Object addIssues(@RequestBody List<Issue> issueList){
         try{
           issueService.insertIssueList(issueList);
@@ -59,6 +61,7 @@ public class IssueController {
     }
 
     @DeleteMapping(value = {"/{projectId}"})
+    @CrossOrigin
     public Object deleteIssues(@PathVariable("projectId")String projectId){
         try{
             issueService.deleteIssueByProjectId(projectId);
@@ -70,6 +73,7 @@ public class IssueController {
     }
 
     @PutMapping
+    @CrossOrigin
     public Object updateIssues(@RequestBody List<Issue> issueList){
         try{
             issueService.batchUpdateIssue(issueList);
@@ -81,6 +85,7 @@ public class IssueController {
     }
 
     @PostMapping(value = {"/mapping"})
+    @CrossOrigin
     public Object mapping(@RequestBody JSONObject requestParam){
         try{
             String project_id=requestParam.getString("project_id");
@@ -95,6 +100,7 @@ public class IssueController {
     }
 
     @GetMapping(value = {"/raw-issue"})
+    @CrossOrigin
     public Object getRawIssueList(@RequestParam("issue_id")String issue_id) {
         return rawIssueService.getRawIssueByIssueId(issue_id);
     }

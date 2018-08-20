@@ -20,6 +20,7 @@ public class ProjectController {
     }
 
     @PostMapping
+    @CrossOrigin
     public Object addProject(HttpServletRequest request, @RequestBody Project project){
         String userToken=request.getHeader("token");
         try{
@@ -32,12 +33,14 @@ public class ProjectController {
 
     //get project list
     @GetMapping
+    @CrossOrigin
     public Object query(HttpServletRequest request){
         String userToken=request.getHeader("token");
         return projectService.getProjectList(userToken);
     }
 
     @DeleteMapping(value={"/{projectId}"})
+    @CrossOrigin
     public Object delete(@PathVariable("projectId")String projectId){
         try{
             projectService.remove(projectId);
@@ -50,6 +53,7 @@ public class ProjectController {
 
     //need test
     @PutMapping
+    @CrossOrigin
     public Object updateProject(@RequestBody Project project){
         try{
             projectService.updateProjectStatus(project);
@@ -61,16 +65,19 @@ public class ProjectController {
     }
 
     @GetMapping(value="/repo-path/{project_id}")
+    @CrossOrigin
     public Object getRepoPath(@PathVariable("project_id")String project_id){
         return projectService.getRepoPath(project_id);
     }
 
     @GetMapping(value = {"/{project-id}"})
+    @CrossOrigin
     public Object getProject(@PathVariable("project-id")String project_id){
         return projectService.getProjectByID(project_id);
     }
 
     @GetMapping(value = "/repo-id")
+    @CrossOrigin
     public String getRepoId(@RequestParam("project-id")String projectId){
         return projectService.getRepoId(projectId);
     }

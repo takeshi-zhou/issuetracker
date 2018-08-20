@@ -21,6 +21,7 @@ public class RawIssueController {
     }
 
     @PostMapping
+    @CrossOrigin
     public Object addRawIssues(@RequestBody List<RawIssue> list){
         try{
             rawIssueService.insertRawIssueList(list);
@@ -32,6 +33,7 @@ public class RawIssueController {
     }
 
     @DeleteMapping(value={"/{projectId}"})
+    @CrossOrigin
     public Object deleteRawIssue(@PathVariable("projectId")String projectId){
         try{
             rawIssueService.deleteRawIssueByProjectId(projectId);
@@ -43,6 +45,7 @@ public class RawIssueController {
     }
 
     @PutMapping
+    @CrossOrigin
     public Object updateRawIssues(@RequestBody List<RawIssue> issueList){
         try{
             rawIssueService.batchUpdateIssueId(issueList);
@@ -54,12 +57,14 @@ public class RawIssueController {
     }
 
     @GetMapping(value = {"/list-by-issue"})
+    @CrossOrigin
     public Object getRawIssueList(@RequestParam("issue_id")String issue_id) {
         return rawIssueService.getRawIssueByIssueId(issue_id);
     }
 
     // need or not
     @GetMapping(value = {"/list-by-commit"})
+    @CrossOrigin
     public Object getRawIssues(@RequestParam("commit_id")String commit_id){
         return rawIssueService.getRawIssueByCommitID(commit_id);
     }
