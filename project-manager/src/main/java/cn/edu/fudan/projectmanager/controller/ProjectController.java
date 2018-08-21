@@ -5,6 +5,7 @@ import cn.edu.fudan.projectmanager.domain.ResponseBean;
 import cn.edu.fudan.projectmanager.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -18,6 +19,7 @@ public class ProjectController {
     public void setProjectService(ProjectService projectService) {
         this.projectService = projectService;
     }
+
 
     @PostMapping
     @CrossOrigin

@@ -89,6 +89,7 @@ public class IssueServiceImpl implements IssueService {
             result.put("totalPage", count%size==0?count/size:count/size+1);
             map.remove("size");
             map.put("key",size);
+            result.put("count",count);
             result.put("issueList", issueDao.getIssueList(map));
             return result;
         }
