@@ -16,6 +16,7 @@ tags:
 - name: "scan-service"
 - name: "unifying-service"
 - name: "issue-service"
+- name: "commit-service"
 schemes:
 - "http"
 paths:
@@ -562,6 +563,76 @@ paths:
         401:
           description: "failed operation"
 
+  /commit:
+    get:
+      tags:
+      - "commit-service"
+      summary: "get the commitList by projectId"
+      operationId: "getCommitList"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "projectId"
+        description: " "
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: '#/definitions/CommitList'
+        404:
+          description: "failed operation"
+
+  /commit/checkout/{projectId}/{commitId}:
+    get:
+      tags:
+      - "commit-service"
+      summary: "checkout the project into the certain version by projectId and commitId"
+      operationId: "checkout"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "projectId"
+        description: " "
+        required: true
+        type: "string"
+      - in: "path"
+        name: "commitId"
+        description: " "
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: '#/definitions/ResponseBean'
+        404:
+          description: "failed operation"
+
+  /commit/commit-time:
+    get:
+      tags:
+      - "commit-service"
+      summary: "get the time of commit by commitId"
+      operationId: "getCommitTime"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "commitId"
+        description: " "
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: '#/definitions/CommitTime'
+        404:
+          description: "failed operation"
 
 
 
@@ -735,6 +806,40 @@ definitions:
     items:
       $ref: "#/definitions/RawIssue"
 
+  Commit:
+    type: "object"
+    properties:
+      data:
+        type: "object"
+          properties:
+            uuid:
+              type: "string"
+            commit_id:
+              type: "string"
+            message:
+              type: "string"
+            developer:
+              type: "string"
+            commit_time:
+              type: "string"
+            repo_id:
+              type: "string"
+            is_scanned:
+              type: "boolean"
+
+  CommitList:
+    type: "array"
+    items:
+      $ref: "#/definitions/Commit"
+
+  CommitTime:
+    type: "object"
+    properties:
+      data:
+       type: "object"
+       properties:
+        commit_time:
+          type: "string"
 
 
 
