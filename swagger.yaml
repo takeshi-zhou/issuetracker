@@ -577,9 +577,9 @@ paths:
         description: " "
         required: true
         type: "string"
-      response:
+      responses:
         200:
-          descirption: "successful operation"
+          description: "successful operation"
           schema:
             $ref: '#/definitions/CommitList'
         404:
@@ -604,9 +604,9 @@ paths:
         description: " "
         required: true
         type: "string"
-      response:
+      responses:
         200:
-          descirption: "successful operation"
+          description: "successful operation"
           schema:
             $ref: '#/definitions/ResponseBean'
         404:
@@ -626,9 +626,9 @@ paths:
         description: " "
         required: true
         type: "string"
-      response:
+      responses:
         200:
-          descirption: "successful operation"
+          description: "successful operation"
           schema:
             $ref: '#/definitions/CommitTime'
         404:
@@ -809,20 +809,23 @@ definitions:
   Commit:
     type: "object"
     properties:
-      uuid:
-        type: "string"
-      commit_id:
-        type: "string"
-      message:
-        type: "string"
-      developer:
-        type: "string"
-      commit_time:
-        type: "string"
-      repo_id:
-        type: "string"
-      is_scanned:
-        type: "bool"
+      data:
+        type: "object"
+          properties:
+            uuid:
+              type: "string"
+            commit_id:
+              type: "string"
+            message:
+              type: "string"
+            developer:
+              type: "string"
+            commit_time:
+              type: "string"
+            repo_id:
+              type: "string"
+            is_scanned:
+              type: "boolean"
 
   CommitList:
     type: "array"
@@ -832,7 +835,11 @@ definitions:
   CommitTime:
     type: "object"
     properties:
-      commit_time: "string"
+      data:
+       type: "object"
+       properties:
+        commit_time:
+          type: "string"
 
 
 
