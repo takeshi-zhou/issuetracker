@@ -566,73 +566,91 @@ paths:
   /commit:
     get:
       tags:
-      - "commit-service"
-      summary: "get the commitList by projectId"
-      operationId: "getCommitList"
+        - commit-service
+      summary: get the commitList by projectId
+      operationId: getCommitList
       produces:
-      - "application/json"
+        - application/json
       parameters:
-      - in: "query"
-        name: "projectId"
-        description: " "
-        required: true
-        type: "string"
+        - in: query
+          name: projectId
+          description: ' '
+          required: true
+          type: string
       responses:
-        200:
-          description: "successful operation"
+        '200':
+          description: successful operation
           schema:
             $ref: '#/definitions/CommitList'
-        404:
-          description: "failed operation"
+        '404':
+          description: not found
+          schema:
+            $ref: '#/definitions/VoidResponse-Python'
+        '500':
+          description: failed operation
+          schema:
+            $ref: '#/definitions/VoidResponse-Python'
 
-  /commit/checkout/{projectId}/{commitId}:
+  '/commit/checkout/{projectId}/{commitId}':
     get:
       tags:
-      - "commit-service"
-      summary: "checkout the project into the certain version by projectId and commitId"
-      operationId: "checkout"
+        - commit-service
+      summary: checkout the project into the certain version by projectId and commitId
+      operationId: checkout
       produces:
-      - "application/json"
+        - application/json
       parameters:
-      - in: "path"
-        name: "projectId"
-        description: " "
-        required: true
-        type: "string"
-      - in: "path"
-        name: "commitId"
-        description: " "
-        required: true
-        type: "string"
+        - in: path
+          name: projectId
+          description: ' '
+          required: true
+          type: string
+        - in: path
+          name: commitId
+          description: ' '
+          required: true
+          type: string
       responses:
-        200:
-          description: "successful operation"
+        '200':
+          description: successful operation
           schema:
-            $ref: '#/definitions/ResponseBean'
-        404:
-          description: "failed operation"
+            $ref: '#/definitions/VoidResponse-Python'
+        '404':
+          description: not found
+          schema:
+            $ref: '#/definitions/VoidResponse-Python'
+        '500':
+          description: failed operation
+          schema:
+            $ref: '#/definitions/VoidResponse-Python'
 
   /commit/commit-time:
     get:
       tags:
-      - "commit-service"
-      summary: "get the time of commit by commitId"
-      operationId: "getCommitTime"
+        - commit-service
+      summary: get the time of commit by commitId
+      operationId: getCommitTime
       produces:
-      - "application/json"
+        - application/json
       parameters:
-      - in: "query"
-        name: "commitId"
-        description: " "
-        required: true
-        type: "string"
+        - in: query
+          name: commitId
+          description: ' '
+          required: true
+          type: string
       responses:
-        200:
-          description: "successful operation"
+        '200':
+          description: successful operation
           schema:
             $ref: '#/definitions/CommitTime'
-        404:
-          description: "failed operation"
+        '404':
+          description: not found
+          schema:
+            $ref: '#/definitions/VoidResponse-Python'
+        '500':
+          description: failed operation
+          schema:
+            $ref: '#/definitions/VoidResponse-Python'
 
 
 
@@ -838,6 +856,8 @@ definitions:
       data:
        type: "object"
        properties:
+        status:
+          type: "string"
         commit_time:
           type: "string"
 
@@ -853,6 +873,15 @@ definitions:
         type: "string"
       data:
         type: "object"
+        
+  VoidResponse-Python:
+    type: object
+    properties:
+      status:
+        type: string
+      message:
+        type: string
+        
 externalDocs:
   description: "Find out more about Swagger"
   url: "http://swagger.io"
