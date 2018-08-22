@@ -119,7 +119,7 @@ public class IssueServiceImpl implements IssueService {
             JSONArray commits=restTemplate.getForObject(scanServicePath+"/commits?project_id="+project_id, JSONArray.class);
             Date start_commit_time=commits.getJSONObject(0).getDate("commit_time");
             Date end_commit_time=commits.getJSONObject(commits.size()-1).getDate("commit_time");
-            JSONObject jsonObject = restTemplate.getForObject(commitServicePath+"/commit-time/"+current_commit_id,JSONObject.class);
+            JSONObject jsonObject = restTemplate.getForObject(commitServicePath+"/commit-time?commitId="+current_commit_id,JSONObject.class);
             Date commit_time =jsonObject.getJSONObject("data").getDate("commit_time");
             //装需要更新的
             List<Issue> issues=new ArrayList<>();

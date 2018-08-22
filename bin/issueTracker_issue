@@ -1,5 +1,5 @@
 #!/bin/bash
-usage="\nUsage: issueTracker_issue （list|track）(<page size> | <issueId>) \n"
+usage="\nUsage: issueTracker_issue （list|track）<issueId> \n"
 
 # if no args specified, show usage
 if [ $# -le 0 ]; then
@@ -9,24 +9,25 @@ fi
 
 option=$1
 ip="10.141.221.80"
-port="8003"
+port="8005"
 baseDir="$ISSUETRACKER_HOME/bin"
 project_id=`cat $baseDir/project`
-token=`cat $baseDir/authentication`
+token=$(cat $baseDir/authentication)
+
 
 case $option in
 
   (list)
    # paging or not ；size is the number of listing in the page
-    curl -H "Content-Type:application/json" -H "token:$token" -X POST -d '{"project_id": '$project_id', "page":'$2',"size":'$3'}' http://$ip:$port/Issue/issueList -s
+    curl -H "token:$token"  http://$ip:$port/issue?project-id=${project_id}\&page=${2}\&size=${3} -s | jq -r
     ;;
   (track)
    #
-    curl -H "token:$token"  http://$ip:$port/RawIssue/rawIssueListByIssue?issue_id=$2 -s
+   curl -H "token:$token"  http://$ip:$port/issue/raw-issue?issue_id=$2 -s | jq -r
     ;;
 
   (*)
-    echo -e "No option $1"
+        echo -e "No option $1"
     echo -e $usage
     exit 1
     ;;

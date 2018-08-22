@@ -77,7 +77,7 @@ public class ScanOperationAdapter implements ScanOperation {
         String uuid= UUID.randomUUID().toString();
         scan.setUuid(uuid);
         //use api provided by commit-service
-        JSONObject jsonObject = restTemplate.getForObject(commitServicePath+"/commit-time/"+commitId,JSONObject.class);
+        JSONObject jsonObject = restTemplate.getForObject(commitServicePath+"/commit-time?commitId="+commitId,JSONObject.class);
         Date commit_time =jsonObject.getJSONObject("data").getDate("commit_time");
         scan.setCommit_time(DateTimeUtil.formatedDate(commit_time));
         return new ScanInitialInfo(scan,projectName,repoId, repoPath);

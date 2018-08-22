@@ -1,7 +1,6 @@
-
 #!/bin/bash
 
-usage="\nUsage: issueTracker_commitShow (all|scaned)  \n"
+usage="\nUsage: issueTracker_commitShow (all|scanned)  \n"
 
 # if no args specified, show usage
 if [ $# -le 0 ]; then
@@ -19,17 +18,17 @@ option=$1
 case $option in
 
   (all)
-	curl -H "token:$token" http://$ip:$port/commit/$project_id -s
-	exit 1
-	;;
+        curl -H "token:$token" http://$ip:$port/commit?projectId=$project_id -s | jq -r
+        exit 1
+        ;;
   (scaned)
    # need Formatted output display
-    curl -H "token:$token" http://$ip:8003/scan/commits?project_id=$project_id -s
-	exit 1
+    curl -H "token:$token" http://$ip:8003/scan/commits?project_id=$project_id -s | jq -r
+        exit 1
     ;;
   (*)
    ## /commitDate/{commit_id}   /tillCommitDate/{repo_id}
-	echo -e "No option $1"
+        echo -e "No option $1"
     echo -e $usage
     exit 1
     ;;
