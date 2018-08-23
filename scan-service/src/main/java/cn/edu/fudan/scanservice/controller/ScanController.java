@@ -50,23 +50,6 @@ public class ScanController {
 
     }
 
-    /**
-     *      useless
-     *
-     *     @PostMapping
-     *     public Object addScan(@RequestBody Scan scan){
-     *         try{
-     *             scanService.insertOneScan(scan);
-     *             return new ResponseBean(200,"scan add success!",null);
-     *         }catch (Exception e){
-     *             e.printStackTrace();
-     *             return new ResponseBean(401,"scan add failed!",null);
-     *         }
-     *     }
-     *
-     * */
-
-
     @DeleteMapping(value = {"/{projectId}"})
     @CrossOrigin
     public Object deleteScans(@PathVariable("projectId")String projectId){

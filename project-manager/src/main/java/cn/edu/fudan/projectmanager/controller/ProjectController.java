@@ -10,7 +10,6 @@ import org.springframework.web.client.RestTemplate;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/project")
 public class ProjectController {
 
     private ProjectService projectService;
@@ -21,8 +20,7 @@ public class ProjectController {
     }
 
 
-    @PostMapping
-    @CrossOrigin
+    @PostMapping(value={"/project"})
     public Object addProject(HttpServletRequest request, @RequestBody Project project){
         String userToken=request.getHeader("token");
         try{
@@ -34,15 +32,19 @@ public class ProjectController {
     }
 
     //get project list
-    @GetMapping
-    @CrossOrigin
+    @GetMapping(value={"/project"})
     public Object query(HttpServletRequest request){
         String userToken=request.getHeader("token");
         return projectService.getProjectList(userToken);
     }
 
-    @DeleteMapping(value={"/{projectId}"})
-    @CrossOrigin
+    @GetMapping(value = {"/project/filter"})
+    public Object keyWordQuery(HttpServletRequest request,@RequestParam("keyWord")String keyWord){
+        String userToken=request.getHeader("token");
+        return projectService.getProjectListByKeyWord(userToken,keyWord);
+    }
+
+    @DeleteMapping(value={"/project/{projectId}"})
     public Object delete(@PathVariable("projectId")String projectId){
         try{
             projectService.remove(projectId);
@@ -54,8 +56,7 @@ public class ProjectController {
     }
 
     //need test
-    @PutMapping
-    @CrossOrigin
+    @PutMapping(value = {"/inner/project"})
     public Object updateProject(@RequestBody Project project){
         try{
             projectService.updateProjectStatus(project);
@@ -66,20 +67,17 @@ public class ProjectController {
         }
     }
 
-    @GetMapping(value="/repo-path/{project_id}")
-    @CrossOrigin
+    @GetMapping(value="/inner/project/repo-path/{project_id}")
     public Object getRepoPath(@PathVariable("project_id")String project_id){
         return projectService.getRepoPath(project_id);
     }
 
-    @GetMapping(value = {"/{project-id}"})
-    @CrossOrigin
+    @GetMapping(value = {"/inner/project/{project-id}"})
     public Object getProject(@PathVariable("project-id")String project_id){
         return projectService.getProjectByID(project_id);
     }
 
-    @GetMapping(value = "/repo-id")
-    @CrossOrigin
+    @GetMapping(value = "/inner/project/repo-id")
     public String getRepoId(@RequestParam("project-id")String projectId){
         return projectService.getRepoId(projectId);
     }

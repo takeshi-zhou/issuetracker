@@ -54,10 +54,14 @@ public class ProjectServiceImpl implements ProjectService {
         kafkaTemplate.send("ProjectManager", JSONObject.toJSONString(needDownload));
     }
 
+    private String getAccountId(String userToken){
+        return restTemplate.getForObject(accountServicePath+"/accountId?userToken="+userToken,String.class);
+    }
+
     @Override
     public void addOneProject(String userToken,String url) {
-        String account_id=restTemplate.getForObject(accountServicePath+"/accountId?userToken="+userToken,String.class);
-        if(projectDao.hasBeenAdded(account_id,url)){
+        String account_id=getAccountId(userToken);
+        if(projectDao.hasBeenAdded(account_id,url.trim())){
             throw new RuntimeException("The project has been added!");
         }
         String projectName=url.substring(url.lastIndexOf("/")+1);
@@ -69,7 +73,6 @@ public class ProjectServiceImpl implements ProjectService {
         project.setAccount_id(account_id);
         project.setDownload_status("Downloading");
         project.setScan_status("Not Scanned");
-        //project.setRepo_id();
         projectDao.addOneProject(project);
         //向RepoManager这个Topic发送消息，请求开始下载
         send(projectId,url);
@@ -77,9 +80,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Object getProjectList(String userToken) {
-        RestTemplate restTemplate=new RestTemplate();
-        String account_id=restTemplate.getForObject(accountServicePath+"/accountId?userToken="+userToken,String.class);
+        String account_id=getAccountId(userToken);
         return projectDao.getProjectByAccountId(account_id);
+    }
+
+    @Override
+    public Object getProjectListByKeyWord(String userToken, String keyWord) {
+        String account_id=getAccountId(userToken);
+        return projectDao.getProjectByKeyWordAndAccountId(account_id,keyWord.trim());
     }
 
     @Override

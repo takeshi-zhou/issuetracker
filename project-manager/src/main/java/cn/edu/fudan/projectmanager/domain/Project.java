@@ -10,7 +10,6 @@ public class Project {
     private String url;
     private String vcs_type;
     private String account_id;
-    private String prev_scan_commit;
     private String download_status;
     private String scan_status;
     private Date till_commit_time;
@@ -72,14 +71,6 @@ public class Project {
 
     public void setAccount_id(String account_id) {
         this.account_id = account_id;
-    }
-
-    public String getPrev_scan_commit() {
-        return prev_scan_commit;
-    }
-
-    public void setPrev_scan_commit(String prev_scan_commit) {
-        this.prev_scan_commit = prev_scan_commit;
     }
 
     public String getDownload_status() {

@@ -14,6 +14,8 @@ public interface ProjectMapper {
 
 	 List<Project> getProjectByAccountId(@Param("account_id") String account_id);
 
+	 List<Project> getProjectByKeyWordAndAccountId(@Param("account_id")String account_id,@Param("keyWord")String keyWord);
+
 	 Project getProjectByID(String uuid);
 
 	 Project getProjectByURLAndAccountId(@Param("account_id") String account_id,@Param("url")String url);

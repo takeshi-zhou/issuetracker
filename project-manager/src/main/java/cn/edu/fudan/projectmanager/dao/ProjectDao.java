@@ -26,6 +26,10 @@ public class ProjectDao {
 		return projectMapper.getProjectByAccountId(accountId);
 	}
 
+	public List<Project> getProjectByKeyWordAndAccountId(String account_id,String keyWord){
+		return projectMapper.getProjectByKeyWordAndAccountId(account_id,keyWord);
+	}
+
     public Project getProjectByID(String projectId){
 		return projectMapper.getProjectByID(projectId);
 	}

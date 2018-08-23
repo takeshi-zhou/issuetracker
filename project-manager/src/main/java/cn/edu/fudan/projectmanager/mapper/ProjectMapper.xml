@@ -10,7 +10,6 @@
          <result property="url" column="url"/>
          <result property="vcs_type" column="vcs_type"/>
          <result property="account_id" column="account_id"/>
-         <result property="prev_scan_commit" column="prev_scan_commit"/>
          <result property="download_status" column="download_status"/>
          <result property="scan_status" column="scan_status"/>
          <result property="till_commit_time" column="till_commit_time"/>
@@ -53,6 +52,17 @@
    <select id = "getProjectByAccountId" parameterType="String" resultMap="project" >
    		select * from project where account_id = #{account_id}
    </select>
+
+    <select id="getProjectByKeyWordAndAccountId" parameterType="String" resultMap="project">
+        select *
+        from project
+        <where>
+            account_id = #{account_id}
+            <if test="keyWord != null and keyWord != '' ">
+                and url like "%"#{keyWord}"%"
+            </if>
+        </where>
+    </select>
     
     <select id="getProjectByID" parameterType="String" resultMap="project">
         select * from project where uuid = #{uuid}
