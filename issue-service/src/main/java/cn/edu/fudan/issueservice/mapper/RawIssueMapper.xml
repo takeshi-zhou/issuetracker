@@ -4,7 +4,6 @@
 <mapper namespace="cn.edu.fudan.issueservice.mapper.RawIssueMapper">
 
 	<resultMap id="rawIssue" type="RawIssue">
-		<id property="id" column="id"/>
 		<id property="uuid" column="uuid" />
 		<result property="type" column="type" />
 		<result property="detail" column="detail" />
@@ -17,7 +16,6 @@
 	</resultMap>
 
 	<resultMap id="rawIssue2" type="RawIssue">
-		<id property="id" column="id"/>
 		<id property="uuid" column="uuid" />
 		<result property="type" column="type" />
 		<result property="detail" column="detail" />

@@ -4,7 +4,6 @@
 <mapper namespace="cn.edu.fudan.issueservice.mapper.IssueMapper">
 
     <resultMap id="issue" type="Issue">
-        <id property="id" column="id"/>
         <id property="uuid" column="uuid"/>
         <result property="type" column="type"/>
         <result property="start_commit" column="start_commit"/>
@@ -16,7 +15,6 @@
     </resultMap>
 
     <resultMap id="issue2" type="Issue">
-        <id property="id" column="id"/>
         <id property="uuid" column="uuid"/>
         <result property="type" column="type"/>
         <result property="start_commit" column="start_commit"/>
