@@ -5,7 +5,6 @@ import java.util.List;
 
 public class RawIssue {
 
-    private int id;
     private String uuid;
     private String type;
     private String detail;
@@ -16,14 +15,6 @@ public class RawIssue {
 	private List<Location> locations;
 	private Date commit_time;
 
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getUuid() {
         return uuid;
