@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/raw-issue")
 public class RawIssueController {
 
 
@@ -20,8 +19,20 @@ public class RawIssueController {
         this.rawIssueService = rawIssueService;
     }
 
-    @PostMapping
-    @CrossOrigin
+    @GetMapping(value = {"/raw-issue"})
+    public Object getRawIssueList(@RequestParam("issue_id")String issue_id) {
+        return rawIssueService.getRawIssueByIssueId(issue_id);
+    }
+
+    @GetMapping(value={"/raw-issue/code"})
+    public Object getLocationList(@RequestParam("raw_issue_id")String raw_issue_id){
+        //需要添加全部的code内容
+        return rawIssueService.getLocationsByRawIssueId(raw_issue_id);
+    }
+
+    //下面的接口都是其他服务调用的内部接口
+
+    @PostMapping(value = {"/inner/raw-issue"})
     public Object addRawIssues(@RequestBody List<RawIssue> list){
         try{
             rawIssueService.insertRawIssueList(list);
@@ -32,8 +43,7 @@ public class RawIssueController {
         }
     }
 
-    @DeleteMapping(value={"/{projectId}"})
-    @CrossOrigin
+    @DeleteMapping(value={"/inner/raw-issue/{projectId}"})
     public Object deleteRawIssue(@PathVariable("projectId")String projectId){
         try{
             rawIssueService.deleteRawIssueByProjectId(projectId);
@@ -44,8 +54,7 @@ public class RawIssueController {
         }
     }
 
-    @PutMapping
-    @CrossOrigin
+    @PutMapping(value={"/inner/raw-issue"})
     public Object updateRawIssues(@RequestBody List<RawIssue> issueList){
         try{
             rawIssueService.batchUpdateIssueId(issueList);
@@ -56,15 +65,7 @@ public class RawIssueController {
         }
     }
 
-    @GetMapping(value = {"/list-by-issue"})
-    @CrossOrigin
-    public Object getRawIssueList(@RequestParam("issue_id")String issue_id) {
-        return rawIssueService.getRawIssueByIssueId(issue_id);
-    }
-
-    // need or not
-    @GetMapping(value = {"/list-by-commit"})
-    @CrossOrigin
+    @GetMapping(value = {"/inner/raw-issue/list-by-commit"})
     public Object getRawIssues(@RequestParam("commit_id")String commit_id){
         return rawIssueService.getRawIssueByCommitID(commit_id);
     }

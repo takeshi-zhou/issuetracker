@@ -5,12 +5,8 @@ import java.util.List;
 
 public class Issue {
 
-
-    private int id;
     private String uuid;
     private String type;
-    private Date start_commit_time;
-    private Date end_commit_time;
     private String start_commit;
     private String end_commit;
     private String raw_issue_start;
@@ -40,30 +36,6 @@ public class Issue {
         this.raw_issue_end = raw_issue_end;
         this.project_id=project_id;
         this.target_files=target_files;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public Date getStart_commit_time() {
-        return start_commit_time;
-    }
-
-    public void setStart_commit_time(Date start_commit_time) {
-        this.start_commit_time = start_commit_time;
-    }
-
-    public Date getEnd_commit_time() {
-        return end_commit_time;
-    }
-
-    public void setEnd_commit_time(Date end_commit_time) {
-        this.end_commit_time = end_commit_time;
     }
 
     public String getType() {

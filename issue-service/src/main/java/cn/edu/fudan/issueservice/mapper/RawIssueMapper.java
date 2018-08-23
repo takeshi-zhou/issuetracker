@@ -1,5 +1,6 @@
 package cn.edu.fudan.issueservice.mapper;
 
+import cn.edu.fudan.issueservice.domain.Location;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;

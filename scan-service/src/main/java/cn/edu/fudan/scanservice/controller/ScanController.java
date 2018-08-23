@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/scan")
 public class ScanController {
 
 
@@ -29,16 +28,7 @@ public class ScanController {
     }
 
 
-    /**
-     *  requestParam:  projectId  commitId
-     *  doScan  scan 的区别
-     *  doscan ：
-     *     step 1：initialize project (update table project)   step 2：scan
-     *      when finished send message
-     *
-     *      (value = {"/doScan"})
-     * */
-    @PostMapping
+    @PostMapping(value={"/scan"})
     @CrossOrigin
     public Object scan(@RequestBody JSONObject requestParam){
         try{
@@ -50,8 +40,9 @@ public class ScanController {
 
     }
 
-    @DeleteMapping(value = {"/{projectId}"})
-    @CrossOrigin
+    //下面都是供其它服务调用的内部接口
+
+    @DeleteMapping(value = {"/inner/scan/{projectId}"})
     public Object deleteScans(@PathVariable("projectId")String projectId){
         try{
             scanService.deleteScanByProjectId(projectId);
@@ -62,13 +53,7 @@ public class ScanController {
         }
     }
 
-
-    /**
-     * old
-     *  (value = {"/update"})
-     */
-    @PutMapping
-    @CrossOrigin
+    @PutMapping(value={"/inner/scan"})
     public Object updateScan(@RequestBody Scan scan){
         try{
             scanService.updateOneScan(scan);
@@ -79,14 +64,12 @@ public class ScanController {
         }
     }
 
-    @GetMapping(value = {"/last-commit-date"})
-    @CrossOrigin
+    @GetMapping(value = {"/inner/scan/last-commit-date"})
     public Object getTillCommitDateByProjectId(@RequestParam("project-id") String projectId ){
         return scanService.getTillCommitDateByProjectId(projectId);
     }
 
-    @GetMapping(value = {"/commits"})
-    @CrossOrigin
+    @GetMapping(value = {"/inner/scan/commits"})
     public JSONArray getScannedCommits(@RequestParam("project_id") String project_id){
         return scanService.getScannedCommits(project_id);
     }

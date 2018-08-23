@@ -26,8 +26,6 @@ public class ScanServiceApplicationTests {
 
 	private final static Logger logger= LoggerFactory.getLogger(ScanOperationAdapter.class);
 
-	@Value("${commit.service.path}")
-	private String commitServicePath;
 	//@Value("${project.service.path}")
 	private String projectServicePath;
 	@Value("${issue.service.path}")
