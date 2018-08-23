@@ -23,8 +23,6 @@
         <result property="raw_issue_end" column="raw_issue_end"/>
         <result property="project_id" column="project_id"/>
         <result property="target_files" column="target_files"/>
-        <result property="start_commit_time" column="start_commit_time" />
-        <result property="end_commit_time" column="start_commit_time" />
         <collection property="issueType" column="type" select="cn.edu.fudan.issueservice.mapper.IssueTypeMapper.getIssueTypeByTypeName"/>
     </resultMap>
 
@@ -57,15 +55,13 @@
     </insert>
     
     <select id="getIssueList" parameterType="Map" resultMap="issue2">
-        select a.* , b.commit_time as start_commit_time , c.commit_time as end_commit_time from issue as a
-        inner join commit as b on a.start_commit = b.commit_id
-        inner join commit as c on a.end_commit = c.commit_id
+        select * from issue
         <where>
             <if test="project_id != null">
-                 a.project_id = #{project_id}
+                 project_id = #{project_id}
             </if>
             <if test="type != null">
-                and a.type = #{type}
+                and type = #{type}
             </if>
         </where>
         <if test="start != null  and size != null ">
@@ -78,7 +74,7 @@
     </select>
 
     <select id="getIssueCount" parameterType="Map" resultType="Integer">
-        select count(id) from issue
+        select count(uuid) from issue
         <where>
             <if test="project_id != null">
                 project_id = #{project_id}

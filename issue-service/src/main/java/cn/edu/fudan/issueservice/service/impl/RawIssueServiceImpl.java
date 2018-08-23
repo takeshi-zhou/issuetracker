@@ -72,4 +72,9 @@ public class RawIssueServiceImpl implements RawIssueService {
     public List<RawIssue> getRawIssueByIssueId(String issueId) {
         return rawIssueDao.getRawIssueByIssueId(issueId);
     }
+
+    @Override
+    public List<Location> getLocationsByRawIssueId(String raw_issue_id) {
+        return locationDao.getLocations(raw_issue_id);
+    }
 }

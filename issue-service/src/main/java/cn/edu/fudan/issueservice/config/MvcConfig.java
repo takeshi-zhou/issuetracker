@@ -28,8 +28,8 @@ public class MvcConfig implements WebMvcConfigurer {
      public void addInterceptors(InterceptorRegistry registry) {
         List<String> urlPatterns=new ArrayList<>();
         //添加拦截的URL
-        urlPatterns.add("/Issue/issueList");
-        urlPatterns.add("/RawIssue/rawIssueListByIssue");
+        urlPatterns.add("/issue/**");
+        urlPatterns.add("/raw-issue/**");
         registry.addInterceptor(authTokenInterceptor()).addPathPatterns(urlPatterns);
     }
 

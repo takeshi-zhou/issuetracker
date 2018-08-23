@@ -55,7 +55,8 @@ public class ProjectController {
         }
     }
 
-    //need test
+    //下面是其它服务调用的内部接口
+
     @PutMapping(value = {"/inner/project"})
     public Object updateProject(@RequestBody Project project){
         try{

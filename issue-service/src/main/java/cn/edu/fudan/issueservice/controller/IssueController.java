@@ -13,43 +13,25 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/issue")
 public class IssueController {
 
 
     private IssueService issueService;
-
-    private RawIssueService rawIssueService;
-
-    @Autowired
-    public void setRawIssueService(RawIssueService rawIssueService) {
-        this.rawIssueService = rawIssueService;
-    }
 
     @Autowired
     public void setIssueService(IssueService issueService) {
         this.issueService = issueService;
     }
 
-    /**
-     *  project_id
-     *  page
-     *  size
-     * */
-    @GetMapping
-    @CrossOrigin
-    public Object getIssues(@RequestParam("project-id") Object project_id,
-                            @RequestParam("page") Object page,
-                            @RequestParam("size") Object size){
-        Map<String,Object>requestParam = new HashMap<>();
-        requestParam.put("project_id",project_id);
-        requestParam.put("page",page);
-        requestParam.put("size",size);
+
+    @PostMapping(value={"/issue"})
+    public Object getIssues(@RequestBody Map<String,Object>requestParam){
     	return issueService.getIssueList(requestParam);
     }
 
-    @PostMapping
-    @CrossOrigin
+    //下面都是供其他服务调用的内部接口
+
+    @PostMapping(value={"/inner/issue"})
     public Object addIssues(@RequestBody List<Issue> issueList){
         try{
           issueService.insertIssueList(issueList);
@@ -60,8 +42,7 @@ public class IssueController {
         }
     }
 
-    @DeleteMapping(value = {"/{projectId}"})
-    @CrossOrigin
+    @DeleteMapping(value = {"/inner/issue/{projectId}"})
     public Object deleteIssues(@PathVariable("projectId")String projectId){
         try{
             issueService.deleteIssueByProjectId(projectId);
@@ -72,8 +53,7 @@ public class IssueController {
         }
     }
 
-    @PutMapping
-    @CrossOrigin
+    @PutMapping(value={"/inner/issue"})
     public Object updateIssues(@RequestBody List<Issue> issueList){
         try{
             issueService.batchUpdateIssue(issueList);
@@ -84,8 +64,7 @@ public class IssueController {
         }
     }
 
-    @PostMapping(value = {"/mapping"})
-    @CrossOrigin
+    @PostMapping(value = {"/inner/issue/mapping"})
     public Object mapping(@RequestBody JSONObject requestParam){
         try{
             String project_id=requestParam.getString("project_id");
@@ -97,12 +76,6 @@ public class IssueController {
             e.printStackTrace();
             return new ResponseBean(401,"issues mapping failed!",null);
         }
-    }
-
-    @GetMapping(value = {"/raw-issue"})
-    @CrossOrigin
-    public Object getRawIssueList(@RequestParam("issue_id")String issue_id) {
-        return rawIssueService.getRawIssueByIssueId(issue_id);
     }
     
 }
