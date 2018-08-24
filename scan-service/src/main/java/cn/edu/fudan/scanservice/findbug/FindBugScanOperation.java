@@ -28,8 +28,6 @@ public class FindBugScanOperation extends ScanOperationAdapter {
     private String resultFileHome;
     @Value("${repoHome}")
     private String repoHome;
-    @Value("${issue.service.path}")
-    private String issueServicePath;
     @Value("${rawIssue.service.path}")
     private String rawIssueServicePath;
 
@@ -174,9 +172,6 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         logger.info("start to analyze resultFile......");
         //如果fingBug调用成功，开始解析XML文件
         String xmlPath=resultFileHome+projectName+".xml";
-        /**
-         *  attention
-         * */
         if(!analyzeXML(scan,repoPath,xmlPath)){
             logger.error("Result File Analyze Failed!");
             return new ScanResult("failed","analyze failed");

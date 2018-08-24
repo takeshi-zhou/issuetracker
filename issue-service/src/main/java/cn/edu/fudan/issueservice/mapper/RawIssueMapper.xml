@@ -11,8 +11,8 @@
 		<result property="scan_id" column="scan_id" />
 		<result property="issue_id" column="issue_id" />
 		<result property="commit_id" column="commit_id" />
-		<!--<result property="commit_time" column="commit_time"/>-->
-		<!--<collection property="locations" column="uuid" select="cn.edu.fudan.issueservice.mapper.LocationMapper.getLocations"/>-->
+		<result property="commit_time" column="commit_time"/>
+		<collection property="locations" column="uuid" select="cn.edu.fudan.issueservice.mapper.LocationMapper.getLocations"/>
 	</resultMap>
 
 	<resultMap id="rawIssue2" type="RawIssue">
@@ -81,7 +81,12 @@
 	</select>
 	
 	<select id="getRawIssueByIssueId" parameterType="String" resultMap="rawIssue">
-		select * from rawIssue where issue_id=#{issueId}
+		select a.* ,b.commit_time as commit_time
+		from rawIssue as a
+		inner join commit as b
+		on a.commit_id = b.commit_id
+		where a.issue_id=#{issueId}
+		order by commit_time
 	</select>
 
 

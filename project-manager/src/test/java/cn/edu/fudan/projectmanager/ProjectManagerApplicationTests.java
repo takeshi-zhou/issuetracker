@@ -1,36 +1,21 @@
 package cn.edu.fudan.projectmanager;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestTemplate;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+
 public class ProjectManagerApplicationTests {
 
-	@Value("${account.service.path}")
-	private String accountServicePath;
-	@Value("${commit.service.path}")
-	private String commitServicePath;
-	@Value("${issue.service.path}")
-	private String issueServicePath;
-	@Value("${scan.service.path}")
-	private String scanServicePath;
-
-	private RestTemplate restTemplate;
-
-	@Autowired
-	public void setRestTemplate(RestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
-	}
-
 	@Test
-	public void contextLoads() {
-		restTemplate.delete(issueServicePath+"/Location/delete/"+1);
+	public void test(){
+		Pattern pattern=Pattern.compile("https://github.com(/[\\w-]{1,}/[\\w-]{1,})");
+		Matcher matcher=pattern.matcher("https://github.com/ccran/WebMagicForBlog");
+		while(matcher.find()){
+			System.out.println(matcher.group(1));
+		}
+
 	}
 
 }
