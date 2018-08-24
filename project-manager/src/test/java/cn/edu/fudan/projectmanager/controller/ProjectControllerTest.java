@@ -54,7 +54,6 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
         project.setScan_status("Not Scanned");
         project.setDescription("27天成为Java大神");
         project.setRepo_id("227a91de-a522-11e8-8fa0-d067e5ea858d");
-        project.setPrev_scan_commit("");
 
 
     }
