@@ -1,36 +1,31 @@
 package cn.edu.fudan.projectmanager;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@WebAppConfiguration
 public class ProjectManagerApplicationTests {
 
-	@Value("${account.service.path}")
-	private String accountServicePath;
-	@Value("${commit.service.path}")
-	private String commitServicePath;
-	@Value("${issue.service.path}")
-	private String issueServicePath;
-	@Value("${scan.service.path}")
-	private String scanServicePath;
 
-	private RestTemplate restTemplate;
-
-	@Autowired
-	public void setRestTemplate(RestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
+	@BeforeClass
+	public static void beforeTest(){
+		System.out.println("开始测试..................................");
 	}
 
-	@Test
-	public void contextLoads() {
-		restTemplate.delete(issueServicePath+"/Location/delete/"+1);
+	@AfterClass
+	public static void afterTest(){
+		System.out.println("结束测试..................................");
 	}
+
 
 }
