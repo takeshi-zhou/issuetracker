@@ -16,5 +16,5 @@ public interface ScanService {
 
     Object getTillCommitDateByProjectId(String projectId);
 
-    JSONArray getScannedCommits(String project_id);
+    JSONArray getCommits(String project_id,String option);
 }

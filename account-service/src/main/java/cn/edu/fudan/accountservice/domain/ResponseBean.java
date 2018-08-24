@@ -46,4 +46,8 @@ public class ResponseBean implements Serializable {
     public void setData(Object data) {
         this.data = data;
     }
+
+    public String toString(){
+        return "code : " + code + "; msg : " + msg + "; data :" + data;
+    }
 }
