@@ -14,7 +14,6 @@ tags:
 - name: "account-service"
 - name: "project-service"
 - name: "scan-service"
-- name: "unifying-service"
 - name: "issue-service"
 - name: "commit-service"
 schemes:
@@ -174,78 +173,106 @@ paths:
               $ref: "#/definitions/Project"
         400:
           description: "failed"
-
-    put:
-      tags:
-      - "project-service"
-      summary: "update Project "
-      operationId: "updateProject"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "project"
-        description: " message about project "
-        required: true
-        schema:
-          $ref: '#/definitions/Project'
-      responses:
-        200:
-          description : "succsssful"
-          schema:
-            $ref: "#/definitions/ResponseBean"
-        401:
-          description: "failed"
-          schema:
-            $ref: "#/definitions/ResponseBean"
-
   /project/{projectId}:
-    delete:
-      tags:
-      - "project-service"
-      summary: "delet a project"
-      description: "delet a project by projectId"
-      operationId: "delete"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "path"
-        name: "projectId"
-        description: "project that user want to delet"
-        required: true
-        type : "string"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ResponseBean"
-        401:
-          description: "Invalid ID supplied"
-          schema:
-            $ref: "#/definitions/ResponseBean"
-    get:
-      tags:
-      - "project-service"
-      summary: "get a project"
-      description: "get a project by projectId"
-      operationId: "getProject"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "path"
-        name: "projectId"
-        description: "project that user want to get"
-        required: true
-        type : "string"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/Project"
-        401:
-          description: "Invalid ID supplied"
+   delete:
+     tags:
+     - "project-service"
+     summary: "delet a project"
+     description: "delet a project by projectId"
+     operationId: "delete"
+     produces:
+     - "application/json"
+     parameters:
+     - in: "path"
+       name: "projectId"
+       description: "project that user want to delet"
+       required: true
+       type : "string"
+     responses:
+       200:
+         description: "successful operation"
+         schema:
+           $ref: "#/definitions/ResponseBean"
+       401:
+         description: "Invalid ID supplied"
+         schema:
+           $ref: "#/definitions/ResponseBean"
+   get:
+     tags:
+     - "project-service"
+     summary: "get a project"
+     description: "get a project by projectId"
+     operationId: "getProject"
+     produces:
+     - "application/json"
+     parameters:
+     - in: "path"
+       name: "projectId"
+       description: "project that user want to get"
+       required: true
+       type : "string"
+     responses:
+       200:
+         description: "successful operation"
+         schema:
+           $ref: "#/definitions/Project"
+       401:
+         description: "Invalid ID supplied"
 
-  /project/repo-path/{project_id}:
+  /project/filter:
+     get:
+       tags:
+       - "project-service"
+       summary: "query Project list By userToken"
+       operationId: "query"
+       produces:
+       - "application/json"
+       parameters:
+       - in: "header"
+         name: "token"
+         description: "get userToken from Header"
+         required: true
+         type: "string"
+       - in: "header"
+       name: "keyWord"
+       required: true
+       type: "string"
+       responses:
+         200:
+           description : "succsssful"
+           schema:
+             type: "array"
+             items:
+               $ref: "#/definitions/Project"
+         400:
+           description: "failed"
+
+  /inner/project:
+    put:
+    tags:
+    - "project-service"
+    summary: "update Project "
+    operationId: "updateProject"
+    produces:
+    - "application/json"
+    parameters:
+    - in: "body"
+      name: "project"
+      description: " message about project "
+      required: true
+      schema:
+        $ref: '#/definitions/Project'
+    responses:
+      200:
+        description : "succsssful"
+        schema:
+          $ref: "#/definitions/ResponseBean"
+      401:
+        description: "failed"
+        schema:
+          $ref: "#/definitions/ResponseBean"
+
+  /inner/project/repo-path/{project_id}:
     get:
       tags:
       - "project-service"
@@ -268,7 +295,7 @@ paths:
         401:
           description: "Invalid ID supplied"
 
-  /project/repo-id:
+  /inner/project/repo-id:
     get:
       tags:
       - "project-service"
@@ -291,6 +318,28 @@ paths:
         401:
           description: "Invalid ID supplied"
 
+  /inner/project/{projectId}:
+    get:
+      tags:
+      - "project-service"
+      summary: "get a project"
+      description: "get a project by projectId"
+      operationId: "getProject"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "projectId"
+        description: "project that user want to get"
+        required: true
+        type : "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Project"
+        401:
+          description: "Invalid ID supplied"
   /scan:
     post:
       tags:
