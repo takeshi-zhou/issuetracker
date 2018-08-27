@@ -18,6 +18,8 @@ public interface IssueService {
 
      Object getIssueList(Map<String, Object> map);
 
+     Object getDashBoardInfo(String duration,String userToken);
+
      void startMapping(String project_id, String pre_commit_id, String current_commit_id);
 
 }

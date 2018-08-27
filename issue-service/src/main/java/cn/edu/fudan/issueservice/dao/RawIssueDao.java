@@ -33,6 +33,10 @@ public class RawIssueDao {
         rawIssueMapper.batchUpdateIssueId(list);
     }
 
+    public Integer getIssueCountBeforeSpecificTime(String account_id,String specificTime){
+        return rawIssueMapper.getIssueCountBeforeSpecificTime(account_id,specificTime);
+    }
+
     public List<RawIssue> getRawIssueByCommitID(String commit_id){
         return rawIssueMapper.getRawIssueByCommitID(commit_id);
     }

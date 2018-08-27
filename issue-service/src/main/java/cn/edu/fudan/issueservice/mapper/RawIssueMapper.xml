@@ -76,6 +76,16 @@
 	</update>
 
 
+	<select id="getIssueCountBeforeSpecificTime" parameterType="String" resultType="Integer">
+		select
+		   count(distinct(issue_id))
+		from
+		  rawIssue
+		where
+		  scan_id in (select uuid from scan where end_time &lt; #{specificTime} and project_id in (select uuid from project where account_id = #{account_id}));
+	</select>
+
+
 	<select id="getRawIssueByCommitID" parameterType="String" resultMap="rawIssue2">
 		select * from rawIssue where commit_id = #{commit_id}
 	</select>

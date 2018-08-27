@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,12 @@ public class IssueController {
     @PostMapping(value={"/issue"})
     public Object getIssues(@RequestBody Map<String,Object>requestParam){
     	return issueService.getIssueList(requestParam);
+    }
+
+    @GetMapping(value = {"/issue/dashboard"})
+    public Object getDashBoardInfo(@RequestParam("duration")String duration, HttpServletRequest request){
+        String userToken=request.getHeader("token");
+        return issueService.getDashBoardInfo(duration,userToken);
     }
 
     //下面都是供其他服务调用的内部接口

@@ -7,6 +7,7 @@ import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.IssueType;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 import cn.edu.fudan.issueservice.service.IssueService;
+import cn.edu.fudan.issueservice.util.DateTimeUtil;
 import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -29,6 +31,9 @@ public class IssueServiceImpl implements IssueService {
 
     @Value("${scan.service.path}")
     private String scanServicePath;
+
+    @Value("${account.service.path}")
+    private String accountServicePath;
 
     private IssueDao issueDao;
 
@@ -87,9 +92,32 @@ public class IssueServiceImpl implements IssueService {
             int count=issueDao.getIssueCount(map);
             map.put("start", (page-1)*size);
             result.put("totalPage", count%size==0?count/size:count/size+1);
+            result.put("totalCount",count);
             result.put("issueList", issueDao.getIssueList(map));
             return result;
         }
+    }
+
+    @Override
+    public Object getDashBoardInfo(String duration, String userToken) {
+        Map<String,Object> result=new HashMap<>();
+        String account_id=restTemplate.getForObject(accountServicePath+"/accountId?userToken="+userToken,String.class);
+        LocalDateTime now= LocalDateTime.now();
+        LocalDateTime specificTime=null;
+        if(duration.equals("yesterday")){
+            specificTime=now.minusDays(1);
+        }else if(duration.equals("week")){
+            specificTime=now.minusWeeks(1);
+        }else if(duration.equals("month")){
+            specificTime=now.minusMonths(1);
+        }else{
+            throw new IllegalArgumentException();
+        }
+        //新增得issue数量=countTillNow-countTillSpecificTime
+        int countTillNow=rawIssueDao.getIssueCountBeforeSpecificTime(account_id, DateTimeUtil.format(now));
+        int countTillSpecificTime=rawIssueDao.getIssueCountBeforeSpecificTime(account_id, DateTimeUtil.format(specificTime));
+        result.put("newIssueCount",countTillNow-countTillSpecificTime);
+        return result;
     }
 
     @SuppressWarnings("unchecked")
