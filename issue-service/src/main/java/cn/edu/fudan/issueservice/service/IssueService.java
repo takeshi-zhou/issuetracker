@@ -16,7 +16,7 @@ public interface IssueService {
 
      Issue getIssueByID(String uuid);
 
-     Object getIssueList(Map<String, Object> map);
+     Object getIssueList(String project_id,Integer page,Integer size);
 
      Object getDashBoardInfo(String duration,String userToken);
 

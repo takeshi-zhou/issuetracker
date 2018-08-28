@@ -77,25 +77,17 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public Object getIssueList(Map<String, Object> map) {
+    public Object getIssueList(String project_id,Integer page,Integer size) {
         Map<String,Object> result=new HashMap<>();
-        if(map.get("project_id")==null||map.get("project_id").equals("")) {
-            result.put("msg", "query failed，please provide project_id！");
-            return result;
-        }else if(map.get("page")==null||map.get("size")==null) {
-            result.put("msg", "query failed，please provide page(current page number)and size(the number of list in one page)！");
-            return result;
-        }else {
-            result.put("msg", "successful query！");
-            int page=Integer.parseInt(map.get("page").toString()) ;
-            int size=Integer.parseInt(map.get("size").toString());
-            int count=issueDao.getIssueCount(map);
-            map.put("start", (page-1)*size);
-            result.put("totalPage", count%size==0?count/size:count/size+1);
-            result.put("totalCount",count);
-            result.put("issueList", issueDao.getIssueList(map));
-            return result;
-        }
+        Map<String,Object> param=new HashMap<>();
+        param.put("project_id",project_id);
+        param.put("size",size);
+        int count=issueDao.getIssueCount(param);
+        param.put("start", (page-1)*size);
+        result.put("totalPage", count%size==0?count/size:count/size+1);
+        result.put("totalCount",count);
+        result.put("issueList", issueDao.getIssueList(param));
+        return result;
     }
 
     @Override

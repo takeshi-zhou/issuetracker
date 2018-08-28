@@ -19,7 +19,9 @@ public interface RawIssueService {
 
     List<RawIssue> getRawIssueByCommitID(String commit_id);
 
-    List<RawIssue> getRawIssueByIssueId( String issueId);
+    List<RawIssue> getRawIssueByIssueId(String issueId);
+
+    Object getCode(String project_id,String commit_id,String file_path);
 
     List<Location> getLocationsByRawIssueId(String raw_issue_id);
 }

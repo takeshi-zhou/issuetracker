@@ -13,7 +13,6 @@ public class Issue {
     private String raw_issue_end;
     private String project_id;
     private String target_files;
-    private List<RawIssue> rawIssues;
     private IssueType issueType;
 
     public IssueType getIssueType() {
@@ -92,14 +91,6 @@ public class Issue {
 
     public void setProject_id(String project_id) {
         this.project_id = project_id;
-    }
-
-    public List<RawIssue> getRawIssues() {
-        return rawIssues;
-    }
-
-    public void setRawIssues(List<RawIssue> rawIssues) {
-        this.rawIssues = rawIssues;
     }
 
     public String getTarget_files() {

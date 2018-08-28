@@ -42,8 +42,11 @@ public class ScanController {
 
     @GetMapping(value = {"/scan/commits"})
     @CrossOrigin
-    public JSONArray getCommits(@RequestParam("project_id") String project_id ,@RequestParam("option") String option){
-        return scanService.getCommits(project_id,option);
+    public Object getCommits(@RequestParam(name="project_id",required = true) String project_id ,
+                                @RequestParam(name="page",required = false,defaultValue = "1")Integer page,
+                                @RequestParam(name="size",required = false,defaultValue = "10")Integer size,
+                                @RequestParam(name="is_whole",required = false,defaultValue = "false") Boolean is_whole){
+        return scanService.getCommits(project_id,page,size,is_whole);
     }
 
     //下面都是供其它服务调用的内部接口
@@ -75,10 +78,10 @@ public class ScanController {
         return scanService.getTillCommitDateByProjectId(projectId);
     }
 
-    /**
+
     @GetMapping(value = {"/inner/scan/commits"})
-    public JSONArray getScannedCommits(@RequestParam("project_id") String project_id){
+    public Object getScannedCommits(@RequestParam("project_id") String project_id){
         return scanService.getScannedCommits(project_id);
     }
-    */
+
 }

@@ -11,7 +11,6 @@ import java.util.List;
 @RestController
 public class RawIssueController {
 
-
     private RawIssueService rawIssueService;
 
     @Autowired
@@ -25,9 +24,11 @@ public class RawIssueController {
     }
 
     @GetMapping(value={"/raw-issue/code"})
-    public Object getLocationList(@RequestParam("raw_issue_id")String raw_issue_id){
+    public Object getCode(@RequestParam("project_id")String project_id,
+                          @RequestParam("commit_id")String commit_id,
+                          @RequestParam("file_path")String file_path){
         //需要添加全部的code内容
-        return rawIssueService.getLocationsByRawIssueId(raw_issue_id);
+        return rawIssueService.getCode(project_id,commit_id,file_path);
     }
 
     //下面的接口都是其他服务调用的内部接口

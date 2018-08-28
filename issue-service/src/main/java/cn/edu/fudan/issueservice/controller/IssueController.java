@@ -25,9 +25,11 @@ public class IssueController {
     }
 
 
-    @PostMapping(value={"/issue"})
-    public Object getIssues(@RequestBody Map<String,Object>requestParam){
-    	return issueService.getIssueList(requestParam);
+    @GetMapping(value={"/issue"})
+    public Object getIssues(@RequestParam("project_id")String project_id,
+                            @RequestParam("page")Integer page,
+                            @RequestParam("size")Integer size){
+    	return issueService.getIssueList(project_id,page,size);
     }
 
     @GetMapping(value = {"/issue/dashboard"})
