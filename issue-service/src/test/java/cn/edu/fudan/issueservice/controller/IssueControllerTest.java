@@ -90,23 +90,23 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
         list.add(issue2);
     }
 
-    /*
-          存在400错误 ，原因还在寻找
-     */
     @Test
-
     public void getIssues()  throws Exception{
-        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
-        System.out.printf(JSONUtils.toJSONString(map));
-        java.lang.String requestJson = ow.writeValueAsString(map);
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/issue")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(requestJson)
-        ).andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
+        request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
+        List<Issue> listIssue = (List<Issue>)issueController.getIssues(map);
+        for(Issue issue : listIssue){
+            System.out.println(issue.getUuid());
+        }
+    }
 
-        System.out.println(result.getResponse().getContentAsString());
-
+    /*
+    *   需要启动account-service
+    */
+    @Test
+    public void getDashBoardInfo()  throws Exception{
+        request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
+        Map<String,Object> result = (Map<String,Object>)issueController.getDashBoardInfo("yesterday",request);
+        System.out.println(result.toString());
     }
 
     @Test
