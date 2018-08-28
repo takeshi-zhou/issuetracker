@@ -174,103 +174,83 @@ paths:
         400:
           description: "failed"
   /project/{projectId}:
-   delete:
-     tags:
-     - "project-service"
-     summary: "delet a project"
-     description: "delet a project by projectId"
-     operationId: "delete"
-     produces:
-     - "application/json"
-     parameters:
-     - in: "path"
-       name: "projectId"
-       description: "project that user want to delet"
-       required: true
-       type : "string"
-     responses:
-       200:
-         description: "successful operation"
-         schema:
-           $ref: "#/definitions/ResponseBean"
-       401:
-         description: "Invalid ID supplied"
-         schema:
-           $ref: "#/definitions/ResponseBean"
-   get:
-     tags:
-     - "project-service"
-     summary: "get a project"
-     description: "get a project by projectId"
-     operationId: "getProject"
-     produces:
-     - "application/json"
-     parameters:
-     - in: "path"
-       name: "projectId"
-       description: "project that user want to get"
-       required: true
-       type : "string"
-     responses:
-       200:
-         description: "successful operation"
-         schema:
-           $ref: "#/definitions/Project"
-       401:
-         description: "Invalid ID supplied"
+    delete:
+      tags:
+      - "project-service"
+      summary: "delet a project"
+      description: "delet a project by projectId"
+      operationId: "delete"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "projectId"
+        description: "project that user want to delet"
+        required: true
+        type : "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        401:
+          description: "Invalid ID supplied"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+
 
   /project/filter:
-     get:
-       tags:
-       - "project-service"
-       summary: "query Project list By userToken"
-       operationId: "query"
-       produces:
-       - "application/json"
-       parameters:
-       - in: "header"
-         name: "token"
-         description: "get userToken from Header"
-         required: true
-         type: "string"
-       - in: "header"
-       name: "keyWord"
-       required: true
-       type: "string"
-       responses:
-         200:
-           description : "succsssful"
-           schema:
-             type: "array"
-             items:
-               $ref: "#/definitions/Project"
-         400:
-           description: "failed"
+    get:
+      tags:
+      - "project-service"
+      summary: "query Project list By userToken"
+      operationId: "filter"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "token"
+        description: "get userToken from Header"
+        required: true
+        type: "string"
+      - in: "query"
+        name: "keyWord"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description : "succsssful"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Project"
+        400:
+          description: "failed"
 
   /inner/project:
     put:
-    tags:
-    - "project-service"
-    summary: "update Project "
-    operationId: "updateProject"
-    produces:
-    - "application/json"
-    parameters:
-    - in: "body"
-      name: "project"
-      description: " message about project "
-      required: true
-      schema:
-        $ref: '#/definitions/Project'
-    responses:
-      200:
-        description : "succsssful"
+      tags:
+      - "project-service"
+      summary: "update Project "
+      operationId: "updateProject"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "project"
+        description: " message about project "
+        required: true
         schema:
-          $ref: "#/definitions/ResponseBean"
-      401:
-        description: "failed"
-        schema:
-          $ref: "#/definitions/ResponseBean"
+          $ref: '#/definitions/Project'
+      responses:
+        200:
+          description : "succsssful"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        401:
+          description: "failed"
+          schema:
+            $ref: "#/definitions/ResponseBean"
 
   /inner/project/repo-path/{project_id}:
     get:
@@ -366,7 +346,7 @@ paths:
           schema:
             $ref: "#/definitions/ResponseBean"
 
-
+  /inner/scan:
     put:
       tags:
       - "scan-service"
@@ -392,8 +372,7 @@ paths:
           schema:
             $ref: "#/definitions/ResponseBean"
 
-
-  /scan/{projectId}:
+  /inner/scan/{projectId}:
     delete:
       tags:
       - "scan-service"
@@ -417,7 +396,7 @@ paths:
           schema:
             $ref: "#/definitions/ResponseBean"
 
-  /scan/last-commit-date:
+  /inner/scan/last-commit-date:
     get:
       tags:
       - "scan-service"
@@ -439,7 +418,8 @@ paths:
         401:
           description: "failed operation"
 
-  /scan/commits:
+
+  /inner/scan/commits:
     get:
       tags:
       - "scan-service"
@@ -453,11 +433,17 @@ paths:
         description: "a project id"
         required: true
         type: "string"
+      - in: "query"
+        name: "option"
+        description: "a option"
+        required: true
+        type: "string"
       responses:
         200:
           description: "successful operation"
         401:
           description: "failed operation"
+      deprecated: true
 
   /issue:
     get:
@@ -493,6 +479,7 @@ paths:
           schema:
             $ref: '#/definitions/IssuesMsg'
 
+  /inner/issue:
     post:
       tags:
       - "issue-service"
@@ -541,6 +528,36 @@ paths:
           schema:
             $ref: '#/definitions/ResponseBean'
 
+  /issue/dashboard:
+    get:
+      tags:
+      - "issue-service"
+      summary: "get dashboard info "
+      operationId: "getDashBoardInfo"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "token"
+        description: "get userToken from Header"
+        required: true
+        type: "string"
+      - in: "query"
+        name: "duration"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "succsssful"
+          schema:
+            type: "object"
+            properties:
+              newIssueCount:
+                type: "string"
+        400:
+          description: "failed"
+
+
   /issue/{projectId}:
     delete:
       tags:
@@ -565,7 +582,7 @@ paths:
           schema:
             $ref: '#/definitions/ResponseBean'
 
-  /issue/mapping:
+  /inner/issue/mapping:
     post:
       tags:
       - "issue-service"
@@ -590,7 +607,7 @@ paths:
           schema:
             $ref: '#/definitions/ResponseBean'
 
-  /issue/raw-issue:
+  /raw-issue:
     get:
       tags:
       - "issue-service"
@@ -612,20 +629,141 @@ paths:
         401:
           description: "failed operation"
 
+  /raw-issue/code:
+    get:
+      tags:
+      - "issue-service"
+      summary: "get LocationList by raw_issue_id"
+      operationId: "getLocationList"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "raw_issue_id"
+        description: " "
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: '#/definitions/LocationList'
+        401:
+          description: "failed operation"
+
+  /inner/raw-issue:
+    post:
+      tags:
+      - "issue-service"
+      summary: "add RawIssues"
+      operationId: "addRawIssues"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "list"
+        description: " "
+        required: true
+        schema:
+          $ref: "#/definitions/RawIssueList"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        400:
+          description: "failed operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+
+    put:
+      tags:
+      - "issue-service"
+      summary: "update RawIssues"
+      operationId: "updateRawIssues"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "list"
+        description: " "
+        required: true
+        schema:
+          $ref: "#/definitions/RawIssueList"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        400:
+          description: "failed operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+
+  /inner/raw-issue/{projectId}:
+    delete:
+      tags:
+      - "issue-service"
+      summary: "delete RawIssues"
+      operationId: "deleteRawIssue"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "projectId"
+        description: " "
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        400:
+          description: "failed operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+
+  /inner/raw-issue/list-by-commit:
+    get:
+      tags:
+      - "issue-service"
+      summary: "get RawIssues by commit_id"
+      operationId: "getRawIssues"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "commit_id"
+        description: " "
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: '#/definitions/RawIssueList'
+        401:
+          description: "failed operation"
+
+
+
+
+
   /commit:
     get:
       tags:
-        - commit-service
+      - commit-service
       summary: get the commitList by projectId
       operationId: getCommitList
       produces:
-        - application/json
+      - application/json
       parameters:
-        - in: query
-          name: projectId
-          description: ' '
-          required: true
-          type: string
+      - in: query
+        name: projectId
+        description: ' '
+        required: true
+        type: string
       responses:
         '200':
           description: successful operation
@@ -643,22 +781,22 @@ paths:
   '/commit/checkout/{projectId}/{commitId}':
     get:
       tags:
-        - commit-service
+      - commit-service
       summary: checkout the project into the certain version by projectId and commitId
       operationId: checkout
       produces:
-        - application/json
+      - application/json
       parameters:
-        - in: path
-          name: projectId
-          description: ' '
-          required: true
-          type: string
-        - in: path
-          name: commitId
-          description: ' '
-          required: true
-          type: string
+      - in: path
+        name: projectId
+        description: ' '
+        required: true
+        type: string
+      - in: path
+        name: commitId
+        description: ' '
+        required: true
+        type: string
       responses:
         '200':
           description: successful operation
@@ -676,17 +814,17 @@ paths:
   /commit/commit-time:
     get:
       tags:
-        - commit-service
+      - commit-service
       summary: get the time of commit by commitId
       operationId: getCommitTime
       produces:
-        - application/json
+      - application/json
       parameters:
-        - in: query
-          name: commitId
-          description: ' '
-          required: true
-          type: string
+      - in: query
+        name: commitId
+        description: ' '
+        required: true
+        type: string
       responses:
         '200':
           description: successful operation
@@ -873,26 +1011,57 @@ definitions:
     items:
       $ref: "#/definitions/RawIssue"
 
+
+  LocationList:
+    type: "array"
+    items:
+      $ref: "#/definitions/Location"
+
+  Location:
+    type: "object"
+    properties:
+      uuid:
+        type: "string"
+      start_line:
+        type: "integer"
+        format: "int32"
+      end_line:
+        type: "integer"
+        format: "int32"
+      bug_lines:
+        type: "string"
+      file_path:
+        type: "string"
+      class_name:
+        type: "string"
+      method_name:
+        type: "string"
+      rawIssue_id:
+        type: "string"
+      code:
+        type: "string"
+
+
   Commit:
     type: "object"
     properties:
       data:
         type: "object"
-          properties:
-            uuid:
-              type: "string"
-            commit_id:
-              type: "string"
-            message:
-              type: "string"
-            developer:
-              type: "string"
-            commit_time:
-              type: "string"
-            repo_id:
-              type: "string"
-            is_scanned:
-              type: "boolean"
+        properties:
+          uuid:
+            type: "string"
+          commit_id:
+            type: "string"
+          message:
+            type: "string"
+          developer:
+            type: "string"
+          commit_time:
+            type: "string"
+          repo_id:
+            type: "string"
+          is_scanned:
+            type: "boolean"
 
   CommitList:
     type: "array"
@@ -903,12 +1072,12 @@ definitions:
     type: "object"
     properties:
       data:
-       type: "object"
-       properties:
-        status:
-          type: "string"
-        commit_time:
-          type: "string"
+        type: "object"
+        properties:
+          status:
+            type: "string"
+          commit_time:
+            type: "string"
 
 
 
@@ -922,7 +1091,7 @@ definitions:
         type: "string"
       data:
         type: "object"
-        
+
   VoidResponse-Python:
     type: object
     properties:
@@ -930,7 +1099,7 @@ definitions:
         type: string
       message:
         type: string
-        
+
 externalDocs:
   description: "Find out more about Swagger"
   url: "http://swagger.io"
