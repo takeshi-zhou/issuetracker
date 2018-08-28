@@ -33,6 +33,7 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
     private MockHttpServletResponse response;
     private MockHttpSession session;
 
+
     Project project;
 
     @Before
@@ -55,13 +56,13 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
         project.setDescription("27天成为Java大神");
         project.setRepo_id("227a91de-a522-11e8-8fa0-d067e5ea858d");
 
-
     }
 
     @Test
     public void getProject() throws Exception{
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/project/a585c7d8-e8a9-47c9-878d-761f8bfaaf62")
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/inner/project/9151ecba-e749-4a14-b6e3-f3a1388139ec")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .header("token","ec15d79e36e14dd258cfff3d48b73d35")
                 .session(session)
         ).andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
@@ -75,10 +76,11 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
      */
     @Test
     public void addProject() throws Exception{
-        request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
+       request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
         //Project project = (Project)controller.getProject("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
-        ResponseBean responseBean = (ResponseBean)controller.addProject(request,project);
-        System.out.println(responseBean);
+       ResponseBean responseBean = (ResponseBean)controller.addProject(request,project);
+       System.out.println(responseBean);
+
 
 
     }
@@ -91,20 +93,24 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
             System.out.println(project.getName() + "  " + project.getUrl());
         }
     }
+
+    @Test
+    public void keyWordQuery(){
+        request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
+        List<Project> list = (List<Project>)controller.keyWordQuery(request,"web");
+        for(Project project :list ){
+            System.out.println(project.getName());
+        }
+    }
+
+
     /*
             delete方法的测试需要启动rawIssue.service，issue.service，account.service，scan.service
      */
     @Test
     public void delete() throws Exception{
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders
-                .delete("/project/repo-path/a585c7d8-e8a9-47c9-878d-761f8bfaaf62")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .session(session)
-        ).andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
-
-        System.out.println(result.getResponse().getContentAsString());
-
+        request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
+        ResponseBean responseBean = (ResponseBean)controller.delete("22");
     }
 
     @Test
@@ -116,7 +122,7 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
     @Test
     public void getRepoPath() throws Exception{
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders
-                .get("/project/a585c7d8-e8a9-47c9-878d-761f8bfaaf62")
+                .get("/inner/project/9151ecba-e749-4a14-b6e3-f3a1388139ec")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .session(session)
         ).andExpect(MockMvcResultMatchers.status().isOk())
@@ -129,8 +135,8 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
 
     @Test
     public void getRepoId() throws Exception{
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/project/repo-id")
-                .param("project-id","a585c7d8-e8a9-47c9-878d-761f8bfaaf62")
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/inner/project/repo-id")
+                .param("project-id","9151ecba-e749-4a14-b6e3-f3a1388139ec")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .session(session)
         ).andExpect(MockMvcResultMatchers.status().isOk())
