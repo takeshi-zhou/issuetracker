@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
@@ -100,6 +101,7 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
     }
 
     @Test
+    @Transactional
     public void addRawIssues() throws Exception{
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
         java.lang.String requestJson = ow.writeValueAsString(list);
@@ -113,6 +115,7 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
     }
 
     @Test
+    @Transactional
     public void deleteRawIssue() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/raw-issue/9151ecba-e749-4a14-b6e3-f3a1388139ec")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -124,6 +127,7 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
     }
 
     @Test
+    @Transactional
     public void updateRawIssues() throws Exception{
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
         java.lang.String requestJson = ow.writeValueAsString(list);

@@ -5,6 +5,7 @@ import cn.edu.fudan.projectmanager.domain.Project;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
@@ -37,6 +38,7 @@ public class ProjectDaoTest extends ProjectManagerApplicationTests {
     }
 
     @Test
+    @Transactional
     public void addOneProject() {
         projectDao.addOneProject(project);
 
@@ -68,11 +70,13 @@ public class ProjectDaoTest extends ProjectManagerApplicationTests {
     }
 
     @Test
+    @Transactional
     public void updateProjectStatus() {
         projectDao.updateProjectStatus(project);
     }
 
     @Test
+    @Transactional
     public void remove() {
         projectDao.remove("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
     }
@@ -93,5 +97,14 @@ public class ProjectDaoTest extends ProjectManagerApplicationTests {
     public void getRepoId() {
         String repoId = projectDao.getRepoId("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
         System.out.println(repoId);
+    }
+
+    @Test
+    public void getProjectByKeyWordAndAccountId() {
+        List<Project> projects = projectDao.getProjectByKeyWordAndAccountId("1","x");
+        System.out.println(projects);
+        for(Project project : projects){
+            System.out.println(project.getUuid());
+        }
     }
 }

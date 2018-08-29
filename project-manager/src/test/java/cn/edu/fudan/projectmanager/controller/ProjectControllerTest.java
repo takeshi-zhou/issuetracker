@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
@@ -75,6 +76,7 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
 
      */
     @Test
+    @Transactional
     public void addProject() throws Exception{
        request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
         //Project project = (Project)controller.getProject("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
@@ -108,12 +110,14 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
             delete方法的测试需要启动rawIssue.service，issue.service，account.service，scan.service
      */
     @Test
+    @Transactional
     public void delete() throws Exception{
         request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
         ResponseBean responseBean = (ResponseBean)controller.delete("22");
     }
 
     @Test
+    @Transactional
     public void updateProject() {
         ResponseBean responseBean = (ResponseBean) controller.updateProject(project);
         System.out.println(responseBean);

@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 
@@ -93,8 +94,9 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
     @Test
     public void getIssues()  throws Exception{
         request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
-        List<Issue> listIssue = (List<Issue>)issueController.getIssues(map);
-        for(Issue issue : listIssue){
+        Map<String,Object> mapIssues = (Map<String,Object>)issueController.getIssues("9151ecba-e749-4a14-b6e3-f3a1388139ec",1,2);
+        System.out.println(mapIssues.toString());
+        for(Issue issue : (List<Issue>)mapIssues.get("issueList")){
             System.out.println(issue.getUuid());
         }
     }
@@ -110,6 +112,7 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
     }
 
     @Test
+    @Transactional
     public void addIssues() throws Exception{
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
         java.lang.String requestJson = ow.writeValueAsString(list);
@@ -123,6 +126,7 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
     }
 
     @Test
+    @Transactional
     public void deleteIssues() throws Exception{
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/issue/222")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -134,6 +138,7 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
     }
 
     @Test
+    @Transactional
     public void updateIssues() throws Exception{
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
         java.lang.String requestJson = ow.writeValueAsString(list);
