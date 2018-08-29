@@ -5,6 +5,7 @@ import cn.edu.fudan.issueservice.domain.Issue;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,16 +64,19 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
     }
 
     @Test
+    @Transactional
     public void insertIssueList() {
         issueService.insertIssueList(list);
     }
 
     @Test
+    @Transactional
     public void deleteIssueByProjectId() {
         issueService.deleteIssueByProjectId("222");
     }
 
     @Test
+    @Transactional
     public void batchUpdateIssue() {
         issueService.batchUpdateIssue(list);
     }
@@ -85,7 +89,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
 
     @Test
     public void getIssueList() {
-        Map<String,Object> result = (Map<String,Object>)issueService.getIssueList(map);
+        Map<String,Object> result = (Map<String,Object>)issueService.getIssueList("9151ecba-e749-4a14-b6e3-f3a1388139ec",1,2);
         System.out.println(result.toString());
     }
 

@@ -6,6 +6,7 @@ import cn.edu.fudan.issueservice.domain.RawIssue;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,7 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
         等scan单元测试之后完善
      */
     @Test
+    @Transactional
     public void insertRawIssueList() {
         rawIssueService.insertRawIssueList(list);
     }
@@ -58,6 +60,7 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
         等scan单元测试之后完善
      */
     @Test
+    @Transactional
     public void deleteRawIssueByProjectId() {
         rawIssueService.deleteRawIssueByProjectId("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
     }

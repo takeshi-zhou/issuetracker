@@ -5,6 +5,7 @@ import cn.edu.fudan.issueservice.domain.Issue;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -56,16 +57,19 @@ public class IssueDaoTest extends IssueServiceApplicationTests {
     }
 
     @Test
+    @Transactional
     public void insertIssueList() {
         issueDao.insertIssueList(list);
     }
 
     @Test
+    @Transactional
     public void deleteIssueByProjectId() {
         issueDao.deleteIssueByProjectId("222");
     }
 
     @Test
+    @Transactional
     public void batchUpdateIssue() {
         issueDao.batchUpdateIssue(list);
     }
