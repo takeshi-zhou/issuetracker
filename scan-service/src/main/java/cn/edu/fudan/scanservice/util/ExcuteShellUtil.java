@@ -69,18 +69,5 @@ public class ExcuteShellUtil {
 		
 		return null;
 	}
-	
-	public static boolean removeProject(String userName, String projectName) {
-		try {
-			Runtime rt = Runtime.getRuntime();
-			Process process = rt.exec("rm -rf  /home/fdse/issueTracker/repo/"+userName+projectName);
-			int exitValue = process.waitFor();
-			if (exitValue == 0)
-				return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
 
 }
