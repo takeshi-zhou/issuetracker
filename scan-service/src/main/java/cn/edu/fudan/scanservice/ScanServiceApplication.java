@@ -1,12 +1,12 @@
 package cn.edu.fudan.scanservice;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+		import org.mybatis.spring.annotation.MapperScan;
+		import org.springframework.boot.SpringApplication;
+		import org.springframework.boot.autoconfigure.SpringBootApplication;
+		import org.springframework.boot.web.servlet.ServletComponentScan;
+		import org.springframework.context.annotation.PropertySource;
+		import org.springframework.scheduling.annotation.EnableAsync;
+		import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @ServletComponentScan//扫描Filter

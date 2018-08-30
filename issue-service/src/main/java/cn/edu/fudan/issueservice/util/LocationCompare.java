@@ -1,7 +1,5 @@
 package cn.edu.fudan.issueservice.util;
 
-
-
 import cn.edu.fudan.issueservice.domain.Location;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 
