@@ -1,16 +1,14 @@
 #coding:utf-8
 import pymysql
-import configparser
-config = configparser.ConfigParser()
-config.read('config.conf')
+from python.restfulAPI.config import config
 
 def insert_into_mysql(tablename, params={}, mode='single'):
     conn = pymysql.connect(
-        host=config.get('IssueTrackerMysqlDB', 'host'),
-        db=config.get('IssueTrackerMysqlDB', 'db'),
-        user=config.get('IssueTrackerMysqlDB', 'user'),
-        passwd=config.get('IssueTrackerMysqlDB', 'passwd'),
-        charset=config.get('IssueTrackerMysqlDB', 'charset')
+        host=config.ISSUE_TRACKER_MYSQL_DB['host'],
+        db=config.ISSUE_TRACKER_MYSQL_DB['db'],
+        user=config.ISSUE_TRACKER_MYSQL_DB['user'],
+        passwd=config.ISSUE_TRACKER_MYSQL_DB['passwd'],
+        charset=config.ISSUE_TRACKER_MYSQL_DB['charset']
     )
     sql = "insert into %s " % tablename
     keys = params.keys()
@@ -53,11 +51,11 @@ def insert_into_mysql(tablename, params={}, mode='single'):
 
 def delete_from_mysql(tablename, params={}):
     conn = pymysql.connect(
-        host=config.get('IssueTrackerMysqlDB', 'host'),
-        db=config.get('IssueTrackerMysqlDB', 'db'),
-        user=config.get('IssueTrackerMysqlDB', 'user'),
-        passwd=config.get('IssueTrackerMysqlDB', 'passwd'),
-        charset=config.get('IssueTrackerMysqlDB', 'charset')
+        host=config.ISSUE_TRACKER_MYSQL_DB['host'],
+        db=config.ISSUE_TRACKER_MYSQL_DB['db'],
+        user=config.ISSUE_TRACKER_MYSQL_DB['user'],
+        passwd=config.ISSUE_TRACKER_MYSQL_DB['passwd'],
+        charset=config.ISSUE_TRACKER_MYSQL_DB['charset']
     )
     sql = "delete from %s " % tablename
     sql += " where uuid = %(uuid)s "
@@ -69,11 +67,11 @@ def delete_from_mysql(tablename, params={}):
 
 def update_mysql(tablename, params={}):
     conn = pymysql.connect(
-        host=config.get('IssueTrackerMysqlDB', 'host'),
-        db=config.get('IssueTrackerMysqlDB', 'db'),
-        user=config.get('IssueTrackerMysqlDB', 'user'),
-        passwd=config.get('IssueTrackerMysqlDB', 'passwd'),
-        charset=config.get('IssueTrackerMysqlDB', 'charset')
+        host=config.ISSUE_TRACKER_MYSQL_DB['host'],
+        db=config.ISSUE_TRACKER_MYSQL_DB['db'],
+        user=config.ISSUE_TRACKER_MYSQL_DB['user'],
+        passwd=config.ISSUE_TRACKER_MYSQL_DB['passwd'],
+        charset=config.ISSUE_TRACKER_MYSQL_DB['charset']
     )
     cur = conn.cursor()
     sql = "update %s set " % tablename
@@ -88,13 +86,22 @@ def update_mysql(tablename, params={}):
     cur.close()
     conn.close()
 
-def get_data_from_mysql(tablename, params={}, fields=[]):
+def get_data_from_mysql(tablename, params={}, fields=[], order_field=None, order_by = 'desc', start=None, num=None):
+    order = ''
+    limit = ''
+
+    if order_field is not None:
+        order = ' order by ' + order_field + ' ' + order_by
+
+    if start is not None and num is not None:
+        limit = ' limit ' + str(start) + ',' + str(num)
+
     conn = pymysql.connect(
-        host=config.get('IssueTrackerMysqlDB', 'host'),
-        db=config.get('IssueTrackerMysqlDB', 'db'),
-        user=config.get('IssueTrackerMysqlDB', 'user'),
-        passwd=config.get('IssueTrackerMysqlDB', 'passwd'),
-        charset=config.get('IssueTrackerMysqlDB', 'charset')
+        host=config.ISSUE_TRACKER_MYSQL_DB['host'],
+        db=config.ISSUE_TRACKER_MYSQL_DB['db'],
+        user=config.ISSUE_TRACKER_MYSQL_DB['user'],
+        passwd=config.ISSUE_TRACKER_MYSQL_DB['passwd'],
+        charset=config.ISSUE_TRACKER_MYSQL_DB['charset']
     )
     sql = "select %s from %s " % ('*' if len(fields) == 0 else ','.join(fields), tablename)
     keys = params.keys()
@@ -107,7 +114,7 @@ def get_data_from_mysql(tablename, params={}, fields=[]):
             values.append(params[key])
         where += ' where ' + ' and '.join(ps)
     cur = conn.cursor()
-    cur.execute(sql + where, values)
+    cur.execute(sql + where + order + limit, values)
     ret = cur.fetchall()
     cur.close()
     conn.close()

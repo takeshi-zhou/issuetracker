@@ -5,6 +5,7 @@ import cn.edu.fudan.projectmanager.domain.Project;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         addOneProject方法的测试需要account-service项目启动
      */
     @Test
+    @Transactional
     public void addOneProject() {
         projectService.addOneProject("ec15d79e36e14dd258cfff3d48b73d35","https://github.com/DuGuQiuBai/Java");
     }
@@ -61,6 +63,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
     }
 
     @Test
+    @Transactional
     public void updateProjectStatus() {
         projectService.updateProjectStatus(project);
     }
@@ -69,6 +72,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         remove方法的测试需要启动rawIssue.service，issue.service，account.service，scan.service
      */
     @Test
+    @Transactional
     public void remove() {
         projectService.remove("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
     }
@@ -89,5 +93,15 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
     public void getRepoId() {
         String repoId = projectService.getRepoId("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
         System.out.println(repoId);
+    }
+
+    @Test
+    public void getProjectListByKeyWord() {
+        List<Project> projects = (List<Project>) projectService.getProjectListByKeyWord("ec15d79e36e14dd258cfff3d48b73d35", "x");
+        System.out.println(projects);
+        for (Project project : projects) {
+            System.out.println(project.getUuid());
+
+        }
     }
 }

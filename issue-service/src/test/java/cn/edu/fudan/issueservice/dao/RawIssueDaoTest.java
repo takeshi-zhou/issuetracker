@@ -5,6 +5,7 @@ import cn.edu.fudan.issueservice.domain.RawIssue;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,16 +47,19 @@ public class RawIssueDaoTest extends IssueServiceApplicationTests {
     }
 
     @Test
+    @Transactional
     public void insertRawIssueList() {
-        rawIssueDao.insertRawIssueList(list);
+         rawIssueDao.insertRawIssueList(list);
     }
 
     @Test
+    @Transactional
     public void deleteRawIssueByProjectId() {
         rawIssueDao.deleteRawIssueByProjectId("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
     }
 
     @Test
+    @Transactional
     public void batchUpdateIssueId() {
         rawIssueDao.batchUpdateIssueId(list);
     }

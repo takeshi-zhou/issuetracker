@@ -5,6 +5,7 @@ import cn.edu.fudan.issueservice.domain.Location;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,11 +50,13 @@ public class LocationDaoTest extends IssueServiceApplicationTests {
     }
 
     @Test
+    @Transactional
     public void insertLocationList() {
         locationDao.insertLocationList(list);
     }
 
     @Test
+    @Transactional
     public void deleteLocationByProjectId() {
         locationDao.deleteLocationByProjectId("9151ecba-e749-4a14-b6e3-f3a1388139ec");
     }
