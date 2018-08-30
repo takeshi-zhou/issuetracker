@@ -18,7 +18,7 @@ public interface IssueService {
 
      Object getIssueList(String project_id,Integer page,Integer size);
 
-     Object getDashBoardInfo(String duration,String userToken);
+     Object getDashBoardInfo(String duration,String project_id,String userToken);
 
      void startMapping(String project_id, String pre_commit_id, String current_commit_id);
 

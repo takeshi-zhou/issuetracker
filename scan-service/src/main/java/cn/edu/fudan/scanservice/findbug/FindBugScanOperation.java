@@ -73,34 +73,38 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         int start = Integer.parseInt(sourceLineInMethod.attributeValue("start"));
         int end = Integer.parseInt(sourceLineInMethod.attributeValue("end"));
         String bugLines=null;
+        String code=null;
         if(iterator!=null){
-            Set<String> container=new HashSet<>();
-            StringBuilder bugLineBuilder=new StringBuilder();
+            int max=0;
+            int min=99999;
             while(iterator.hasNext()){
                 Element SourceLine=iterator.next();
-                String bugLine=SourceLine.attributeValue("start");
-                if(!container.contains(bugLine)){
-                    container.add(bugLine);
-                    bugLineBuilder.append(",");
-                    bugLineBuilder.append(bugLine);
-                }
+                String startBugLine=SourceLine.attributeValue("start");
+                String endBugLine=SourceLine.attributeValue("end");
+                int sourceStart=Integer.parseInt(startBugLine);
+                int sourceEnd=Integer.parseInt(endBugLine);
+                if(sourceStart<min)
+                    min=sourceStart;
+                if(sourceEnd>max)
+                    max=sourceEnd;
             }
-            if(bugLineBuilder.length()>0)
-                bugLines=bugLineBuilder.deleteCharAt(0).toString();
+            bugLines=min+"-"+max;
+            code = ASTUtil.getCode(min,max,repoHome + filePath);
 
-            String code = ASTUtil.getCode(start,end,repoHome + filePath);
-            JSONObject location=new JSONObject();
-            location.put("uuid",UUID.randomUUID().toString());
-            location.put("start_line",start);
-            location.put("end_line",end);
-            location.put("bug_lines",bugLines);
-            location.put("file_path",filePath);
-            location.put("class_name",className);
-            location.put("method_name",methodName);
-            location.put("rawIssue_id",rawIssueUUID);
-            location.put("code",code);
-            locations.add(location);
+        }else{
+            code = ASTUtil.getCode(start,end,repoHome + filePath);
         }
+        JSONObject location=new JSONObject();
+        location.put("uuid",UUID.randomUUID().toString());
+        location.put("start_line",start);
+        location.put("end_line",end);
+        location.put("bug_lines",bugLines);
+        location.put("file_path",filePath);
+        location.put("class_name",className);
+        location.put("method_name",methodName);
+        location.put("rawIssue_id",rawIssueUUID);
+        location.put("code",code);
+        locations.add(location);
         return fileName;
     }
 

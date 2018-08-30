@@ -109,10 +109,8 @@ public class RawIssue {
         if(obj==this)return true;
         if(!(obj instanceof RawIssue))return false;
         RawIssue rawIssue=(RawIssue)obj;
-        return rawIssue.uuid.equals(uuid) &&
-                rawIssue.type.equals(type) &&
+        return rawIssue.type.equals(type) &&
                 rawIssue.detail.equals(detail) &&
-                rawIssue.scan_id.equals(scan_id) &&
-                rawIssue.commit_id.equals(commit_id);
+                rawIssue.file_name.equals(file_name);
     }
 }

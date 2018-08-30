@@ -15,8 +15,10 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author WZY
@@ -29,6 +31,9 @@ public class KafkaServiceImpl implements KafkaService{
 
     @Value("${project.service.path}")
     private String projectServicePath;
+
+    @Value("${rawIssue.service.path}")
+    private String rawIssueServicePath;
 
     private ScanTask scanTask;
 
@@ -76,15 +81,20 @@ public class KafkaServiceImpl implements KafkaService{
         //开一个工作者线程来管理异步任务的超时
         new Thread(()->{
             try{
-                future.get(60, TimeUnit.SECONDS);//设置1分钟的超时时间
-            }catch (Exception e){
+                future.get(15, TimeUnit.MINUTES);//设置15分钟的超时时间
+            }catch (TimeoutException e){
                 //因scan超时而抛出异常
-                System.out.println("超时了");
+                logger.error("超时了");
                 future.cancel(false);
                 JSONObject projectParam=new JSONObject();
                 projectParam.put("uuid",projectId);
                 projectParam.put("scan_status","Scan Time Out");
                 updateProject(projectParam);
+            } catch (InterruptedException e) {
+                logger.error(e.getMessage());
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
         }).start();
     }
@@ -122,6 +132,10 @@ public class KafkaServiceImpl implements KafkaService{
         if(scanResult.getStatus().equals("success")){
             projectParam.put("scan_status","Scanned");
         }else{
+            if(scanResult.getDescription().equals("Mapping failed")){
+                //mapping 失败，删除当前project当前所扫commit得到的rawIssue和location
+                restTemplate.delete(rawIssueServicePath+"/"+projectId);
+            }
             projectParam.put("scan_status",scanResult.getDescription());
         }
         updateProject(projectParam);

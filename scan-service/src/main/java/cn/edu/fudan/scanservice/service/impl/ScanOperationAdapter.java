@@ -54,9 +54,10 @@ public class ScanOperationAdapter implements ScanOperation {
     }
 
     @Override
-    public boolean checkOut(String projectId, String commitId){
-        String repoPath=restTemplate.getForObject(projectServicePath+"/repo-path/"+projectId,String.class);
-        return ExcuteShellUtil.executeCheckout(repoPath,commitId);
+    public boolean checkOut(String project_id, String commit_id){
+        String repo_id=restTemplate.getForObject(projectServicePath+"/repo-id?project-id="+project_id,String.class);
+        JSONObject response=restTemplate.getForObject(commitServicePath+"/checkout?repo_id="+repo_id+"&commit_id="+commit_id, JSONObject.class);
+        return response!=null&&response.getJSONObject("data").getString("status").equals("Successful");
     }
 
     @Override
@@ -77,7 +78,7 @@ public class ScanOperationAdapter implements ScanOperation {
         String uuid= UUID.randomUUID().toString();
         scan.setUuid(uuid);
         //use api provided by commit-service
-        JSONObject jsonObject = restTemplate.getForObject(commitServicePath+"/commit-time?commitId="+commitId,JSONObject.class);
+        JSONObject jsonObject = restTemplate.getForObject(commitServicePath+"/commit-time?commit_id="+commitId,JSONObject.class);
         Date commit_time =jsonObject.getJSONObject("data").getDate("commit_time");
         scan.setCommit_time(DateTimeUtil.formatedDate(commit_time));
         return new ScanInitialInfo(scan,projectName,repoId, repoPath);

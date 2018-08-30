@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -52,5 +53,9 @@ public class ScanDao {
             list.add(scan.getCommit_id());
         }
         return list;
+    }
+
+    public List<Scan> getScans(String project_id){
+        return scanMapper.getScannedCommits(project_id);
     }
 }

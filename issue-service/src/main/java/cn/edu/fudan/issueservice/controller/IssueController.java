@@ -33,9 +33,9 @@ public class IssueController {
     }
 
     @GetMapping(value = {"/issue/dashboard"})
-    public Object getDashBoardInfo(@RequestParam("duration")String duration, HttpServletRequest request){
+    public Object getDashBoardInfo(@RequestParam("duration")String duration, @RequestParam("project_id")String project_id, HttpServletRequest request){
         String userToken=request.getHeader("token");
-        return issueService.getDashBoardInfo(duration,userToken);
+        return issueService.getDashBoardInfo(duration,project_id,userToken);
     }
 
     //下面都是供其他服务调用的内部接口

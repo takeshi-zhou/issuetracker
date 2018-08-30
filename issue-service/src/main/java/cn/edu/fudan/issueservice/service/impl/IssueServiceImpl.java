@@ -1,22 +1,19 @@
 package cn.edu.fudan.issueservice.service.impl;
 
 import cn.edu.fudan.issueservice.dao.IssueDao;
-import cn.edu.fudan.issueservice.dao.IssueTypeDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.domain.Issue;
-import cn.edu.fudan.issueservice.domain.IssueType;
+import cn.edu.fudan.issueservice.domain.IssueCount;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 import cn.edu.fudan.issueservice.service.IssueService;
-import cn.edu.fudan.issueservice.util.DateTimeUtil;
 import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -34,6 +31,16 @@ public class IssueServiceImpl implements IssueService {
 
     @Value("${account.service.path}")
     private String accountServicePath;
+
+    @Value("${project.service.path}")
+    private String projectServicePath;
+
+    private RedisTemplate<Object,Object> redisTemplate;
+
+    @Autowired
+    public void setRedisTemplate(RedisTemplate<Object,Object> redisTemplate){
+        this.redisTemplate=redisTemplate;
+    }
 
     private IssueDao issueDao;
 
@@ -91,24 +98,39 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public Object getDashBoardInfo(String duration, String userToken) {
-        Map<String,Object> result=new HashMap<>();
+    public Object getDashBoardInfo(String duration,String project_id, String userToken) {
+        int newIssueCount=0;
+        int eliminatedIssueCount=0;
+        int remainingIssueCount=0;
         String account_id=restTemplate.getForObject(accountServicePath+"/accountId?userToken="+userToken,String.class);
-        LocalDateTime now= LocalDateTime.now();
-        LocalDateTime specificTime=null;
-        if(duration.equals("yesterday")){
-            specificTime=now.minusDays(1);
-        }else if(duration.equals("week")){
-            specificTime=now.minusWeeks(1);
-        }else if(duration.equals("month")){
-            specificTime=now.minusMonths(1);
+        if(project_id==null){
+            //未选择某一个project,显示该用户所有project的dashboard信息
+            JSONArray projectIds=restTemplate.getForObject(projectServicePath+"/project-id?account_id="+account_id,JSONArray.class);
+            if(projectIds!=null){
+                for(int i=0;i<projectIds.size();i++){
+                    String currentProjectId=projectIds.getString(i);
+                    IssueCount issueCount=(IssueCount)redisTemplate.opsForHash().get(currentProjectId,duration);
+                    if(issueCount!=null){
+                        newIssueCount+=issueCount.getNewIssueCount();
+                        eliminatedIssueCount+=issueCount.getEliminatedIssueCount();
+                        remainingIssueCount+=issueCount.getRemainingIssueCount();
+                    }
+                }
+            }
         }else{
-            throw new IllegalArgumentException();
+            //只显示当前所选project的相关dashboard信息
+            IssueCount issueCount=(IssueCount)redisTemplate.opsForHash().get(project_id,duration);
+            if(issueCount!=null){
+                newIssueCount+=issueCount.getNewIssueCount();
+                eliminatedIssueCount+=issueCount.getEliminatedIssueCount();
+                remainingIssueCount+=issueCount.getRemainingIssueCount();
+            }
         }
-        //新增得issue数量=countTillNow-countTillSpecificTime
-        int countTillNow=rawIssueDao.getIssueCountBeforeSpecificTime(account_id, DateTimeUtil.format(now));
-        int countTillSpecificTime=rawIssueDao.getIssueCountBeforeSpecificTime(account_id, DateTimeUtil.format(specificTime));
-        result.put("newIssueCount",countTillNow-countTillSpecificTime);
+        Map<String,Object> result=new HashMap<>();
+
+        result.put("newIssueCount",newIssueCount);
+        result.put("eliminatedIssueCount",eliminatedIssueCount);
+        result.put("remainingIssueCount",remainingIssueCount);
         return result;
     }
 
@@ -126,6 +148,12 @@ public class IssueServiceImpl implements IssueService {
                 Issue issue=new Issue(new_IssueId,rawIssue.getType(),current_commit_id,current_commit_id,rawIssue.getUuid(),rawIssue.getUuid(),project_id,targetFiles);
                 insertIssueList.add(issue);
             }
+            int newIssueCount=insertIssueList.size();
+            int remainingIssueCount=insertIssueList.size();
+            int eliminatedIssueCount=0;
+            redisTemplate.opsForHash().put(project_id,"today",new IssueCount(newIssueCount,eliminatedIssueCount,remainingIssueCount));
+            redisTemplate.opsForHash().put(project_id,"week",new IssueCount(newIssueCount,eliminatedIssueCount,remainingIssueCount));
+            redisTemplate.opsForHash().put(project_id,"month",new IssueCount(newIssueCount,eliminatedIssueCount,remainingIssueCount));
             rawIssueDao.batchUpdateIssueId(rawIssues);
         }else{
             //不是第一次扫描，需要和前一次的commit进行mapping
@@ -136,17 +164,18 @@ public class IssueServiceImpl implements IssueService {
             JSONArray commits=restTemplate.getForObject(scanServicePath+"/commits?project_id="+project_id, JSONArray.class);
             Date start_commit_time=commits.getJSONObject(0).getDate("commit_time");
             Date end_commit_time=commits.getJSONObject(commits.size()-1).getDate("commit_time");
-            JSONObject jsonObject = restTemplate.getForObject(commitServicePath+"/commit-time?commitId="+current_commit_id,JSONObject.class);
+            JSONObject jsonObject = restTemplate.getForObject(commitServicePath+"/commit-time?commit_id="+current_commit_id,JSONObject.class);
             Date commit_time =jsonObject.getJSONObject("data").getDate("commit_time");
             //装需要更新的
             List<Issue> issues=new ArrayList<>();
-
+            int equalsCount=0;
             for(RawIssue issue_2:rawIssues2){
                 boolean mapped=false;
                 for(RawIssue issue_1:rawIssues1){
                     //如果issue_1已经匹配到一个issue_2,内部循环不再继续
                     if(LocationCompare.isUniqueIssue(issue_1,issue_2)){
                         mapped=true;
+                        equalsCount++;
                         String pre_issue_id=issue_1.getIssue_id();
                         //如果匹配到的上个commit的某个rawIssue已经有了issue_id,说明当前commit这个rawIssue也应该对应到这个issue
                         issue_2.setIssue_id(pre_issue_id);
@@ -185,6 +214,20 @@ public class IssueServiceImpl implements IssueService {
             if(!issues.isEmpty()){
                 //更新issue
                 issueDao.batchUpdateIssue(issues);
+            }
+            IssueCount preDayIssueCount=(IssueCount)redisTemplate.opsForHash().get(project_id,"today");
+            IssueCount preWeekIssueCount=(IssueCount)redisTemplate.opsForHash().get(project_id,"week");
+            IssueCount preMonthIssueCount=(IssueCount)redisTemplate.opsForHash().get(project_id,"month");
+            int eliminatedIssueCount=rawIssues1.size()-equalsCount;
+            int remainingIssueCount=rawIssues2.size();
+            int newIssueCount=rawIssues2.size()-equalsCount;
+            if(preDayIssueCount!=null&&preWeekIssueCount!=null&&preMonthIssueCount!=null){
+                preDayIssueCount.issueCountUpdate(newIssueCount,eliminatedIssueCount,remainingIssueCount);
+                preWeekIssueCount.issueCountUpdate(newIssueCount,eliminatedIssueCount,remainingIssueCount);
+                preMonthIssueCount.issueCountUpdate(newIssueCount,eliminatedIssueCount,remainingIssueCount);
+                redisTemplate.opsForHash().put(project_id,"today",preDayIssueCount);
+                redisTemplate.opsForHash().put(project_id,"week",preWeekIssueCount);
+                redisTemplate.opsForHash().put(project_id,"month",preMonthIssueCount);
             }
             rawIssueDao.batchUpdateIssueId(rawIssues2);
         }

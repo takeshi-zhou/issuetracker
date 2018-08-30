@@ -13,9 +13,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
@@ -120,6 +124,11 @@ public class ProjectServiceImpl implements ProjectService {
     public Object getProjectList(String userToken) {
         String account_id=getAccountId(userToken);
         return projectDao.getProjectByAccountId(account_id);
+    }
+
+    @Override
+    public Object getProjectIdList(String account_id) {
+        return projectDao.getProjectByAccountId(account_id).stream().map(Project::getAccount_id).collect(Collectors.toList());
     }
 
     @Override

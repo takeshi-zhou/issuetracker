@@ -85,8 +85,8 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
 
     @Test
     public void getIssueList() {
-        Map<String,Object> result = (Map<String,Object>)issueService.getIssueList(map);
-        System.out.println(result.toString());
+//        Map<String,Object> result = (Map<String,Object>)issueService.getIssueList(map);
+//        System.out.println(result.toString());
     }
 
     /*

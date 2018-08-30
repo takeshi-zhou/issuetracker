@@ -70,19 +70,28 @@ public class ScanServiceImpl implements ScanService {
         JSONObject commitResponse=restTemplate.getForObject(commitServicePath+"?repo_id="+repo_id+"&page="+page+"&per_page="+size+"&is_whole=true",JSONObject.class);
         if(commitResponse!=null){
             List<String> scannedCommitId=scanDao.getScannedCommits(project_id);
-            String lastScannedCommitId=scannedCommitId.get(scannedCommitId.size()-1);
             JSONArray commitArray=commitResponse.getJSONArray("data");
             int index=0;
-            for(int i=0;i<commitArray.size();i++){
-                JSONObject commit=commitArray.getJSONObject(i);
-                String commit_id=commit.getString("commit_id");
-                if(scannedCommitId.contains(commit_id)){
-                    commit.put("isScanned",true);
-                    if(commit_id.equals(lastScannedCommitId)){
-                            index=i;
-                    }
-                }else{
+            if(scannedCommitId.isEmpty()){
+                //全都没扫过
+                for(int i=0;i<commitArray.size();i++){
+                    JSONObject commit=commitArray.getJSONObject(i);
                     commit.put("isScanned",false);
+                }
+                is_whole=true;
+            }else{
+                String lastScannedCommitId=scannedCommitId.get(scannedCommitId.size()-1);
+                for(int i=0;i<commitArray.size();i++){
+                    JSONObject commit=commitArray.getJSONObject(i);
+                    String commit_id=commit.getString("commit_id");
+                    if(scannedCommitId.contains(commit_id)){
+                        commit.put("isScanned",true);
+                        if(commit_id.equals(lastScannedCommitId)){
+                            index=i;
+                        }
+                    }else{
+                        commit.put("isScanned",false);
+                    }
                 }
             }
             Map<String,Object> result=new HashMap<>();
@@ -97,6 +106,7 @@ public class ScanServiceImpl implements ScanService {
             }else{
                 List<Object> notScannedCommits=commitArray.subList(0,index);
                 int totalCount=notScannedCommits.size();
+                result.put("totalCount",totalCount);
                 if(totalCount>size){
                     result.put("commitList",notScannedCommits.subList((page-1)*size,page*size>totalCount?totalCount:page*size));
                 }else{
@@ -111,6 +121,6 @@ public class ScanServiceImpl implements ScanService {
 
     @Override
     public Object getScannedCommits(String project_id) {
-        return scanDao.getScannedCommits(project_id);
+        return scanDao.getScans(project_id);
     }
 }

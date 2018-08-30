@@ -9,6 +9,8 @@ public interface ProjectService {
 
      Object getProjectList(String userToken);
 
+     Object getProjectIdList(String account_id);
+
      Object getProjectListByKeyWord(String userToken,String keyWord);
 
      Project getProjectByID(String projectId);

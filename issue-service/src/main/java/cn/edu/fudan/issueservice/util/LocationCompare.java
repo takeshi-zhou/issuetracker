@@ -16,9 +16,9 @@ public class LocationCompare {
 
 	
 	public static boolean isUniqueIssue(RawIssue issue_1, RawIssue issue_2) {
-		if(!issue_1.getType().equals(issue_2.getType()))
-			return false;
-		if(issue_1.equals(issue_2))return true;
+//		if(!issue_1.getType().equals(issue_2.getType()))
+////			return false;
+		if(!issue_1.equals(issue_2))return false;
 		List<Location> intersect_locations = intersect(issue_1.getLocations() , issue_2.getLocations());
 		List<Location> intersect_locations2 = intersect(issue_2.getLocations() , issue_1.getLocations());
 		List<Location> union_locations = union(issue_1.getLocations() , issue_2.getLocations());

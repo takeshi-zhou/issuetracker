@@ -83,4 +83,9 @@ public class ProjectController {
         return projectService.getRepoId(projectId);
     }
 
+    @GetMapping(value="/inner/project/project-id")
+    public Object getProjectIds(@RequestParam("account_id")String account_id){
+        return projectService.getProjectIdList(account_id);
+    }
+
 }
