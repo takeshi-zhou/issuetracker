@@ -3,6 +3,8 @@ package cn.edu.fudan.projectmanager.service;
 
 import cn.edu.fudan.projectmanager.domain.Project;
 
+import java.util.List;
+
 public interface ProjectService {
 
      void addOneProject(String userToken,String url);

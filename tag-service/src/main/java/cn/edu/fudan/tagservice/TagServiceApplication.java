@@ -1,4 +1,4 @@
-package cn.edu.fudan.scanservice;
+package cn.edu.fudan.tagservice;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -11,12 +11,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @ServletComponentScan//扫描Filter
 @PropertySource("classpath:conf.properties")
-@MapperScan("cn.edu.fudan.scanservice.mapper")
+@MapperScan("cn.edu.fudan.tagservice.mapper")
 @EnableTransactionManagement//开启事务支持
 @EnableAsync//开启异步调用的支持
-public class ScanServiceApplication {
+public class TagServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ScanServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(TagServiceApplication.class, args);
+    }
 }
