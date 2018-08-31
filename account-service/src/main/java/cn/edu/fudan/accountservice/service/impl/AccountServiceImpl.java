@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -61,6 +63,11 @@ public class AccountServiceImpl implements AccountService {
     public void addAccount(Account account) {
         if(accountDao.isAccountLegal())
             accountDao.addAccount(account);
+    }
+
+    @Override
+    public List<String> getAllAccountId() {
+        return accountDao.getAllAccountId();
     }
 
 

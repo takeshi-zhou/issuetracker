@@ -84,7 +84,7 @@ public class ProjectController {
     }
 
     @GetMapping(value="/inner/project/project-id")
-    public Object getProjectIds(@RequestParam("account_id")String account_id){
+    public Object getProjectIds(@RequestParam(name="account_id",required = false)String account_id){
         return projectService.getProjectIdList(account_id);
     }
 

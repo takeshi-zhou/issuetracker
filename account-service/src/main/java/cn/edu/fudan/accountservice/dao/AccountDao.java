@@ -5,6 +5,8 @@ import cn.edu.fudan.accountservice.mapper.AccountMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class AccountDao {
 
@@ -25,5 +27,9 @@ public class AccountDao {
 
     public void addAccount(Account account) {
         return;
+    }
+
+    public List<String> getAllAccountId(){
+        return accountMapper.getAllAccountId();
     }
 }

@@ -5,6 +5,8 @@ import cn.edu.fudan.accountservice.domain.Account;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface AccountMapper {
 
@@ -12,5 +14,7 @@ public interface AccountMapper {
 
 
     String getAccountIdByAccountName(String accountName);
+
+    List<String> getAllAccountId();
 
 }

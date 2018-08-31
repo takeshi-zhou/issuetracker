@@ -4,6 +4,8 @@ package cn.edu.fudan.accountservice.service;
 import cn.edu.fudan.accountservice.domain.Account;
 import cn.edu.fudan.accountservice.domain.ResponseBean;
 
+import java.util.List;
+
 
 public interface AccountService {
 
@@ -16,4 +18,6 @@ public interface AccountService {
      String getAccountIdByAccountName(String accountName);
 
      void addAccount(Account account);
+
+     List<String> getAllAccountId();
 }

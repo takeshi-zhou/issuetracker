@@ -48,7 +48,10 @@
    </insert>
     
    <select id = "getProjectByAccountId" parameterType="String" resultMap="project" >
-   		select * from project where account_id = #{account_id}
+   		select * from project
+   		<if test="account_id != null">
+            where account_id = #{account_id}
+        </if>
    </select>
 
     <select id="getProjectByKeyWordAndAccountId" parameterType="String" resultMap="project">

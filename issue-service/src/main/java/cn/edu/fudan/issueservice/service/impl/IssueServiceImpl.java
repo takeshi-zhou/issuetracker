@@ -97,15 +97,23 @@ public class IssueServiceImpl implements IssueService {
         return result;
     }
 
+    private String getAccountId(String userToken){
+        return restTemplate.getForObject(accountServicePath+"/accountId?userToken="+userToken,String.class);
+    }
+
+    private JSONArray getProjectIds(String account_id){
+        return restTemplate.getForObject(projectServicePath+"/project-id?account_id="+account_id,JSONArray.class);
+    }
+
     @Override
     public Object getDashBoardInfo(String duration,String project_id, String userToken) {
         int newIssueCount=0;
         int eliminatedIssueCount=0;
         int remainingIssueCount=0;
-        String account_id=restTemplate.getForObject(accountServicePath+"/accountId?userToken="+userToken,String.class);
+        String account_id=getAccountId(userToken);
         if(project_id==null){
             //未选择某一个project,显示该用户所有project的dashboard信息
-            JSONArray projectIds=restTemplate.getForObject(projectServicePath+"/project-id?account_id="+account_id,JSONArray.class);
+            JSONArray projectIds=getProjectIds(account_id);
             if(projectIds!=null){
                 for(int i=0;i<projectIds.size();i++){
                     String currentProjectId=projectIds.getString(i);
@@ -127,11 +135,27 @@ public class IssueServiceImpl implements IssueService {
             }
         }
         Map<String,Object> result=new HashMap<>();
-
         result.put("newIssueCount",newIssueCount);
         result.put("eliminatedIssueCount",eliminatedIssueCount);
         result.put("remainingIssueCount",remainingIssueCount);
         return result;
+    }
+
+    @Override
+    public Object getStatisticalResults(Integer month, String project_id, String userToken) {
+        String account_id=getAccountId(userToken);
+        if(project_id==null){
+            if(month==1)
+                return redisTemplate.opsForValue().get(account_id+"day");
+            else
+                return redisTemplate.opsForValue().get(account_id+"week");
+
+        }else{
+            if(month==1)
+                 return redisTemplate.opsForValue().get(project_id+"day");
+            else
+                return redisTemplate.opsForValue().get(project_id+"week");
+        }
     }
 
     @SuppressWarnings("unchecked")

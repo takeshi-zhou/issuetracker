@@ -105,7 +105,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         location.put("rawIssue_id",rawIssueUUID);
         location.put("code",code);
         locations.add(location);
-        return fileName;
+        return filePath;
     }
 
     @SuppressWarnings("unchecked")

@@ -62,4 +62,9 @@ public class AccountController {
             return new ResponseBean(401,"auth failed",null);
         }
     }
+
+    @GetMapping(value="/accountIds")
+    public Object getAccountIds(){
+        return accountService.getAllAccountId();
+    }
 }
