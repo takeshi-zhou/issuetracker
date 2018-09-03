@@ -3,13 +3,11 @@ package cn.edu.fudan.tagservice;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
-@ServletComponentScan//扫描Filter
 @PropertySource("classpath:conf.properties")
 @MapperScan("cn.edu.fudan.tagservice.mapper")
 @EnableTransactionManagement//开启事务支持

@@ -14,7 +14,7 @@
     <parent>
         <artifactId>issueTracker</artifactId>
         <groupId>cn.edu.fudan</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0-SNAPSHOT</version>   
     </parent>
 
     <dependencies>
@@ -46,10 +46,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
-        </dependency>
 
         <!--druid连接池-->
         <dependency>
@@ -62,10 +58,6 @@
             <artifactId>fastjson</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.eclipse.jdt</groupId>
-            <artifactId>org.eclipse.jdt.core</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
