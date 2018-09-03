@@ -3,11 +3,13 @@ package cn.edu.fudan.accountservice.service;
 import cn.edu.fudan.accountservice.AccountServiceApplicationTests;
 import cn.edu.fudan.accountservice.domain.Account;
 import cn.edu.fudan.accountservice.domain.ResponseBean;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import cn.edu.fudan.accountservice.tool.MockTestConnection;
+import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.Statement;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -15,7 +17,23 @@ public class AccountServiceTest extends AccountServiceApplicationTests {
 
     @Autowired
     AccountService accountService ;
-    
+
+    public static MockTestConnection mockTestConnection;
+
+    @BeforeClass
+    public static void setupConnection() throws Exception {
+        mockTestConnection = new MockTestConnection();
+        mockTestConnection.setupCoon();
+    }
+
+    @Before
+    public void setupData() throws Exception{
+        String sql="insert into account values(\"3\",\"admin\",\"f6fdffe48c908deb0f4c3bd36c032e72\",\"admin\",\"123456@fudan.edu.cn\")";
+        Statement stmt=mockTestConnection.getConn().createStatement();//创建一个Statement对象
+        stmt.executeUpdate(sql);//执行sql语句
+        System.out.println("finish mocking");
+    }
+
 
     @Test
     public void login() {
@@ -79,4 +97,28 @@ public class AccountServiceTest extends AccountServiceApplicationTests {
     @Transactional
     public void addAccount() {
     }
+
+    @Test
+    public void getAllAccountId(){
+        List<String> listString = accountService.getAllAccountId();
+        for (String id:listString ) {
+            System.out.println(id);
+        }
+    }
+
+
+    @After
+    public void cleanData() throws Exception{
+        String sql="delete from account where uuid='3'";
+        Statement stmt=mockTestConnection.getConn().createStatement();//创建一个Statement对象
+        stmt.executeUpdate(sql);//执行sql语句
+        System.out.println("finish cleaning");
+    }
+
+    @AfterClass
+    public static void closeConnection() throws Exception {
+        mockTestConnection.closeCoon();
+        System.out.println("关闭数据库成功");
+    }
+
 }
