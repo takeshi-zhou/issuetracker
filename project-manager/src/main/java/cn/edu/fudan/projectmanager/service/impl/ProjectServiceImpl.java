@@ -10,11 +10,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,19 +23,26 @@ import java.util.stream.Collectors;
 @Service
 public class ProjectServiceImpl implements ProjectService {
 
-    @Value("${account.service.path}")
-    private String accountServicePath;
-    @Value("${issue.service.path}")
-    private String issueServicePath;
-    @Value("${rawIssue.service.path}")
-    private String rawIssueServicePath;
-    @Value("${scan.service.path}")
-    private String scanServicePath;
     @Value("${github.api.path}")
     private String githubAPIPath;
-
+    @Value("${inner-service-path}")
+    private String innerServicePath;
+    @Value("${inner.header.key}")
+    private  String headerKey;
+    @Value("${inner.header.value}")
+    private  String headerValue;
 
     private KafkaTemplate kafkaTemplate;
+
+    private HttpHeaders headers;
+
+    public void initHeader() {
+        if (headers != null)
+            return;
+        headers = new HttpHeaders();
+        headers.add(headerKey,headerValue);
+    }
+
 
     @Autowired
     public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
@@ -63,7 +70,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private String getAccountId(String userToken){
-        return restTemplate.getForObject(accountServicePath+"/accountId?userToken="+userToken,String.class);
+        return restTemplate.getForObject(innerServicePath+"/user/accountId?userToken="+userToken,String.class);
     }
 
     private void checkProjectURL(String url){
@@ -149,9 +156,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
 	public void remove(String projectId) {
-        restTemplate.delete(issueServicePath+"/"+projectId);
-        restTemplate.delete(rawIssueServicePath+"/"+projectId);
-        restTemplate.delete(scanServicePath+"/"+projectId);
+        initHeader();
+        restTemplate.delete(innerServicePath+"/inner/issue/"+projectId,headers);
+        restTemplate.delete(innerServicePath+"/inner/raw-issue/"+projectId,headers);
+        restTemplate.delete(innerServicePath+"/inner/scan/"+projectId,headers);
 		projectDao.remove(projectId);
 	}
 
