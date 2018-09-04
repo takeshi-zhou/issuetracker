@@ -28,6 +28,12 @@ public class IssueCount implements Serializable {
         this.remainingIssueCount += remainingIssueCount;
     }
 
+    public void issueCountUpdate(IssueCount another){
+        this.newIssueCount += another.getNewIssueCount();
+        this.eliminatedIssueCount += another.getEliminatedIssueCount();
+        this.remainingIssueCount += another.getRemainingIssueCount();
+    }
+
     public int getNewIssueCount() {
         return newIssueCount;
     }

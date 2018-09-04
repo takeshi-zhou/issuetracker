@@ -10,7 +10,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -25,7 +27,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Value("${github.api.path}")
     private String githubAPIPath;
-    @Value("${inner-service-path}")
+    @Value("${inner.service.path}")
     private String innerServicePath;
     @Value("${inner.header.key}")
     private  String headerKey;
@@ -35,14 +37,6 @@ public class ProjectServiceImpl implements ProjectService {
     private KafkaTemplate kafkaTemplate;
 
     private HttpHeaders headers;
-
-    public void initHeader() {
-        if (headers != null)
-            return;
-        headers = new HttpHeaders();
-        headers.add(headerKey,headerValue);
-    }
-
 
     @Autowired
     public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
@@ -54,6 +48,12 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    public ProjectServiceImpl(){
+        //构造函数中初始化kong的header
+        headers = new HttpHeaders();
+        headers.add(headerKey,headerValue);
     }
 
     private ProjectDao projectDao;
@@ -70,11 +70,12 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private String getAccountId(String userToken){
-        return restTemplate.getForObject(innerServicePath+"/user/accountId?userToken="+userToken,String.class);
+        HttpEntity<String> requestEntity=new HttpEntity<>(null,headers);
+        return restTemplate.exchange(innerServicePath+"/user/accountId?userToken="+userToken,HttpMethod.GET,requestEntity,String.class).getBody();
     }
 
     private void checkProjectURL(String url){
-        Pattern pattern=Pattern.compile("https://github.com(/[\\w-]{1,}/[\\w-]{1,})");
+        Pattern pattern=Pattern.compile("https://github.com(/[\\w-]+/[\\w-]+)");
         Matcher matcher=pattern.matcher(url);
         if(!matcher.matches()){
             throw new RuntimeException("invalid url!");
@@ -134,7 +135,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Object getProjectIdList(String account_id) {
-        return projectDao.getProjectByAccountId(account_id).stream().map(Project::getAccount_id).collect(Collectors.toList());
+        return projectDao.getProjectByAccountId(account_id).stream().map(Project::getUuid).collect(Collectors.toList());
     }
 
     @Override
@@ -156,10 +157,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
 	public void remove(String projectId) {
-        initHeader();
-        restTemplate.delete(innerServicePath+"/inner/issue/"+projectId,headers);
-        restTemplate.delete(innerServicePath+"/inner/raw-issue/"+projectId,headers);
-        restTemplate.delete(innerServicePath+"/inner/scan/"+projectId,headers);
+        HttpEntity<String> requestEntity=new HttpEntity<>(null,headers);
+        restTemplate.exchange(innerServicePath+"/inner/issue/"+projectId, HttpMethod.DELETE,requestEntity,JSONObject.class);
+        restTemplate.exchange(innerServicePath+"/inner/raw-issue/"+projectId,HttpMethod.DELETE,requestEntity,JSONObject.class);
+        restTemplate.exchange(innerServicePath+"/inner/scan/"+projectId,HttpMethod.DELETE,requestEntity,JSONObject.class);
 		projectDao.remove(projectId);
 	}
 

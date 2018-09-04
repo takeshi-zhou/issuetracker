@@ -12,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -29,10 +32,21 @@ public class ScanOperationAdapter implements ScanOperation {
 
     @Value("${commit.service.path}")
     private String commitServicePath;
-    @Value("${project.service.path}")
-    private String projectServicePath;
-    @Value("${issue.service.path}")
-    private String issueServicePath;
+
+    @Value("${inner.service.path}")
+    private String innerServicePath;
+    @Value("${inner.header.key}")
+    private  String headerKey;
+    @Value("${inner.header.value}")
+    private  String headerValue;
+
+    private HttpHeaders headers;
+
+    public ScanOperationAdapter() {
+        headers = new HttpHeaders();
+        headers.add(headerKey,headerValue);
+    }
+
 
     protected RestTemplate restTemplate;
 
@@ -55,7 +69,8 @@ public class ScanOperationAdapter implements ScanOperation {
 
     @Override
     public boolean checkOut(String project_id, String commit_id){
-        String repo_id=restTemplate.getForObject(projectServicePath+"/repo-id?project-id="+project_id,String.class);
+        HttpEntity<String> entity=new HttpEntity<>(headers);
+        String repo_id=restTemplate.exchange(innerServicePath+"/inner/project/repo-id?project-id="+project_id, HttpMethod.GET,entity,String.class).getBody();
         JSONObject response=restTemplate.getForObject(commitServicePath+"/checkout?repo_id="+repo_id+"&commit_id="+commit_id, JSONObject.class);
         return response!=null&&response.getJSONObject("data").getString("status").equals("Successful");
     }
@@ -63,8 +78,9 @@ public class ScanOperationAdapter implements ScanOperation {
     @Override
     public ScanInitialInfo initialScan(String projectId, String commitId)  {
         Date startTime=new Date();
-        String repoPath=restTemplate.getForObject(projectServicePath+"/repo-path/"+projectId,String.class);
-        JSONObject currentProject=restTemplate.getForObject(projectServicePath+"/"+projectId,JSONObject.class);
+        HttpEntity<String> entity=new HttpEntity<>(headers);
+        String repoPath=restTemplate.exchange(innerServicePath+"/inner/project/repo-path/"+projectId,HttpMethod.GET,entity,String.class).getBody();
+        JSONObject currentProject=restTemplate.exchange(innerServicePath+"/inner/project"+projectId,HttpMethod.GET,entity,JSONObject.class).getBody();
         String projectName=currentProject.getString("name");
         String repoId=currentProject.getString("repo_id");
         //新建一个Scan对象
@@ -101,7 +117,8 @@ public class ScanOperationAdapter implements ScanOperation {
             requestParam.put("pre_commit_id",commitId);
         requestParam.put("current_commit_id",commitId);
         logger.info("mapping between "+requestParam.toJSONString());
-        JSONObject result=restTemplate.postForObject(issueServicePath+"/mapping",requestParam,JSONObject.class);
+        HttpEntity<Object> entity=new HttpEntity<>(requestParam,headers);
+        JSONObject result=restTemplate.exchange(innerServicePath+"/inner/issue/mapping",HttpMethod.POST,entity,JSONObject.class).getBody();
         return result!=null&&result.getIntValue("code")==200;
     }
 
@@ -124,7 +141,8 @@ public class ScanOperationAdapter implements ScanOperation {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String dateString = formatter.format(scan.getCommit_time());
             requestParam.put("till_commit_time",dateString);
-            restTemplate.put(projectServicePath,requestParam,JSONObject.class);
+            HttpEntity<Object> entity=new HttpEntity<>(requestParam,headers);
+            restTemplate.exchange(innerServicePath+"/inner/project",HttpMethod.PUT,entity,JSONObject.class);
         }
 
         //更新当前Scan的状态

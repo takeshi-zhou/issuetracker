@@ -106,9 +106,9 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
     */
     @Test
     public void getDashBoardInfo()  throws Exception{
-        request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
-        Map<String,Object> result = (Map<String,Object>)issueController.getDashBoardInfo("yesterday",request);
-        System.out.println(result.toString());
+//        request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
+//        Map<String,Object> result = (Map<String,Object>)issueController.getDashBoardInfo("yesterday",request);
+//        System.out.println(result.toString());
     }
 
     @Test

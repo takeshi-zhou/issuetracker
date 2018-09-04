@@ -20,6 +20,8 @@ public interface IssueService {
 
      Object getDashBoardInfo(String duration,String project_id,String userToken);
 
+     Object getStatisticalResults(Integer month, String project_id, String userToken);
+
      void startMapping(String project_id, String pre_commit_id, String current_commit_id);
 
 }

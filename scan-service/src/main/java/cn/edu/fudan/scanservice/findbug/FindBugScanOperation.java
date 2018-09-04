@@ -14,6 +14,9 @@ import org.dom4j.io.SAXReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -28,8 +31,19 @@ public class FindBugScanOperation extends ScanOperationAdapter {
     private String resultFileHome;
     @Value("${repoHome}")
     private String repoHome;
-    @Value("${rawIssue.service.path}")
-    private String rawIssueServicePath;
+    @Value("${inner.service.path}")
+    private String innerServicePath;
+    @Value("${inner.header.key}")
+    private  String headerKey;
+    @Value("${inner.header.value}")
+    private  String headerValue;
+
+    private HttpHeaders headers;
+
+    public FindBugScanOperation() {
+        headers = new HttpHeaders();
+        headers.add(headerKey,headerValue);
+    }
 
     @SuppressWarnings("unchecked")
     private String getJsonString(Element element){
@@ -141,7 +155,8 @@ public class FindBugScanOperation extends ScanOperationAdapter {
             }
             if(!rawIssues.isEmpty()){
                 //插入所有的rawIssue
-                restTemplate.postForEntity(rawIssueServicePath,rawIssues,JSONObject.class).getBody();
+                HttpEntity<Object> requestEntity=new HttpEntity<>(rawIssues,headers);
+                restTemplate.exchange(innerServicePath+"/inner/raw-issue", HttpMethod.POST,requestEntity,JSONObject.class);
             }
             return true;
         } catch (Exception e) {

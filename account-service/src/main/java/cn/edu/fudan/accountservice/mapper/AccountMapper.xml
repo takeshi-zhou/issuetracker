@@ -23,7 +23,7 @@
         accountName=#{accountName} and password=#{password}
     </select>
 
-    <select id="getAllAccountId" resultType="String">
+    <select id="getAllAccountId" resultType="List">
         select uuid from account;
     </select>
 </mapper>

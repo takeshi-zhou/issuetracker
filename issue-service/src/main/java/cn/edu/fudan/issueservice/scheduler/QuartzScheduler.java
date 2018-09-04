@@ -4,22 +4,23 @@ import cn.edu.fudan.issueservice.domain.IssueCount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
 public class QuartzScheduler {
 
-    @Value("${project.service.path}")
-    private String projectServicePath;
-
-    @Value("${account.service.path}")
-    private String accountServicePath;
+    @Value("${inner.service.path}")
+    private String innerServicePath;
+    @Value("${inner.header.key}")
+    private  String headerKey;
+    @Value("${inner.header.value}")
+    private  String headerValue;
 
     private RedisTemplate<Object,Object> redisTemplate;
 
@@ -35,14 +36,23 @@ public class QuartzScheduler {
         this.restTemplate = restTemplate;
     }
 
+    private HttpEntity<?> requestEntity;
+
+    public QuartzScheduler() {
+        //构造函数中初始化kong的header
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(headerKey,headerValue);
+        requestEntity=new HttpEntity<>(headers);
+    }
+
     @SuppressWarnings("unchecked")
     private List<String> getAccountIds(){
-        return restTemplate.getForObject(accountServicePath+"/accountIds", List.class);
+        return restTemplate.exchange(innerServicePath+"/user/accountIds", HttpMethod.GET, requestEntity,List.class).getBody();
     }
 
     @SuppressWarnings("unchecked")
     private List<String> getCurrentProjectList(String account_id){
-        return restTemplate.getForObject(projectServicePath+"/project-id?account_id="+account_id, List.class);
+        return restTemplate.exchange(innerServicePath+"/inner/project/project-id?account_id="+account_id, HttpMethod.GET, requestEntity,List.class).getBody();
     }
 
     private void issueCountListUpdate(String key,IssueCount issueCount){

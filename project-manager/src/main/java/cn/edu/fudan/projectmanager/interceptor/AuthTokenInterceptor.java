@@ -4,6 +4,9 @@ import cn.edu.fudan.projectmanager.exception.AuthException;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
@@ -20,14 +23,27 @@ import javax.servlet.http.HttpServletResponse;
 
 public class AuthTokenInterceptor implements HandlerInterceptor {
 
-    @Value("${account.service.path}")
-    private String accountServicePath;
+    @Value("${inner.service.path}")
+    private String innerServicePath;
+    @Value("${inner.header.key}")
+    private  String headerKey;
+    @Value("${inner.header.value}")
+    private  String headerValue;
 
     private RestTemplate restTemplate;
 
     @Autowired
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    private HttpEntity<?> requestEntity;
+
+    public AuthTokenInterceptor() {
+        //构造函数中初始化kong的header
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(headerKey,headerValue);
+        requestEntity=new HttpEntity<>(headers);
     }
 
     @Override
@@ -44,8 +60,8 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
         if(userToken==null){
             throw new AuthException("need user token!");
         }
-        JSONObject result=restTemplate.getForObject(accountServicePath+"/auth/"+userToken,JSONObject.class);
-        if(result.getIntValue("code")!=200){
+        JSONObject result=restTemplate.exchange(innerServicePath+"/user/auth/"+userToken, HttpMethod.GET,requestEntity,JSONObject.class).getBody();
+        if(result==null||result.getIntValue("code")!=200){
             throw new AuthException("auth failed!");
         }
         return true;

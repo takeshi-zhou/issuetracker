@@ -12,6 +12,9 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.util.*;
@@ -26,14 +29,12 @@ public class IssueServiceImpl implements IssueService {
     @Value("${commit.service.path}")
     private String commitServicePath;
 
-    @Value("${scan.service.path}")
-    private String scanServicePath;
-
-    @Value("${account.service.path}")
-    private String accountServicePath;
-
-    @Value("${project.service.path}")
-    private String projectServicePath;
+    @Value("${inner.service.path}")
+    private String innerServicePath;
+    @Value("${inner.header.key}")
+    private  String headerKey;
+    @Value("${inner.header.value}")
+    private  String headerValue;
 
     private RedisTemplate<Object,Object> redisTemplate;
 
@@ -61,6 +62,15 @@ public class IssueServiceImpl implements IssueService {
     @Autowired
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    private HttpEntity<?> requestEntity;
+
+    public IssueServiceImpl() {
+        //构造函数中初始化kong的header
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(headerKey,headerValue);
+        requestEntity=new HttpEntity<>(headers);
     }
 
     @Override
@@ -98,11 +108,11 @@ public class IssueServiceImpl implements IssueService {
     }
 
     private String getAccountId(String userToken){
-        return restTemplate.getForObject(accountServicePath+"/accountId?userToken="+userToken,String.class);
+        return restTemplate.exchange(innerServicePath+"/user/accountId?userToken="+userToken, HttpMethod.GET,requestEntity,String.class).getBody();
     }
 
     private JSONArray getProjectIds(String account_id){
-        return restTemplate.getForObject(projectServicePath+"/project-id?account_id="+account_id,JSONArray.class);
+        return restTemplate.exchange(innerServicePath+"/inner/project/project-id?account_id="+account_id,HttpMethod.GET,requestEntity,JSONArray.class).getBody();
     }
 
     @Override
@@ -141,21 +151,31 @@ public class IssueServiceImpl implements IssueService {
         return result;
     }
 
+    private List<IssueCount> getFakeData(){
+        Random random=new Random();
+        List<IssueCount> list=new ArrayList<>();
+        for(int i=0;i<30;i++){
+            list.add(new IssueCount(random.nextInt(100),random.nextInt(100),random.nextInt(100)));
+        }
+        return list;
+    }
     @Override
     public Object getStatisticalResults(Integer month, String project_id, String userToken) {
-        String account_id=getAccountId(userToken);
-        if(project_id==null){
-            if(month==1)
-                return redisTemplate.opsForValue().get(account_id+"day");
-            else
-                return redisTemplate.opsForValue().get(account_id+"week");
-
-        }else{
-            if(month==1)
-                 return redisTemplate.opsForValue().get(project_id+"day");
-            else
-                return redisTemplate.opsForValue().get(project_id+"week");
-        }
+        Map<String,Object> result=new HashMap<>();
+//        String account_id=getAccountId(userToken);
+//        if(project_id==null){
+//            if(month==1)
+//                result.put("data",redisTemplate.opsForValue().get(account_id+"day"));
+//            else
+//                result.put("data",redisTemplate.opsForValue().get(account_id+"week"));
+//        }else{
+//            if(month==1)
+//                result.put("data",redisTemplate.opsForValue().get(project_id+"day"));
+//            else
+//                result.put("data",redisTemplate.opsForValue().get(project_id+"week"));
+//        }
+        result.put("data",getFakeData());
+        return result;
     }
 
     @SuppressWarnings("unchecked")
@@ -185,7 +205,7 @@ public class IssueServiceImpl implements IssueService {
             List<RawIssue> rawIssues2=rawIssueDao.getRawIssueByCommitID(current_commit_id);
 
             //当前project已经扫描过的commit列表,是按commit_time从小到大排序的
-            JSONArray commits=restTemplate.getForObject(scanServicePath+"/commits?project_id="+project_id, JSONArray.class);
+            JSONArray commits=restTemplate.exchange(innerServicePath+"/inner/scan/commits?project_id="+project_id, HttpMethod.GET,requestEntity,JSONArray.class).getBody();
             Date start_commit_time=commits.getJSONObject(0).getDate("commit_time");
             Date end_commit_time=commits.getJSONObject(commits.size()-1).getDate("commit_time");
             JSONObject jsonObject = restTemplate.getForObject(commitServicePath+"/commit-time?commit_id="+current_commit_id,JSONObject.class);
