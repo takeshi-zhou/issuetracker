@@ -1,8 +1,8 @@
 package cn.edu.fudan.tagservice.service;
 
-import cn.edu.fudan.tagservice.domain.Tag;
+import com.alibaba.fastjson.JSONObject;
 
 public interface TagService {
 
-    void addTag(Tag tag,String item_id);
+    void addTag(JSONObject requestBody);
 }
