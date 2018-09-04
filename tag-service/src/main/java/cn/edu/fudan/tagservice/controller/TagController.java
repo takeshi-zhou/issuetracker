@@ -3,6 +3,7 @@ package cn.edu.fudan.tagservice.controller;
 import cn.edu.fudan.tagservice.domain.ResponseBean;
 import cn.edu.fudan.tagservice.domain.Tag;
 import cn.edu.fudan.tagservice.service.TagService;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,10 +24,11 @@ public class TagController {
         this.tagService = tagService;
     }
 
+    //JSONObject(name、scope、item_id、option)
     @PostMapping("/tag")
-    public Object addTag(@RequestBody Tag tag, @RequestParam("item_id")String item_id){
+    public Object addTag(@RequestBody JSONObject requestBody){
         try{
-            tagService.addTag(tag,item_id);
+            tagService.addTag(requestBody);
             return new ResponseBean(200,"add success",null);
         }catch (Exception e){
             return new ResponseBean(401,"add failed :"+e.getMessage(),null);

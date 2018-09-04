@@ -26,4 +26,8 @@ public class TagDao {
     public void addOneTaggedItem( String item_id, String tag_id){
         tagMapper.addOneTaggedItem(item_id,tag_id);
     }
+
+    public String getUuidByNameAndScope(String name, String scope) {
+        return tagMapper.getUuidByNameAndScope(name,scope);
+    }
 }

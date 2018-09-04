@@ -11,6 +11,10 @@
         <result property="icon" column="icon"/>
     </resultMap>
 
+    <select id="getUuidByNameAndScope" parameterType="String">
+        select uuid from tag where name=#{name} and scope=#{scope}
+    </select>
+
     <insert id="addOneTag" parameterType="Tag">
         insert into tag
                (

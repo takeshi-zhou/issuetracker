@@ -11,6 +11,13 @@ public class Tag {
     private String color;
     private String icon;
 
+    public Tag(String uuid,String name,String scope,String color){
+        this.uuid=uuid;
+        this.name=name;
+        this.scope=scope;
+        this.color=color;
+    }
+
     public String getUuid() {
         return uuid;
     }
