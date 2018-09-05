@@ -30,4 +30,20 @@ public class TagDao {
     public String getUuidByNameAndScope(String name, String scope) {
         return tagMapper.getUuidByNameAndScope(name,scope);
     }
+
+    public void deleteOneTag(String tagId) {
+        tagMapper.deleteOneTag(tagId);
+    }
+
+    public void deleteOneTagged(String tagId, String itemId) {
+        tagMapper.deleteOneTagged(tagId,itemId);
+    }
+
+    public void modifyOneTag(String tagId, String name) {
+        tagMapper.modifyOneTag(tagId,name);
+    }
+
+    public void modifyOneTagged(String oldTagId,String newTagId, String iteamId) {
+        tagMapper.modifyOneTagged(oldTagId,newTagId,iteamId);
+    }
 }

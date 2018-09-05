@@ -5,10 +5,7 @@ import cn.edu.fudan.tagservice.domain.Tag;
 import cn.edu.fudan.tagservice.service.TagService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author WZY
@@ -24,11 +21,33 @@ public class TagController {
         this.tagService = tagService;
     }
 
-    //JSONObject(name、scope、item_id、option)
-    @PostMapping("/tag")
+    //JSONObject(name、scope、itemId、isDefault)
+    @PostMapping("/tags")
+    @CrossOrigin
     public Object addTag(@RequestBody JSONObject requestBody){
         try{
             tagService.addTag(requestBody);
+            return new ResponseBean(200,"add success",null);
+        }catch (Exception e){
+            return new ResponseBean(401,"add failed :"+e.getMessage(),null);
+        }
+    }
+
+    @DeleteMapping("/tags/{tag-id}")
+    public Object deleteTag(@PathVariable("tag-id")String tagId,@RequestParam("item-id") String itemId){
+        try{
+            tagService.deleteTag(tagId,itemId);
+            return new ResponseBean(200,"add success",null);
+        }catch (Exception e){
+            return new ResponseBean(401,"add failed :"+e.getMessage(),null);
+        }
+    }
+
+    //JSONObject(tagId,name,isDefault,itemId)
+    @PutMapping("/tags")
+    public  Object modifyTag(@RequestBody JSONObject requestBody){
+        try{
+            tagService.modifyTag(requestBody);
             return new ResponseBean(200,"add success",null);
         }catch (Exception e){
             return new ResponseBean(401,"add failed :"+e.getMessage(),null);

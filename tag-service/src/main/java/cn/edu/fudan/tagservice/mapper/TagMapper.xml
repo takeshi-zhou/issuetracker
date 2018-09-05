@@ -46,4 +46,21 @@
                   #{tag_id}
               )
     </insert>
+
+    <delete id="deleteOneTag" parameterType="String">
+        delete from tag where uuid = #{tag_id}
+    </delete>
+
+    <delete id="deleteOneTagged" parameterType="String">
+        delete from tagged where tag_id=#{tag_id} and item_id=#{item_id}
+    </delete>
+
+    <update id="modifyOneTagged" parameterType="String">
+        update tagged set tag_id=#{new_tag_id} where tag_id=#{old_tag_id} and item_id=#{item_id}
+    </update>
+
+    <update id="modifyOneTag" parameterType="String">
+        update tag set name=#{name} where uuid=#{tag_id}
+    </update>
+
 </mapper>

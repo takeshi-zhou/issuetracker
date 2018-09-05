@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum Priority{
-    Immediate("red"),
-    Urgent("2"),
-    High("3"),
-    Normal("4"),
-    Low("5"),
-    Ignore("6"),
-    Misinformation("7");
+    Immediate("#b52a28"),
+    Urgent("#e36e6c"),
+    High("#eba47c"),
+    Normal("#ebcb8d"),
+    Low("#a0b08f"),
+    Ignore("#628e8b"),
+    Misinformation("#5499bd");
 
     private String color;
     private static Map<String,Priority> valueMap = new HashMap<>();

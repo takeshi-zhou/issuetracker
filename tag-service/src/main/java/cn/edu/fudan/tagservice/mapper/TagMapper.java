@@ -12,4 +12,12 @@ public interface TagMapper {
     void addOneTaggedItem(@Param("item_id") String item_id, @Param("tag_id")String tag_id);
 
     String getUuidByNameAndScope(@Param("name")String name, @Param("scope")String scope);
+
+    void deleteOneTag(@Param("tag_id")String tagId);
+
+    void deleteOneTagged(@Param("tag_id")String tagId,@Param("item_id") String itemId);
+
+    void modifyOneTagged(@Param("old_tag_id")String oldTagId,@Param("new_tag_id")String newTagId,@Param("item_id") String itemId);
+
+    void modifyOneTag(@Param("tag_id")String tagId,@Param("name") String name);
 }
