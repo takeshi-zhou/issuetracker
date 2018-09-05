@@ -8,6 +8,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,11 +22,25 @@ import java.util.Map;
 @Service
 public class ScanServiceImpl implements ScanService {
 
-    @Value("${project.service.path}")
-    private String projectServicePath;
+    @Value("${inner.service.path}")
+    private String innerServicePath;
+    @Value("${inner.header.key}")
+    private  String headerKey;
+    @Value("${inner.header.value}")
+    private  String headerValue;
 
     @Value("${commit.service.path}")
     private String commitServicePath;
+
+    private HttpEntity<?> httpEntity;
+
+    private void initHttpEntity(){
+        if(httpEntity!=null)
+            return;
+        HttpHeaders headers=new HttpHeaders();
+        headers.add(headerKey,headerValue);
+        httpEntity=new HttpEntity<>(headers);
+    }
 
     private RestTemplate restTemplate;
 
@@ -66,7 +83,7 @@ public class ScanServiceImpl implements ScanService {
 
     @Override
     public Object getCommits(String project_id,Integer page,Integer size,Boolean is_whole) {
-        String repo_id=restTemplate.getForObject(projectServicePath+"/repo-id?project-id="+project_id,String.class);
+        String repo_id=restTemplate.exchange(innerServicePath+"/inner/project/repo-id?project-id="+project_id, HttpMethod.GET,httpEntity,String.class).getBody();
         JSONObject commitResponse=restTemplate.getForObject(commitServicePath+"?repo_id="+repo_id+"&page="+page+"&per_page="+size+"&is_whole=true",JSONObject.class);
         if(commitResponse!=null){
             List<String> scannedCommitId=scanDao.getScannedCommits(project_id);

@@ -41,8 +41,9 @@ public class ScanOperationAdapter implements ScanOperation {
     private  String headerValue;
 
     private HttpHeaders headers;
-
-    public ScanOperationAdapter() {
+    private void initHeaders(){
+        if(headers!=null)
+            return;
         headers = new HttpHeaders();
         headers.add(headerKey,headerValue);
     }
@@ -69,6 +70,7 @@ public class ScanOperationAdapter implements ScanOperation {
 
     @Override
     public boolean checkOut(String project_id, String commit_id){
+        initHeaders();
         HttpEntity<String> entity=new HttpEntity<>(headers);
         String repo_id=restTemplate.exchange(innerServicePath+"/inner/project/repo-id?project-id="+project_id, HttpMethod.GET,entity,String.class).getBody();
         JSONObject response=restTemplate.getForObject(commitServicePath+"/checkout?repo_id="+repo_id+"&commit_id="+commit_id, JSONObject.class);
@@ -78,6 +80,7 @@ public class ScanOperationAdapter implements ScanOperation {
     @Override
     public ScanInitialInfo initialScan(String projectId, String commitId)  {
         Date startTime=new Date();
+        initHeaders();
         HttpEntity<String> entity=new HttpEntity<>(headers);
         String repoPath=restTemplate.exchange(innerServicePath+"/inner/project/repo-path/"+projectId,HttpMethod.GET,entity,String.class).getBody();
         JSONObject currentProject=restTemplate.exchange(innerServicePath+"/inner/project"+projectId,HttpMethod.GET,entity,JSONObject.class).getBody();
@@ -117,6 +120,7 @@ public class ScanOperationAdapter implements ScanOperation {
             requestParam.put("pre_commit_id",commitId);
         requestParam.put("current_commit_id",commitId);
         logger.info("mapping between "+requestParam.toJSONString());
+        initHeaders();
         HttpEntity<Object> entity=new HttpEntity<>(requestParam,headers);
         JSONObject result=restTemplate.exchange(innerServicePath+"/inner/issue/mapping",HttpMethod.POST,entity,JSONObject.class).getBody();
         return result!=null&&result.getIntValue("code")==200;
@@ -141,6 +145,7 @@ public class ScanOperationAdapter implements ScanOperation {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String dateString = formatter.format(scan.getCommit_time());
             requestParam.put("till_commit_time",dateString);
+            initHeaders();
             HttpEntity<Object> entity=new HttpEntity<>(requestParam,headers);
             restTemplate.exchange(innerServicePath+"/inner/project",HttpMethod.PUT,entity,JSONObject.class);
         }

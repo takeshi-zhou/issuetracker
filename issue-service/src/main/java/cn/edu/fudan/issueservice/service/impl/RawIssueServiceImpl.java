@@ -44,8 +44,10 @@ public class RawIssueServiceImpl implements RawIssueService {
 
     private HttpEntity<?> requestEntity;
 
-    public RawIssueServiceImpl() {
-        //构造函数中初始化kong的header
+    private void initRequestEntity(){
+        if(requestEntity!=null){
+            return;
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.add(headerKey,headerValue);
         requestEntity=new HttpEntity<>(headers);
@@ -116,6 +118,7 @@ public class RawIssueServiceImpl implements RawIssueService {
     @Override
     public Object getCode(String project_id, String commit_id, String file_path) {
         Map<String,Object> result=new HashMap<>();
+        initRequestEntity();
         String repo_id=restTemplate.exchange(innerServicePath+"/inner/project/repo-id?project-id="+project_id, HttpMethod.GET,requestEntity,String.class).getBody();
         JSONObject response=restTemplate.getForObject(commitServicePath+"/checkout?repo_id="+repo_id+"&commit_id="+commit_id, JSONObject.class);
         if(response!=null&&response.getJSONObject("data").getString("status").equals("Successful")){

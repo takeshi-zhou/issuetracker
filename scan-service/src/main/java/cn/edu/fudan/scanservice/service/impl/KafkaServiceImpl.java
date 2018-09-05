@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -29,11 +32,20 @@ public class KafkaServiceImpl implements KafkaService{
 
     private Logger logger= LoggerFactory.getLogger(ScanServiceImpl.class);
 
-    @Value("${project.service.path}")
-    private String projectServicePath;
+    @Value("${inner.service.path}")
+    private String innerServicePath;
+    @Value("${inner.header.key}")
+    private  String headerKey;
+    @Value("${inner.header.value}")
+    private  String headerValue;
 
-    @Value("${rawIssue.service.path}")
-    private String rawIssueServicePath;
+    private HttpHeaders headers;
+    private void initHeaders(){
+        if(headers!=null)
+            return;
+        headers = new HttpHeaders();
+        headers.add(headerKey,headerValue);
+    }
 
     private ScanTask scanTask;
 
@@ -61,7 +73,9 @@ public class KafkaServiceImpl implements KafkaService{
     @SuppressWarnings("unchecked")
     private void updateProject(JSONObject projectParam){
         try{
-            restTemplate.put(projectServicePath,projectParam);
+            initHeaders();
+            HttpEntity<Object> entity=new HttpEntity<>(projectParam,headers);
+            restTemplate.exchange(innerServicePath+"/inner/project", HttpMethod.PUT,entity,JSONObject.class);
         }catch (Exception e){
             throw new RuntimeException("project status initial failed!");
         }
@@ -134,7 +148,8 @@ public class KafkaServiceImpl implements KafkaService{
         }else{
             if(scanResult.getDescription().equals("Mapping failed")){
                 //mapping 失败，删除当前project当前所扫commit得到的rawIssue和location
-                restTemplate.delete(rawIssueServicePath+"/"+projectId);
+                HttpEntity<String> entity=new HttpEntity<>(headers);
+                restTemplate.exchange(innerServicePath+"/inner/raw-issue/"+projectId,HttpMethod.DELETE,entity,JSONObject.class);
             }
             projectParam.put("scan_status",scanResult.getDescription());
         }

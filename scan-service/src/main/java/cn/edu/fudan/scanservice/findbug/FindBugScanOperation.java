@@ -40,7 +40,9 @@ public class FindBugScanOperation extends ScanOperationAdapter {
 
     private HttpHeaders headers;
 
-    public FindBugScanOperation() {
+    private void initHeaders(){
+        if(headers!=null)
+            return;
         headers = new HttpHeaders();
         headers.add(headerKey,headerValue);
     }
@@ -155,6 +157,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
             }
             if(!rawIssues.isEmpty()){
                 //插入所有的rawIssue
+                initHeaders();
                 HttpEntity<Object> requestEntity=new HttpEntity<>(rawIssues,headers);
                 restTemplate.exchange(innerServicePath+"/inner/raw-issue", HttpMethod.POST,requestEntity,JSONObject.class);
             }

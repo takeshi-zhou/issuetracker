@@ -38,6 +38,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     private HttpHeaders headers;
 
+    private void initHeaders(){
+        if(headers!=null)
+            return;
+        headers = new HttpHeaders();
+        headers.add(headerKey,headerValue);
+    }
+
     @Autowired
     public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
@@ -50,11 +57,6 @@ public class ProjectServiceImpl implements ProjectService {
         this.restTemplate = restTemplate;
     }
 
-    public ProjectServiceImpl(){
-        //构造函数中初始化kong的header
-        headers = new HttpHeaders();
-        headers.add(headerKey,headerValue);
-    }
 
     private ProjectDao projectDao;
 
@@ -70,6 +72,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private String getAccountId(String userToken){
+        initHeaders();
         HttpEntity<String> requestEntity=new HttpEntity<>(null,headers);
         return restTemplate.exchange(innerServicePath+"/user/accountId?userToken="+userToken,HttpMethod.GET,requestEntity,String.class).getBody();
     }
@@ -157,6 +160,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
 	public void remove(String projectId) {
+        initHeaders();
         HttpEntity<String> requestEntity=new HttpEntity<>(null,headers);
         restTemplate.exchange(innerServicePath+"/inner/issue/"+projectId, HttpMethod.DELETE,requestEntity,JSONObject.class);
         restTemplate.exchange(innerServicePath+"/inner/raw-issue/"+projectId,HttpMethod.DELETE,requestEntity,JSONObject.class);

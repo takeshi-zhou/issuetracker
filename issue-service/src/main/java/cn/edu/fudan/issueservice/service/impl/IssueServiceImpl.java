@@ -66,8 +66,10 @@ public class IssueServiceImpl implements IssueService {
 
     private HttpEntity<?> requestEntity;
 
-    public IssueServiceImpl() {
-        //构造函数中初始化kong的header
+    private void initRequestEntity(){
+        if(requestEntity!=null){
+            return;
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.add(headerKey,headerValue);
         requestEntity=new HttpEntity<>(headers);
@@ -108,10 +110,12 @@ public class IssueServiceImpl implements IssueService {
     }
 
     private String getAccountId(String userToken){
+        initRequestEntity();
         return restTemplate.exchange(innerServicePath+"/user/accountId?userToken="+userToken, HttpMethod.GET,requestEntity,String.class).getBody();
     }
 
     private JSONArray getProjectIds(String account_id){
+        initRequestEntity();
         return restTemplate.exchange(innerServicePath+"/inner/project/project-id?account_id="+account_id,HttpMethod.GET,requestEntity,JSONArray.class).getBody();
     }
 
@@ -205,6 +209,7 @@ public class IssueServiceImpl implements IssueService {
             List<RawIssue> rawIssues2=rawIssueDao.getRawIssueByCommitID(current_commit_id);
 
             //当前project已经扫描过的commit列表,是按commit_time从小到大排序的
+            initRequestEntity();
             JSONArray commits=restTemplate.exchange(innerServicePath+"/inner/scan/commits?project_id="+project_id, HttpMethod.GET,requestEntity,JSONArray.class).getBody();
             Date start_commit_time=commits.getJSONObject(0).getDate("commit_time");
             Date end_commit_time=commits.getJSONObject(commits.size()-1).getDate("commit_time");

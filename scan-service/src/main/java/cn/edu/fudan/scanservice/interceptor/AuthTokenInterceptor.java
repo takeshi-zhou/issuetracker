@@ -39,8 +39,10 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
 
     private HttpEntity<?> requestEntity;
 
-    public AuthTokenInterceptor() {
-        //构造函数中初始化kong的header
+    private void initRequestEntity(){
+        if(requestEntity!=null){
+            return;
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.add(headerKey,headerValue);
         requestEntity=new HttpEntity<>(headers);
@@ -60,6 +62,7 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
         if(userToken==null){
             throw new AuthException("need user token!");
         }
+        initRequestEntity();
         JSONObject result=restTemplate.exchange(innerServicePath+"/user/auth/"+userToken, HttpMethod.GET,requestEntity,JSONObject.class).getBody();
         if(result==null||result.getIntValue("code")!=200){
             throw new AuthException("auth failed!");

@@ -38,8 +38,10 @@ public class QuartzScheduler {
 
     private HttpEntity<?> requestEntity;
 
-    public QuartzScheduler() {
-        //构造函数中初始化kong的header
+    private void initRequestEntity(){
+        if(requestEntity!=null){
+            return;
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.add(headerKey,headerValue);
         requestEntity=new HttpEntity<>(headers);
@@ -47,11 +49,13 @@ public class QuartzScheduler {
 
     @SuppressWarnings("unchecked")
     private List<String> getAccountIds(){
+        initRequestEntity();
         return restTemplate.exchange(innerServicePath+"/user/accountIds", HttpMethod.GET, requestEntity,List.class).getBody();
     }
 
     @SuppressWarnings("unchecked")
     private List<String> getCurrentProjectList(String account_id){
+        initRequestEntity();
         return restTemplate.exchange(innerServicePath+"/inner/project/project-id?account_id="+account_id, HttpMethod.GET, requestEntity,List.class).getBody();
     }
 
