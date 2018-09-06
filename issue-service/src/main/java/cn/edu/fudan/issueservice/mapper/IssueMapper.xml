@@ -58,10 +58,19 @@
         select * from issue
         <where>
             <if test="project_id != null">
-                 project_id = #{project_id}
+                project_id = #{project_id}
             </if>
-            <if test="type != null">
-                and type = #{type}
+            <if test="types != null">
+                and type in
+                <foreach collection="types" separator="," open="(" close=")" item="type">
+                    #{type}
+                </foreach>
+            </if>
+            <if test="issue_ids != null">
+                and uuid in
+                <foreach collection="issue_ids" separator="," open="(" close=")" item="issue_id">
+                    #{issue_id}
+                </foreach>
             </if>
         </where>
         <if test="start != null  and size != null ">
@@ -79,8 +88,17 @@
             <if test="project_id != null">
                 project_id = #{project_id}
             </if>
-            <if test="type != null">
-                and type = #{type}
+            <if test="types != null">
+                and type in
+                <foreach collection="types" separator="," open="(" close=")" item="type">
+                    #{type}
+                </foreach>
+            </if>
+            <if test="issue_ids != null">
+                and uuid in
+                <foreach collection="issue_ids" separator="," open="(" close=")" item="issue_id">
+                    #{issue_id}
+                </foreach>
             </if>
         </where>
     </select>

@@ -110,6 +110,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         }else{
             code = ASTUtil.getCode(start,end,repoHome + filePath);
         }
+        filePath=filePath.substring(filePath.indexOf("/")+1);
         JSONObject location=new JSONObject();
         location.put("uuid",UUID.randomUUID().toString());
         location.put("start_line",start);

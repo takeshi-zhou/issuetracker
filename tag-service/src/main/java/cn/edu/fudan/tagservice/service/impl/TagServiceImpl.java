@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -69,5 +70,17 @@ public class TagServiceImpl implements TagService {
             tagDao.modifyOneTag(oldTagId,name);
         }
 
+    }
+
+    @Override
+    public List<Tag> getTagsByItemId(String item_id) {
+        return tagDao.getTagsByItemId(item_id);
+    }
+
+    @Override
+    public List<String> getItemIdsByTagIds(List<String> tagIds) {
+        if(tagIds==null||tagIds.size()==0)
+            return null;
+        return tagDao.getItemIdsByTagIds(tagIds);
     }
 }

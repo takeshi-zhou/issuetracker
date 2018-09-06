@@ -2,9 +2,9 @@ package cn.edu.fudan.issueservice.service;
 
 
 import cn.edu.fudan.issueservice.domain.Issue;
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
-import java.util.Map;
 
 public interface IssueService {
 
@@ -17,6 +17,8 @@ public interface IssueService {
      Issue getIssueByID(String uuid);
 
      Object getIssueList(String project_id,Integer page,Integer size);
+
+     Object getFilteredIssueList(JSONObject requestParam);
 
      Object getDashBoardInfo(String duration,String project_id,String userToken);
 

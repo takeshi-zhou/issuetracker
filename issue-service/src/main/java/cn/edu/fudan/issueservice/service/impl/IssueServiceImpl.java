@@ -28,6 +28,8 @@ public class IssueServiceImpl implements IssueService {
 
     @Value("${commit.service.path}")
     private String commitServicePath;
+    @Value("${tag.service.path}")
+    private String tagServicePath;
 
     @Value("${inner.service.path}")
     private String innerServicePath;
@@ -95,6 +97,13 @@ public class IssueServiceImpl implements IssueService {
         return issueDao.getIssueByID(uuid);
     }
 
+    private void addTagInfo(List<Issue> issues){
+        for(Issue issue:issues){
+            JSONArray tags=restTemplate.getForObject(tagServicePath+"?item_id="+issue.getUuid(),JSONArray.class);
+            issue.setTags(tags);
+        }
+    }
+
     @Override
     public Object getIssueList(String project_id,Integer page,Integer size) {
         Map<String,Object> result=new HashMap<>();
@@ -105,7 +114,38 @@ public class IssueServiceImpl implements IssueService {
         param.put("start", (page-1)*size);
         result.put("totalPage", count%size==0?count/size:count/size+1);
         result.put("totalCount",count);
-        result.put("issueList", issueDao.getIssueList(param));
+        List<Issue> issues=issueDao.getIssueList(param);
+        addTagInfo(issues);
+        result.put("issueList", issues);
+        return result;
+    }
+
+    @Override
+    public Object getFilteredIssueList(JSONObject requestParam) {
+        String project_id=requestParam.getString("project_id");
+        int size=requestParam.getIntValue("size");
+        int page=requestParam.getIntValue("page");
+        if(project_id==null ||size==0||page==0)
+            throw new IllegalArgumentException("param lost!");
+        JSONArray tag_ids=requestParam.getJSONArray("tags");
+        JSONArray types=requestParam.getJSONArray("types");
+        JSONArray issue_ids=restTemplate.postForObject(tagServicePath+"/item-ids",tag_ids,JSONArray.class);
+
+        Map<String,Object> query=new HashMap<>();
+        query.put("project_id",project_id);
+        if(types!=null&&types.size()>0)
+           query.put("types",types.toJavaList(String.class));
+        if(issue_ids!=null&&issue_ids.size()>0)
+           query.put("issue_ids",issue_ids.toJavaList(String.class));
+        int count=issueDao.getIssueCount(query);
+        query.put("size",size);
+        query.put("start",(page-1)*size);
+        List<Issue> issues=issueDao.getIssueList(query);
+        addTagInfo(issues);
+        Map<String,Object> result=new HashMap<>();
+        result.put("totalPage", count%size==0?count/size:count/size+1);
+        result.put("totalCount",count);
+        result.put("issueList",issues);
         return result;
     }
 

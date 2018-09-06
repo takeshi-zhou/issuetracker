@@ -4,6 +4,8 @@ import cn.edu.fudan.tagservice.domain.Tag;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface TagMapper {
 
@@ -20,4 +22,8 @@ public interface TagMapper {
     void modifyOneTagged(@Param("old_tag_id")String oldTagId,@Param("new_tag_id")String newTagId,@Param("item_id") String itemId);
 
     void modifyOneTag(@Param("tag_id")String tagId,@Param("name") String name);
+
+    List<Tag> getTagsByItemId(@Param("item_id") String item_id);
+
+    List<String> getItemIdsByTagIds(List<String> list);
 }

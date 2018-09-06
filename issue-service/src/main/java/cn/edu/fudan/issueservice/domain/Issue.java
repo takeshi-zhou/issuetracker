@@ -14,6 +14,7 @@ public class Issue {
     private String project_id;
     private String target_files;
     private IssueType issueType;
+    private List<Object> tags;
 
     public IssueType getIssueType() {
         return issueType;
@@ -35,6 +36,14 @@ public class Issue {
         this.raw_issue_end = raw_issue_end;
         this.project_id=project_id;
         this.target_files=target_files;
+    }
+
+    public List<Object> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Object> tags) {
+        this.tags = tags;
     }
 
     public String getType() {

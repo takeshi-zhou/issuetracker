@@ -3,15 +3,12 @@ package cn.edu.fudan.issueservice.controller;
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.ResponseBean;
 import cn.edu.fudan.issueservice.service.IssueService;
-import cn.edu.fudan.issueservice.service.RawIssueService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class IssueController {
@@ -30,6 +27,11 @@ public class IssueController {
                             @RequestParam("page")Integer page,
                             @RequestParam("size")Integer size){
     	return issueService.getIssueList(project_id,page,size);
+    }
+
+    @PostMapping(value = {"/issue/filter"})
+    public Object filterIssues(@RequestBody JSONObject requestParam){
+        return issueService.getFilteredIssueList(requestParam);
     }
 
     @GetMapping(value = {"/issue/dashboard"})

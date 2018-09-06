@@ -5,6 +5,8 @@ import cn.edu.fudan.tagservice.mapper.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author WZY
  * @version 1.0
@@ -45,5 +47,13 @@ public class TagDao {
 
     public void modifyOneTagged(String oldTagId,String newTagId, String iteamId) {
         tagMapper.modifyOneTagged(oldTagId,newTagId,iteamId);
+    }
+
+    public List<Tag> getTagsByItemId(String item_id){
+        return tagMapper.getTagsByItemId(item_id);
+    }
+
+    public List<String> getItemIdsByTagIds(List<String> tagIds){
+        return tagMapper.getItemIdsByTagIds(tagIds);
     }
 }
