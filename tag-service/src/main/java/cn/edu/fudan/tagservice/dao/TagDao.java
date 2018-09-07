@@ -41,6 +41,10 @@ public class TagDao {
         tagMapper.deleteOneTagged(tagId,itemId);
     }
 
+    public void deleteTaggeds(List<String> itemIds){
+        tagMapper.deleteTaggeds(itemIds);
+    }
+
     public void modifyOneTag(String tagId, String name) {
         tagMapper.modifyOneTag(tagId,name);
     }
@@ -55,5 +59,9 @@ public class TagDao {
 
     public List<String> getItemIdsByTagIds(List<String> tagIds){
         return tagMapper.getItemIdsByTagIds(tagIds);
+    }
+
+    public List<Tag> getAllDefaultTags(){
+        return tagMapper.getAllDefaultTags();
     }
 }

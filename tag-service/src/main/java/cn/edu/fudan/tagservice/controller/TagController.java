@@ -27,6 +27,11 @@ public class TagController {
         return tagService.getTagsByItemId(item_id);
     }
 
+    @GetMapping("/tags/default")
+    public Object getAllDefaultTags(){
+        return tagService.getAllDefaultTags();
+    }
+
     //JSONObject(name、scope、itemId、isDefault)
     @PostMapping("/tags")
     public Object addTag(@RequestBody JSONObject requestBody){
@@ -62,5 +67,15 @@ public class TagController {
     @PostMapping("/tags/item-ids")
     public Object getItemIds(@RequestBody List<String> tagIds){
         return tagService.getItemIdsByTagIds(tagIds);
+    }
+
+    @PostMapping("/tags/tagged-delete")
+    public Object deleteTagged(@RequestBody List<String> itemIds){
+        try{
+            tagService.deleteTaggeds(itemIds);
+            return new ResponseBean(200,"delete success",null);
+        }catch (Exception e){
+            return new ResponseBean(401,"delete failed :"+e.getMessage(),null);
+        }
     }
 }

@@ -11,9 +11,13 @@ public interface TagService {
 
     void deleteTag(String tagId,String itemId);
 
+    void deleteTaggeds(List<String> itemIds);
+
     void modifyTag(JSONObject requestBody);
 
     List<Tag> getTagsByItemId(String item_id);
 
     List<String> getItemIdsByTagIds(List<String> tagIds);
+
+    List<Tag> getAllDefaultTags();
 }

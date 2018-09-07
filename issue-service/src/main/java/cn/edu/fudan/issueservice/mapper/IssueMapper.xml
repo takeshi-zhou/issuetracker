@@ -153,6 +153,14 @@
         delete from issue where project_id = #{projectId}
     </delete>
 
+    <select id="getExistIssueTypes" resultType="String">
+        select distinct(type)
+        from issue
+    </select>
+
+    <select id="getIssueIdsByProjectId" resultType="String" parameterType="String">
+        select uuid from issue where project_id = #{projectId}
+    </select>
 
 
 </mapper>

@@ -51,8 +51,13 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public void deleteTag(String tagId,String itemId) {
-        tagDao.deleteOneTag(tagId);
+        //tagDao.deleteOneTag(tagId);
         tagDao.deleteOneTagged(tagId,itemId);
+    }
+
+    @Override
+    public void deleteTaggeds(List<String> itemIds) {
+        tagDao.deleteTaggeds(itemIds);
     }
 
     @Override
@@ -82,5 +87,10 @@ public class TagServiceImpl implements TagService {
         if(tagIds==null||tagIds.size()==0)
             return null;
         return tagDao.getItemIdsByTagIds(tagIds);
+    }
+
+    @Override
+    public List<Tag> getAllDefaultTags() {
+        return tagDao.getAllDefaultTags();
     }
 }

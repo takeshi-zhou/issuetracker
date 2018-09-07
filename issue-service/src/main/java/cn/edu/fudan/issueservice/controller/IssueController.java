@@ -29,6 +29,11 @@ public class IssueController {
     	return issueService.getIssueList(project_id,page,size);
     }
 
+    @GetMapping(value={"/issue/issue-types"})
+    public Object getExistIssueTypes(){
+        return issueService.getExistIssueTypes();
+    }
+
     @PostMapping(value = {"/issue/filter"})
     public Object filterIssues(@RequestBody JSONObject requestParam){
         return issueService.getFilteredIssueList(requestParam);

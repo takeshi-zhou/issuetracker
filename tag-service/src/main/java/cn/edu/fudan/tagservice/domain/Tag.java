@@ -11,11 +11,22 @@ public class Tag {
     private String color;
     private String icon;
 
+    public Tag(){}
+
     public Tag(String uuid,String name,String scope,String color){
         this.uuid=uuid;
         this.name=name;
         this.scope=scope;
         this.color=color;
+        this.icon=null;
+    }
+
+    public Tag(String uuid,String name,String scope,String color,String icon){
+        this.uuid=uuid;
+        this.name=name;
+        this.scope=scope;
+        this.color=color;
+        this.icon=icon;
     }
 
     public String getUuid() {

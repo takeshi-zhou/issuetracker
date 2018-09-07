@@ -19,11 +19,15 @@ public interface TagMapper {
 
     void deleteOneTagged(@Param("tag_id")String tagId,@Param("item_id") String itemId);
 
+    void deleteTaggeds(List<String> list);
+
     void modifyOneTagged(@Param("old_tag_id")String oldTagId,@Param("new_tag_id")String newTagId,@Param("item_id") String itemId);
 
     void modifyOneTag(@Param("tag_id")String tagId,@Param("name") String name);
 
     List<Tag> getTagsByItemId(@Param("item_id") String item_id);
+
+    List<Tag> getAllDefaultTags();
 
     List<String> getItemIdsByTagIds(List<String> list);
 }

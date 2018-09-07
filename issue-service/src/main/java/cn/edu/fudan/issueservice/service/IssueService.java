@@ -24,6 +24,8 @@ public interface IssueService {
 
      Object getStatisticalResults(Integer month, String project_id, String userToken);
 
+     Object getExistIssueTypes();
+
      void startMapping(String project_id, String pre_commit_id, String current_commit_id);
 
 }

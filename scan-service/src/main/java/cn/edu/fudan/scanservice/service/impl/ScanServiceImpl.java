@@ -83,6 +83,7 @@ public class ScanServiceImpl implements ScanService {
 
     @Override
     public Object getCommits(String project_id,Integer page,Integer size,Boolean is_whole) {
+        initHttpEntity();
         String repo_id=restTemplate.exchange(innerServicePath+"/inner/project/repo-id?project-id="+project_id, HttpMethod.GET,httpEntity,String.class).getBody();
         JSONObject commitResponse=restTemplate.getForObject(commitServicePath+"?repo_id="+repo_id+"&page="+page+"&per_page="+size+"&is_whole=true",JSONObject.class);
         if(commitResponse!=null){

@@ -55,6 +55,14 @@
         delete from tagged where tag_id=#{tag_id} and item_id=#{item_id}
     </delete>
 
+    <delete id="deleteTaggeds" parameterType="List">
+        delete from tagger
+        where item_id in
+        <foreach collection="list" separator="," open="(" close=")" item="item_id">
+            #{item_id}
+        </foreach>
+    </delete>
+
     <update id="modifyOneTagged" parameterType="String">
         update tagged set tag_id=#{new_tag_id} where tag_id=#{old_tag_id} and item_id=#{item_id}
     </update>
@@ -76,6 +84,10 @@
                 #{tag_id}
             </foreach>
         </if>
+    </select>
+
+    <select id="getAllDefaultTags" resultMap="tag">
+        select * from tag
     </select>
 
 </mapper>

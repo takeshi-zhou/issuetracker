@@ -43,4 +43,12 @@ public class IssueDao {
 		return issueMapper.getIssueList(map);
 	}
 
+	public List<String> getExistIssueTypes(){
+		return issueMapper.getExistIssueTypes();
+	}
+
+	public List<String> getIssueIdsByProjectId(String projectId){
+		return issueMapper.getIssueIdsByProjectId(projectId);
+	}
+
 }
