@@ -83,7 +83,7 @@ public class ScanOperationAdapter implements ScanOperation {
         initHeaders();
         HttpEntity<String> entity=new HttpEntity<>(headers);
         String repoPath=restTemplate.exchange(innerServicePath+"/inner/project/repo-path/"+projectId,HttpMethod.GET,entity,String.class).getBody();
-        JSONObject currentProject=restTemplate.exchange(innerServicePath+"/inner/project"+projectId,HttpMethod.GET,entity,JSONObject.class).getBody();
+        JSONObject currentProject=restTemplate.exchange(innerServicePath+"/inner/project/"+projectId,HttpMethod.GET,entity,JSONObject.class).getBody();
         String projectName=currentProject.getString("name");
         String repoId=currentProject.getString("repo_id");
         //新建一个Scan对象
