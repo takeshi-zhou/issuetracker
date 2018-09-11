@@ -45,7 +45,7 @@ public class IssueController {
                                    HttpServletRequest request){
         String userToken=request.getHeader("token");
         return issueService.getDashBoardInfo(duration,project_id,userToken);
-    }
+}
 
     @GetMapping(value = {"/issue/statistical-results"})
     public Object getStatisticalResults(@RequestParam("month")Integer month,

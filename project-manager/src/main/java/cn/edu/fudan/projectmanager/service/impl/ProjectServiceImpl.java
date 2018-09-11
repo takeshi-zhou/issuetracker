@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -47,6 +48,13 @@ public class ProjectServiceImpl implements ProjectService {
             return;
         headers = new HttpHeaders();
         headers.add(headerKey,headerValue);
+    }
+
+    private RedisTemplate<Object,Object> redisTemplate;
+
+    @Autowired
+    public void setRedisTemplate(RedisTemplate<Object,Object> redisTemplate){
+        this.redisTemplate=redisTemplate;
     }
 
     @Autowired
@@ -170,6 +178,7 @@ public class ProjectServiceImpl implements ProjectService {
         restTemplate.exchange(innerServicePath+"/inner/issue/"+projectId, HttpMethod.DELETE,requestEntity,JSONObject.class);
         restTemplate.exchange(innerServicePath+"/inner/raw-issue/"+projectId,HttpMethod.DELETE,requestEntity,JSONObject.class);
         restTemplate.exchange(innerServicePath+"/inner/scan/"+projectId,HttpMethod.DELETE,requestEntity,JSONObject.class);
+        redisTemplate.delete(projectId);
 		projectDao.remove(projectId);
 	}
 
