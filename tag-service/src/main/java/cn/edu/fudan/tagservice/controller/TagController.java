@@ -22,10 +22,6 @@ public class TagController {
         this.tagService = tagService;
     }
 
-    @GetMapping("/tags")
-    public Object getTags(@RequestParam("item_id")String item_id){
-        return tagService.getTagsByItemId(item_id);
-    }
 
     @GetMapping("/tags/default")
     public Object getAllDefaultTags(){
@@ -64,12 +60,12 @@ public class TagController {
         }
     }
 
-    @PostMapping("/tags/item-ids")
+    @PostMapping("/inner/tags/item-ids")
     public Object getItemIds(@RequestBody List<String> tagIds){
         return tagService.getItemIdsByTagIds(tagIds);
     }
 
-    @PostMapping("/tags/tagged-delete")
+    @PostMapping("/inner/tags/tagged-delete")
     public Object deleteTagged(@RequestBody List<String> itemIds){
         try{
             tagService.deleteTaggeds(itemIds);
@@ -77,5 +73,9 @@ public class TagController {
         }catch (Exception e){
             return new ResponseBean(401,"delete failed :"+e.getMessage(),null);
         }
+    }
+    @GetMapping("/inner/tags")
+    public Object getTags(@RequestParam("item_id")String item_id){
+        return tagService.getTagsByItemId(item_id);
     }
 }
