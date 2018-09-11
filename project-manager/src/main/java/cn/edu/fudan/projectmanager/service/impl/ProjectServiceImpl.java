@@ -8,6 +8,8 @@ import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.service.ProjectService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,6 +27,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
+
+    private static Logger logger= LoggerFactory.getLogger(ProjectServiceImpl.class);
 
     @Value("${github.api.path}")
     private String githubAPIPath;
@@ -77,6 +81,7 @@ public class ProjectServiceImpl implements ProjectService {
     private void send(String projectId, String url){
         NeedDownload needDownload=new NeedDownload(projectId,url);
         kafkaTemplate.send("ProjectManager", JSONObject.toJSONString(needDownload));
+        logger.info("send message to topic ProjectManage ---> "+JSONObject.toJSONString(needDownload));
     }
 
     private String getAccountId(String userToken){
