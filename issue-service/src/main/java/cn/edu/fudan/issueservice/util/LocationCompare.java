@@ -69,7 +69,7 @@ public class LocationCompare {
 	}
 	
 	private static boolean theSameItem(String content_1,String content_2){
-		return lcs(content_1, content_2)/Math.max(content_1.length(), content_2.length())>threshold_lcs;
+		return ((double)lcs(content_1, content_2))/(double) Math.max(content_1.length(), content_2.length())>threshold_lcs;
 		/*
 		   if (lcs(content_1, content_2)/Math.max(content_1.length(), content_2.length())>threshold_lcs)
 		       return true;

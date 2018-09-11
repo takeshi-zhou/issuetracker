@@ -241,6 +241,8 @@ public class IssueServiceImpl implements IssueService {
         if(pre_commit_id.equals(current_commit_id)){
             //当前project第一次扫描，所有的rawIssue都是issue
             List<RawIssue> rawIssues=rawIssueDao.getRawIssueByCommitID(current_commit_id);
+            if (rawIssues==null || rawIssues.isEmpty())
+                return;
             for(RawIssue rawIssue:rawIssues){
                 String new_IssueId= UUID.randomUUID().toString();
                 rawIssue.setIssue_id(new_IssueId);
@@ -259,7 +261,8 @@ public class IssueServiceImpl implements IssueService {
             //不是第一次扫描，需要和前一次的commit进行mapping
             List<RawIssue> rawIssues1=rawIssueDao.getRawIssueByCommitID(pre_commit_id);
             List<RawIssue> rawIssues2=rawIssueDao.getRawIssueByCommitID(current_commit_id);
-
+            if (rawIssues2==null || rawIssues1.isEmpty())
+                return;
             //当前project已经扫描过的commit列表,是按commit_time从小到大排序的
             initRequestEntity();
             JSONArray commits=restTemplate.exchange(innerServicePath+"/inner/scan/commits?project_id="+project_id, HttpMethod.GET,requestEntity,JSONArray.class).getBody();
