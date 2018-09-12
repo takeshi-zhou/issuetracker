@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ProjectService {
 
-     void addOneProject(String userToken,String url);
+     void addOneProject(String userToken,Project project);
 
      Object getProjectList(String userToken);
 

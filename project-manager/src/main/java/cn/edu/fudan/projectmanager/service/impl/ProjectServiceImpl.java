@@ -104,11 +104,11 @@ public class ProjectServiceImpl implements ProjectService {
             JSONArray fileList=restTemplate.getForEntity(githubAPIPath+author_projectName+"/contents",JSONArray.class).getBody();
             if(fileList!=null){
                 for(int i=0;i<fileList.size();i++){
-                   JSONObject file=fileList.getJSONObject(i);
-                   if(file.getString("name").equals("pom.xml")){
-                       isMavenProject=true;
-                       break;
-                   }
+                    JSONObject file=fileList.getJSONObject(i);
+                    if(file.getString("name").equals("pom.xml")){
+                        isMavenProject=true;
+                        break;
+                    }
                 }
                 if(!isMavenProject)
                     throw new RuntimeException("failed,this project is not maven project!");
@@ -119,7 +119,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void addOneProject(String userToken,String url) {
+    public void addOneProject(String userToken,Project project) {
+        String url=project.getUrl();
         if(url==null){
             throw new RuntimeException("please input the project url!");
         }
@@ -131,7 +132,6 @@ public class ProjectServiceImpl implements ProjectService {
         }
         String projectName=url.substring(url.lastIndexOf("/")+1);
         String projectId= UUID.randomUUID().toString();
-        Project project=new Project();
         project.setUuid(projectId);
         project.setName(projectName);
         project.setUrl(url);
@@ -172,15 +172,22 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Override
-	public void remove(String projectId) {
+    public void remove(String projectId) {
         initHeaders();
         HttpEntity<String> requestEntity=new HttpEntity<>(null,headers);
-        restTemplate.exchange(innerServicePath+"/inner/issue/"+projectId, HttpMethod.DELETE,requestEntity,JSONObject.class);
-        restTemplate.exchange(innerServicePath+" "+projectId,HttpMethod.DELETE,requestEntity,JSONObject.class);
-        restTemplate.exchange(innerServicePath+"/inner/scan/"+projectId,HttpMethod.DELETE,requestEntity,JSONObject.class);
+        JSONObject response=null;
+        response=restTemplate.exchange(innerServicePath+"/inner/issue/"+projectId, HttpMethod.DELETE,requestEntity,JSONObject.class).getBody();
+        if(response!=null)
+            logger.info(response.toJSONString());
+        response=restTemplate.exchange(innerServicePath+"/inner/raw-issue/"+projectId,HttpMethod.DELETE,requestEntity,JSONObject.class).getBody();
+        if(response!=null)
+            logger.info(response.toJSONString());
+        response=restTemplate.exchange(innerServicePath+"/inner/scan/"+projectId,HttpMethod.DELETE,requestEntity,JSONObject.class).getBody();
+        if(response!=null)
+            logger.info(response.toJSONString());
         redisTemplate.delete(projectId);
-		projectDao.remove(projectId);
-	}
+        projectDao.remove(projectId);
+    }
 
     @Override
     public String getProjectNameById(String projectId) {

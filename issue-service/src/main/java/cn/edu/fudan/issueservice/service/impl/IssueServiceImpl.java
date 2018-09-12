@@ -86,9 +86,11 @@ public class IssueServiceImpl implements IssueService {
     public void deleteIssueByProjectId(String projectId) {
         //先删除该项目所有issue对应的tag
         List<String> issueIds=issueDao.getIssueIdsByProjectId(projectId);
-        JSONObject response=restTemplate.postForObject(tagServicePath+"/tagged-delete",issueIds,JSONObject.class);
-        if(response==null||response.getIntValue("code")!=200){
-            throw new RuntimeException("tag item delete failed!");
+        if(issueIds!=null&&!issueIds.isEmpty()){
+            JSONObject response=restTemplate.postForObject(tagServicePath+"/tagged-delete",issueIds,JSONObject.class);
+            if(response==null||response.getIntValue("code")!=200){
+                throw new RuntimeException("tag item delete failed!");
+            }
         }
         issueDao.deleteIssueByProjectId(projectId);
 
