@@ -1,9 +1,5 @@
 package cn.edu.fudan.tagservice.domain;
 
-/**
- * @author WZY
- * @version 1.0
- **/
 public class Tag {
     private String uuid;
     private String name;

@@ -34,6 +34,7 @@ public class IssueController {
         return issueService.getExistIssueTypes();
     }
 
+    //参数超过三个不宜采用requestParameter、post请求（参数封装成一个类自动解析）、get+requestBody
     @PostMapping(value = {"/issue/filter"})
     public Object filterIssues(@RequestBody JSONObject requestParam){
         return issueService.getFilteredIssueList(requestParam);

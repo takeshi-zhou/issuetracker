@@ -176,7 +176,7 @@ public class ProjectServiceImpl implements ProjectService {
         initHeaders();
         HttpEntity<String> requestEntity=new HttpEntity<>(null,headers);
         restTemplate.exchange(innerServicePath+"/inner/issue/"+projectId, HttpMethod.DELETE,requestEntity,JSONObject.class);
-        restTemplate.exchange(innerServicePath+"/inner/raw-issue/"+projectId,HttpMethod.DELETE,requestEntity,JSONObject.class);
+        restTemplate.exchange(innerServicePath+" "+projectId,HttpMethod.DELETE,requestEntity,JSONObject.class);
         restTemplate.exchange(innerServicePath+"/inner/scan/"+projectId,HttpMethod.DELETE,requestEntity,JSONObject.class);
         redisTemplate.delete(projectId);
 		projectDao.remove(projectId);

@@ -25,7 +25,7 @@ public class IssueCount implements Serializable {
     public void issueCountUpdate(int newIssueCount, int eliminatedIssueCount, int remainingIssueCount) {
         this.newIssueCount += newIssueCount;
         this.eliminatedIssueCount += eliminatedIssueCount;
-        this.remainingIssueCount += remainingIssueCount;
+        this.remainingIssueCount = remainingIssueCount;
     }
 
     public void issueCountUpdate(IssueCount another){
