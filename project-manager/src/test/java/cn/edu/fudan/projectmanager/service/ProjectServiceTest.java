@@ -1,57 +1,130 @@
 package cn.edu.fudan.projectmanager.service;
 
+import cn.edu.fudan.projectmanager.ProjectManagerApplication;
 import cn.edu.fudan.projectmanager.ProjectManagerApplicationTests;
+import cn.edu.fudan.projectmanager.dao.ProjectDao;
 import cn.edu.fudan.projectmanager.domain.Project;
+import cn.edu.fudan.projectmanager.service.impl.ProjectServiceImpl;
+import cn.edu.fudan.projectmanager.tool.MockTestConnection;
+import cn.edu.fudan.projectmanager.tool.TestDataMaker;
+import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.api.support.membermodification.MemberMatcher;
+import org.powermock.api.support.membermodification.MemberModifier;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
-
-public class ProjectServiceTest extends ProjectManagerApplicationTests {
-
-    @Autowired
-    ProjectService projectService;
+@RunWith(PowerMockRunner.class)
+@PowerMockRunnerDelegate(SpringRunner.class)
+@SpringBootTest(classes = ProjectManagerApplication.class)
+@TestPropertySource("classpath:testApplication.properties")
+@PrepareForTest({ProjectService.class,ProjectServiceImpl.class,ProjectDao.class})
+@PowerMockIgnore("javax.management.*")
+public class ProjectServiceTest {
 
     Project project;
+    Project projectUpdate;
+    TestDataMaker testDataMaker;
+
+    @Mock
+    private ProjectDao projectDao;
+
+    @Autowired
+    @InjectMocks
+    private ProjectService projectService = new ProjectServiceImpl();
+
 
     @Before
     public void setup() throws Exception {
-
-        project = new Project();
-        project.setUuid("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
-        project.setName("Java");
-        project.setLanguage("Java");
-        project.setUrl("https://github.com/DuGuQiuBai/Java");
-        project.setVcs_type("git");
-        project.setAccount_id("1");
-        project.setDownload_status("Downloaded");
-        project.setScan_status("Not Scanned");
-        project.setDescription("27天成为Java大神");
-        project.setRepo_id("227a91de-a522-11e8-8fa0-d067e5ea858d");
-
-
+        testDataMaker = new TestDataMaker();
+        project = testDataMaker.projectMakerPro2();
+        projectUpdate = testDataMaker.projectMakerPro1();
+        MemberModifier.field(ProjectServiceImpl .class, "projectDao").set(projectService ,projectDao );
+        System.out.println("finish mocking");
     }
+
+
+
     /*
-        addOneProject方法的测试需要account-service项目启动
+        关于kafka发送消息下载不知道如何检验
      */
     @Test
-    @Transactional
-    public void addOneProject() {
-        //projectService.addOneProject("ec15d79e36e14dd258cfff3d48b73d35","https://github.com/DuGuQiuBai/Java");
+    public void addOneProject() throws Exception{
+        String accountId = "1";
+        doNothing().when(projectDao).addOneProject(project);
+        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"getAccountId")).toReturn(accountId);
+        //当url地址为null时
+        try{
+            String url = null;
+            projectService.addOneProject("1",url);
+        }catch(RuntimeException e){
+            assertEquals(e.getMessage(),"please input the project url!");
+        }
+
+        try{
+            String url = "https://github.co";
+            projectService.addOneProject("1",url);
+        }catch(RuntimeException e){
+            assertEquals(e.getMessage(),"invalid url!");
+        }
+
+        try{
+            String url = "https://github.com/TheAlgorit";
+            projectService.addOneProject("1",url);
+        }catch(RuntimeException e){
+            assertEquals(e.getMessage(),"invalid url!");
+        }
+
+        try{
+            String url = "https://github.com/TheAlgorithms/Java";
+            projectService.addOneProject("1",url);
+        }catch(RuntimeException e){
+            assertEquals(e.getMessage(),"failed,this project is not maven project!");
+        }
+
+        try{
+            String url = "hhttps://github.com/spotify/docker-maven-plugin";
+            PowerMockito.when(projectDao.hasBeenAdded(accountId,url)).thenThrow( new RuntimeException("The project has been added!"));
+            projectService.addOneProject("1",url);
+        }catch(RuntimeException e){
+            assertEquals(e.getMessage(),"The project has been added!");
+        }
+
+
+
+
     }
 
-    /*
-        addOneProject方法的测试需要account-service项目启动
-     */
+
     @Test
     public void getProjectList() {
-        List<Project> list = (List<Project>)projectService.getProjectList("ec15d79e36e14dd258cfff3d48b73d35");
-        for(Project project : list){
-            System.out.println(project.getName() + "  " + project.getUrl());
+        List<Project> list = new ArrayList<Project>();
+        list.add(project);
+        list.add(projectUpdate);
+        PowerMockito.when(projectDao.getProjectByAccountId("1")).thenReturn(list);
+
+        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"getAccountId")).toReturn("1");
+
+        List<Project> listResult = (List<Project>)projectService.getProjectList("22222");
+        for (Project pro : listResult) {
+            System.out.println(pro);
         }
 
     }
