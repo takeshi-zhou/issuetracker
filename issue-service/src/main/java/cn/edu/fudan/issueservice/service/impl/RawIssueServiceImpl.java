@@ -12,6 +12,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -94,6 +95,7 @@ public class RawIssueServiceImpl implements RawIssueService {
      * @author WZY
      * @param projectId 项目的id
      */
+    @Transactional
     @Override
     public void deleteRawIssueByProjectId(String projectId) {
         locationDao.deleteLocationByProjectId(projectId);

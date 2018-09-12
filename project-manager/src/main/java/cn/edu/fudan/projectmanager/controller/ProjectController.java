@@ -24,7 +24,7 @@ public class ProjectController {
     public Object addProject(HttpServletRequest request, @RequestBody Project project){
         String userToken=request.getHeader("token");
         try{
-            projectService.addOneProject(userToken,project.getUrl());
+            projectService.addOneProject(userToken,project);
             return new ResponseBean(200,"add success",null);
         }catch (Exception e){
             return new ResponseBean(401,"add failed :"+e.getMessage(),null);

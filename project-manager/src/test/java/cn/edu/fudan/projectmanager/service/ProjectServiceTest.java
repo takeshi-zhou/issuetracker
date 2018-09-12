@@ -41,7 +41,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
     @Test
     @Transactional
     public void addOneProject() {
-        projectService.addOneProject("ec15d79e36e14dd258cfff3d48b73d35","https://github.com/DuGuQiuBai/Java");
+        //projectService.addOneProject("ec15d79e36e14dd258cfff3d48b73d35","https://github.com/DuGuQiuBai/Java");
     }
 
     /*

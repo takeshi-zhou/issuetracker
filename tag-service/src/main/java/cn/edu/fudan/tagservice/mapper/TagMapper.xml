@@ -56,7 +56,7 @@
     </delete>
 
     <delete id="deleteTaggeds" parameterType="List">
-        delete from tagger
+        delete from tagged
         where item_id in
         <foreach collection="list" separator="," open="(" close=")" item="item_id">
             #{item_id}
