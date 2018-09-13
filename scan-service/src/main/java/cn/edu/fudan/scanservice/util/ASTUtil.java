@@ -3,6 +3,7 @@ package cn.edu.fudan.scanservice.util;
 import org.eclipse.jdt.core.dom.*;
 
 import java.io.*;
+import java.util.Set;
 
 public class ASTUtil {
 
@@ -65,6 +66,24 @@ public class ASTUtil {
                 }
                 line++;
                 if(line>endLine)break;
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        return code.toString();
+    }
+
+    public static String getCodeAtSpecificLines(Set<String> lines,String filePath){
+        StringBuilder code=new StringBuilder();
+        String s="";
+        int line=1;
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
+            while((s=bufferedReader.readLine())!=null){
+                if(lines.contains(String.valueOf(line))){
+                    code.append(s);
+                    code.append("/n");
+                }
+                line++;
             }
         }catch (IOException e){
             e.printStackTrace();

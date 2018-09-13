@@ -93,19 +93,29 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         if(iterator!=null){
             int max=0;
             int min=99999;
+            Set<String> container=new HashSet<>();
+            StringBuilder bugLineBuilder=new StringBuilder();
             while(iterator.hasNext()){
                 Element SourceLine=iterator.next();
                 String startBugLine=SourceLine.attributeValue("start");
-                String endBugLine=SourceLine.attributeValue("end");
-                int sourceStart=Integer.parseInt(startBugLine);
-                int sourceEnd=Integer.parseInt(endBugLine);
-                if(sourceStart<min)
-                    min=sourceStart;
-                if(sourceEnd>max)
-                    max=sourceEnd;
+                if(!container.contains(startBugLine)){
+                    container.add(startBugLine);
+                    bugLineBuilder.append(",");
+                    bugLineBuilder.append(startBugLine);
+                }
+//                String endBugLine=SourceLine.attributeValue("end");
+//                int sourceStart=Integer.parseInt(startBugLine);
+//                int sourceEnd=Integer.parseInt(endBugLine);
+//                if(sourceStart<min)
+//                    min=sourceStart;
+//                if(sourceEnd>max)
+//                    max=sourceEnd;
             }
-            bugLines=min+"-"+max;
-            code = ASTUtil.getCode(min,max,repoHome + filePath);
+            if(bugLineBuilder.length()>0)
+                bugLines=bugLineBuilder.deleteCharAt(0).toString();
+          //  bugLines=min+"-"+max;
+            //code = ASTUtil.getCode(min,max,repoHome + filePath);
+            code= ASTUtil.getCodeAtSpecificLines(container,repoHome+filePath);
 
         }else{
             code = ASTUtil.getCode(start,end,repoHome + filePath);

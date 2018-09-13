@@ -61,7 +61,7 @@ public class TagController {
         }
     }
 
-    @PostMapping("/inner/tags/")
+    @PostMapping("/inner/tags")
     public Object addMultiTaggedItem(@RequestBody List<TaggedItem> list){
         try{
             tagService.addMultiTaggedItem(list);
