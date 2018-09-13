@@ -117,7 +117,7 @@
         </where>
     </select>
 
-    <select id="getSolvedIssueIds" parameterType="String" resultType="List">
+    <select id="getSolvedIssueIds" parameterType="String" resultType="String">
         select uuid from issue
         where project_id = #{project_id} and end_commit = #{commit_id}
     </select>

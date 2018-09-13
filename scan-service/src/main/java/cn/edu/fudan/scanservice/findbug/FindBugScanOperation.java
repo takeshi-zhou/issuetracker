@@ -113,7 +113,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
             }
             if(bugLineBuilder.length()>0)
                 bugLines=bugLineBuilder.deleteCharAt(0).toString();
-          //  bugLines=min+"-"+max;
+            //  bugLines=min+"-"+max;
             //code = ASTUtil.getCode(min,max,repoHome + filePath);
             code= ASTUtil.getCodeAtSpecificLines(container,repoHome+filePath);
 

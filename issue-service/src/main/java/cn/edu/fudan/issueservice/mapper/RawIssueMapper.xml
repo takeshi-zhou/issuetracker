@@ -91,13 +91,19 @@
 	</select>
 	
 	<select id="getRawIssueByIssueId" parameterType="String" resultMap="rawIssue">
+		select * from rawIssue as a where issue_id=#{issueId}
+		order by (select commit_time from scan as b where a.commit_id = b.commit_id ) desc
+	</select>
+
+
+</mapper>
+
+<!--
 		select a.* ,b.commit_time as commit_time
 		from rawIssue as a
 		inner join commit as b
 		on a.commit_id = b.commit_id
 		where a.issue_id=#{issueId}
 		order by commit_time
-	</select>
 
-
-</mapper>
+-->

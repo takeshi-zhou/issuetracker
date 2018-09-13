@@ -368,6 +368,8 @@ public class IssueServiceImpl implements IssueService {
         if(!insertIssueList.isEmpty()){
             issueDao.insertIssueList(insertIssueList);
         }
-        addSolvedTag(project_id,pre_commit_id);
+        if (!pre_commit_id.equals(current_commit_id)){
+            addSolvedTag(project_id,pre_commit_id);
+        }
     }
 }
