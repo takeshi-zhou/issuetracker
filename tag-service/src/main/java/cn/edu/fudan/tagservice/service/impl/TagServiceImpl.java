@@ -3,6 +3,7 @@ package cn.edu.fudan.tagservice.service.impl;
 import cn.edu.fudan.tagservice.dao.TagDao;
 import cn.edu.fudan.tagservice.domain.Priority;
 import cn.edu.fudan.tagservice.domain.Tag;
+import cn.edu.fudan.tagservice.domain.TaggedItem;
 import cn.edu.fudan.tagservice.service.TagService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,8 @@ public class TagServiceImpl implements TagService {
                 tag_id = UUID.randomUUID().toString();
                 tagDao.addOneTag(new Tag(tag_id,name,scope,Priority.getByValue("name").getColor()));
             }
+            if(tagDao.hasBeenTagged(tag_id,itemId)>0)
+                throw new RuntimeException("duplicate tag!");
             tagDao.addOneTaggedItem(itemId,tag_id);
         }else{
             if (Priority.contains(name))
@@ -47,6 +50,11 @@ public class TagServiceImpl implements TagService {
             tagDao.addOneTag(new Tag(tag_id,name,scope,"#ffffff"));
             tagDao.addOneTaggedItem(itemId,tag_id);
         }
+    }
+
+    @Override
+    public void addMultiTaggedItem(List<TaggedItem> list) {
+        tagDao.addMultiTaggedItem(list);
     }
 
     @Override

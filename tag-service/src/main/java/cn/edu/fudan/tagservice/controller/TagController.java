@@ -1,6 +1,7 @@
 package cn.edu.fudan.tagservice.controller;
 
 import cn.edu.fudan.tagservice.domain.ResponseBean;
+import cn.edu.fudan.tagservice.domain.TaggedItem;
 import cn.edu.fudan.tagservice.service.TagService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,16 @@ public class TagController {
     public  Object modifyTag(@RequestBody JSONObject requestBody){
         try{
             tagService.modifyTag(requestBody);
+            return new ResponseBean(200,"modify success",null);
+        }catch (Exception e){
+            return new ResponseBean(401,"modify failed :"+e.getMessage(),null);
+        }
+    }
+
+    @PostMapping("/inner/tags/")
+    public Object addMultiTaggedItem(@RequestBody List<TaggedItem> list){
+        try{
+            tagService.addMultiTaggedItem(list);
             return new ResponseBean(200,"add success",null);
         }catch (Exception e){
             return new ResponseBean(401,"add failed :"+e.getMessage(),null);

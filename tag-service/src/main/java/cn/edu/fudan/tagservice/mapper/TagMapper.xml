@@ -47,6 +47,21 @@
               )
     </insert>
 
+    <insert id="addMultiTaggedItem" parameterType="List">
+        insert into tagged
+              (
+                  item_id,
+                  tag_id
+              )
+        values
+        <foreach collection="list" item="item" index="index" separator =",">
+            (
+                #{item.item_id},
+                #{item.tag_id}
+            )
+        </foreach>
+    </insert>
+
     <delete id="deleteOneTag" parameterType="String">
         delete from tag where uuid = #{tag_id}
     </delete>
@@ -88,6 +103,10 @@
 
     <select id="getAllDefaultTags" resultMap="tag">
         select * from tag
+    </select>
+
+    <select id="hasBeenTagged" parameterType="String" resultType="Integer">
+        select count(*) from tag where tag_id = #{tag_id} and item_id = #{item_id}
     </select>
 
 </mapper>
