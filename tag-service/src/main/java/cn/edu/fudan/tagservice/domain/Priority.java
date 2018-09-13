@@ -10,6 +10,7 @@ public enum Priority{
     Normal("#ebcb8d"),
     Low("#a0b08f"),
     Ignore("#628e8b"),
+    Solved("#d3d3d3"),
     Misinformation("#5499bd");
 
     private String color;

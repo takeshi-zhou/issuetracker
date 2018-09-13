@@ -99,9 +99,21 @@ public class ScanServiceImpl implements ScanService {
                 is_whole=true;
             }else{
                 String lastScannedCommitId=scannedCommitId.get(scannedCommitId.size()-1);
+                //add for disable commits befor scanning commits
+                boolean disabled = false;
                 for(int i=0;i<commitArray.size();i++){
                     JSONObject commit=commitArray.getJSONObject(i);
                     String commit_id=commit.getString("commit_id");
+                    if(scannedCommitId.contains(commit_id)||disabled){
+                        commit.put("isScanned",true);
+                        if(commit_id.equals(lastScannedCommitId)){
+                            index=i;
+                        }
+                        disabled = true;
+                    }else{
+                        commit.put("isScanned",false);
+                    }
+                    /*
                     if(scannedCommitId.contains(commit_id)){
                         commit.put("isScanned",true);
                         if(commit_id.equals(lastScannedCommitId)){
@@ -109,7 +121,7 @@ public class ScanServiceImpl implements ScanService {
                         }
                     }else{
                         commit.put("isScanned",false);
-                    }
+                    }*/
                 }
             }
             Map<String,Object> result=new HashMap<>();
