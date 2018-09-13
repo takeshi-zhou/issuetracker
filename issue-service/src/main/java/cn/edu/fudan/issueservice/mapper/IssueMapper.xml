@@ -72,6 +72,12 @@
                     #{issue_id}
                 </foreach>
             </if>
+            <if test="solved_issue_ids != null">
+                and uuid not in
+                <foreach collection="solved_issue_ids" separator="," open="(" close=")" item="issue_id">
+                    #{issue_id}
+                </foreach>
+            </if>
         </where>
         order by (select commit_time from scan where commit_id = end_commit) desc ,
         (select commit_time from scan where commit_id = start_commit ) desc
@@ -102,7 +108,18 @@
                     #{issue_id}
                 </foreach>
             </if>
+            <if test="solved_issue_ids != null">
+                and uuid not in
+                <foreach collection="solved_issue_ids" separator="," open="(" close=")" item="issue_id">
+                    #{issue_id}
+                </foreach>
+            </if>
         </where>
+    </select>
+
+    <select id="getSolvedIssueIds" parameterType="String" resultType="List">
+        select uuid from issue
+        where project_id = #{project_id} and end_commit = #{commit_id}
     </select>
 
     <update id="batchUpdateIssue" parameterType="List">

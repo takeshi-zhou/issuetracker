@@ -1,6 +1,7 @@
 package cn.edu.fudan.tagservice.dao;
 
 import cn.edu.fudan.tagservice.domain.Tag;
+import cn.edu.fudan.tagservice.domain.TaggedItem;
 import cn.edu.fudan.tagservice.mapper.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,10 @@ public class TagDao {
 
     public void addOneTaggedItem( String item_id, String tag_id){
         tagMapper.addOneTaggedItem(item_id,tag_id);
+    }
+
+    public void addMultiTaggedItem(List<TaggedItem> list){
+        tagMapper.addMultiTaggedItem(list);
     }
 
     public String getUuidByNameAndScope(String name, String scope) {
@@ -63,5 +68,9 @@ public class TagDao {
 
     public List<Tag> getAllDefaultTags(){
         return tagMapper.getAllDefaultTags();
+    }
+
+    public Integer hasBeenTagged(String tag_id,String item_id){
+        return tagMapper.hasBeenTagged(tag_id,item_id);
     }
 }

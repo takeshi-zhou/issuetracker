@@ -26,6 +26,11 @@ import java.util.*;
 @Service
 public class IssueServiceImpl implements IssueService {
 
+    @Value("${solved.tag_id}")
+    private String solvedTagId;
+    @Value("${ignore.tag_id}")
+    private String ignoreTagId;
+
     @Value("${commit.service.path}")
     private String commitServicePath;
     @Value("${tag.service.path}")
@@ -119,6 +124,14 @@ public class IssueServiceImpl implements IssueService {
         Map<String,Object> param=new HashMap<>();
         param.put("project_id",project_id);
         param.put("size",size);
+        //获取已经solve的和ignore的issue_ids
+        List<String> tag_ids=new ArrayList<>();
+        tag_ids.add(solvedTagId);
+        tag_ids.add(ignoreTagId);
+        JSONArray solved_issue_ids=restTemplate.postForObject(tagServicePath+"/item-ids",tag_ids,JSONArray.class);
+        if(solved_issue_ids!=null&&solved_issue_ids.size()>0){
+            param.put("solved_issue_ids",solved_issue_ids.toJavaList(String.class));
+        }
         int count=issueDao.getIssueCount(param);
         param.put("start", (page-1)*size);
         result.put("totalPage", count%size==0?count/size:count/size+1);
@@ -204,36 +217,50 @@ public class IssueServiceImpl implements IssueService {
         return result;
     }
 
-    private List<IssueCount> getFakeData(){
-        Random random=new Random();
-        List<IssueCount> list=new ArrayList<>();
-        for(int i=0;i<30;i++){
-            list.add(new IssueCount(random.nextInt(100),random.nextInt(100),random.nextInt(100)));
-        }
-        return list;
-    }
+//    private List<IssueCount> getFakeData(){
+//        Random random=new Random();
+//        List<IssueCount> list=new ArrayList<>();
+//        for(int i=0;i<30;i++){
+//            list.add(new IssueCount(random.nextInt(100),random.nextInt(100),random.nextInt(100)));
+//        }
+//        return list;
+//    }
     @Override
     public Object getStatisticalResults(Integer month, String project_id, String userToken) {
         Map<String,Object> result=new HashMap<>();
-//        String account_id=getAccountId(userToken);
-//        if(project_id==null){
-//            if(month==1)
-//                result.put("data",redisTemplate.opsForValue().get(account_id+"day"));
-//            else
-//                result.put("data",redisTemplate.opsForValue().get(account_id+"week"));
-//        }else{
-//            if(month==1)
-//                result.put("data",redisTemplate.opsForValue().get(project_id+"day"));
-//            else
-//                result.put("data",redisTemplate.opsForValue().get(project_id+"week"));
-//        }
-        result.put("data",getFakeData());
+        String account_id=getAccountId(userToken);
+        if(project_id==null){
+            if(month==1)
+                result.put("data",redisTemplate.opsForValue().get(account_id+"day"));
+            else
+                result.put("data",redisTemplate.opsForValue().get(account_id+"week"));
+        }else{
+            if(month==1)
+                result.put("data",redisTemplate.opsForValue().get(project_id+"day"));
+            else
+                result.put("data",redisTemplate.opsForValue().get(project_id+"week"));
+        }
+        //result.put("data",result);
         return result;
     }
 
     @Override
     public Object getExistIssueTypes() {
         return issueDao.getExistIssueTypes();
+    }
+
+    private void addSolvedTag(String project_id,String pre_commit_id){
+        List<String> issueIds=issueDao.getSolvedIssueIds(project_id,pre_commit_id);
+        if(issueIds!=null&&!issueIds.isEmpty()){
+            List<JSONObject> taggeds=new ArrayList<>();
+            for(String issueId:issueIds){
+                JSONObject tagged=new JSONObject();
+                tagged.put("item_id",issueId);
+                tagged.put("tag_id",solvedTagId);
+                taggeds.add(tagged);
+            }
+            restTemplate.postForObject(tagServicePath,taggeds,JSONObject.class);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -341,5 +368,6 @@ public class IssueServiceImpl implements IssueService {
         if(!insertIssueList.isEmpty()){
             issueDao.insertIssueList(insertIssueList);
         }
+        addSolvedTag(project_id,pre_commit_id);
     }
 }
