@@ -90,7 +90,7 @@ public class QuartzScheduler {
     }
 
     //表示每个星期一 0:0:01
-    @Scheduled(cron = "1 0 0 ? * MON ")
+    @Scheduled(cron = "1 0 0 ? * MON")
     public void timerToWeek(){
         for(String account_id:getAccountIds()){
             List<String> projectIds=getCurrentProjectList(account_id);

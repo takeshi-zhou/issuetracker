@@ -106,7 +106,7 @@
     </select>
 
     <select id="hasBeenTagged" parameterType="String" resultType="Integer">
-        select count(*) from tag where tag_id = #{tag_id} and item_id = #{item_id}
+        select count(*) from tagged where tag_id = #{tag_id} and item_id = #{item_id}
     </select>
 
 </mapper>

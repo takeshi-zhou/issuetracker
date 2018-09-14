@@ -6,6 +6,8 @@ import cn.edu.fudan.tagservice.domain.Tag;
 import cn.edu.fudan.tagservice.domain.TaggedItem;
 import cn.edu.fudan.tagservice.service.TagService;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,8 @@ import java.util.UUID;
  **/
 @Service
 public class TagServiceImpl implements TagService {
+
+    private Logger logger= LoggerFactory.getLogger(TagServiceImpl.class);
 
     private TagDao tagDao;
 
@@ -40,6 +44,7 @@ public class TagServiceImpl implements TagService {
                 tag_id = UUID.randomUUID().toString();
                 tagDao.addOneTag(new Tag(tag_id,name,scope,Priority.getByValue("name").getColor()));
             }
+            logger.error(tagDao.hasBeenTagged(tag_id,itemId).toString());
             if(tagDao.hasBeenTagged(tag_id,itemId)>0)
                 throw new RuntimeException("duplicate tag!");
             tagDao.addOneTaggedItem(itemId,tag_id);
@@ -73,7 +78,8 @@ public class TagServiceImpl implements TagService {
         String name = requestBody.getString("name");
         String scope = requestBody.getString("scope");
         String itemId = requestBody.getString("itemId");
-        String oldTagId = requestBody.getString("tagId");
+        String oldName = requestBody.getString("oldName");
+        String oldTagId=tagDao.getUuidByNameAndScope(oldName,scope);
         String newTagId = tagDao.getUuidByNameAndScope(name,scope);
         if (requestBody.getBoolean("isDefault")){
             tagDao.modifyOneTagged(oldTagId,newTagId,itemId);

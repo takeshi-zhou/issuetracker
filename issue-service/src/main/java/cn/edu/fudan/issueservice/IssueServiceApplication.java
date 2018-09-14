@@ -7,11 +7,12 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@EnableScheduling
+
 @SpringBootApplication
 @PropertySource("classpath:conf.properties")
 @MapperScan("cn.edu.fudan.issueservice.mapper")
 @EnableTransactionManagement//开启事务支持
+@EnableScheduling
 public class IssueServiceApplication {
 
 	public static void main(String[] args) {

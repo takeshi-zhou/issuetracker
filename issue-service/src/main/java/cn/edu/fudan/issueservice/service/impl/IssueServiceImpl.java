@@ -9,6 +9,8 @@ import cn.edu.fudan.issueservice.service.IssueService;
 import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,6 +27,8 @@ import java.util.*;
  **/
 @Service
 public class IssueServiceImpl implements IssueService {
+
+    private Logger logger= LoggerFactory.getLogger(IssueServiceImpl.class);
 
     @Value("${solved.tag_id}")
     private String solvedTagId;
@@ -351,7 +355,10 @@ public class IssueServiceImpl implements IssueService {
             IssueCount preDayIssueCount=(IssueCount)redisTemplate.opsForHash().get(project_id,"today");
             IssueCount preWeekIssueCount=(IssueCount)redisTemplate.opsForHash().get(project_id,"week");
             IssueCount preMonthIssueCount=(IssueCount)redisTemplate.opsForHash().get(project_id,"month");
-            int eliminatedIssueCount=rawIssues1.size()-equalsCount;
+            if(rawIssues1.size()<equalsCount){
+                logger.error("eliminatedIssueCount<0  pre_commit_id="+pre_commit_id+"  current_commit_id="+current_commit_id);
+            }
+            int eliminatedIssueCount=rawIssues1.size()<equalsCount?rawIssues1.size():rawIssues1.size()-equalsCount;
             int remainingIssueCount=rawIssues2.size();
             int newIssueCount=rawIssues2.size()-equalsCount;
             if(preDayIssueCount!=null&&preWeekIssueCount!=null&&preMonthIssueCount!=null){
@@ -368,6 +375,7 @@ public class IssueServiceImpl implements IssueService {
         if(!insertIssueList.isEmpty()){
             issueDao.insertIssueList(insertIssueList);
         }
-        addSolvedTag(project_id,pre_commit_id);
+        if(!pre_commit_id.equals(current_commit_id))
+            addSolvedTag(project_id,pre_commit_id);
     }
 }
