@@ -14,7 +14,15 @@ public class RawIssue {
     private String commit_id;
 	private List<Location> locations;
 	private Date commit_time;
+	private String developer_email;
 
+    public String getDeveloper_email() {
+        return developer_email;
+    }
+
+    public void setDeveloper_email(String developer_email) {
+        this.developer_email = developer_email;
+    }
 
     public String getUuid() {
         return uuid;
