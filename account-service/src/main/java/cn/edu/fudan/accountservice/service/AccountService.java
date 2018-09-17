@@ -13,9 +13,13 @@ public interface AccountService {
 
      String getUserNameByToken(String userToken);
 
-     Account getAccountByToken(String userToken);
+     boolean isAccountNameExist(String accountName);
 
-     String getAccountIdByAccountName(String accountName);
+     boolean isNameExist(String name);
+
+     boolean authByToken(String userToken);
+
+     Account getAccountByToken(String userToken);
 
      void addAccount(Account account);
 

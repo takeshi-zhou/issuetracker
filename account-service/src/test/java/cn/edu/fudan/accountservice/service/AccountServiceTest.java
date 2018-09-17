@@ -77,20 +77,20 @@ public class AccountServiceTest extends AccountServiceApplicationTests {
 
     }
 
-    @Test
-    public void getAccountIdByAccountName() {
-        /*
-            正确的AccountName
-         */
-        String idCorrect  = accountService.getAccountIdByAccountName("admin");
-        System.out.println(idCorrect);
-
-        /*
-            错误的AccountName
-         */
-        String idIncorrect  = accountService.getAccountIdByAccountName("admins");
-        System.out.println(idIncorrect);
-    }
+//    @Test
+//    public void getAccountIdByAccountName() {
+//        /*
+//            正确的AccountName
+//         */
+//        String idCorrect  = accountService.getAccountIdByAccountName("admin");
+//        System.out.println(idCorrect);
+//
+//        /*
+//            错误的AccountName
+//         */
+//        String idIncorrect  = accountService.getAccountIdByAccountName("admins");
+//        System.out.println(idIncorrect);
+//    }
 
     @Ignore
     @Test

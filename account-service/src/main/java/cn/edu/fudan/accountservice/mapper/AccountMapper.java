@@ -12,8 +12,11 @@ public interface AccountMapper {
 
     Account login(@Param("accountName") String accountName, @Param("password") String password);
 
+    void addAccount(Account account);
 
-    String getAccountIdByAccountName(String accountName);
+    String getAccountIdByName(@Param("name") String name);
+
+    Account getAccountByAccountName(String accountName);
 
     List<String> getAllAccountId();
 

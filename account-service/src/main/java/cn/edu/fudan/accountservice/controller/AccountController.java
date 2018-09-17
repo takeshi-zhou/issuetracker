@@ -21,17 +21,14 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @SuppressWarnings("need check and complete")
-    @PostMapping
+    @PostMapping("/register")
     @CrossOrigin
     public Object createUser(@RequestBody Account account){
-        //need check out account is legal or not
         try{
             accountService.addAccount(account);
             return new ResponseBean(200,"Congratulations！successful registration.",null);
         }catch(Exception e){
-            e.printStackTrace();
-            return new ResponseBean(401,"sigh up failed!",null);
+            return new ResponseBean(401,"sigh up failed! "+e.getMessage(),null);
         }
     }
 
@@ -45,7 +42,6 @@ public class AccountController {
         return responseBean;
     }
 
-    //used in project service for get user project list;;need modify
     @GetMapping(value="/accountId")
     @CrossOrigin
     public Object getAccountID(@RequestParam("userToken")String userToken){
@@ -55,11 +51,10 @@ public class AccountController {
     @GetMapping(value="/auth/{userToken}")
     @CrossOrigin
     public Object auth(@PathVariable("userToken")String userToken){
-        Account account=accountService.getAccountByToken(userToken);
-        if(account!=null){
+        if(accountService.authByToken(userToken)){
             return new ResponseBean(200,"auth pass",null);
         }else{
-            return new ResponseBean(401,"auth failed",null);
+            return new ResponseBean(401,"token time out,please login",null);
         }
     }
 

@@ -32,20 +32,20 @@ public class AccountDaoTest extends AccountServiceApplicationTests {
         System.out.println("finish mocking");
     }
 
-    @Test
-    public void getAccountIdByAccountName() {
-        /*
-            正确的用户名
-         */
-        String accountIdCorrect = accountDao.getAccountIdByAccountName("admin");
-        System.out.println(accountIdCorrect);
-
-        /*
-            错误的用户名
-         */
-        String accountIdIncorrect = accountDao.getAccountIdByAccountName("admins");
-        System.out.println(accountIdIncorrect);
-    }
+//    @Test
+//    public void getAccountIdByAccountName() {
+//        /*
+//            正确的用户名
+//         */
+//        String accountIdCorrect = accountDao.getAccountIdByAccountName("admin");
+//        System.out.println(accountIdCorrect);
+//
+//        /*
+//            错误的用户名
+//         */
+//        String accountIdIncorrect = accountDao.getAccountIdByAccountName("admins");
+//        System.out.println(accountIdIncorrect);
+//    }
 
     @Test
     public void login() {
