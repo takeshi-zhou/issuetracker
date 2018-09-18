@@ -73,4 +73,8 @@ public class TagDao {
     public Integer hasBeenTagged(String tag_id,String item_id){
         return tagMapper.hasBeenTagged(tag_id,item_id);
     }
+
+    public void deleteTagByProjectId(String projectId) {
+        tagMapper.deleteTagByProjectId(projectId);
+    }
 }

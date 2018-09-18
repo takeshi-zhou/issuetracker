@@ -23,4 +23,6 @@ public interface TagService {
     List<String> getItemIdsByTagIds(List<String> tagIds);
 
     List<Tag> getAllDefaultTags();
+
+    void deleteTagByProjectId(String projectId);
 }

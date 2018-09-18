@@ -176,6 +176,8 @@ public class ProjectServiceImpl implements ProjectService {
         initHeaders();
         HttpEntity<String> requestEntity=new HttpEntity<>(null,headers);
         JSONObject response=null;
+        //delete tags relationship
+        restTemplate.delete(innerServicePath + "/inner/tags?project-id="+projectId);
         response=restTemplate.exchange(innerServicePath+"/inner/issue/"+projectId, HttpMethod.DELETE,requestEntity,JSONObject.class).getBody();
         if(response!=null)
             logger.info(response.toJSONString());
@@ -185,6 +187,7 @@ public class ProjectServiceImpl implements ProjectService {
         response=restTemplate.exchange(innerServicePath+"/inner/scan/"+projectId,HttpMethod.DELETE,requestEntity,JSONObject.class).getBody();
         if(response!=null)
             logger.info(response.toJSONString());
+        //delete info in redis
         redisTemplate.delete(projectId);
         projectDao.remove(projectId);
     }

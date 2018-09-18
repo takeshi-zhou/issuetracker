@@ -70,6 +70,10 @@
         delete from tagged where tag_id=#{tag_id} and item_id=#{item_id}
     </delete>
 
+    <delete id="deleteTagByProjectId" parameterType="String">
+        delete from tagged where item_id in (select uuid from issue where project_id=#{project_id})
+    </delete>
+
     <delete id="deleteTaggeds" parameterType="List">
         delete from tagged
         where item_id in
