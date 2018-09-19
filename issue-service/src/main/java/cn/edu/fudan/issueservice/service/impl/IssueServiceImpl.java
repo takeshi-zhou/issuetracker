@@ -18,6 +18,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import javax.jnlp.IntegrationService;
 import java.util.*;
 
 /**
@@ -225,30 +227,49 @@ public class IssueServiceImpl implements IssueService {
         return result;
     }
 
-//    private List<IssueCount> getFakeData(){
-//        Random random=new Random();
-//        List<IssueCount> list=new ArrayList<>();
-//        for(int i=0;i<30;i++){
-//            list.add(new IssueCount(random.nextInt(100),random.nextInt(100),random.nextInt(100)));
-//        }
-//        return list;
-//    }
+    private List<IssueCount> getFormatData(List<String> newList,List<String> remainingList,List<String> eliminatedList){
+        if(newList==null||remainingList==null||eliminatedList==null)
+            return Collections.emptyList();
+        List<IssueCount> list=new ArrayList<>();
+        for(int i=0;i<newList.size();i++){
+            list.add(new IssueCount(Integer.parseInt(newList.get(i)),Integer.parseInt(remainingList.get(i)),Integer.parseInt(eliminatedList.get(i))));
+        }
+        return list;
+    }
     @Override
     public Object getStatisticalResults(Integer month, String project_id, String userToken) {
         Map<String,Object> result=new HashMap<>();
         String account_id=getAccountId(userToken);
+        String newKey="";
+        String remainingKey="";
+        String eliminatedKey="";
         if(project_id==null){
-            if(month==1)
-                result.put("data",redisTemplate.opsForValue().get(account_id+"day"));
-            else
-                result.put("data",redisTemplate.opsForValue().get(account_id+"week"));
+            if(month==1){
+                newKey="trend:day:new:"+account_id;
+                remainingKey="trend:day:remaining:"+account_id;
+                eliminatedKey="trend:day:eliminated:"+account_id;
+            }
+            else{
+                newKey="trend:week:new:"+account_id;
+                remainingKey="trend:week:remaining:"+account_id;
+                eliminatedKey="trend:week:eliminated:"+account_id;
+            }
         }else{
-            if(month==1)
-                result.put("data",redisTemplate.opsForValue().get(project_id+"day"));
-            else
-                result.put("data",redisTemplate.opsForValue().get(project_id+"week"));
+            if(month==1){
+                newKey="trend:day:new:"+account_id+":"+project_id;
+                remainingKey="trend:day:remaining:"+account_id+":"+project_id;
+                eliminatedKey="trend:day:eliminated:"+account_id+":"+project_id;
+            }
+            else{
+                newKey="trend:week:new:"+account_id+":"+project_id;
+                remainingKey="trend:week:remaining:"+account_id+":"+project_id;
+                eliminatedKey="trend:week:eliminated:"+account_id+":"+project_id;
+            }
         }
-        //result.put("data",result);
+        List<String> newList=stringRedisTemplate.opsForList().range(newKey,0,-1);
+        List<String> remainingList=stringRedisTemplate.opsForList().range(remainingKey,0,-1);
+        List<String> eliminatedList=stringRedisTemplate.opsForList().range(eliminatedKey,0,-1);
+        result.put("data",getFormatData(newList,remainingList,eliminatedList));
         return result;
     }
 
@@ -279,13 +300,13 @@ public class IssueServiceImpl implements IssueService {
         stringRedisTemplate.setEnableTransactionSupport(true);
         stringRedisTemplate.multi();
         stringRedisTemplate.opsForHash().increment(todayKey,"new",newIssueCount);
-        stringRedisTemplate.opsForHash().put(todayKey,"remaining",remainingIssueCount);
+        stringRedisTemplate.opsForHash().put(todayKey,"remaining",String.valueOf(remainingIssueCount));
         stringRedisTemplate.opsForHash().increment(todayKey,"eliminated",eliminatedIssueCount);
         stringRedisTemplate.opsForHash().increment(weekKey,"new",newIssueCount);
-        stringRedisTemplate.opsForHash().put(weekKey,"remaining",remainingIssueCount);
+        stringRedisTemplate.opsForHash().put(weekKey,"remaining",String.valueOf(remainingIssueCount));
         stringRedisTemplate.opsForHash().increment(weekKey,"eliminated",eliminatedIssueCount);
         stringRedisTemplate.opsForHash().increment(monthKey,"new",newIssueCount);
-        stringRedisTemplate.opsForHash().put(monthKey,"remaining",remainingIssueCount);
+        stringRedisTemplate.opsForHash().put(monthKey,"remaining",String.valueOf(remainingIssueCount));
         stringRedisTemplate.opsForHash().increment(monthKey,"eliminated",eliminatedIssueCount);
         stringRedisTemplate.exec();
     }

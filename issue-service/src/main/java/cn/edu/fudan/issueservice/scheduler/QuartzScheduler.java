@@ -77,10 +77,18 @@ public class QuartzScheduler {
     }
 
     private void updateTrend(String duration,String account_id,String project_id,int newIssueCount,int remainingIssueCount,int eliminatedIssueCount){
-
-        String newKey="trend:"+duration+":new:"+account_id+":"+project_id;
-        String remainingKey="trend:"+duration+":remaining:"+account_id+":"+project_id;
-        String eliminatedKey="trend:"+duration+":eliminated:"+account_id+":"+project_id;
+        String newKey="";
+        String remainingKey="";
+        String eliminatedKey="";
+        if(project_id==null){
+            newKey="trend:"+duration+":new:"+account_id;
+            remainingKey="trend:"+duration+":remaining:"+account_id;
+            eliminatedKey="trend:"+duration+":eliminated:"+account_id;
+        }else{
+            newKey="trend:"+duration+":new:"+account_id+":"+project_id;
+            remainingKey="trend:"+duration+":remaining:"+account_id+":"+project_id;
+            eliminatedKey="trend:"+duration+":eliminated:"+account_id+":"+project_id;
+        }
         stringRedisTemplate.setEnableTransactionSupport(true);
         stringRedisTemplate.multi();
         stringRedisTemplate.opsForList().rightPush(newKey,String.valueOf(newIssueCount));
@@ -102,9 +110,9 @@ public class QuartzScheduler {
                 String dashboardKey="dashboard:day:"+project_id;
                 if(!stringRedisTemplate.hasKey(dashboardKey))
                     continue;
-                int newIssueCount=(Integer)stringRedisTemplate.opsForHash().get(dashboardKey,"new");
-                int remainingIssueCount=(Integer)stringRedisTemplate.opsForHash().get(dashboardKey,"remaining");
-                int eliminatedIssueCount=(Integer)stringRedisTemplate.opsForHash().get(dashboardKey,"eliminated");
+                int newIssueCount=Integer.parseInt((String)stringRedisTemplate.opsForHash().get(dashboardKey,"new"));
+                int remainingIssueCount=Integer.parseInt((String)stringRedisTemplate.opsForHash().get(dashboardKey,"remaining"));
+                int eliminatedIssueCount=Integer.parseInt((String)stringRedisTemplate.opsForHash().get(dashboardKey,"eliminated"));
                 updateTrend("day",account_id,project_id,newIssueCount,remainingIssueCount,eliminatedIssueCount);
                 newSummary+=newIssueCount;
                 remainingSummary+=remainingIssueCount;
@@ -129,17 +137,17 @@ public class QuartzScheduler {
                 String dashboardKey="dashboard:week:"+project_id;
                 if(!stringRedisTemplate.hasKey(dashboardKey))
                     continue;
-                int newIssueCount=(Integer)stringRedisTemplate.opsForHash().get(dashboardKey,"new");
-                int remainingIssueCount=(Integer)stringRedisTemplate.opsForHash().get(dashboardKey,"remaining");
-                int eliminatedIssueCount=(Integer)stringRedisTemplate.opsForHash().get(dashboardKey,"eliminated");
-                updateTrend("day",account_id,project_id,newIssueCount,remainingIssueCount,eliminatedIssueCount);
+                int newIssueCount=Integer.parseInt((String)stringRedisTemplate.opsForHash().get(dashboardKey,"new"));
+                int remainingIssueCount=Integer.parseInt((String)stringRedisTemplate.opsForHash().get(dashboardKey,"remaining"));
+                int eliminatedIssueCount=Integer.parseInt((String)stringRedisTemplate.opsForHash().get(dashboardKey,"eliminated"));
+                updateTrend("week",account_id,project_id,newIssueCount,remainingIssueCount,eliminatedIssueCount);
                 newSummary+=newIssueCount;
                 remainingSummary+=remainingIssueCount;
                 eliminatedSummary+=eliminatedIssueCount;
                 //清零
                 stringRedisTemplate.delete(dashboardKey);
             }
-            updateTrend("day",account_id,null,newSummary,remainingSummary,eliminatedSummary);
+            updateTrend("week",account_id,null,newSummary,remainingSummary,eliminatedSummary);
         }
     }
 

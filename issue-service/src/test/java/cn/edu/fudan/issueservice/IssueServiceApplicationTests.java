@@ -6,15 +6,37 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @WebAppConfiguration
 public class IssueServiceApplicationTests {
+
+	@Value("${inner.service.path}")
+	private String innerServicePath;
+	@Value("${inner.header.key}")
+	private  String headerKey;
+	@Value("${inner.header.value}")
+	private  String headerValue;
+
+	private RestTemplate restTemplate;
+
+	@Autowired
+	public void setRestTemplate(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+	}
 
 	@BeforeClass
 	public static void beforeTest(){
@@ -26,26 +48,13 @@ public class IssueServiceApplicationTests {
 		System.out.println("结束测试..................................");
 	}
 
-	private RedisTemplate<Object,Object> redisTemplate;
+	private StringRedisTemplate stringRedisTemplate;
 
 	@Autowired
-	public void setRedisTemplate(RedisTemplate<Object,Object> redisTemplate){
-		this.redisTemplate=redisTemplate;
+	public void setStringRedisTemplate(StringRedisTemplate stringRedisTemplate) {
+		this.stringRedisTemplate = stringRedisTemplate;
 	}
 
-	@Test
-	public void test(){
-		String project_id="616bb11c-2a6f-4cf3-9aa4-60cfa26fa90f";
-		//redisTemplate.opsForHash().put(project_id,"today",new IssueCount(0,0,0));
-		//redisTemplate.opsForHash().put(project_id,"week",new IssueCount(0,0,0));
-		//redisTemplate.opsForHash().put(project_id,"month",new IssueCount(0,0,0));
-		IssueCount today=(IssueCount) redisTemplate.opsForHash().get(project_id,"today");
-		IssueCount week=(IssueCount) redisTemplate.opsForHash().get(project_id,"week");
-		IssueCount month=(IssueCount) redisTemplate.opsForHash().get(project_id,"month");
-		System.out.println(today);
-		System.out.println(week);
-		System.out.println(month);
-	}
 
 
 }
