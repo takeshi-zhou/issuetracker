@@ -18,7 +18,7 @@ public interface ProjectMapper {
 
 	 Project getProjectByID(String uuid);
 
-	 Project getProjectByURLAndAccountId(@Param("account_id") String account_id,@Param("url")String url);
+	 Project getProjectByURLTypeAndAccountId(@Param("account_id") String account_id,@Param("url")String url,@Param("type")String type);
 
 	 void updateProjectStatus(Project project);
 

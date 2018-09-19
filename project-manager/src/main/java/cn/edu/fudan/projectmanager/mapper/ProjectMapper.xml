@@ -12,6 +12,7 @@
          <result property="account_id" column="account_id"/>
          <result property="download_status" column="download_status"/>
          <result property="scan_status" column="scan_status"/>
+         <result property="add_time" column="add_time"/>
          <result property="till_commit_time" column="till_commit_time"/>
          <result property="last_scan_time" column="last_scan_time"/>
          <result property="description" column="description"/>
@@ -26,9 +27,11 @@
                   language,
                   url,
                   vcs_type,
+                  type,
                   account_id,
                   download_status,
                   scan_status,
+                  add_time,
                   description,
                   repo_id
               )
@@ -39,9 +42,11 @@
                   #{language},
                   #{url},
                   #{vcs_type},
+                  #{type},
                   #{account_id},
                   #{download_status},
                   #{scan_status},
+                  #{add_time},
                   #{description},
                   #{repo_id}
              )
@@ -52,6 +57,7 @@
    		<if test="account_id != null">
             where account_id = #{account_id}
         </if>
+       order by add_time desc
    </select>
 
     <select id="getProjectByKeyWordAndAccountId" parameterType="String" resultMap="project">
@@ -70,11 +76,11 @@
     </select>
 	
 	<select id="getProjectNameById" parameterType="String" resultType="String">
-		select name from project where uuid = #{projectId}
+		select name from project where uuid = #{projectId} order by
 	</select>
 
-    <select id="getProjectByURLAndAccountId" parameterType="String" resultType="project">
-        select * from project where account_id = #{account_id} and url = #{url}
+    <select id="getProjectByURLTypeAndAccountId" parameterType="String" resultType="project">
+        select * from project where account_id = #{account_id} and url = #{url}and type = #{type}
     </select>
 
     <select id="getRepoPath" parameterType="String" resultType="String">

@@ -6,6 +6,7 @@ import cn.edu.fudan.projectmanager.dao.*;
 import cn.edu.fudan.projectmanager.domain.NeedDownload;
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.service.ProjectService;
+import cn.edu.fudan.projectmanager.util.DateTimeUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -20,6 +21,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -126,18 +129,19 @@ public class ProjectServiceImpl implements ProjectService {
         }
         url=url.trim();
         checkProjectURL(url);
+        if(project.getType()==null)
+            project.setType("bug");
         String account_id=getAccountId(userToken);
-        if(projectDao.hasBeenAdded(account_id,url)){
+        if(projectDao.hasBeenAdded(account_id,url,project.getType())){
             throw new RuntimeException("The project has been added!");
         }
-        String projectName=url.substring(url.lastIndexOf("/")+1);
         String projectId= UUID.randomUUID().toString();
         project.setUuid(projectId);
-        project.setName(projectName);
         project.setUrl(url);
         project.setAccount_id(account_id);
         project.setDownload_status("Downloading");
         project.setScan_status("Not Scanned");
+        project.setAdd_time(DateTimeUtil.formatedDate(new Date()));
         projectDao.addOneProject(project);
         //向RepoManager这个Topic发送消息，请求开始下载
         send(projectId,url);

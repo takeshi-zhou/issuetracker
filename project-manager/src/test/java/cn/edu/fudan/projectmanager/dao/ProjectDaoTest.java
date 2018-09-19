@@ -76,10 +76,10 @@ public class ProjectDaoTest extends ProjectManagerApplicationTests {
 
     @Test
     public void hasBeenAdded() {
-        Boolean state1 = projectDao.hasBeenAdded("1","https://github.com/knowm/XChart");
+        Boolean state1 = projectDao.hasBeenAdded("1","https://github.com/knowm/XChart","bug");
         System.out.println(state1);
 
-        Boolean state2 = projectDao.hasBeenAdded("1","https://github.com/mockito/mockito");
+        Boolean state2 = projectDao.hasBeenAdded("1","https://github.com/mockito/mockito","bug");
         System.out.println(state2);
 
     }

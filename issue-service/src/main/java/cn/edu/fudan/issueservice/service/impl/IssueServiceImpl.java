@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -48,6 +49,13 @@ public class IssueServiceImpl implements IssueService {
     @Autowired
     public void setRedisTemplate(RedisTemplate<Object,Object> redisTemplate){
         this.redisTemplate=redisTemplate;
+    }
+
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    public void setStringRedisTemplate(StringRedisTemplate stringRedisTemplate) {
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     private IssueDao issueDao;
@@ -263,6 +271,25 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
+    private void dashboardUpdate(String project_id,int newIssueCount,int remainingIssueCount,int eliminatedIssueCount){
+        //注意只有remaining是覆盖的，其余是累增的
+        String todayKey="dashboard:day:"+project_id;
+        String weekKey="dashboard:week:"+project_id;
+        String monthKey="dashboard:month:"+project_id;
+        stringRedisTemplate.setEnableTransactionSupport(true);
+        stringRedisTemplate.multi();
+        stringRedisTemplate.opsForHash().increment(todayKey,"new",newIssueCount);
+        stringRedisTemplate.opsForHash().put(todayKey,"remaining",remainingIssueCount);
+        stringRedisTemplate.opsForHash().increment(todayKey,"eliminated",eliminatedIssueCount);
+        stringRedisTemplate.opsForHash().increment(weekKey,"new",newIssueCount);
+        stringRedisTemplate.opsForHash().put(weekKey,"remaining",remainingIssueCount);
+        stringRedisTemplate.opsForHash().increment(weekKey,"eliminated",eliminatedIssueCount);
+        stringRedisTemplate.opsForHash().increment(monthKey,"new",newIssueCount);
+        stringRedisTemplate.opsForHash().put(monthKey,"remaining",remainingIssueCount);
+        stringRedisTemplate.opsForHash().increment(monthKey,"eliminated",eliminatedIssueCount);
+        stringRedisTemplate.exec();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public void startMapping(String project_id, String pre_commit_id, String current_commit_id) {
@@ -282,6 +309,7 @@ public class IssueServiceImpl implements IssueService {
             int newIssueCount=insertIssueList.size();
             int remainingIssueCount=insertIssueList.size();
             int eliminatedIssueCount=0;
+            dashboardUpdate(project_id,newIssueCount,remainingIssueCount,eliminatedIssueCount);
             redisTemplate.opsForHash().put(project_id,"today",new IssueCount(newIssueCount,eliminatedIssueCount,remainingIssueCount));
             redisTemplate.opsForHash().put(project_id,"week",new IssueCount(newIssueCount,eliminatedIssueCount,remainingIssueCount));
             redisTemplate.opsForHash().put(project_id,"month",new IssueCount(newIssueCount,eliminatedIssueCount,remainingIssueCount));
@@ -354,6 +382,7 @@ public class IssueServiceImpl implements IssueService {
             int eliminatedIssueCount=rawIssues1.size()-equalsCount;
             int remainingIssueCount=rawIssues2.size();
             int newIssueCount=rawIssues2.size()-equalsCount;
+            dashboardUpdate(project_id,newIssueCount,remainingIssueCount,eliminatedIssueCount);
             if(preDayIssueCount!=null&&preWeekIssueCount!=null&&preMonthIssueCount!=null){
                 preDayIssueCount.issueCountUpdate(newIssueCount,eliminatedIssueCount,remainingIssueCount);
                 preWeekIssueCount.issueCountUpdate(newIssueCount,eliminatedIssueCount,remainingIssueCount);

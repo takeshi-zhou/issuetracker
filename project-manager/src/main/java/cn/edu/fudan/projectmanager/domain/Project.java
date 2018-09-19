@@ -9,13 +9,31 @@ public class Project {
     private String language;
     private String url;
     private String vcs_type;
+    private String type;
     private String account_id;
     private String download_status;
     private String scan_status;
+    private Date add_time;
     private Date till_commit_time;
     private Date last_scan_time;
     private String description;
     private String repo_id;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Date getAdd_time() {
+        return add_time;
+    }
+
+    public void setAdd_time(Date add_time) {
+        this.add_time = add_time;
+    }
 
     public String getRepo_id() {
         return repo_id;

@@ -4,9 +4,11 @@ import cn.edu.fudan.issueservice.domain.IssueCount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -34,6 +36,13 @@ public class QuartzScheduler {
     @Autowired
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    public void setStringRedisTemplate(StringRedisTemplate stringRedisTemplate) {
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     private HttpEntity<?> requestEntity;
@@ -65,6 +74,83 @@ public class QuartzScheduler {
             redisTemplate.opsForList().leftPop(key);
         }
         redisTemplate.opsForList().rightPush(key,issueCount);
+    }
+
+    private void updateTrend(String duration,String account_id,String project_id,int newIssueCount,int remainingIssueCount,int eliminatedIssueCount){
+
+        String newKey="trend:"+duration+":new:"+account_id+":"+project_id;
+        String remainingKey="trend:"+duration+":remaining:"+account_id+":"+project_id;
+        String eliminatedKey="trend:"+duration+":eliminated:"+account_id+":"+project_id;
+        stringRedisTemplate.setEnableTransactionSupport(true);
+        stringRedisTemplate.multi();
+        stringRedisTemplate.opsForList().rightPush(newKey,String.valueOf(newIssueCount));
+        stringRedisTemplate.opsForList().rightPush(remainingKey,String.valueOf(remainingIssueCount));
+        stringRedisTemplate.opsForList().rightPush(eliminatedKey,String.valueOf(eliminatedIssueCount));
+        stringRedisTemplate.exec();
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    private void PerDay(){
+        for(String account_id:getAccountIds()){
+            List<String> projectIds=getCurrentProjectList(account_id);
+            if(projectIds==null)continue;
+            int newSummary=0;
+            int remainingSummary=0;
+            int eliminatedSummary=0;
+            for (String project_id : projectIds){
+                //该用户当前项目前一天的统计结果
+                String dashboardKey="dashboard:day:"+project_id;
+                if(!stringRedisTemplate.hasKey(dashboardKey))
+                    continue;
+                int newIssueCount=(Integer)stringRedisTemplate.opsForHash().get(dashboardKey,"new");
+                int remainingIssueCount=(Integer)stringRedisTemplate.opsForHash().get(dashboardKey,"remaining");
+                int eliminatedIssueCount=(Integer)stringRedisTemplate.opsForHash().get(dashboardKey,"eliminated");
+                updateTrend("day",account_id,project_id,newIssueCount,remainingIssueCount,eliminatedIssueCount);
+                newSummary+=newIssueCount;
+                remainingSummary+=remainingIssueCount;
+                eliminatedSummary+=eliminatedIssueCount;
+                //清零
+                stringRedisTemplate.delete(dashboardKey);
+            }
+            updateTrend("day",account_id,null,newSummary,remainingSummary,eliminatedSummary);
+        }
+    }
+
+    @Scheduled(cron="0 5 0 * * Mon")
+    public void perWeek(){
+        for(String account_id:getAccountIds()){
+            List<String> projectIds=getCurrentProjectList(account_id);
+            if(projectIds==null)continue;
+            int newSummary=0;
+            int remainingSummary=0;
+            int eliminatedSummary=0;
+            for (String project_id : projectIds){
+                //该用户当前项目前一周的统计结果
+                String dashboardKey="dashboard:week:"+project_id;
+                if(!stringRedisTemplate.hasKey(dashboardKey))
+                    continue;
+                int newIssueCount=(Integer)stringRedisTemplate.opsForHash().get(dashboardKey,"new");
+                int remainingIssueCount=(Integer)stringRedisTemplate.opsForHash().get(dashboardKey,"remaining");
+                int eliminatedIssueCount=(Integer)stringRedisTemplate.opsForHash().get(dashboardKey,"eliminated");
+                updateTrend("day",account_id,project_id,newIssueCount,remainingIssueCount,eliminatedIssueCount);
+                newSummary+=newIssueCount;
+                remainingSummary+=remainingIssueCount;
+                eliminatedSummary+=eliminatedIssueCount;
+                //清零
+                stringRedisTemplate.delete(dashboardKey);
+            }
+            updateTrend("day",account_id,null,newSummary,remainingSummary,eliminatedSummary);
+        }
+    }
+
+    @Scheduled(cron = "0 10 0 1 * *")
+    private void perMonth(){
+        List<String> projectList=getCurrentProjectList(null);
+        if(projectList==null)return;
+        for (String project_id : projectList){
+            String dashboardKey="dashboard:month:"+project_id;
+            stringRedisTemplate.delete(dashboardKey);
+        }
     }
 
     //每天0:0:01触发

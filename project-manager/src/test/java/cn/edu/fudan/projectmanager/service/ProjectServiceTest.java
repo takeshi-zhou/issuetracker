@@ -136,7 +136,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
         MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"getAccountId")).toReturn(accountId);
         try{
             project.setUrl("https://github.com/spotify/docker-maven-plugin");
-            PowerMockito.when(projectDao.hasBeenAdded(accountId,project.getUrl())).thenReturn(true);
+            PowerMockito.when(projectDao.hasBeenAdded(accountId,project.getUrl(),project.getType())).thenReturn(true);
             projectService.addOneProject("1",project);
         }catch(RuntimeException e){
             assertEquals(e.getMessage(),"The project has been added!");
@@ -152,7 +152,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
         doNothing().when(projectDao).addOneProject(project);
         MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"getAccountId")).toReturn(accountId);
         MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"send"));
-        PowerMockito.when(projectDao.hasBeenAdded(accountId,project.getUrl())).thenReturn(false);
+        PowerMockito.when(projectDao.hasBeenAdded(accountId,project.getUrl(),project.getType())).thenReturn(false);
         projectService.addOneProject("1",project);
         verify(projectDao, Mockito.atLeast(1)).addOneProject(project);
 
