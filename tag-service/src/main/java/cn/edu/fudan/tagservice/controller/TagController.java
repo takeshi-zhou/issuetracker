@@ -89,4 +89,14 @@ public class TagController {
     public Object getTags(@RequestParam("item_id")String item_id){
         return tagService.getTagsByItemId(item_id);
     }
+
+    @DeleteMapping("/inner/tags")
+    public Object deleteTagByProjectId(@RequestParam("project-id")String projectId){
+        try {
+            tagService.deleteTagByProjectId(projectId);
+            return new ResponseBean(200,"delete success",null);
+        }catch (Exception e){
+            return new ResponseBean(401,"delete failed :"+e.getMessage(),null);
+        }
+    }
 }

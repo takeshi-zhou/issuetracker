@@ -107,4 +107,9 @@ public class TagServiceImpl implements TagService {
     public List<Tag> getAllDefaultTags() {
         return tagDao.getAllDefaultTags();
     }
+
+    @Override
+    public void deleteTagByProjectId(String projectId) {
+        tagDao.deleteTagByProjectId(projectId);
+    }
 }

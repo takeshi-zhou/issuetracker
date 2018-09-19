@@ -35,4 +35,6 @@ public interface TagMapper {
     List<Tag> getAllDefaultTags();
 
     List<String> getItemIdsByTagIds(List<String> list);
+
+    void deleteTagByProjectId(@Param("project_id")String projectId);
 }

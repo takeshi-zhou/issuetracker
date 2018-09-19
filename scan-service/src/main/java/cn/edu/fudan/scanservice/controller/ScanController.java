@@ -37,7 +37,6 @@ public class ScanController {
         }catch (Exception e){
             return new ResponseBean(401,e.getMessage(),null);
         }
-
     }
 
     @GetMapping(value = {"/scan/commits"})
