@@ -34,6 +34,7 @@ public class ProjectDaoTest extends ProjectManagerApplicationTests {
 
     @Before
     public void setup() throws Exception {
+        testDataMaker = new TestDataMaker();
 
         project = testDataMaker.projectMakerPro2();
 
