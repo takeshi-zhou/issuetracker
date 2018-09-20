@@ -16,6 +16,7 @@ tags:
 - name: "scan-service"
 - name: "issue-service"
 - name: "commit-service"
+- name: "tag-service"
 schemes:
 - "http"
 paths:
@@ -120,6 +121,25 @@ paths:
           description: "failed"
         401:
           description: "Incorrect userToken"
+
+  /user/accountIds:
+    get:
+      tags:
+      - "account-service"
+      summary: "get AccountIDs"
+      operationId: "getAccountIds"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description : "succsssful"
+          schema:
+            type: "array"
+            items:
+              type: "string"
+        400:
+          description: "failed"
+
 
   /project:
     post:
@@ -320,6 +340,31 @@ paths:
             $ref: "#/definitions/Project"
         401:
           description: "Invalid ID supplied"
+
+  /inner/project/project-id:
+    get:
+      tags:
+      - "project-service"
+      summary: "get  projectId List"
+      description: "get  projectId List by account id"
+      operationId: "getProjectIds"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "account_id"
+        description: "account_id that user want to get"
+        required: true
+        type : "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              type: "string"
+        401:
+          description: "Invalid ID supplied"
   /scan:
     post:
       tags:
@@ -345,6 +390,49 @@ paths:
           description: "failed operation"
           schema:
             $ref: "#/definitions/ResponseBean"
+
+  /scan/commits:
+    get:
+      tags:
+      - "scan-service"
+      summary: "get Commits"
+      description: " "
+      operationId: "getCommits"
+      parameters:
+      - in: "query"
+        name: "project_id"
+        description: ""
+        required: true
+        type: "string"
+      - in: "query"
+        name: "page"
+        description: ""
+        type: "string"
+        required: false
+        default: "1"
+      - in: "query"
+        name: "size"
+        description: ""
+        type: "string"
+        required: false
+        default: "10"
+      - in: "query"
+        name: "is_whole"
+        description: ""
+        type: "string"
+        required: false
+        default: "false"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            items:
+              $ref: "#/definitions/CommitsMsg"
+        401:
+          description: "failed operation"
+
 
   /inner/scan:
     put:
@@ -423,7 +511,7 @@ paths:
     get:
       tags:
       - "scan-service"
-      summary: "get commits by projectId"
+      summary: "get commits that have been scanned"
       operationId: "getScannedCommits"
       produces:
       - "application/json"
@@ -433,14 +521,11 @@ paths:
         description: "a project id"
         required: true
         type: "string"
-      - in: "query"
-        name: "option"
-        description: "a option"
-        required: true
-        type: "string"
       responses:
         200:
           description: "successful operation"
+          schema:
+            $ref: "#/definitions/Scan"
         401:
           description: "failed operation"
       deprecated: true
@@ -476,8 +561,138 @@ paths:
             $ref: '#/definitions/IssuesMsg'
         401:
           description: "failed operation"
+
+  /issue/issue-types:
+    get:
+      tags:
+      - "issue-service"
+      summary: "get Exist IssueTypes"
+      operationId: "getExistIssueTypes"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
           schema:
-            $ref: '#/definitions/IssuesMsg'
+            type: "array"
+            items:
+              type: "string"
+        401:
+          description: "failed operation"
+
+  /issue/filter:
+    post:
+      tags:
+      - "issue-service"
+      summary: "filter of issues"
+      operationId: "filterIssues"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "requestParam"
+        description: ""
+        required: true
+        schema:
+          $ref: '#/definitions/IssueFilterRequestParam'
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              totalPage:
+                type: "integer"
+                format: "int32"
+              totalCount:
+                type: "integer"
+                format: "int32"
+              issueList:
+                items:
+                  $ref: '#/definitions/IssueList'
+        401:
+          description: "failed operation"
+
+
+  /issue/dashboard:
+    get:
+      tags:
+      - "issue-service"
+      summary: "get dashboard info "
+      operationId: "getDashBoardInfo"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "token"
+        description: "get userToken from Header"
+        required: true
+        type: "string"
+      - in: "query"
+        name: "duration"
+        required: true
+        type: "string"
+      - in: "query"
+        name: "project_id"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "succsssful"
+          schema:
+            type: "object"
+            properties:
+              newIssueCount:
+                type: "integer"
+                format: "int32"
+              eliminatedIssueCount:
+                type: "integer"
+                format: "int32"
+              remainingIssueCount:
+                type: "integer"
+                format: "int32"
+        400:
+          description: "failed"
+
+  /issue/statistical-results:
+    get:
+      tags:
+      - "issue-service"
+      summary: "get Statistical Results "
+      operationId: "getStatisticalResults"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "token"
+        description: "get userToken from Header"
+        required: true
+        type: "string"
+      - in: "query"
+        name: "month"
+        required: true
+        type: "string"
+      - in: "query"
+        name: "project_id"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "succsssful"
+          schema:
+            type: "object"
+            properties:
+              newIssueCount:
+                type: "integer"
+                format: "int32"
+              eliminatedIssueCount:
+                type: "integer"
+                format: "int32"
+              remainingIssueCount:
+                type: "integer"
+                format: "int32"
+        400:
+          description: "failed"
 
   /inner/issue:
     post:
@@ -528,37 +743,8 @@ paths:
           schema:
             $ref: '#/definitions/ResponseBean'
 
-  /issue/dashboard:
-    get:
-      tags:
-      - "issue-service"
-      summary: "get dashboard info "
-      operationId: "getDashBoardInfo"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "header"
-        name: "token"
-        description: "get userToken from Header"
-        required: true
-        type: "string"
-      - in: "query"
-        name: "duration"
-        required: true
-        type: "string"
-      responses:
-        200:
-          description: "succsssful"
-          schema:
-            type: "object"
-            properties:
-              newIssueCount:
-                type: "string"
-        400:
-          description: "failed"
 
-
-  /issue/{projectId}:
+  /inner/issue/{projectId}:
     delete:
       tags:
       - "issue-service"
@@ -639,7 +825,17 @@ paths:
       - "application/json"
       parameters:
       - in: "query"
-        name: "raw_issue_id"
+        name: "project_id"
+        description: " "
+        required: true
+        type: "string"
+      - in: "query"
+        name: "commit_id"
+        description: " "
+        required: true
+        type: "string"
+      - in: "query"
+        name: "file_path"
         description: " "
         required: true
         type: "string"
@@ -647,7 +843,10 @@ paths:
         200:
           description: "successful operation"
           schema:
-            $ref: '#/definitions/LocationList'
+            type: "object"
+            properties:
+              code:
+                type: "string"
         401:
           description: "failed operation"
 
@@ -745,6 +944,250 @@ paths:
             $ref: '#/definitions/RawIssueList'
         401:
           description: "failed operation"
+
+  /tags/default:
+    get:
+      tags:
+      - "tag-service"
+      summary: "get all default tags"
+      operationId: "getAllDefaultTags"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: '#/definitions/TagList'
+        401:
+          description: "failed operation"
+
+  /tags/{tag-id}:
+    delete:
+      tags:
+      - "tag-service"
+      summary: "delete Tag"
+      operationId: "deleteTag"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "tag-id"
+        description: " "
+        required: true
+        type: "string"
+      - in: "query"
+        name: "item-id"
+        description: " "
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        401:
+          description: "failed operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+
+  /tags:
+    post:
+      tags:
+      - "tag-service"
+      summary: "add Tag"
+      operationId: "addTag"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "requestBody"
+        description: " "
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+            scope:
+              type: "string"
+            itemId:
+              type: "string"
+            isDefault:
+              type: "boolean"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        401:
+          description: "failed operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+
+    put:
+      tags:
+      - "tag-service"
+      summary: "modify Tag"
+      operationId: "modifyTag"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "requestBody"
+        description: " "
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+            scope:
+              type: "string"
+            itemId:
+              type: "string"
+            oldName:
+              type: "string"
+            isDefault:
+              type: "boolean"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        401:
+          description: "failed operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+
+  /inner/tags:
+    post:
+      tags:
+      - "tag-service"
+      summary: "add multiTagged item"
+      operationId: "addMultiTaggedItem"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "requestBody"
+        description: " "
+        required: true
+        schema:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              item_id:
+                type: "string"
+              tag_id:
+                type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        401:
+          description: "failed operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+
+    get:
+      tags:
+      - "tag-service"
+      summary: "get tags by item id"
+      operationId: "getTags"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "item-id"
+        description: " "
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: '#/definitions/TagList'
+        401:
+          description: "failed operation"
+
+    delete:
+      tags:
+      - "tag-service"
+      summary: "delete tag by projectId"
+      operationId: "deleteTagByProjectId"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "project-id"
+        description: " "
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        401:
+          description: "failed operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+
+  /inner/tags/item-ids:
+    post:
+      tags:
+      - "tag-service"
+      summary: "get item ids"
+      operationId: "getItemIds"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "tagIds"
+        description: " "
+        required: true
+        schema:
+          type: "array"
+          items:
+            type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              type: "string"
+        401:
+          description: "failed operation"
+
+  /inner/tags/tagged-delete:
+    post:
+      tags:
+      - "tag-service"
+      summary: "delete Tagged"
+      operationId: "deleteTagged"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "itemIds"
+        description: " "
+        required: true
+        schema:
+          type: "array"
+          items:
+            type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        401:
+          description: "failed operation"
+          schema:
+            $ref: "#/definitions/ResponseBean"
 
 
 
@@ -920,20 +1363,63 @@ definitions:
       commitId:
         type: "string"
 
+  CommitsMsg:
+    type: "object"
+    properties:
+      totalCount:
+        type: "integer"
+        format: "int32"
+      commitList:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            data:
+              type: "object"
+              properties:
+                uuid:
+                  type: "string"
+                commit_id:
+                  type: "string"
+                message:
+                  type: "string"
+                developer:
+                  type: "string"
+                commit_time:
+                  type: "string"
+                repo_id:
+                  type: "string"
+                is_scanned:
+                  type: "boolean"
+            isScanned:
+              type: "boolean"
+
+  IssueFilterRequestParam:
+    type: "object"
+    properties:
+      project_id:
+        type: "string"
+      size:
+        type: "integer"
+        format: "int32"
+      page:
+        type: "integer"
+        format: "int32"
+      tags:
+        type: "array"
+        items:
+          type: "string"
+      types:
+        type: "array"
+        items:
+          type: "string"
 
   Issue:
     type: "object"
     properties:
-      id:
-        type: "integer"
-        format: "int32"
       uuid:
         type: "string"
       type:
-        type: "string"
-      start_commit_time:
-        type: "string"
-      end_commit_time:
         type: "string"
       start_commit:
         type: "string"
@@ -947,8 +1433,12 @@ definitions:
         type: "string"
       target_files:
         type: "string"
-      rawIssues:
+      issueType:
         type: "object"
+      tags:
+        type: "array"
+        items:
+          type: "object"
 
   RawIssue:
     type: "object"
@@ -985,11 +1475,11 @@ definitions:
   IssuesMsg:
     type: "object"
     properties:
-      msg:
-        type: "string"
       start:
         type: "string"
       totalPage:
+        type: "string"
+      totalCount:
         type: "string"
       issueList:
         type: "array"
@@ -1078,6 +1568,25 @@ definitions:
             type: "string"
           commit_time:
             type: "string"
+
+  TagList:
+    type: "array"
+    items:
+      $ref: "#/definitions/Tag"
+
+  Tag:
+    type: "object"
+    properties:
+      uuid:
+        type: "string"
+      name:
+        type: "string"
+      scope:
+        type: "string"
+      color:
+        type: "string"
+      icon:
+        type: "string"
 
 
 
