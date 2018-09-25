@@ -161,7 +161,9 @@ public class IssueServiceImpl implements IssueService {
             throw new IllegalArgumentException("param lost!");
         JSONArray tag_ids=requestParam.getJSONArray("tags");
         JSONArray types=requestParam.getJSONArray("types");
-        JSONArray issue_ids=restTemplate.postForObject(tagServicePath+"/item-ids",tag_ids,JSONArray.class);
+        JSONArray issue_ids = null;
+        if (tag_ids!=null&&tag_ids.size()>0)
+            issue_ids=restTemplate.postForObject(tagServicePath+"/item-ids",tag_ids,JSONArray.class);
 
         Map<String,Object> query=new HashMap<>();
         query.put("project_id",project_id);
@@ -169,6 +171,8 @@ public class IssueServiceImpl implements IssueService {
            query.put("types",types.toJavaList(String.class));
         if(issue_ids!=null&&issue_ids.size()>0)
            query.put("issue_ids",issue_ids.toJavaList(String.class));
+        else
+            query.put("issue_ids",issueDao.getIssueIdsByProjectIdLatest(project_id));
         int count=issueDao.getIssueCount(query);
         query.put("size",size);
         query.put("start",(page-1)*size);

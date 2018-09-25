@@ -28,4 +28,6 @@ public interface IssueMapper {
 	List<String> getExistIssueTypes();
 
 	List<String> getIssueIdsByProjectId(String projectId);
+
+	List<String> getIssueIdsByProjectIdLatest(String projectId);
 }

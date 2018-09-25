@@ -130,7 +130,7 @@ public class ProjectServiceImpl implements ProjectService {
         url=url.trim();
         checkProjectURL(url);
         if(project.getType()==null)
-            project.setType("bug");
+            project.setType("findbugs");
         String account_id=getAccountId(userToken);
         if(projectDao.hasBeenAdded(account_id,url,project.getType())){
             throw new RuntimeException("The project has been added!");

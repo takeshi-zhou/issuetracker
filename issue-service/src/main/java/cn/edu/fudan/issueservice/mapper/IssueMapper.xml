@@ -181,5 +181,11 @@
         select uuid from issue where project_id = #{projectId}
     </select>
 
+    <select id="getIssueIdsByProjectIdLatest" resultType="String" parameterType="String">
+        select uuid from issue where project_id = #{projectId} and end_commit=(
+        select commit_id from scan where project_id=#{projectId} order by commit_time desc limit 1
+        )
+    </select>
+
 
 </mapper>
