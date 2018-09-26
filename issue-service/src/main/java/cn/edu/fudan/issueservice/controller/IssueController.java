@@ -105,4 +105,15 @@ public class IssueController {
         }
     }
 
+    @GetMapping(value = "/inner/issue/dashbaord")
+    public Object updateIssueCount(@RequestParam ("time") String time){
+        try {
+            issueService.updateIssueCount(time);
+            return new ResponseBean(200, "update success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, " update failed!", null);
+        }
+    }
+
 }
