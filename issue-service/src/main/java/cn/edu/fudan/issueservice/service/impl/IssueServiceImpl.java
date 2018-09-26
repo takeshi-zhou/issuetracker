@@ -144,19 +144,21 @@ public class IssueServiceImpl implements IssueService {
         String repoId = getRepoId(project_id);
         JSONArray tag_ids = requestParam.getJSONArray("tags");
         JSONArray types = requestParam.getJSONArray("types");
-        JSONArray issue_ids = restTemplate.postForObject(tagServicePath + "/item-ids", tag_ids, JSONArray.class);
         Map<String, Object> result = new HashMap<>();
-        if (issue_ids == null || issue_ids.size() == 0) {//没找到打了这些tag的issue
-            result.put("totalPage", 0);
-            result.put("totalCount", 0);
-            result.put("issueList", Collections.emptyList());
-            return result;
-        }
         Map<String, Object> query = new HashMap<>();
-        query.put("repo_id", repoId);
-        query.put("issue_ids", issue_ids.toJavaList(String.class));
-        if (types != null && types.size() > 0)
+        if(tag_ids!=null&&types!=null&&!tag_ids.isEmpty()&&!types.isEmpty()){
+            //只有在筛选条件都不为null的条件下才启用过滤
+            JSONArray issue_ids = restTemplate.postForObject(tagServicePath + "/item-ids", tag_ids, JSONArray.class);
+            if (issue_ids == null || issue_ids.size() == 0) {//没找到打了这些tag的issue
+                result.put("totalPage", 0);
+                result.put("totalCount", 0);
+                result.put("issueList", Collections.emptyList());
+                return result;
+            }
+            query.put("issue_ids", issue_ids.toJavaList(String.class));
             query.put("types", types.toJavaList(String.class));
+        }
+        query.put("repo_id", repoId);
         int count = issueDao.getIssueCount(query);
         query.put("size", size);
         query.put("start", (page - 1) * size);
