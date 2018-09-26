@@ -36,21 +36,21 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public ResponseBean login(String username, String password) {
         //首次登录或token过期重新登录，返回新的token
-        String encodePassword= MD5Util.md5(username+password);
-        Account account= accountDao.login(username,encodePassword);
-        if(account!=null){
-            String userToken= MD5Util.md5(encodePassword);
-            stringRedisTemplate.opsForValue().set("login:"+userToken,username);
-            stringRedisTemplate.expire("login:"+userToken,7, TimeUnit.DAYS);//token保存7天
-            return new ResponseBean(200,"登录成功!",new AccountInfo(username,userToken));
-        }else{
-           return new ResponseBean(401,"用户名或密码错误!",null);
+        String encodePassword = MD5Util.md5(username + password);
+        Account account = accountDao.login(username, encodePassword);
+        if (account != null) {
+            String userToken = MD5Util.md5(encodePassword);
+            stringRedisTemplate.opsForValue().set("login:" + userToken, username);
+            stringRedisTemplate.expire("login:" + userToken, 7, TimeUnit.DAYS);//token保存7天
+            return new ResponseBean(200, "登录成功!", new AccountInfo(username, userToken));
+        } else {
+            return new ResponseBean(401, "用户名或密码错误!", null);
         }
     }
 
     @Override
     public String getUserNameByToken(String userToken) {
-        return stringRedisTemplate.opsForValue().get("login:"+userToken);
+        return stringRedisTemplate.opsForValue().get("login:" + userToken);
     }
 
     @Override
@@ -64,27 +64,34 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public boolean isEmailExist(String email) {
+        return accountDao.isEmailExist(email);
+    }
+
+    @Override
     public boolean authByToken(String userToken) {
-        return stringRedisTemplate.opsForValue().get("login:"+userToken)!=null;
+        return stringRedisTemplate.opsForValue().get("login:" + userToken) != null;
     }
 
     @Override
     public Account getAccountByToken(String userToken) {
-        String username=stringRedisTemplate.opsForValue().get("login:"+userToken);
+        String username = stringRedisTemplate.opsForValue().get("login:" + userToken);
         return accountDao.getAccountByAccountName(username);
     }
 
     @Override
     public void addAccount(Account account) {
-         if(account.getAccountName()==null||account.getPassword()==null||account.getEmail()==null||account.getName()==null)
-             throw new RuntimeException("param loss");
-         if(isAccountNameExist(account.getAccountName()))
-             throw new RuntimeException("accountName has been used!");
-         if(isNameExist(account.getName()))
-             throw new RuntimeException("nickName has been used!");
-         account.setUuid(UUID.randomUUID().toString());
-         account.setPassword(MD5Util.md5(account.getAccountName()+account.getPassword()));
-         accountDao.addAccount(account);
+        if (account.getAccountName() == null || account.getPassword() == null || account.getEmail() == null || account.getName() == null)
+            throw new RuntimeException("param loss");
+        if (isAccountNameExist(account.getAccountName()))
+            throw new RuntimeException("accountName has been used!");
+        if (isEmailExist(account.getEmail()))
+            throw new RuntimeException("email has been used!");
+        if (isNameExist(account.getName()))
+            throw new RuntimeException("nickName has been used!");
+        account.setUuid(UUID.randomUUID().toString());
+        account.setPassword(MD5Util.md5(account.getAccountName() + account.getPassword()));
+        accountDao.addAccount(account);
     }
 
     @Override

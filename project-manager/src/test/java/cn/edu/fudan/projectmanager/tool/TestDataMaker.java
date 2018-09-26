@@ -5,7 +5,7 @@ import cn.edu.fudan.projectmanager.domain.Project;
 public class TestDataMaker {
 
 
-    public  Project projectMakerPro1(){
+    public Project projectMakerPro1() {
         Project project = new Project();
         project.setUuid("pro1");
         project.setName("Java");
@@ -20,7 +20,7 @@ public class TestDataMaker {
         return project;
     }
 
-    public  Project projectMakerPro2(){
+    public Project projectMakerPro2() {
         Project project = new Project();
         project.setUuid("pro2");
         project.setName("Java");
@@ -35,7 +35,7 @@ public class TestDataMaker {
         return project;
     }
 
-    public  Project projectMakerPro1Update(){
+    public Project projectMakerPro1Update() {
         Project project = new Project();
         project.setUuid("pro1");
         project.setName("UpdateData");

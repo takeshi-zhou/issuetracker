@@ -11,7 +11,7 @@ public class Issue {
     private String end_commit;
     private String raw_issue_start;
     private String raw_issue_end;
-    private String project_id;
+    private String repo_id;
     private String target_files;
     private IssueType issueType;
     private List<Object> tags;
@@ -27,15 +27,15 @@ public class Issue {
     public Issue() {
     }
 
-    public Issue(String uuid, String type, String start_commit,String end_commit,String raw_issue_start, String raw_issue_end,String project_id,String target_files) {
+    public Issue(String uuid, String type, String start_commit, String end_commit, String raw_issue_start, String raw_issue_end, String repo_id, String target_files) {
         this.uuid = uuid;
         this.type = type;
-        this.start_commit=start_commit;
-        this.end_commit=end_commit;
+        this.start_commit = start_commit;
+        this.end_commit = end_commit;
         this.raw_issue_start = raw_issue_start;
         this.raw_issue_end = raw_issue_end;
-        this.project_id=project_id;
-        this.target_files=target_files;
+        this.repo_id = repo_id;
+        this.target_files = target_files;
     }
 
     public List<Object> getTags() {
@@ -94,12 +94,12 @@ public class Issue {
         this.uuid = uuid;
     }
 
-    public String getProject_id() {
-        return project_id;
+    public String getRepo_id() {
+        return repo_id;
     }
 
-    public void setProject_id(String project_id) {
-        this.project_id = project_id;
+    public void setRepo_id(String repo_id) {
+        this.repo_id = repo_id;
     }
 
     public String getTarget_files() {

@@ -2,16 +2,15 @@ package cn.edu.fudan.scanservice.domain;
 
 public class ScanMessage {
 
-    private String projectId;
+    private String repoId;
     private String commitId;
 
-
-    public String getProjectId() {
-        return projectId;
+    public String getRepoId() {
+        return repoId;
     }
 
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
+    public void setRepoId(String repoId) {
+        this.repoId = repoId;
     }
 
     public String getCommitId() {

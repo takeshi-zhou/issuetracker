@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class ProjectManagerApplication {
 
 
-	public static void main(String[] args) {
-		SpringApplication.run(ProjectManagerApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ProjectManagerApplication.class, args);
+    }
 }

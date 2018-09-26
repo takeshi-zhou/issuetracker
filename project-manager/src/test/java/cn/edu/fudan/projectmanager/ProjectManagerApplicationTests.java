@@ -19,14 +19,14 @@ import org.springframework.test.context.web.WebAppConfiguration;
 public class ProjectManagerApplicationTests {
 
 
-	@BeforeClass
-	public static void beforeTest(){
-		System.out.println("开始测试..................................");
-	}
+    @BeforeClass
+    public static void beforeTest() {
+        System.out.println("开始测试..................................");
+    }
 
-	@AfterClass
-	public static void afterTest(){
-		System.out.println("结束测试..................................");
-	}
+    @AfterClass
+    public static void afterTest() {
+        System.out.println("结束测试..................................");
+    }
 
 }

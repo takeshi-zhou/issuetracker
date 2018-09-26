@@ -29,29 +29,19 @@ public class RawIssueServiceImpl implements RawIssueService {
 
     @Value("${commit.service.path}")
     private String commitServicePath;
-
     @Value("${code.service.path}")
     private String codeServicePath;
-
     @Value("${repoHome}")
     private String repoHome;
 
     @Value("${inner.service.path}")
     private String innerServicePath;
-    @Value("${inner.header.key}")
-    private  String headerKey;
-    @Value("${inner.header.value}")
-    private  String headerValue;
 
-    private HttpEntity<?> requestEntity;
+    private HttpHeaders httpHeaders;
 
-    private void initRequestEntity(){
-        if(requestEntity!=null){
-            return;
-        }
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(headerKey,headerValue);
-        requestEntity=new HttpEntity<>(headers);
+    @Autowired
+    public void setHttpHeaders(HttpHeaders httpHeaders) {
+        this.httpHeaders = httpHeaders;
     }
 
     private RestTemplate restTemplate;
@@ -77,13 +67,14 @@ public class RawIssueServiceImpl implements RawIssueService {
 
     /**
      * 插入rawIssue列表，同时会插入里面包含的locations
-     * @author WZY
+     *
      * @param list rawIssue的列表，里面包含了locations
+     * @author WZY
      */
     @Override
     public void insertRawIssueList(List<RawIssue> list) {
-        List<Location> locations=new ArrayList<>();
-        for(RawIssue rawIssue:list){
+        List<Location> locations = new ArrayList<>();
+        for (RawIssue rawIssue : list) {
             locations.addAll(rawIssue.getLocations());
         }
         rawIssueDao.insertRawIssueList(list);
@@ -92,14 +83,15 @@ public class RawIssueServiceImpl implements RawIssueService {
 
     /**
      * 删除rawIssue以及对应的locations
+     *
+     * @param repoId 项目的id
      * @author WZY
-     * @param projectId 项目的id
      */
     @Transactional
     @Override
-    public void deleteRawIssueByProjectId(String projectId) {
-        locationDao.deleteLocationByProjectId(projectId);
-        rawIssueDao.deleteRawIssueByProjectId(projectId);
+    public void deleteRawIssueByRepoId(String repoId) {
+        locationDao.deleteLocationByRepoId(repoId);
+        rawIssueDao.deleteRawIssueByRepoId(repoId);
     }
 
     @Override
@@ -119,19 +111,19 @@ public class RawIssueServiceImpl implements RawIssueService {
 
     @Override
     public Object getCode(String project_id, String commit_id, String file_path) {
-        Map<String,Object> result=new HashMap<>();
-        initRequestEntity();
-        String repo_id=restTemplate.exchange(innerServicePath+"/inner/project/repo-id?project-id="+project_id, HttpMethod.GET,requestEntity,String.class).getBody();
-        JSONObject response=restTemplate.getForObject(commitServicePath+"/checkout?repo_id="+repo_id+"&commit_id="+commit_id, JSONObject.class);
-        if(response!=null&&response.getJSONObject("data").getString("status").equals("Successful")){
-            JSONObject codeResponse=restTemplate.getForObject(codeServicePath+"?file_path="+repoHome+file_path,JSONObject.class);
-            if(codeResponse!=null&&codeResponse.getJSONObject("data").getString("status").equals("Successful")){
-                result.put("code",codeResponse.getJSONObject("data").getString("content"));
-            }else{
-                throw  new RuntimeException("load file failed!");
+        Map<String, Object> result = new HashMap<>();
+        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+        String repo_id = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + project_id, HttpMethod.GET, requestEntity, String.class).getBody();
+        JSONObject response = restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class);
+        if (response != null && response.getJSONObject("data").getString("status").equals("Successful")) {
+            JSONObject codeResponse = restTemplate.getForObject(codeServicePath + "?file_path=" + repoHome + file_path, JSONObject.class);
+            if (codeResponse != null && codeResponse.getJSONObject("data").getString("status").equals("Successful")) {
+                result.put("code", codeResponse.getJSONObject("data").getString("content"));
+            } else {
+                throw new RuntimeException("load file failed!");
             }
-        }else{
-            throw  new RuntimeException("check out failed!");
+        } else {
+            throw new RuntimeException("check out failed!");
         }
         return result;
     }

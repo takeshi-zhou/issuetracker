@@ -11,23 +11,21 @@ import java.util.Map;
 @Repository
 public interface IssueMapper {
 
-	void insertIssueList(List<Issue> list);
+    void insertIssueList(List<Issue> list);
 
-	void deleteIssueByProjectId(String projectId);
+    void deleteIssueByRepoId(String repo_id);
 
-	void batchUpdateIssue(List<Issue> list);
+    void batchUpdateIssue(List<Issue> list);
 
-	Issue getIssueByID(String uuid);
+    Issue getIssueByID(String uuid);
 
-	Integer getIssueCount(Map<String, Object> map);
+    Integer getIssueCount(Map<String, Object> map);
 
-	List<String> getSolvedIssueIds(@Param("project_id")String project_id,@Param("commit_id")String commit_id);
-	
-	List<Issue> getIssueList(Map<String, Object> map);
+    List<String> getSolvedIssueIds(@Param("repo_id") String repo_id, @Param("commit_id") String commit_id);
 
-	List<String> getExistIssueTypes();
+    List<Issue> getIssueList(Map<String, Object> map);
 
-	List<String> getIssueIdsByProjectId(String projectId);
+    List<String> getExistIssueTypes();
 
-	List<String> getIssueIdsByProjectIdLatest(String projectId);
+    List<String> getIssueIdsByRepoId(String repo_id);
 }

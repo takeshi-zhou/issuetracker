@@ -21,15 +21,15 @@ public class LocationDao {
         this.locationMapper = locationMapper;
     }
 
-    public void insertLocationList(List<Location> list){
+    public void insertLocationList(List<Location> list) {
         locationMapper.insertLocationList(list);
     }
 
-    public void deleteLocationByProjectId(String projectId){
-        locationMapper.deleteLocationByProjectId(projectId);
+    public void deleteLocationByRepoId(String repoId) {
+        locationMapper.deleteLocationByRepoId(repoId);
     }
 
-    public List<Location> getLocations(String rawIssueId){
+    public List<Location> getLocations(String rawIssueId) {
         return locationMapper.getLocations(rawIssueId);
     }
 }

@@ -9,19 +9,21 @@ import java.util.List;
 
 public interface AccountService {
 
-     ResponseBean login(String username, String password);
+    ResponseBean login(String username, String password);
 
-     String getUserNameByToken(String userToken);
+    String getUserNameByToken(String userToken);
 
-     boolean isAccountNameExist(String accountName);
+    boolean isAccountNameExist(String accountName);
 
-     boolean isNameExist(String name);
+    boolean isNameExist(String name);
 
-     boolean authByToken(String userToken);
+    boolean isEmailExist(String email);
 
-     Account getAccountByToken(String userToken);
+    boolean authByToken(String userToken);
 
-     void addAccount(Account account);
+    Account getAccountByToken(String userToken);
 
-     List<String> getAllAccountId();
+    void addAccount(Account account);
+
+    List<String> getAllAccountId();
 }

@@ -15,13 +15,14 @@ public class IssueDaoTest extends IssueServiceApplicationTests {
     @Autowired
     IssueDao issueDao;
 
-    List<Issue> list ;
+    List<Issue> list;
 
     Issue issue1;
 
     Issue issue2;
 
     Map<String, Object> map;
+
     @Before
     public void setup() throws Exception {
         issue1 = new Issue();
@@ -31,7 +32,7 @@ public class IssueDaoTest extends IssueServiceApplicationTests {
         issue1.setEnd_commit("badfd40225cb3208106ec30c403928fd55f84886");
         issue1.setRaw_issue_start("10cfe678-8606-41cb-abf4-fda25292cc2b");
         issue1.setRaw_issue_end("10cfe678-8606-41cb-abf4-fda25292cc2b");
-        issue1.setProject_id("222");
+        issue1.setRepo_id("222");
         issue1.setTarget_files("DatabaseTool.java");
 
         issue2 = new Issue();
@@ -41,7 +42,7 @@ public class IssueDaoTest extends IssueServiceApplicationTests {
         issue2.setEnd_commit("badfd40225cb3208106ec30c403928fd55f84886");
         issue2.setRaw_issue_start("c5b30c01-86bd-4a66-a828-0d78688fb005");
         issue2.setRaw_issue_end("c5b30c01-86bd-4a66-a828-0d78688fb005");
-        issue2.setProject_id("222");
+        issue2.setRepo_id("222");
         issue2.setTarget_files("DatabaseTool.java");
 
         list = new ArrayList<>();
@@ -50,10 +51,10 @@ public class IssueDaoTest extends IssueServiceApplicationTests {
 
 
         map = new HashMap<String, Object>();
-        map.put("project_id","222");
-        map.put("type","OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE");
-        map.put("start",0);
-        map.put("size",2);
+        map.put("project_id", "222");
+        map.put("type", "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE");
+        map.put("start", 0);
+        map.put("size", 2);
     }
 
     @Test
@@ -65,7 +66,7 @@ public class IssueDaoTest extends IssueServiceApplicationTests {
     @Test
     @Transactional
     public void deleteIssueByProjectId() {
-        issueDao.deleteIssueByProjectId("222");
+        issueDao.deleteIssueByRepoId("222");
     }
 
     @Test

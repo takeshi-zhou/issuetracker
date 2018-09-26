@@ -10,7 +10,7 @@
         <result property="end_commit" column="end_commit"/>
         <result property="raw_issue_start" column="raw_issue_start"/>
         <result property="raw_issue_end" column="raw_issue_end"/>
-        <result property="project_id" column="project_id"/>
+        <result property="repo_id" column="repo_id"/>
         <result property="target_files" column="target_files"/>
     </resultMap>
 
@@ -21,9 +21,10 @@
         <result property="end_commit" column="end_commit"/>
         <result property="raw_issue_start" column="raw_issue_start"/>
         <result property="raw_issue_end" column="raw_issue_end"/>
-        <result property="project_id" column="project_id"/>
+        <result property="repo_id" column="repo_id"/>
         <result property="target_files" column="target_files"/>
-        <collection property="issueType" column="type" select="cn.edu.fudan.issueservice.mapper.IssueTypeMapper.getIssueTypeByTypeName"/>
+        <collection property="issueType" column="type"
+                    select="cn.edu.fudan.issueservice.mapper.IssueTypeMapper.getIssueTypeByTypeName"/>
     </resultMap>
 
 
@@ -36,11 +37,11 @@
         end_commit,
         raw_issue_start,
         raw_issue_end,
-        project_id,
+        repo_id,
         target_files
         )
         VALUES
-        <foreach collection="list" item="item" index="index" separator =",">
+        <foreach collection="list" item="item" index="index" separator=",">
             (
             #{item.uuid},
             #{item.type},
@@ -48,17 +49,17 @@
             #{item.end_commit},
             #{item.raw_issue_start},
             #{item.raw_issue_end},
-            #{item.project_id},
+            #{item.repo_id},
             #{item.target_files}
             )
         </foreach>
     </insert>
-    
+
     <select id="getIssueList" parameterType="Map" resultMap="issue2">
         select * from issue
         <where>
-            <if test="project_id != null">
-                project_id = #{project_id}
+            <if test="repo_id != null">
+                repo_id = #{repo_id}
             </if>
             <if test="types != null">
                 and type in
@@ -84,7 +85,7 @@
         <if test="start != null  and size != null ">
             limit #{start},#{size}
         </if>
-	</select>
+    </select>
 
     <select id="getIssueByID" parameterType="String" resultMap="issue">
         select * from issue where uuid = #{uuid}
@@ -93,8 +94,8 @@
     <select id="getIssueCount" parameterType="Map" resultType="Integer">
         select count(uuid) from issue
         <where>
-            <if test="project_id != null">
-                project_id = #{project_id}
+            <if test="repo_id != null">
+                repo_id = #{repo_id}
             </if>
             <if test="types != null">
                 and type in
@@ -119,7 +120,7 @@
 
     <select id="getSolvedIssueIds" parameterType="String" resultType="String">
         select uuid from issue
-        where project_id = #{project_id} and end_commit = #{commit_id}
+        where repo_id = #{repo_id} and end_commit = #{commit_id}
     </select>
 
     <update id="batchUpdateIssue" parameterType="List">
@@ -168,8 +169,8 @@
         </where>
     </update>
 
-    <delete id="deleteIssueByProjectId" parameterType="String">
-        delete from issue where project_id = #{projectId}
+    <delete id="deleteIssueByRepoId" parameterType="String">
+        delete from issue where repo_id = #{repo_id}
     </delete>
 
     <select id="getExistIssueTypes" resultType="String">
@@ -177,14 +178,8 @@
         from issue
     </select>
 
-    <select id="getIssueIdsByProjectId" resultType="String" parameterType="String">
-        select uuid from issue where project_id = #{projectId}
-    </select>
-
-    <select id="getIssueIdsByProjectIdLatest" resultType="String" parameterType="String">
-        select uuid from issue where project_id = #{projectId} and end_commit=(
-        select commit_id from scan where project_id=#{projectId} order by commit_time desc limit 1
-        )
+    <select id="getIssueIdsByRepoId" resultType="String" parameterType="String">
+        select uuid from issue where repo_id = #{repo_id}
     </select>
 
 

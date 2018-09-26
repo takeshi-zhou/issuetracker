@@ -2,7 +2,7 @@ package cn.edu.fudan.accountservice.domain;
 
 import java.io.Serializable;
 
-public class Account implements Serializable{
+public class Account implements Serializable {
 
     private String uuid;
     private String accountName;

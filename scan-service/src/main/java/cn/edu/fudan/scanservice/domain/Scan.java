@@ -10,7 +10,7 @@ public class Scan {
     private Date end_time;
     private String status;
     private String result_summary;
-    private String project_id;
+    private String repo_id;
     private String commit_id;
     private Date commit_time;
 
@@ -62,12 +62,12 @@ public class Scan {
         this.result_summary = result_summary;
     }
 
-    public String getProject_id() {
-        return project_id;
+    public String getRepo_id() {
+        return repo_id;
     }
 
-    public void setProject_id(String project_id) {
-        this.project_id = project_id;
+    public void setRepo_id(String repo_id) {
+        this.repo_id = repo_id;
     }
 
     public String getCommit_id() {

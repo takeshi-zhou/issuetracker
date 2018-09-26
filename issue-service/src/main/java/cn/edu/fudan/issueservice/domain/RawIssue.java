@@ -12,9 +12,9 @@ public class RawIssue {
     private String scan_id;
     private String issue_id;
     private String commit_id;
-	private List<Location> locations;
-	private Date commit_time;
-	private String developer_email;
+    private List<Location> locations;
+    private Date commit_time;
+    private String developer_email;
 
     public String getDeveloper_email() {
         return developer_email;
@@ -81,7 +81,7 @@ public class RawIssue {
         this.commit_id = commit_id;
     }
 
-    public Location firstLocation(){
+    public Location firstLocation() {
         return this.locations.get(0);
     }
 
@@ -103,20 +103,20 @@ public class RawIssue {
 
     @Override
     public int hashCode() {
-        int result=17;
-        result=31*result+uuid.hashCode();
-        result=31*result+type.hashCode();
-        result=31*result+detail.hashCode();
-        result=31*result+scan_id.hashCode();
-        result=31*result+commit_id.hashCode();
+        int result = 17;
+        result = 31 * result + uuid.hashCode();
+        result = 31 * result + type.hashCode();
+        result = 31 * result + detail.hashCode();
+        result = 31 * result + scan_id.hashCode();
+        result = 31 * result + commit_id.hashCode();
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if(obj==this)return true;
-        if(!(obj instanceof RawIssue))return false;
-        RawIssue rawIssue=(RawIssue)obj;
+        if (obj == this) return true;
+        if (!(obj instanceof RawIssue)) return false;
+        RawIssue rawIssue = (RawIssue) obj;
         return rawIssue.type.equals(type) &&
                 rawIssue.detail.equals(detail) &&
                 rawIssue.file_name.equals(file_name);

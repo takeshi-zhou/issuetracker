@@ -10,23 +10,27 @@ import java.util.List;
 @Repository
 public interface ProjectMapper {
 
-	 void addOneProject(Project project);
+    void addOneProject(Project project);
 
-	 List<Project> getProjectByAccountId(@Param("account_id") String account_id);
+    List<Project> getProjectByAccountId(@Param("account_id") String account_id);
 
-	 List<Project> getProjectByKeyWordAndAccountId(@Param("account_id")String account_id,@Param("keyWord")String keyWord);
+    List<Project> getProjectByKeyWordAndAccountId(@Param("account_id") String account_id, @Param("keyWord") String keyWord);
 
-	 Project getProjectByID(String uuid);
+    List<Project> getProjectByRepoId(@Param("repo_id") String repo_id);
 
-	 Project getProjectByURLTypeAndAccountId(@Param("account_id") String account_id,@Param("url")String url,@Param("type")String type);
+    Project getProjectByID(String uuid);
 
-	 void updateProjectStatus(Project project);
+    Project getProjectByURLTypeAndAccountId(@Param("account_id") String account_id, @Param("url") String url, @Param("type") String type);
 
-	 void remove(@Param("projectId") String projectId);
+    void updateProjectStatus(Project project);
 
-	 String getProjectNameById(@Param("projectId") String projectId);
+    void remove(@Param("projectId") String projectId);
 
-	 String getRepoPath(String project_id);
+    String getProjectNameById(@Param("projectId") String projectId);
 
-	 String getRepoId(@Param("projectId") String projectId);
+    String getRepoPath(String project_id);
+
+    String getRepoId(@Param("projectId") String projectId);
+
+    List<String> getProjectIds(@Param("repo_id") String repo_id);
 }

@@ -4,7 +4,7 @@
 <mapper namespace="cn.edu.fudan.issueservice.mapper.LocationMapper">
 
     <resultMap id="location" type="Location">
-        <id  property="uuid" column="uuid"/>
+        <id property="uuid" column="uuid"/>
         <result property="start_line" column="start_line"/>
         <result property="end_line" column="end_line"/>
         <result property="file_path" column="file_path"/>
@@ -30,7 +30,7 @@
         code
         )
         VALUES
-        <foreach collection="list" item="item" index="index" separator =",">
+        <foreach collection="list" item="item" index="index" separator=",">
             (
             #{item.uuid},
             #{item.start_line},
@@ -45,8 +45,9 @@
         </foreach>
     </insert>
 
-    <delete id="deleteLocationByProjectId" parameterType="String">
-        delete from location where rawIssue_id in (select uuid from rawIssue where scan_id in (select uuid from scan where project_id=#{projectId}))
+    <delete id="deleteLocationByRepoId" parameterType="String">
+        delete from location where rawIssue_id in (select uuid from rawIssue where scan_id in (select uuid from scan
+        where repo_id=#{repo_id}))
     </delete>
 
     <select id="getLocations" parameterType="Location" resultMap="location">

@@ -3,27 +3,23 @@ package cn.edu.fudan.projectmanager.service;
 
 import cn.edu.fudan.projectmanager.domain.Project;
 
-import java.util.List;
-
 public interface ProjectService {
 
-     void addOneProject(String userToken,Project project);
+    void addOneProject(String userToken, Project project);
 
-     Object getProjectList(String userToken);
+    Object getProjectList(String userToken);
 
-     Object getProjectIdList(String account_id);
+    Object getProjectByRepoId(String repo_id);
 
-     Object getProjectListByKeyWord(String userToken,String keyWord);
+    Object getProjectIdList(String account_id);
 
-     Project getProjectByID(String projectId);
+    Object getProjectListByKeyWord(String userToken, String keyWord);
 
-     void updateProjectStatus(Project project);
+    Project getProjectByID(String projectId);
 
-	 void remove(String projectId);
+    void updateProjectStatus(Project project);
 
-    String getProjectNameById(String projectId);
-
-    String getRepoPath(String project_id);
+    void remove(String projectId, String userToken);
 
     String getRepoId(String projectId);
 }

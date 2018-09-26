@@ -9,17 +9,15 @@ import java.util.List;
 @Repository
 public interface ScanMapper {
 
-     Integer getScanCountByCommitId(String commit_id);
+    Integer getScanCountByCommitId(String commit_id);
 
-     void insertOneScan(Scan scan);
+    void insertOneScan(Scan scan);
 
-     void deleteScanByProjectId(@Param("projectId")String projectId) ;
+    void deleteScanByRepoId(@Param("repo_id") String repo_id);
 
-     void updateOneScan(Scan scan);
+    void updateOneScan(Scan scan);
 
-     String getLatestScannedCommitId(String project_id);
+    String getLatestScannedCommitId(String repo_id);
 
-    Object getTillCommitDateByProjectId(@Param("projectId") String projectId);
-
-    List<Scan> getScannedCommits(@Param("projectId") String project_id);
+    List<Scan> getScannedCommits(@Param("repo_id") String repo_id);
 }

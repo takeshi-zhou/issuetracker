@@ -13,7 +13,7 @@ public interface RawIssueService {
 
     void insertRawIssueList(List<RawIssue> list);
 
-    void deleteRawIssueByProjectId(String projectId);
+    void deleteRawIssueByRepoId(String repoId);
 
     void batchUpdateIssueId(List<RawIssue> list);
 
@@ -21,7 +21,7 @@ public interface RawIssueService {
 
     List<RawIssue> getRawIssueByIssueId(String issueId);
 
-    Object getCode(String project_id,String commit_id,String file_path);
+    Object getCode(String project_id, String commit_id, String file_path);
 
     List<Location> getLocationsByRawIssueId(String raw_issue_id);
 }

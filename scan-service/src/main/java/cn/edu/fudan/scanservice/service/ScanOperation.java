@@ -7,13 +7,13 @@ public interface ScanOperation {
 
     boolean isScanned(String commitId);
 
-    boolean checkOut(String projectId, String commitId);
+    boolean checkOut(String repoId, String commitId);
 
-    ScanInitialInfo initialScan(String projectId, String commitId) ;
+    ScanInitialInfo initialScan(String repoId, String commitId);
 
     ScanResult doScan(ScanInitialInfo scanInitialInfo);
 
-    boolean mapping(String projectId, String commitId);
+    boolean mapping(String repoId, String commitId);
 
     boolean updateScan(ScanInitialInfo scanInitialInfo);
 

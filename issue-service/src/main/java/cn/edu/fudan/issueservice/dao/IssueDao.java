@@ -12,51 +12,47 @@ import java.util.Map;
 @Repository
 public class IssueDao {
 
-	private IssueMapper issueMapper;
+    private IssueMapper issueMapper;
 
-	@Autowired
-	public void setIssueMapper(IssueMapper issueMapper) {
-		this.issueMapper = issueMapper;
-	}
+    @Autowired
+    public void setIssueMapper(IssueMapper issueMapper) {
+        this.issueMapper = issueMapper;
+    }
 
-	public void insertIssueList(List<Issue> list){
-		issueMapper.insertIssueList(list);
-	}
+    public void insertIssueList(List<Issue> list) {
+        issueMapper.insertIssueList(list);
+    }
 
-	public void deleteIssueByProjectId(String projectId){
-		issueMapper.deleteIssueByProjectId(projectId);
-	}
+    public void deleteIssueByRepoId(String repo_id) {
+        issueMapper.deleteIssueByRepoId(repo_id);
+    }
 
-	public void batchUpdateIssue(List<Issue> list){
-		issueMapper.batchUpdateIssue(list);
-	}
+    public void batchUpdateIssue(List<Issue> list) {
+        issueMapper.batchUpdateIssue(list);
+    }
 
-	public Issue getIssueByID(String uuid){
-		return issueMapper.getIssueByID(uuid);
-	}
+    public Issue getIssueByID(String uuid) {
+        return issueMapper.getIssueByID(uuid);
+    }
 
-    public 	Integer getIssueCount(Map<String, Object> map){
-		return issueMapper.getIssueCount(map);
-	}
+    public Integer getIssueCount(Map<String, Object> map) {
+        return issueMapper.getIssueCount(map);
+    }
 
-	public List<Issue> getIssueList(Map<String, Object> map){
-		return issueMapper.getIssueList(map);
-	}
+    public List<Issue> getIssueList(Map<String, Object> map) {
+        return issueMapper.getIssueList(map);
+    }
 
-	public List<String> getExistIssueTypes(){
-		return issueMapper.getExistIssueTypes();
-	}
+    public List<String> getExistIssueTypes() {
+        return issueMapper.getExistIssueTypes();
+    }
 
-	public List<String> getIssueIdsByProjectId(String projectId){
-		return issueMapper.getIssueIdsByProjectId(projectId);
-	}
+    public List<String> getIssueIdsByRepoId(String repo_id) {
+        return issueMapper.getIssueIdsByRepoId(repo_id);
+    }
 
-	public List<String> getIssueIdsByProjectIdLatest(String projectId){
-		return issueMapper.getIssueIdsByProjectIdLatest(projectId);
-	}
-
-	public List<String> getSolvedIssueIds(String project_id,String commit_id){
-		return issueMapper.getSolvedIssueIds(project_id,commit_id);
-	}
+    public List<String> getSolvedIssueIds(String repo_id, String commit_id) {
+        return issueMapper.getSolvedIssueIds(repo_id, commit_id);
+    }
 
 }

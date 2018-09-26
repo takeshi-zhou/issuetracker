@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * 统一异常处理的控制器
+ *
  * @author WZY
  * @version 1.0
  **/
@@ -20,8 +21,8 @@ public class ExceptionController {
     //捕捉认证异常
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(AuthException.class)
-    public Object handleAuthException(AuthException e){
-        return new ResponseBean(401,e.getMessage(),null);
+    public Object handleAuthException(AuthException e) {
+        return new ResponseBean(401, e.getMessage(), null);
     }
 
     // 捕捉其他所有异常

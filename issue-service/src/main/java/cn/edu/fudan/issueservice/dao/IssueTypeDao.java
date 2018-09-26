@@ -15,7 +15,7 @@ public class IssueTypeDao {
         this.issueTypeMapper = issueTypeMapper;
     }
 
-    public IssueType getIssueTypeByTypeName(String type){
-        return  issueTypeMapper.getIssueTypeByTypeName(type);
+    public IssueType getIssueTypeByTypeName(String type) {
+        return issueTypeMapper.getIssueTypeByTypeName(type);
     }
 }

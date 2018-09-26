@@ -13,21 +13,21 @@
 
     <insert id="addAccount" parameterType="Account">
         insert into account
-              (
-                 uuid,
-                 accountName,
-                 password,
-                 name,
-                 email
-              )
+        (
+        uuid,
+        accountName,
+        password,
+        name,
+        email
+        )
         values
-             (
-                #{uuid},
-                #{accountName},
-                #{password},
-                #{name},
-                #{email}
-             )
+        (
+        #{uuid},
+        #{accountName},
+        #{password},
+        #{name},
+        #{email}
+        )
     </insert>
 
     <select id="getAccountIdByName" parameterType="String" resultType="String">
@@ -44,6 +44,10 @@
         account
         where
         accountName=#{accountName} and password=#{password}
+    </select>
+
+    <select id="getAccountByEmail" parameterType="String" resultMap="account">
+        select * from account where email = #{email}
     </select>
 
     <select id="getAllAccountId" resultType="String">

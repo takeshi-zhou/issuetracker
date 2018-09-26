@@ -17,11 +17,12 @@ public class LocationDaoTest extends IssueServiceApplicationTests {
     @Autowired
     LocationDao locationDao;
 
-    Location location1 ;
-    Location location2 ;
+    Location location1;
+    Location location2;
     List<Location> list;
+
     @Before
-    public void setup() throws Exception{
+    public void setup() throws Exception {
         location1 = new Location();
         location1.setUuid("111");
         location1.setStart_line(160);
@@ -58,13 +59,13 @@ public class LocationDaoTest extends IssueServiceApplicationTests {
     @Test
     @Transactional
     public void deleteLocationByProjectId() {
-        locationDao.deleteLocationByProjectId("9151ecba-e749-4a14-b6e3-f3a1388139ec");
+        locationDao.deleteLocationByRepoId("9151ecba-e749-4a14-b6e3-f3a1388139ec");
     }
 
     @Test
     public void getLocations() {
         List<Location> listLocation = locationDao.getLocations("ec76e7ff-33c7-46ea-899b-7f24f6b51d3c");
-        for(Location location : listLocation){
+        for (Location location : listLocation) {
             System.out.println(location.getUuid());
         }
     }

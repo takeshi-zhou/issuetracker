@@ -41,31 +41,31 @@ public class AccountControllerTest extends AccountServiceApplicationTests {
         session = new MockHttpSession();
 
         //setupData
-        String sql="insert into account values(\"3\",\"admin\",\"f6fdffe48c908deb0f4c3bd36c032e72\",\"admin\",\"123456@fudan.edu.cn\")";
-        Statement stmt=mockTestConnection.getConn().createStatement();//创建一个Statement对象
+        String sql = "insert into account values(\"3\",\"admin\",\"f6fdffe48c908deb0f4c3bd36c032e72\",\"admin\",\"123456@fudan.edu.cn\")";
+        Statement stmt = mockTestConnection.getConn().createStatement();//创建一个Statement对象
         stmt.executeUpdate(sql);//执行sql语句
         System.out.println("finish mocking");
     }
 
     @Test
     //
-    public void login() throws Exception{
+    public void login() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/user/login")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .param("username","admin")
-                .param("password","admin")  //.param("password","admins")
+                .param("username", "admin")
+                .param("password", "admin")  //.param("password","admins")
                 .session(session)
-            ).andExpect(MockMvcResultMatchers.status().isOk())
+        ).andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
         System.out.println(result.getResponse().getContentAsString());
     }
 
     @Test
-    public void getAccountID() throws Exception{
+    public void getAccountID() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/user/accountId")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .param("userToken","f6fdffe48c908deb0f4c3bd36c032e72")
+                .param("userToken", "f6fdffe48c908deb0f4c3bd36c032e72")
                 .session(session)
         ).andReturn();
 
@@ -75,19 +75,19 @@ public class AccountControllerTest extends AccountServiceApplicationTests {
     }
 
     @Test
-    public void auth() throws Exception{
+    public void auth() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(
                 "/user/auth/f6fdffe48c908deb0f4c3bd36c032e72")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .session(session)
-            ).andExpect(MockMvcResultMatchers.status().isOk())
-            .andReturn();
+        ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
 
         System.out.println(result.getResponse().getContentAsString());
     }
 
     @Test
-    public void getAccountIds()throws Exception{
+    public void getAccountIds() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(
                 "/user/accountIds")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -100,9 +100,9 @@ public class AccountControllerTest extends AccountServiceApplicationTests {
     }
 
     @After
-    public void cleanData() throws Exception{
-        String sql="delete from account where uuid='3'";
-        Statement stmt=mockTestConnection.getConn().createStatement();//创建一个Statement对象
+    public void cleanData() throws Exception {
+        String sql = "delete from account where uuid='3'";
+        Statement stmt = mockTestConnection.getConn().createStatement();//创建一个Statement对象
         stmt.executeUpdate(sql);//执行sql语句
         System.out.println("finish cleaning");
     }

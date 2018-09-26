@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.edu.fudan.tagservice.mapper.TagMapper">
-    
+
     <resultMap id="tag" type="Tag">
         <id property="uuid" column="uuid"/>
         <result property="name" column="name"/>
@@ -17,47 +17,47 @@
 
     <insert id="addOneTag" parameterType="Tag">
         insert into tag
-               (
-                  uuid,
-                  name,
-                  scope,
-                  color,
-                  icon
-               )
+        (
+        uuid,
+        name,
+        scope,
+        color,
+        icon
+        )
         values
-              (
-                  #{uuid},
-                  #{name},
-                  #{scope},
-                  #{color},
-                  #{icon}
-              )
+        (
+        #{uuid},
+        #{name},
+        #{scope},
+        #{color},
+        #{icon}
+        )
     </insert>
 
     <insert id="addOneTaggedItem" parameterType="String">
         insert into tagged
-              (
-                  item_id,
-                  tag_id
-              )
+        (
+        item_id,
+        tag_id
+        )
         values
-              (
-                  #{item_id},
-                  #{tag_id}
-              )
+        (
+        #{item_id},
+        #{tag_id}
+        )
     </insert>
 
     <insert id="addMultiTaggedItem" parameterType="List">
         insert into tagged
-              (
-                  item_id,
-                  tag_id
-              )
+        (
+        item_id,
+        tag_id
+        )
         values
-        <foreach collection="list" item="item" index="index" separator =",">
+        <foreach collection="list" item="item" index="index" separator=",">
             (
-                #{item.item_id},
-                #{item.tag_id}
+            #{item.item_id},
+            #{item.tag_id}
             )
         </foreach>
     </insert>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.fudan.cloneservice.mapper.CloneLocationMapper">
+
+    <resultMap id="cloneLocation" type="CloneLocation">
+        <id property="uuid" column="uuid"/>
+        <result property="start_line" column="start_line"/>
+        <result property="end_line" column="end_line"/>
+        <result property="start_token" column="start_token"/>
+        <result property="end_token" column="end_token"/>
+        <result property="file_path" column="file_path"/>
+        <result property="group_id" column="group_id"/>
+        <result property="clone_rawIssue_id" column="clone_rawIssue_id"/>
+        <result property="code" column="code"/>
+    </resultMap>
+
+    <insert id="insertCloneLocationList" parameterType="List">
+        insert into clone_location
+               (
+                  uuid,
+                  start_line,
+                  end_line,
+                  start_token,
+                  end_token,
+                  file_path,
+                  group_id,
+                  clone_rawIssue_id,
+                  code
+               )
+          values
+        <foreach collection="list" item="item" index="index" separator=",">
+              (
+                 #{item.uuid},
+                 #{item.start_line},
+                 #{item.end_line},
+                 #{item.start_token},
+                 #{item.end_token},
+                 #{item.file_path},
+                 #{item.group_id},
+                 #{item.clone_rawIssue_id},
+                 #{item.code}
+              )
+        </foreach>
+    </insert>
+</mapper>

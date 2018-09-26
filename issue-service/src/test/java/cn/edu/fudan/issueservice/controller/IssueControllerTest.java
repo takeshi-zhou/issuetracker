@@ -42,10 +42,10 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
     private MockHttpSession session;
-    Map<String,Object> map;
-    ObjectMapper mapper ;
+    Map<String, Object> map;
+    ObjectMapper mapper;
 
-    List<Issue> list ;
+    List<Issue> list;
     Issue issue1;
     Issue issue2;
 
@@ -57,12 +57,12 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
         request.setCharacterEncoding("UTF-8");
         response = new MockHttpServletResponse();
 
-        map = new LinkedHashMap<String,Object>();
-        map.put("project_id","222");
-        map.put("type","OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE");
-        map.put("start","0");
-        map.put("size","2");
-        map.put("page","0");
+        map = new LinkedHashMap<String, Object>();
+        map.put("project_id", "222");
+        map.put("type", "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE");
+        map.put("start", "0");
+        map.put("size", "2");
+        map.put("page", "0");
 
         mapper = new ObjectMapper();
 
@@ -73,7 +73,7 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
         issue1.setEnd_commit("badfd40225cb3208106ec30c403928fd55f84886");
         issue1.setRaw_issue_start("10cfe678-8606-41cb-abf4-fda25292cc2b");
         issue1.setRaw_issue_end("10cfe678-8606-41cb-abf4-fda25292cc2b");
-        issue1.setProject_id("222");
+        issue1.setRepo_id("222");
         issue1.setTarget_files("DatabaseTool.java");
 
         issue2 = new Issue();
@@ -83,7 +83,7 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
         issue2.setEnd_commit("badfd40225cb3208106ec30c403928fd55f84886");
         issue2.setRaw_issue_start("c5b30c01-86bd-4a66-a828-0d78688fb005");
         issue2.setRaw_issue_end("c5b30c01-86bd-4a66-a828-0d78688fb005");
-        issue2.setProject_id("222");
+        issue2.setRepo_id("222");
         issue2.setTarget_files("DatabaseTool.java");
 
         list = new ArrayList<>();
@@ -92,20 +92,20 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
     }
 
     @Test
-    public void getIssues()  throws Exception{
-        request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
-        Map<String,Object> mapIssues = (Map<String,Object>)issueController.getIssues("9151ecba-e749-4a14-b6e3-f3a1388139ec",1,2);
+    public void getIssues() throws Exception {
+        request.addHeader("token", "ec15d79e36e14dd258cfff3d48b73d35");
+        Map<String, Object> mapIssues = (Map<String, Object>) issueController.getIssues("9151ecba-e749-4a14-b6e3-f3a1388139ec", 1, 2);
         System.out.println(mapIssues.toString());
-        for(Issue issue : (List<Issue>)mapIssues.get("issueList")){
+        for (Issue issue : (List<Issue>) mapIssues.get("issueList")) {
             System.out.println(issue.getUuid());
         }
     }
 
     /*
-    *   需要启动account-service
-    */
+     *   需要启动account-service
+     */
     @Test
-    public void getDashBoardInfo()  throws Exception{
+    public void getDashBoardInfo() throws Exception {
 //        request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
 //        Map<String,Object> result = (Map<String,Object>)issueController.getDashBoardInfo("yesterday",request);
 //        System.out.println(result.toString());
@@ -113,7 +113,7 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
 
     @Test
     @Transactional
-    public void addIssues() throws Exception{
+    public void addIssues() throws Exception {
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
         java.lang.String requestJson = ow.writeValueAsString(list);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/inner/issue")
@@ -127,7 +127,7 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
 
     @Test
     @Transactional
-    public void deleteIssues() throws Exception{
+    public void deleteIssues() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/issue/222")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .session(session)
@@ -139,7 +139,7 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
 
     @Test
     @Transactional
-    public void updateIssues() throws Exception{
+    public void updateIssues() throws Exception {
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
         java.lang.String requestJson = ow.writeValueAsString(list);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/inner/issue")

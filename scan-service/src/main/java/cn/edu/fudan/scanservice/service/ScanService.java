@@ -8,15 +8,11 @@ public interface ScanService {
 
     void insertOneScan(Scan scan);
 
-    void deleteScanByProjectId(String projectId) ;
+    void deleteScanByRepoId(String repoId);
 
     void updateOneScan(Scan scan);
 
-    String getLatestScannedCommitId(String project_id);
+    Object getCommits(String project_id, Integer page, Integer size, Boolean is_whole);
 
-    Object getTillCommitDateByProjectId(String projectId);
-
-    Object getCommits(String project_id,Integer page,Integer size,Boolean is_whole);
-
-    Object getScannedCommits(String project_id);
+    Object getScannedCommits(String repo_id);
 }

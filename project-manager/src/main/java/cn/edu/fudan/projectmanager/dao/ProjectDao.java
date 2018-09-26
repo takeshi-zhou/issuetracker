@@ -11,52 +11,64 @@ import java.util.List;
 public class ProjectDao {
 
 
-	private ProjectMapper projectMapper;
+    private ProjectMapper projectMapper;
 
-	@Autowired
-	public void setProjectMapper(ProjectMapper projectMapper) {
-		this.projectMapper = projectMapper;
-	}
+    @Autowired
+    public void setProjectMapper(ProjectMapper projectMapper) {
+        this.projectMapper = projectMapper;
+    }
 
-	public void addOneProject(Project project){
-		projectMapper.addOneProject(project);
-	}
-	
-	public List<Project> getProjectByAccountId(String accountId) {
-		return projectMapper.getProjectByAccountId(accountId);
-	}
+    public void addOneProject(Project project) {
+        projectMapper.addOneProject(project);
+    }
 
-	public List<Project> getProjectByKeyWordAndAccountId(String account_id,String keyWord){
-		return projectMapper.getProjectByKeyWordAndAccountId(account_id,keyWord);
-	}
+    public List<Project> getProjectByAccountId(String accountId) {
+        return projectMapper.getProjectByAccountId(accountId);
+    }
 
-    public Project getProjectByID(String projectId){
-		return projectMapper.getProjectByID(projectId);
-	}
+    public List<Project> getProjectByKeyWordAndAccountId(String account_id, String keyWord) {
+        return projectMapper.getProjectByKeyWordAndAccountId(account_id, keyWord);
+    }
 
-	public boolean hasBeenAdded(String account_id,String url,String type){
-		return projectMapper.getProjectByURLTypeAndAccountId(account_id,url,type)!=null;
-	}
+    public List<Project> getProjectByRepoId(String repo_id){
+        return projectMapper.getProjectByRepoId(repo_id);
+    }
 
-	public void updateProjectStatus(Project project){
-		projectMapper.updateProjectStatus(project);
-	}
+    public Project getProjectByID(String projectId) {
+        return projectMapper.getProjectByID(projectId);
+    }
 
-	public void remove(String projectId) {
+    public boolean hasBeenAdded(String account_id, String url, String type) {
+        return projectMapper.getProjectByURLTypeAndAccountId(account_id, url, type) != null;
+    }
 
-		projectMapper.remove(projectId) ;
-	}
+    public void updateProjectStatus(Project project) {
+        projectMapper.updateProjectStatus(project);
+    }
 
-	public String getProjectNameById(String projectId) {
+    public void remove(String projectId) {
 
-		return projectMapper.getProjectNameById(projectId);
-	}
+        projectMapper.remove(projectId);
+    }
 
-	public String getRepoPath(String project_id){
-		return projectMapper.getRepoPath(project_id);
-	}
+    public String getProjectNameById(String projectId) {
+
+        return projectMapper.getProjectNameById(projectId);
+    }
+
+    public String getRepoPath(String project_id) {
+        return projectMapper.getRepoPath(project_id);
+    }
 
     public String getRepoId(String projectId) {
-		return projectMapper.getRepoId(projectId);
+        return projectMapper.getRepoId(projectId);
+    }
+
+    public List<String> getProjectIds(String repo_id) {
+        return projectMapper.getProjectIds(repo_id);
+    }
+
+    public boolean existOtherProjectWithThisRepoId(String repoId) {
+        return projectMapper.getProjectIds(repoId).size() >= 2;
     }
 }

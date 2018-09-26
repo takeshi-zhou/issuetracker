@@ -22,7 +22,7 @@ import java.util.UUID;
 @Service
 public class TagServiceImpl implements TagService {
 
-    private Logger logger= LoggerFactory.getLogger(TagServiceImpl.class);
+    private Logger logger = LoggerFactory.getLogger(TagServiceImpl.class);
 
     private TagDao tagDao;
 
@@ -37,23 +37,23 @@ public class TagServiceImpl implements TagService {
         String name = requestBody.getString("name");
         String scope = requestBody.getString("scope");
         String itemId = requestBody.getString("itemId");
-        String tag_id ;
-        if (requestBody.getBoolean("isDefault")){   // 默认的tag，不是自定义的
-            tag_id = tagDao.getUuidByNameAndScope(name,scope);
-            if (tag_id == null){
+        String tag_id;
+        if (requestBody.getBoolean("isDefault")) {   // 默认的tag，不是自定义的
+            tag_id = tagDao.getUuidByNameAndScope(name, scope);
+            if (tag_id == null) {
                 tag_id = UUID.randomUUID().toString();
-                tagDao.addOneTag(new Tag(tag_id,name,scope,Priority.getByValue("name").getColor()));
+                tagDao.addOneTag(new Tag(tag_id, name, scope, Priority.getByValue("name").getColor()));
             }
-            logger.error(tagDao.hasBeenTagged(tag_id,itemId).toString());
-            if(tagDao.hasBeenTagged(tag_id,itemId)>0)
+            logger.error(tagDao.hasBeenTagged(tag_id, itemId).toString());
+            if (tagDao.hasBeenTagged(tag_id, itemId) > 0)
                 throw new RuntimeException("duplicate tag!");
-            tagDao.addOneTaggedItem(itemId,tag_id);
-        }else{
+            tagDao.addOneTaggedItem(itemId, tag_id);
+        } else {
             if (Priority.contains(name))
-                throw new IllegalArgumentException("enter other tag"+name);
+                throw new IllegalArgumentException("enter other tag" + name);
             tag_id = UUID.randomUUID().toString();
-            tagDao.addOneTag(new Tag(tag_id,name,scope,"#ffffff"));
-            tagDao.addOneTaggedItem(itemId,tag_id);
+            tagDao.addOneTag(new Tag(tag_id, name, scope, "#ffffff"));
+            tagDao.addOneTaggedItem(itemId, tag_id);
         }
     }
 
@@ -63,9 +63,9 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public void deleteTag(String tagId,String itemId) {
+    public void deleteTag(String tagId, String itemId) {
         //tagDao.deleteOneTag(tagId);
-        tagDao.deleteOneTagged(tagId,itemId);
+        tagDao.deleteOneTagged(tagId, itemId);
     }
 
     @Override
@@ -79,14 +79,14 @@ public class TagServiceImpl implements TagService {
         String scope = requestBody.getString("scope");
         String itemId = requestBody.getString("itemId");
         String oldName = requestBody.getString("oldName");
-        String oldTagId=tagDao.getUuidByNameAndScope(oldName,scope);
-        String newTagId = tagDao.getUuidByNameAndScope(name,scope);
-        if (requestBody.getBoolean("isDefault")){
-            tagDao.modifyOneTagged(oldTagId,newTagId,itemId);
-        }else {
+        String oldTagId = tagDao.getUuidByNameAndScope(oldName, scope);
+        String newTagId = tagDao.getUuidByNameAndScope(name, scope);
+        if (requestBody.getBoolean("isDefault")) {
+            tagDao.modifyOneTagged(oldTagId, newTagId, itemId);
+        } else {
             if (Priority.contains(name))
-                throw new IllegalArgumentException("enter other tag"+name);
-            tagDao.modifyOneTag(oldTagId,name);
+                throw new IllegalArgumentException("enter other tag" + name);
+            tagDao.modifyOneTag(oldTagId, name);
         }
 
     }
@@ -98,7 +98,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<String> getItemIdsByTagIds(List<String> tagIds) {
-        if(tagIds==null||tagIds.size()==0)
+        if (tagIds == null || tagIds.size() == 0)
             return null;
         return tagDao.getItemIdsByTagIds(tagIds);
     }

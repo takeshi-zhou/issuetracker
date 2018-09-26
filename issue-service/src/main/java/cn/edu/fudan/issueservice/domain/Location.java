@@ -13,18 +13,19 @@ public class Location {
     private String code;
 
 
-    public Location(){}
+    public Location() {
+    }
 
-    public Location(String uuid, int start_line, int end_line, String bug_lines,String file_path,String class_name, String method_name, String rawIssue_id,String code) {
+    public Location(String uuid, int start_line, int end_line, String bug_lines, String file_path, String class_name, String method_name, String rawIssue_id, String code) {
         this.uuid = uuid;
         this.start_line = start_line;
         this.end_line = end_line;
-        this.bug_lines=bug_lines;
+        this.bug_lines = bug_lines;
         this.file_path = file_path;
         this.class_name = class_name;
         this.method_name = method_name;
         this.rawIssue_id = rawIssue_id;
-        this.code=code;
+        this.code = code;
     }
 
     public String getFile_path() {
@@ -106,11 +107,11 @@ public class Location {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj ==this)return true;
-        if(!(obj instanceof Location))return false;
-        Location location=(Location)obj;
+        if (obj == this) return true;
+        if (!(obj instanceof Location)) return false;
+        Location location = (Location) obj;
 
-        return location.class_name.equals(class_name)&&
+        return location.class_name.equals(class_name) &&
                 location.method_name.equals(method_name) &&
                 location.file_path.equals(file_path);
     }

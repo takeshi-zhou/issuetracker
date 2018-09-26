@@ -21,27 +21,27 @@ public class RawIssueDao {
         this.rawIssueMapper = rawIssueMapper;
     }
 
-    public void insertRawIssueList(List<RawIssue> list){
+    public void insertRawIssueList(List<RawIssue> list) {
         rawIssueMapper.insertRawIssueList(list);
     }
 
-    public void deleteRawIssueByProjectId(String projectId){
-        rawIssueMapper.deleteRawIssueByProjectId(projectId);
+    public void deleteRawIssueByRepoId(String repoId) {
+        rawIssueMapper.deleteRawIssueByRepoId(repoId);
     }
 
-    public void batchUpdateIssueId(List<RawIssue> list){
+    public void batchUpdateIssueId(List<RawIssue> list) {
         rawIssueMapper.batchUpdateIssueId(list);
     }
 
-    public Integer getIssueCountBeforeSpecificTime(String account_id,String specificTime){
-        return rawIssueMapper.getIssueCountBeforeSpecificTime(account_id,specificTime);
+    public Integer getIssueCountBeforeSpecificTime(String account_id, String specificTime) {
+        return rawIssueMapper.getIssueCountBeforeSpecificTime(account_id, specificTime);
     }
 
-    public List<RawIssue> getRawIssueByCommitID(String commit_id){
+    public List<RawIssue> getRawIssueByCommitID(String commit_id) {
         return rawIssueMapper.getRawIssueByCommitID(commit_id);
     }
 
-    public List<RawIssue> getRawIssueByIssueId(String issueId){
+    public List<RawIssue> getRawIssueByIssueId(String issueId) {
         return rawIssueMapper.getRawIssueByIssueId(issueId);
     }
 }

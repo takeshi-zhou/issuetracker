@@ -14,7 +14,7 @@ import java.util.List;
 public class AccountDaoTest extends AccountServiceApplicationTests {
 
     @Autowired
-    AccountDao accountDao ;
+    AccountDao accountDao;
 
     public static MockTestConnection mockTestConnection;
 
@@ -25,9 +25,9 @@ public class AccountDaoTest extends AccountServiceApplicationTests {
     }
 
     @Before
-    public void setupData() throws Exception{
-        String sql="insert into account values(\"3\",\"admin\",\"f6fdffe48c908deb0f4c3bd36c032e72\",\"admin\",\"123456@fudan.edu.cn\")";
-        Statement stmt=mockTestConnection.getConn().createStatement();//创建一个Statement对象
+    public void setupData() throws Exception {
+        String sql = "insert into account values(\"3\",\"admin\",\"f6fdffe48c908deb0f4c3bd36c032e72\",\"admin\",\"123456@fudan.edu.cn\")";
+        Statement stmt = mockTestConnection.getConn().createStatement();//创建一个Statement对象
         stmt.executeUpdate(sql);//执行sql语句
         System.out.println("finish mocking");
     }
@@ -52,13 +52,13 @@ public class AccountDaoTest extends AccountServiceApplicationTests {
         /*
             正确的用户名及密码
          */
-        Account accountCorrect =  accountDao.login("admin","f6fdffe48c908deb0f4c3bd36c032e72");
-        System.out.println(accountCorrect.getAccountName()+ " " + accountCorrect.getPassword());
+        Account accountCorrect = accountDao.login("admin", "f6fdffe48c908deb0f4c3bd36c032e72");
+        System.out.println(accountCorrect.getAccountName() + " " + accountCorrect.getPassword());
 
         /*
             错误的用户名及密码
          */
-        Account accountIncorrect =  accountDao.login("admins","123");
+        Account accountIncorrect = accountDao.login("admins", "123");
         System.out.println(accountIncorrect);
     }
 
@@ -69,17 +69,17 @@ public class AccountDaoTest extends AccountServiceApplicationTests {
     }
 
     @Test
-    public void getAllAccountId(){
-        List<String>  listString = accountDao.getAllAccountId();
-        for (String id:listString ) {
+    public void getAllAccountId() {
+        List<String> listString = accountDao.getAllAccountId();
+        for (String id : listString) {
             System.out.println(id);
         }
     }
 
     @After
-    public void cleanData() throws Exception{
-        String sql="delete from account where uuid='3'";
-        Statement stmt=mockTestConnection.getConn().createStatement();//创建一个Statement对象
+    public void cleanData() throws Exception {
+        String sql = "delete from account where uuid='3'";
+        Statement stmt = mockTestConnection.getConn().createStatement();//创建一个Statement对象
         stmt.executeUpdate(sql);//执行sql语句
         System.out.println("finish cleaning");
     }

@@ -24,37 +24,36 @@ import java.util.List;
 @WebAppConfiguration
 public class IssueServiceApplicationTests {
 
-	@Value("${inner.service.path}")
-	private String innerServicePath;
-	@Value("${inner.header.key}")
-	private  String headerKey;
-	@Value("${inner.header.value}")
-	private  String headerValue;
+    @Value("${inner.service.path}")
+    private String innerServicePath;
+    @Value("${inner.header.key}")
+    private String headerKey;
+    @Value("${inner.header.value}")
+    private String headerValue;
 
-	private RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
-	@Autowired
-	public void setRestTemplate(RestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
-	}
+    @Autowired
+    public void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
-	@BeforeClass
-	public static void beforeTest(){
-		System.out.println("开始测试..................................");
-	}
+    @BeforeClass
+    public static void beforeTest() {
+        System.out.println("开始测试..................................");
+    }
 
-	@AfterClass
-	public static void afterTest(){
-		System.out.println("结束测试..................................");
-	}
+    @AfterClass
+    public static void afterTest() {
+        System.out.println("结束测试..................................");
+    }
 
-	private StringRedisTemplate stringRedisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
 
-	@Autowired
-	public void setStringRedisTemplate(StringRedisTemplate stringRedisTemplate) {
-		this.stringRedisTemplate = stringRedisTemplate;
-	}
-
+    @Autowired
+    public void setStringRedisTemplate(StringRedisTemplate stringRedisTemplate) {
+        this.stringRedisTemplate = stringRedisTemplate;
+    }
 
 
 }

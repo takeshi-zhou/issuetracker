@@ -7,6 +7,7 @@ import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.service.impl.ProjectServiceImpl;
 import cn.edu.fudan.projectmanager.tool.MockTestConnection;
 import cn.edu.fudan.projectmanager.tool.TestDataMaker;
+
 import static org.junit.Assert.*;
 
 import org.junit.*;
@@ -26,14 +27,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-@PrepareForTest({ProjectService.class,ProjectServiceImpl.class,ProjectDao.class})
-public class ProjectServiceTest extends ProjectManagerApplicationTests{
+@PrepareForTest({ProjectService.class, ProjectServiceImpl.class, ProjectDao.class})
+public class ProjectServiceTest extends ProjectManagerApplicationTests {
 
     Project project;
     Project projectUpdate;
@@ -54,7 +56,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
         project = testDataMaker.projectMakerPro2();
         projectUpdate = testDataMaker.projectMakerPro1Update();
         projectInitial = testDataMaker.projectMakerPro1();
-        MemberModifier.field(ProjectServiceImpl .class, "projectDao").set(projectService ,projectDao );
+        MemberModifier.field(ProjectServiceImpl.class, "projectDao").set(projectService, projectDao);
         System.out.println("finish mocking");
     }
 
@@ -63,15 +65,15 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
         当传入的project的url地址为null
      */
     @Test
-    public void addOneProjectTest1() throws Exception{
+    public void addOneProjectTest1() throws Exception {
         String accountId = "1";
         doNothing().when(projectDao).addOneProject(project);
-        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"getAccountId")).toReturn(accountId);
-        try{
+        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "getAccountId")).toReturn(accountId);
+        try {
             project.setUrl(null);
-            projectService.addOneProject("1",project);
-        }catch(RuntimeException e){
-            assertEquals(e.getMessage(),"please input the project url!");
+            projectService.addOneProject("1", project);
+        } catch (RuntimeException e) {
+            assertEquals(e.getMessage(), "please input the project url!");
         }
     }
 
@@ -79,16 +81,16 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
         当传入的project的url地址为不是正确路径
      */
     @Test
-    public void addOneProjectTest2() throws Exception{
+    public void addOneProjectTest2() throws Exception {
         String accountId = "1";
         doNothing().when(projectDao).addOneProject(project);
-        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"getAccountId")).toReturn(accountId);
-        try{
+        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "getAccountId")).toReturn(accountId);
+        try {
             project.setUrl("https://github.co");
             String url = "https://github.co";
-            projectService.addOneProject("1",project);
-        }catch(RuntimeException e){
-            assertEquals(e.getMessage(),"invalid url!");
+            projectService.addOneProject("1", project);
+        } catch (RuntimeException e) {
+            assertEquals(e.getMessage(), "invalid url!");
         }
     }
 
@@ -96,16 +98,16 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
         当传入的project的url地址不是guihub的项目
      */
     @Test
-    public void addOneProjectTest3() throws Exception{
+    public void addOneProjectTest3() throws Exception {
         String accountId = "1";
         doNothing().when(projectDao).addOneProject(project);
-        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"getAccountId")).toReturn(accountId);
-        try{
+        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "getAccountId")).toReturn(accountId);
+        try {
             project.setUrl("https://github.com/TheAlgorit");
             String url = "https://github.com/TheAlgorit";
-            projectService.addOneProject("1",project);
-        }catch(RuntimeException e){
-            assertEquals(e.getMessage(),"invalid url!");
+            projectService.addOneProject("1", project);
+        } catch (RuntimeException e) {
+            assertEquals(e.getMessage(), "invalid url!");
         }
     }
 
@@ -113,16 +115,16 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
         当传入的project的url地址不是maven项目
      */
     @Test
-    public void addOneProjectTest4() throws Exception{
+    public void addOneProjectTest4() throws Exception {
         String accountId = "1";
         doNothing().when(projectDao).addOneProject(project);
-        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"getAccountId")).toReturn(accountId);
-        try{
+        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "getAccountId")).toReturn(accountId);
+        try {
             project.setUrl("https://github.com/TheAlgorithms/Java");
             String url = "https://github.com/TheAlgorithms/Java";
-            projectService.addOneProject("1",project);
-        }catch(RuntimeException e){
-            assertEquals(e.getMessage(),"failed,this project is not maven project!");
+            projectService.addOneProject("1", project);
+        } catch (RuntimeException e) {
+            assertEquals(e.getMessage(), "failed,this project is not maven project!");
         }
     }
 
@@ -130,16 +132,16 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
         当传入的project的url地址过去已添加
      */
     @Test
-    public void addOneProjectTest5() throws Exception{
+    public void addOneProjectTest5() throws Exception {
         String accountId = "1";
         doNothing().when(projectDao).addOneProject(project);
-        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"getAccountId")).toReturn(accountId);
-        try{
+        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "getAccountId")).toReturn(accountId);
+        try {
             project.setUrl("https://github.com/spotify/docker-maven-plugin");
-            PowerMockito.when(projectDao.hasBeenAdded(accountId,project.getUrl(),project.getType())).thenReturn(true);
-            projectService.addOneProject("1",project);
-        }catch(RuntimeException e){
-            assertEquals(e.getMessage(),"The project has been added!");
+            PowerMockito.when(projectDao.hasBeenAdded(accountId, project.getUrl(), project.getType())).thenReturn(true);
+            projectService.addOneProject("1", project);
+        } catch (RuntimeException e) {
+            assertEquals(e.getMessage(), "The project has been added!");
         }
     }
 
@@ -147,13 +149,13 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
         当传入的project的url地址正确并且未添加过
      */
     @Test
-    public void addOneProjectTest6() throws Exception{
+    public void addOneProjectTest6() throws Exception {
         String accountId = "1";
         doNothing().when(projectDao).addOneProject(project);
-        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"getAccountId")).toReturn(accountId);
-        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"send"));
-        PowerMockito.when(projectDao.hasBeenAdded(accountId,project.getUrl(),project.getType())).thenReturn(false);
-        projectService.addOneProject("1",project);
+        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "getAccountId")).toReturn(accountId);
+        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "send"));
+        PowerMockito.when(projectDao.hasBeenAdded(accountId, project.getUrl(), project.getType())).thenReturn(false);
+        projectService.addOneProject("1", project);
         verify(projectDao, Mockito.atLeast(1)).addOneProject(project);
 
     }
@@ -166,13 +168,12 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
         list.add(projectUpdate);
         PowerMockito.when(projectDao.getProjectByAccountId("1")).thenReturn(list);
 
-        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"getAccountId")).toReturn("1");
+        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "getAccountId")).toReturn("1");
 
-        List<Project> listResult = (List<Project>)projectService.getProjectList("22222");
-        Assert.assertEquals(2,listResult.size());
-        Assert.assertEquals("pro2",listResult.get(0).getUuid());
-        Assert.assertEquals("pro1",listResult.get(1).getUuid());
-
+        List<Project> listResult = (List<Project>) projectService.getProjectList("22222");
+        Assert.assertEquals(2, listResult.size());
+        Assert.assertEquals("pro2", listResult.get(0).getUuid());
+        Assert.assertEquals("pro1", listResult.get(1).getUuid());
 
 
     }
@@ -181,9 +182,8 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
     public void getProjectByID() {
         PowerMockito.when(projectDao.getProjectByID("pro2")).thenReturn(project);
         Project projectResult = projectService.getProjectByID("pro2");
-        Assert.assertEquals("pro2",projectResult.getUuid());
+        Assert.assertEquals("pro2", projectResult.getUuid());
     }
-
 
 
     @Test
@@ -193,8 +193,8 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
         PowerMockito.when(projectDao.getProjectByID("pro2")).thenReturn(projectUpdate);
         projectService.updateProjectStatus(project);
         String updateName = projectDao.getProjectByID("pro2").getName();
-        Assert.assertNotEquals(initialName,updateName);
-        Assert.assertEquals("UpdateData",updateName);
+        Assert.assertNotEquals(initialName, updateName);
+        Assert.assertEquals("UpdateData", updateName);
     }
 
     /*
@@ -208,24 +208,10 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
     }
 
     @Test
-    public void getProjectNameById() {
-        PowerMockito.when(projectDao.getProjectNameById("pro1")).thenReturn("Java");
-        String projectName = projectService.getProjectNameById("pro1");
-        Assert.assertEquals("Java",projectName);
-    }
-
-    @Test
-    public void getRepoPath() {
-        PowerMockito.when(projectDao.getRepoPath("pro1")).thenReturn("path");
-        String repoPath = projectService.getRepoPath("pro1");
-        Assert.assertEquals("path",repoPath);
-    }
-
-    @Test
     public void getRepoId() {
         PowerMockito.when(projectDao.getRepoId("pro1")).thenReturn("RepoId");
         String repoId = projectService.getRepoId("pro1");
-        Assert.assertEquals("RepoId",repoId);
+        Assert.assertEquals("RepoId", repoId);
     }
 
     @Test
@@ -235,12 +221,12 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
         List<Project> list = new ArrayList<Project>();
         list.add(project);
         list.add(projectInitial);
-        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class,"getAccountId")).toReturn(accountId);
-        PowerMockito.when(projectDao.getProjectByKeyWordAndAccountId(accountId,"ja")).thenReturn(list);
+        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "getAccountId")).toReturn(accountId);
+        PowerMockito.when(projectDao.getProjectByKeyWordAndAccountId(accountId, "ja")).thenReturn(list);
 
         List<Project> projects = (List<Project>) projectService.getProjectListByKeyWord("1", "ja");
         for (Project eachProject : projects) {
-            Assert.assertEquals("Java",eachProject.getName());
+            Assert.assertEquals("Java", eachProject.getName());
         }
     }
 
@@ -253,10 +239,10 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests{
         list.add(projectInitial);
         PowerMockito.when(projectDao.getProjectByAccountId(accountId)).thenReturn(list);
 
-        List<String> projectIds = (List<String>) projectService.getProjectIdList("1");
-        Assert.assertEquals(list.size(),projectIds.size());
-        Assert.assertEquals(project.getUuid(),projectIds.get(0));
-        Assert.assertEquals(projectInitial.getUuid(),projectIds.get(1));
+        List<String> projectIds = (List<String>) projectService.getProjectIdList("1", "");
+        Assert.assertEquals(list.size(), projectIds.size());
+        Assert.assertEquals(project.getUuid(), projectIds.get(0));
+        Assert.assertEquals(projectInitial.getUuid(), projectIds.get(1));
     }
 
 

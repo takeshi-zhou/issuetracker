@@ -22,7 +22,7 @@ public class RawIssueDaoTest extends IssueServiceApplicationTests {
     List<RawIssue> list;
 
     @Before
-    public void setup() throws Exception{
+    public void setup() throws Exception {
         rawIssue1 = new RawIssue();
         rawIssue1.setUuid("111");
         rawIssue1.setType("OBL_UNSATISFIED_OBLIGATION");
@@ -49,13 +49,13 @@ public class RawIssueDaoTest extends IssueServiceApplicationTests {
     @Test
     @Transactional
     public void insertRawIssueList() {
-         rawIssueDao.insertRawIssueList(list);
+        rawIssueDao.insertRawIssueList(list);
     }
 
     @Test
     @Transactional
     public void deleteRawIssueByProjectId() {
-        rawIssueDao.deleteRawIssueByProjectId("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
+        rawIssueDao.deleteRawIssueByRepoId("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
     }
 
     @Test
@@ -67,7 +67,7 @@ public class RawIssueDaoTest extends IssueServiceApplicationTests {
     @Test
     public void getRawIssueByCommitID() {
         List<RawIssue> list2 = rawIssueDao.getRawIssueByCommitID("94628087eaf6c81584223617d287c26af2116a96");
-        for(RawIssue rawIssue : list2){
+        for (RawIssue rawIssue : list2) {
             System.out.println(rawIssue.getUuid());
         }
     }
@@ -75,7 +75,7 @@ public class RawIssueDaoTest extends IssueServiceApplicationTests {
     @Test
     public void getRawIssueByIssueId() {
         List<RawIssue> list3 = rawIssueDao.getRawIssueByIssueId("fe491c9a-4fd1-48d8-a577-057ce3c93a34");
-        for(RawIssue rawIssue : list3){
+        for (RawIssue rawIssue : list3) {
             System.out.println(rawIssue.getUuid());
         }
     }

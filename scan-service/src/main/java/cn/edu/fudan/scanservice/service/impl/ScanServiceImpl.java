@@ -24,28 +24,20 @@ public class ScanServiceImpl implements ScanService {
 
     @Value("${inner.service.path}")
     private String innerServicePath;
-    @Value("${inner.header.key}")
-    private  String headerKey;
-    @Value("${inner.header.value}")
-    private  String headerValue;
-
     @Value("${commit.service.path}")
     private String commitServicePath;
 
-    private HttpEntity<?> httpEntity;
+    private HttpHeaders httpHeaders;
 
-    private void initHttpEntity(){
-        if(httpEntity!=null)
-            return;
-        HttpHeaders headers=new HttpHeaders();
-        headers.add(headerKey,headerValue);
-        httpEntity=new HttpEntity<>(headers);
+    @Autowired
+    public void setHttpHeaders(HttpHeaders httpHeaders) {
+        this.httpHeaders = httpHeaders;
     }
 
     private RestTemplate restTemplate;
 
     @Autowired
-    public void setRestTemplate(RestTemplate restTemplate){
+    public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
@@ -62,8 +54,8 @@ public class ScanServiceImpl implements ScanService {
     }
 
     @Override
-    public void deleteScanByProjectId(String projectId) {
-        scanDao.deleteScanByProjectId(projectId);
+    public void deleteScanByRepoId(String repoId) {
+        scanDao.deleteScanByRepoId(repoId);
     }
 
     @Override
@@ -72,46 +64,36 @@ public class ScanServiceImpl implements ScanService {
     }
 
     @Override
-    public String getLatestScannedCommitId(String project_id) {
-        return scanDao.getLatestScannedCommitId(project_id);
-    }
-
-    @Override
-    public Object getTillCommitDateByProjectId(String projectId) {
-        return scanDao.getTillCommitDateByProjectId(projectId);
-    }
-
-    @Override
-    public Object getCommits(String project_id,Integer page,Integer size,Boolean is_whole) {
-        initHttpEntity();
-        String repo_id=restTemplate.exchange(innerServicePath+"/inner/project/repo-id?project-id="+project_id, HttpMethod.GET,httpEntity,String.class).getBody();
-        JSONObject commitResponse=restTemplate.getForObject(commitServicePath+"?repo_id="+repo_id+"&page="+page+"&per_page="+size+"&is_whole=true",JSONObject.class);
-        if(commitResponse!=null){
-            List<String> scannedCommitId=scanDao.getScannedCommits(project_id);
-            JSONArray commitArray=commitResponse.getJSONArray("data");
-            int index=0;
-            if(scannedCommitId.isEmpty()){
+    public Object getCommits(String project_id, Integer page, Integer size, Boolean is_whole) {
+        HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
+        String repo_id = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + project_id, HttpMethod.GET, httpEntity, String.class).getBody();
+        JSONObject commitResponse = restTemplate.getForObject(commitServicePath + "?repo_id=" + repo_id + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class);
+        if (commitResponse != null) {
+            List<String> scannedCommitId = scanDao.getScannedCommits(project_id);
+            JSONArray commitArray = commitResponse.getJSONArray("data");
+            int index = 0;
+            if (scannedCommitId.isEmpty()) {
                 //全都没扫过
-                for(int i=0;i<commitArray.size();i++){
-                    JSONObject commit=commitArray.getJSONObject(i);
-                    commit.put("isScanned",false);
+                for (int i = 0; i < commitArray.size(); i++) {
+                    JSONObject commit = commitArray.getJSONObject(i);
+                    commit.put("isScanned", false);
                 }
-                is_whole=true;
-            }else{
-                String lastScannedCommitId=scannedCommitId.get(scannedCommitId.size()-1);
+                is_whole = true;
+            } else {
+                String lastScannedCommitId = scannedCommitId.get(scannedCommitId.size() - 1);
                 //add for disable commits befor scanning commits
                 boolean disabled = false;
-                for(int i=0;i<commitArray.size();i++){
-                    JSONObject commit=commitArray.getJSONObject(i);
-                    String commit_id=commit.getString("commit_id");
-                    if(scannedCommitId.contains(commit_id)||disabled){
-                        commit.put("isScanned",true);
-                        if(commit_id.equals(lastScannedCommitId)){
-                            index=i;
+                for (int i = 0; i < commitArray.size(); i++) {
+                    JSONObject commit = commitArray.getJSONObject(i);
+                    String commit_id = commit.getString("commit_id");
+                    if (scannedCommitId.contains(commit_id) || disabled) {
+                        commit.put("isScanned", true);
+                        if (commit_id.equals(lastScannedCommitId)) {
+                            index = i;
                         }
                         disabled = true;
-                    }else{
-                        commit.put("isScanned",false);
+                    } else {
+                        commit.put("isScanned", false);
                     }
                     /*
                     if(scannedCommitId.contains(commit_id)){
@@ -124,33 +106,33 @@ public class ScanServiceImpl implements ScanService {
                     }*/
                 }
             }
-            Map<String,Object> result=new HashMap<>();
-            if(is_whole){
-                int totalCount=commitArray.size();
-                result.put("totalCount",totalCount);
-                if(totalCount>size){
-                    result.put("commitList",commitArray.subList((page-1)*size,page*size>totalCount?totalCount:page*size));
-                }else{
-                    result.put("commitList",commitArray);
+            Map<String, Object> result = new HashMap<>();
+            if (is_whole) {
+                int totalCount = commitArray.size();
+                result.put("totalCount", totalCount);
+                if (totalCount > size) {
+                    result.put("commitList", commitArray.subList((page - 1) * size, page * size > totalCount ? totalCount : page * size));
+                } else {
+                    result.put("commitList", commitArray);
                 }
-            }else{
-                List<Object> notScannedCommits=commitArray.subList(0,index);
-                int totalCount=notScannedCommits.size();
-                result.put("totalCount",totalCount);
-                if(totalCount>size){
-                    result.put("commitList",notScannedCommits.subList((page-1)*size,page*size>totalCount?totalCount:page*size));
-                }else{
-                    result.put("commitList",notScannedCommits);
+            } else {
+                List<Object> notScannedCommits = commitArray.subList(0, index);
+                int totalCount = notScannedCommits.size();
+                result.put("totalCount", totalCount);
+                if (totalCount > size) {
+                    result.put("commitList", notScannedCommits.subList((page - 1) * size, page * size > totalCount ? totalCount : page * size));
+                } else {
+                    result.put("commitList", notScannedCommits);
                 }
             }
             return result;
-        }else {
+        } else {
             throw new RuntimeException("commit query failed!");
         }
     }
 
     @Override
-    public Object getScannedCommits(String project_id) {
-        return scanDao.getScans(project_id);
+    public Object getScannedCommits(String repoId) {
+        return scanDao.getScans(repoId);
     }
 }

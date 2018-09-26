@@ -28,59 +28,64 @@ public class ScanController {
     }
 
 
-    @PostMapping(value={"/scan"})
+    @PostMapping(value = {"/scan"})
     @CrossOrigin
-    public Object scan(@RequestBody JSONObject requestParam){
-        try{
+    public Object scan(@RequestBody JSONObject requestParam) {
+        try {
             kafkaService.scanByRequest(requestParam);
-            return new ResponseBean(200,"scan msg send success!",null);
-        }catch (Exception e){
-            return new ResponseBean(401,e.getMessage(),null);
+            return new ResponseBean(200, "scan msg send success!", null);
+        } catch (Exception e) {
+            return new ResponseBean(401, e.getMessage(), null);
         }
     }
 
     @GetMapping(value = {"/scan/commits"})
     @CrossOrigin
-    public Object getCommits(@RequestParam(name="project_id",required = true) String project_id ,
-                                @RequestParam(name="page",required = false,defaultValue = "1")Integer page,
-                                @RequestParam(name="size",required = false,defaultValue = "10")Integer size,
-                                @RequestParam(name="is_whole",required = false,defaultValue = "false") Boolean is_whole){
-        return scanService.getCommits(project_id,page,size,is_whole);
+    public Object getCommits(@RequestParam(name = "project_id", required = true) String project_id,
+                             @RequestParam(name = "page", required = false, defaultValue = "1") Integer page,
+                             @RequestParam(name = "size", required = false, defaultValue = "10") Integer size,
+                             @RequestParam(name = "is_whole", required = false, defaultValue = "false") Boolean is_whole) {
+        return scanService.getCommits(project_id, page, size, is_whole);
     }
 
     //下面都是供其它服务调用的内部接口
 
-    @DeleteMapping(value = {"/inner/scan/{projectId}"})
-    public Object deleteScans(@PathVariable("projectId")String projectId){
-        try{
-            scanService.deleteScanByProjectId(projectId);
-            return new ResponseBean(200,"scan delete success!",null);
-        }catch (Exception e){
+    @DeleteMapping(value = {"/inner/scan/{repoId}"})
+    public Object deleteScans(@PathVariable("repoId") String repoId) {
+        try {
+            scanService.deleteScanByRepoId(repoId);
+            return new ResponseBean(200, "scan delete success!", null);
+        } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseBean(401,"scan delete failed",null);
+            return new ResponseBean(401, "scan delete failed", null);
         }
     }
 
-    @PutMapping(value={"/inner/scan"})
-    public Object updateScan(@RequestBody Scan scan){
-        try{
+    @PutMapping(value = {"/inner/scan"})
+    public Object updateScan(@RequestBody Scan scan) {
+        try {
             scanService.updateOneScan(scan);
-            return new ResponseBean(200,"scan update success!",null);
-        }catch (Exception e){
+            return new ResponseBean(200, "scan update success!", null);
+        } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseBean(401,"scan update failed",null);
+            return new ResponseBean(401, "scan update failed", null);
         }
     }
 
-    @GetMapping(value = {"/inner/scan/last-commit-date"})
-    public Object getTillCommitDateByProjectId(@RequestParam("project-id") String projectId ){
-        return scanService.getTillCommitDateByProjectId(projectId);
+    @PostMapping(value = {"/inner/scan"})
+    public Object addOneScan(@RequestBody Scan scan){
+        try {
+            scanService.insertOneScan(scan);
+            return new ResponseBean(200, "scan add success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "scan add failed", null);
+        }
     }
-
 
     @GetMapping(value = {"/inner/scan/commits"})
-    public Object getScannedCommits(@RequestParam("project_id") String project_id){
-        return scanService.getScannedCommits(project_id);
+    public Object getScannedCommits(@RequestParam("repo_id") String repo_id) {
+        return scanService.getScannedCommits(repo_id);
     }
 
 }

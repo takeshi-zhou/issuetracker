@@ -7,13 +7,13 @@ package cn.edu.fudan.scanservice.domain;
 public class ScanInitialInfo {
 
     private Scan scan;
-    private String projectName;
+    private String repoName;
     private String repoId;
     private String repoPath;
 
-    public ScanInitialInfo(Scan scan, String projectName, String repoId, String repoPath) {
+    public ScanInitialInfo(Scan scan, String repoName, String repoId, String repoPath) {
         this.scan = scan;
-        this.projectName = projectName;
+        this.repoName = repoName;
         this.repoId = repoId;
         this.repoPath = repoPath;
     }
@@ -26,12 +26,12 @@ public class ScanInitialInfo {
         this.scan = scan;
     }
 
-    public String getProjectName() {
-        return projectName;
+    public String getRepoName() {
+        return repoName;
     }
 
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
+    public void setRepoName(String repoName) {
+        this.repoName = repoName;
     }
 
     public String getRepoId() {

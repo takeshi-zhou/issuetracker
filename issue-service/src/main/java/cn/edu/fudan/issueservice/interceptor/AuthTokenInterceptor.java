@@ -26,9 +26,9 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
     @Value("${inner.service.path}")
     private String innerServicePath;
     @Value("${inner.header.key}")
-    private  String headerKey;
+    private String headerKey;
     @Value("${inner.header.value}")
-    private  String headerValue;
+    private String headerValue;
 
     private RestTemplate restTemplate;
 
@@ -39,32 +39,32 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
 
     private HttpEntity<?> requestEntity;
 
-    private void initRequestEntity(){
-        if(requestEntity!=null){
+    private void initRequestEntity() {
+        if (requestEntity != null) {
             return;
         }
         HttpHeaders headers = new HttpHeaders();
-        headers.add(headerKey,headerValue);
-        requestEntity=new HttpEntity<>(headers);
+        headers.add(headerKey, headerValue);
+        requestEntity = new HttpEntity<>(headers);
     }
 
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object handler) throws Exception {
-        httpServletResponse.setHeader("Access-Control-Allow-Origin","*");
-        httpServletResponse.setHeader("Access-Control-Allow-Methods","POST,GET,OPTIONS,DELETE");
-        httpServletResponse.setHeader("Access-Control-Allow-Headers",httpServletRequest.getHeader("Access-Control-Request-Headers"));
+        httpServletResponse.setHeader("Access-Control-Allow-Origin", "*");
+        httpServletResponse.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS,DELETE");
+        httpServletResponse.setHeader("Access-Control-Allow-Headers", httpServletRequest.getHeader("Access-Control-Request-Headers"));
         // 跨域时会首先发送一个option请求，该请求不会携带header 这里我们给option请求直接返回正常状态
         if (httpServletRequest.getMethod().equals(RequestMethod.OPTIONS.name())) {
             httpServletResponse.setStatus(HttpStatus.OK.value());
             return false;
         }
-        String userToken=httpServletRequest.getHeader("token");
-        if(userToken==null){
+        String userToken = httpServletRequest.getHeader("token");
+        if (userToken == null) {
             throw new AuthException("need user token!");
         }
         initRequestEntity();
-        JSONObject result=restTemplate.exchange(innerServicePath+"/user/auth/"+userToken, HttpMethod.GET,requestEntity,JSONObject.class).getBody();
-        if(result==null||result.getIntValue("code")!=200){
+        JSONObject result = restTemplate.exchange(innerServicePath + "/user/auth/" + userToken, HttpMethod.GET, requestEntity, JSONObject.class).getBody();
+        if (result == null || result.getIntValue("code") != 200) {
             throw new AuthException("auth failed!");
         }
         return true;

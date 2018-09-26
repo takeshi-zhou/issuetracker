@@ -16,6 +16,8 @@ public interface AccountMapper {
 
     String getAccountIdByName(@Param("name") String name);
 
+    Account getAccountByEmail(@Param("email") String email);
+
     Account getAccountByAccountName(String accountName);
 
     List<String> getAllAccountId();

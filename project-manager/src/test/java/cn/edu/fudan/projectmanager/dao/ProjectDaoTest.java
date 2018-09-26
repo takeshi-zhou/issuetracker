@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 public class ProjectDaoTest extends ProjectManagerApplicationTests {
 
     @Autowired
-    ProjectDao projectDao ;
+    ProjectDao projectDao;
 
     Project project;
     Project projectUpdate;
@@ -34,20 +34,19 @@ public class ProjectDaoTest extends ProjectManagerApplicationTests {
 
     @Before
     public void setup() throws Exception {
-        testDataMaker = new TestDataMaker();
 
         project = testDataMaker.projectMakerPro2();
 
         projectUpdate = testDataMaker.projectMakerPro1();
 
-        String sql="insert into project values(\"pro1\",\"XChart\",\n" +
+        String sql = "insert into project values(\"pro1\",\"XChart\",\n" +
                 "\"https://github.com/knowm/XChart\",\n" +
                 "\"Java\",\"git\",\"1\",\"Downloaded\",\n" +
                 "\"Scanned\",\"2018-07-24 08:33:40\",\n" +
                 "\"2018-09-03 14:15:21\",\n" +
                 "\"XChart is a light-weight Java library for plotting data.\",\n" +
                 "\"cf91a362-ab35-11e8-8a7c-d067e5ea858d\")";
-        Statement stmt=mockTestConnection.getConn().createStatement();//创建一个Statement对象
+        Statement stmt = mockTestConnection.getConn().createStatement();//创建一个Statement对象
         stmt.executeUpdate(sql);//执行sql语句
         System.out.println("finish mocking");
 
@@ -63,7 +62,7 @@ public class ProjectDaoTest extends ProjectManagerApplicationTests {
     @Test
     public void getProjectByAccountId() {
         List<Project> list = projectDao.getProjectByAccountId("1");
-        for(Project project : list){
+        for (Project project : list) {
             System.out.println(project.getName() + "  " + project.getUrl());
         }
     }
@@ -77,10 +76,10 @@ public class ProjectDaoTest extends ProjectManagerApplicationTests {
 
     @Test
     public void hasBeenAdded() {
-        Boolean state1 = projectDao.hasBeenAdded("1","https://github.com/knowm/XChart","bug");
+        Boolean state1 = projectDao.hasBeenAdded("1", "https://github.com/knowm/XChart", "bug");
         System.out.println(state1);
 
-        Boolean state2 = projectDao.hasBeenAdded("1","https://github.com/mockito/mockito","bug");
+        Boolean state2 = projectDao.hasBeenAdded("1", "https://github.com/mockito/mockito", "bug");
         System.out.println(state2);
 
     }
@@ -115,17 +114,17 @@ public class ProjectDaoTest extends ProjectManagerApplicationTests {
 
     @Test
     public void getProjectByKeyWordAndAccountId() {
-        List<Project> projects = projectDao.getProjectByKeyWordAndAccountId("1","x");
+        List<Project> projects = projectDao.getProjectByKeyWordAndAccountId("1", "x");
         System.out.println(projects);
-        for(Project project : projects){
+        for (Project project : projects) {
             System.out.println(project.getUuid());
         }
     }
 
     @After
-    public void cleanData() throws Exception{
-        String sql="delete from project where uuid='pro1'";
-        Statement stmt=mockTestConnection.getConn().createStatement();//创建一个Statement对象
+    public void cleanData() throws Exception {
+        String sql = "delete from project where uuid='pro1'";
+        Statement stmt = mockTestConnection.getConn().createStatement();//创建一个Statement对象
         stmt.executeUpdate(sql);//执行sql语句
         System.out.println("finish cleaning");
     }

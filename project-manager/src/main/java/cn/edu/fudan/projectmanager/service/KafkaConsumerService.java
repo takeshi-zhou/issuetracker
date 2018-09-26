@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 public class KafkaConsumerService {
 
 
-
     private ProjectService projectService;
 
     @Autowired
@@ -22,14 +21,14 @@ public class KafkaConsumerService {
         this.projectService = projectService;
     }
 
-    private Logger logger= LoggerFactory.getLogger(KafkaConsumerService.class);
+    private Logger logger = LoggerFactory.getLogger(KafkaConsumerService.class);
 
-    @KafkaListener(id="projectUpdate",topics = {"RepoManager"},groupId = "project")
-    public void update(ConsumerRecord<String, String> consumerRecord){
-        String msg=consumerRecord.value();
-        logger.info("receive message from topic -> " +consumerRecord.topic()+" : "+msg);
-        CompleteDownLoad completeDownLoad= JSONObject.parseObject(msg, CompleteDownLoad.class);
-        Project currentProject=projectService.getProjectByID(completeDownLoad.getProjectId());
+    @KafkaListener(id = "projectUpdate", topics = {"RepoManager"}, groupId = "project")
+    public void update(ConsumerRecord<String, String> consumerRecord) {
+        String msg = consumerRecord.value();
+        logger.info("receive message from topic -> " + consumerRecord.topic() + " : " + msg);
+        CompleteDownLoad completeDownLoad = JSONObject.parseObject(msg, CompleteDownLoad.class);
+        Project currentProject = projectService.getProjectByID(completeDownLoad.getProjectId());
         currentProject.setLanguage(completeDownLoad.getLanguage());
         currentProject.setVcs_type(completeDownLoad.getVcs_type());
         currentProject.setDownload_status(completeDownLoad.getStatus());

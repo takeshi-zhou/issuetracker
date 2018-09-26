@@ -18,27 +18,31 @@ public class AccountDao {
         this.accountMapper = accountMapper;
     }
 
-    public Account login(String accountName, String password){
-        return accountMapper.login(accountName,password);
+    public Account login(String accountName, String password) {
+        return accountMapper.login(accountName, password);
     }
 
-    public Account getAccountByAccountName(String accountName){
+    public Account getAccountByAccountName(String accountName) {
         return accountMapper.getAccountByAccountName(accountName);
     }
 
-    public boolean isAccountNameExist(String accountName){
-        return getAccountByAccountName(accountName)!=null;
+    public boolean isAccountNameExist(String accountName) {
+        return getAccountByAccountName(accountName) != null;
     }
 
-    public boolean isNameExist(String name){
-        return accountMapper.getAccountIdByName(name)!=null;
+    public boolean isNameExist(String name) {
+        return accountMapper.getAccountIdByName(name) != null;
+    }
+
+    public boolean isEmailExist(String email) {
+        return accountMapper.getAccountByEmail(email) != null;
     }
 
     public void addAccount(Account account) {
         accountMapper.addAccount(account);
     }
 
-    public List<String> getAllAccountId(){
+    public List<String> getAllAccountId() {
         return accountMapper.getAllAccountId();
     }
 }

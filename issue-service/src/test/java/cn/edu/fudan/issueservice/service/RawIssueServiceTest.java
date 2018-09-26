@@ -23,7 +23,7 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
     List<RawIssue> list;
 
     @Before
-    public void setup() throws Exception{
+    public void setup() throws Exception {
         rawIssue1 = new RawIssue();
         rawIssue1.setUuid("111");
         rawIssue1.setType("OBL_UNSATISFIED_OBLIGATION");
@@ -62,7 +62,7 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
     @Test
     @Transactional
     public void deleteRawIssueByProjectId() {
-        rawIssueService.deleteRawIssueByProjectId("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
+        rawIssueService.deleteRawIssueByRepoId("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
     }
 
     @Test
@@ -73,7 +73,7 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
     @Test
     public void getRawIssueByCommitID() {
         List<RawIssue> list = rawIssueService.getRawIssueByCommitID("94628087eaf6c81584223617d287c26af2116a96");
-        for(RawIssue rawIssue : list){
+        for (RawIssue rawIssue : list) {
             System.out.println(rawIssue.getUuid());
         }
     }
@@ -81,7 +81,7 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
     @Test
     public void getRawIssueByIssueId() {
         List<RawIssue> list = rawIssueService.getRawIssueByIssueId("fe491c9a-4fd1-48d8-a577-057ce3c93a34");
-        for(RawIssue rawIssue : list){
+        for (RawIssue rawIssue : list) {
             System.out.println(rawIssue.getUuid());
         }
 
@@ -89,8 +89,8 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
 
     @Test
     public void getLocationsByRawIssueId() {
-        List<Location> locations = ( List<Location>)rawIssueService.getLocationsByRawIssueId("ec76e7ff-33c7-46ea-899b-7f24f6b51d3c");
-        for(Location location : locations){
+        List<Location> locations = (List<Location>) rawIssueService.getLocationsByRawIssueId("ec76e7ff-33c7-46ea-899b-7f24f6b51d3c");
+        for (Location location : locations) {
             System.out.println(location.getUuid());
         }
 

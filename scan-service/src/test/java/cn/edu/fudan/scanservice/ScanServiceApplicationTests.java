@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
@@ -24,26 +27,27 @@ import javax.annotation.Resource;
 @SpringBootTest
 public class ScanServiceApplicationTests {
 
-	private final static Logger logger= LoggerFactory.getLogger(ScanOperationAdapter.class);
+    private final static Logger logger = LoggerFactory.getLogger(ScanOperationAdapter.class);
 
-	//@Value("${project.service.path}")
-	private String projectServicePath;
-	@Value("${issue.service.path}")
-	private String issueServicePath;
+    @Autowired
+    private HttpHeaders httpHeaders;
 
-	protected RestTemplate restTemplate;
+    @Value("${inner.service.path}")
+    private String innerServicePath;
 
-	@Autowired
-	public void setRestTemplate(RestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
-	}
+    protected RestTemplate restTemplate;
 
-	@Test
-	public void contextLoads() {
-		JSONObject requestParam =new JSONObject();
-		requestParam.put("uuid","f2e6189f-e4c8-47d3-b664-9973fdd3038b");
-		requestParam.put("till_commit_time","2016-05-19 10:00:02");
-		projectServicePath="http://10.141.221.80:8002/project";
-		restTemplate.put(projectServicePath,requestParam,JSONObject.class);
-	}
+    @Autowired
+    public void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    @Test
+    public void contextLoads() {
+        JSONObject requestParam = new JSONObject();
+        requestParam.put("uuid", "9b60eadb-6738-4d73-acaa-114f4c848759");
+        requestParam.put("scan_status", "Not Scanned");
+        HttpEntity<Object> entity = new HttpEntity<>(requestParam, httpHeaders);
+        restTemplate.exchange(innerServicePath + "/inner/project", HttpMethod.PUT, entity, JSONObject.class);
+    }
 }

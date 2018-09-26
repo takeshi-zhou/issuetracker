@@ -4,7 +4,7 @@
 <mapper namespace="cn.edu.fudan.issueservice.mapper.IssueTypeMapper">
 
     <resultMap id="issueType" type="IssueType">
-        <id  property="uuid" column="uuid"/>
+        <id property="uuid" column="uuid"/>
         <result property="type" column="type"/>
         <result property="tool" column="tool"/>
         <result property="category" column="category"/>
@@ -13,7 +13,7 @@
 
     <select id="getIssueTypeByTypeName" parameterType="String" resultMap="issueType">
         select * from issueType where type =#{type}
-     </select>
+    </select>
 
 </mapper>
 

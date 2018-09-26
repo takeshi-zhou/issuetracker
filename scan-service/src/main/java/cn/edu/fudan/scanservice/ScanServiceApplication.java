@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableAsync//开启异步调用的支持
 public class ScanServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ScanServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ScanServiceApplication.class, args);
+    }
 }

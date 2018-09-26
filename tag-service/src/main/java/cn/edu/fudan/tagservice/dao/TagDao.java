@@ -22,20 +22,20 @@ public class TagDao {
         this.tagMapper = tagMapper;
     }
 
-    public void addOneTag(Tag tag){
+    public void addOneTag(Tag tag) {
         tagMapper.addOneTag(tag);
     }
 
-    public void addOneTaggedItem( String item_id, String tag_id){
-        tagMapper.addOneTaggedItem(item_id,tag_id);
+    public void addOneTaggedItem(String item_id, String tag_id) {
+        tagMapper.addOneTaggedItem(item_id, tag_id);
     }
 
-    public void addMultiTaggedItem(List<TaggedItem> list){
+    public void addMultiTaggedItem(List<TaggedItem> list) {
         tagMapper.addMultiTaggedItem(list);
     }
 
     public String getUuidByNameAndScope(String name, String scope) {
-        return tagMapper.getUuidByNameAndScope(name,scope);
+        return tagMapper.getUuidByNameAndScope(name, scope);
     }
 
     public void deleteOneTag(String tagId) {
@@ -43,35 +43,35 @@ public class TagDao {
     }
 
     public void deleteOneTagged(String tagId, String itemId) {
-        tagMapper.deleteOneTagged(tagId,itemId);
+        tagMapper.deleteOneTagged(tagId, itemId);
     }
 
-    public void deleteTaggeds(List<String> itemIds){
+    public void deleteTaggeds(List<String> itemIds) {
         tagMapper.deleteTaggeds(itemIds);
     }
 
     public void modifyOneTag(String tagId, String name) {
-        tagMapper.modifyOneTag(tagId,name);
+        tagMapper.modifyOneTag(tagId, name);
     }
 
-    public void modifyOneTagged(String oldTagId,String newTagId, String iteamId) {
-        tagMapper.modifyOneTagged(oldTagId,newTagId,iteamId);
+    public void modifyOneTagged(String oldTagId, String newTagId, String iteamId) {
+        tagMapper.modifyOneTagged(oldTagId, newTagId, iteamId);
     }
 
-    public List<Tag> getTagsByItemId(String item_id){
+    public List<Tag> getTagsByItemId(String item_id) {
         return tagMapper.getTagsByItemId(item_id);
     }
 
-    public List<String> getItemIdsByTagIds(List<String> tagIds){
+    public List<String> getItemIdsByTagIds(List<String> tagIds) {
         return tagMapper.getItemIdsByTagIds(tagIds);
     }
 
-    public List<Tag> getAllDefaultTags(){
+    public List<Tag> getAllDefaultTags() {
         return tagMapper.getAllDefaultTags();
     }
 
-    public Integer hasBeenTagged(String tag_id,String item_id){
-        return tagMapper.hasBeenTagged(tag_id,item_id);
+    public Integer hasBeenTagged(String tag_id, String item_id) {
+        return tagMapper.hasBeenTagged(tag_id, item_id);
     }
 
     public void deleteTagByProjectId(String projectId) {

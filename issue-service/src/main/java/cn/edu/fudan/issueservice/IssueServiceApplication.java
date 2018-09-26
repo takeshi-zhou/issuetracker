@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableScheduling
 public class IssueServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(IssueServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(IssueServiceApplication.class, args);
+    }
 }

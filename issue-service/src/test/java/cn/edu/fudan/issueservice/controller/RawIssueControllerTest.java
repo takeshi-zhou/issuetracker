@@ -81,19 +81,19 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
     }
 
     @Test
-    public void getRawIssueList() throws Exception{
-        request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
-        List<RawIssue> listRaw = (List<RawIssue>)rawIssueController.getRawIssueList("fe491c9a-4fd1-48d8-a577-057ce3c93a34");
-        for(RawIssue rawIssue : listRaw){
+    public void getRawIssueList() throws Exception {
+        request.addHeader("token", "ec15d79e36e14dd258cfff3d48b73d35");
+        List<RawIssue> listRaw = (List<RawIssue>) rawIssueController.getRawIssueList("fe491c9a-4fd1-48d8-a577-057ce3c93a34");
+        for (RawIssue rawIssue : listRaw) {
             System.out.println(rawIssue.getUuid());
         }
     }
 
     @Test
-    public void getLocationList() throws Exception{
-        request.addHeader("token","ec15d79e36e14dd258cfff3d48b73d35");
-        List<Location> listLocation = (List<Location>)rawIssueController.getRawIssueList("00b70f51-5cc4-45f1-bfed-9874a275af96");
-        for(Location location : listLocation){
+    public void getLocationList() throws Exception {
+        request.addHeader("token", "ec15d79e36e14dd258cfff3d48b73d35");
+        List<Location> listLocation = (List<Location>) rawIssueController.getRawIssueList("00b70f51-5cc4-45f1-bfed-9874a275af96");
+        for (Location location : listLocation) {
             System.out.println(location.getUuid());
         }
 
@@ -102,7 +102,7 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
 
     @Test
     @Transactional
-    public void addRawIssues() throws Exception{
+    public void addRawIssues() throws Exception {
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
         java.lang.String requestJson = ow.writeValueAsString(list);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/inner/raw-issue")
@@ -128,7 +128,7 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
 
     @Test
     @Transactional
-    public void updateRawIssues() throws Exception{
+    public void updateRawIssues() throws Exception {
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
         java.lang.String requestJson = ow.writeValueAsString(list);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/inner/raw-issue")
@@ -144,10 +144,10 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
         等scan单元测试之后完善
      */
     @Test
-    public void getRawIssues() throws Exception{
+    public void getRawIssues() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/inner/raw-issue/list-by-commit")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .param("commit_id","")
+                .param("commit_id", "")
                 .session(session)
         ).andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();

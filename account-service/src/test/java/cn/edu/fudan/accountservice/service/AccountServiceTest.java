@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 public class AccountServiceTest extends AccountServiceApplicationTests {
 
     @Autowired
-    AccountService accountService ;
+    AccountService accountService;
 
     public static MockTestConnection mockTestConnection;
 
@@ -27,9 +27,9 @@ public class AccountServiceTest extends AccountServiceApplicationTests {
     }
 
     @Before
-    public void setupData() throws Exception{
-        String sql="insert into account values(\"3\",\"admin\",\"f6fdffe48c908deb0f4c3bd36c032e72\",\"admin\",\"123456@fudan.edu.cn\")";
-        Statement stmt=mockTestConnection.getConn().createStatement();//创建一个Statement对象
+    public void setupData() throws Exception {
+        String sql = "insert into account values(\"3\",\"admin\",\"f6fdffe48c908deb0f4c3bd36c032e72\",\"admin\",\"123456@fudan.edu.cn\")";
+        Statement stmt = mockTestConnection.getConn().createStatement();//创建一个Statement对象
         stmt.executeUpdate(sql);//执行sql语句
         System.out.println("finish mocking");
     }
@@ -40,13 +40,13 @@ public class AccountServiceTest extends AccountServiceApplicationTests {
         /*
             正确的用户名及密码
          */
-        ResponseBean responseBeanCorrect = accountService.login("admin","admin");
+        ResponseBean responseBeanCorrect = accountService.login("admin", "admin");
         System.out.println(responseBeanCorrect.toString());
 
         /*
             错误的用户名及密码
          */
-        ResponseBean responseBeanIncorrect = accountService.login("admin","admins");
+        ResponseBean responseBeanIncorrect = accountService.login("admin", "admins");
         System.out.println(responseBeanIncorrect.toString());
     }
 
@@ -68,9 +68,9 @@ public class AccountServiceTest extends AccountServiceApplicationTests {
     @Test
     public void getAccountByToken() {
         Account account = accountService.getAccountByToken("ec15d79e36e14dd258cfff3d48b73d35");
-        if(account != null){
-            System.out.println(account.getAccountName()+ " " + account.getPassword());
-        }else{
+        if (account != null) {
+            System.out.println(account.getAccountName() + " " + account.getPassword());
+        } else {
             System.out.println("token输入错误");
         }
 
@@ -99,18 +99,18 @@ public class AccountServiceTest extends AccountServiceApplicationTests {
     }
 
     @Test
-    public void getAllAccountId(){
+    public void getAllAccountId() {
         List<String> listString = accountService.getAllAccountId();
-        for (String id:listString ) {
+        for (String id : listString) {
             System.out.println(id);
         }
     }
 
 
     @After
-    public void cleanData() throws Exception{
-        String sql="delete from account where uuid='3'";
-        Statement stmt=mockTestConnection.getConn().createStatement();//创建一个Statement对象
+    public void cleanData() throws Exception {
+        String sql = "delete from account where uuid='3'";
+        Statement stmt = mockTestConnection.getConn().createStatement();//创建一个Statement对象
         stmt.executeUpdate(sql);//执行sql语句
         System.out.println("finish cleaning");
     }
