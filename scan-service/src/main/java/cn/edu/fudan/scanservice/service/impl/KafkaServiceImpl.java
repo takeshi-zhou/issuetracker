@@ -4,7 +4,8 @@ package cn.edu.fudan.scanservice.service.impl;
 import cn.edu.fudan.scanservice.domain.ScanMessage;
 import cn.edu.fudan.scanservice.domain.ScanResult;
 import cn.edu.fudan.scanservice.service.KafkaService;
-import cn.edu.fudan.scanservice.task.ScanTask;
+import cn.edu.fudan.scanservice.task.CloneScanTask;
+import cn.edu.fudan.scanservice.task.FindBugScanTask;
 import cn.edu.fudan.scanservice.util.DateTimeUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -34,30 +35,24 @@ import java.util.concurrent.TimeoutException;
 public class KafkaServiceImpl implements KafkaService {
 
     private Logger logger = LoggerFactory.getLogger(ScanServiceImpl.class);
-
     @Value("${commit.service.path}")
     private String commitServicePath;
     @Value("${inner.service.path}")
     private String innerServicePath;
 
     private HttpHeaders httpHeaders;
-
-    @Autowired
-    public void setHttpHeaders(HttpHeaders httpHeaders) {
-        this.httpHeaders = httpHeaders;
-    }
-
-    private ScanTask scanTask;
-
-    @Autowired
-    public void setScanTask(ScanTask scanTask) {
-        this.scanTask = scanTask;
-    }
-
+    private FindBugScanTask findBugScanTask;
+    private CloneScanTask cloneScanTask;
     private RestTemplate restTemplate;
 
     @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) {
+    public KafkaServiceImpl(HttpHeaders httpHeaders,
+                            FindBugScanTask findBugScanTask,
+                            CloneScanTask cloneScanTask,
+                            RestTemplate restTemplate) {
+        this.httpHeaders = httpHeaders;
+        this.findBugScanTask = findBugScanTask;
+        this.cloneScanTask = cloneScanTask;
         this.restTemplate = restTemplate;
     }
 
@@ -126,14 +121,19 @@ public class KafkaServiceImpl implements KafkaService {
     @SuppressWarnings("unchecked")
     @Override
     public void scanByRequest(JSONObject requestParam) {
+        String type=requestParam.getString("type");
         String projectId = requestParam.getString("projectId");
         String commitId = requestParam.getString("commitId");
         initialProject(projectId);
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
         String repoId = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + projectId, HttpMethod.GET, entity, String.class).getBody();
-        Future<String> future = scanTask.run(repoId, commitId);
-        //开一个工作者线程来管理异步任务的超时
-        setTimeOut(future, repoId);
+        if(type.equals("findbug")){
+           Future<String> future = findBugScanTask.run(repoId, commitId);
+           //开一个工作者线程来管理异步任务的超时
+            setTimeOut(future, repoId);
+        }else{
+            cloneScanTask.run(repoId,commitId);
+        }
     }
 
     /**
@@ -149,7 +149,7 @@ public class KafkaServiceImpl implements KafkaService {
         ScanMessage scanMessage = JSONObject.parseObject(msg, ScanMessage.class);
         String repoId = scanMessage.getRepoId();
         String commitId = scanMessage.getCommitId();
-        Future<String> future = scanTask.run(repoId, commitId);
+        Future<String> future = findBugScanTask.run(repoId, commitId);
         setTimeOut(future, repoId);
     }
 

@@ -15,9 +15,9 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  **/
 @Component("GPUClone")
-public class GPUCloneScanOperation extends ScanOperationAdapter {
+public class CloneScanOperation extends ScanOperationAdapter {
 
-    private Logger logger = LoggerFactory.getLogger(GPUCloneScanOperation.class);
+    private Logger logger = LoggerFactory.getLogger(CloneScanOperation.class);
 
     private KafkaTemplate kafkaTemplate;
 

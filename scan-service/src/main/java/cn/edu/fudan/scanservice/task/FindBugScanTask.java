@@ -24,9 +24,9 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0
  **/
 @Component
-public class ScanTask {
+public class FindBugScanTask {
 
-    private Logger logger = LoggerFactory.getLogger(ScanTask.class);
+    private Logger logger = LoggerFactory.getLogger(FindBugScanTask.class);
 
     //这边注入的是findBug的扫描的实现方式，如果是其它工具，可以换作其它实现
     @Resource(name = "findBug")
@@ -47,8 +47,8 @@ public class ScanTask {
     }
 
     @SuppressWarnings("unchecked")
-    private void send(String repoId, String commitId, String type,String status, String description) {
-        ScanResult scanResult = new ScanResult(repoId, commitId, type,status, description);
+    private void send(String repoId, String commitId,String status, String description) {
+        ScanResult scanResult = new ScanResult(repoId, commitId, "findbug",status, description);
         kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
     }
 
@@ -56,7 +56,7 @@ public class ScanTask {
         if (scanOperation.isScanned(commitId)) {
             //如果当前commit已经扫描过，直接结束
             logger.info("this commit has been scanned");
-            send(repoId, commitId, "findbug","success", "scan success!");
+            send(repoId, commitId, "success", "scan success!");
             logger.info("Scan Success!");
             return;
         }
@@ -64,7 +64,7 @@ public class ScanTask {
         logger.info("start to checkout -> " + commitId);
         //checkout,如果失败发送错误消息，直接返回
         if (!scanOperation.checkOut(repoId, commitId)) {
-            send(repoId, commitId, "findbug","failed", "check out failed");
+            send(repoId, commitId, "failed", "check out failed");
             logger.error("Check Out Failed!");
             return;
         }
@@ -73,14 +73,14 @@ public class ScanTask {
         ScanInitialInfo scanInitialInfo = scanOperation.initialScan(repoId, commitId);
         ScanResult scanResult = scanOperation.doScan(scanInitialInfo);
         if (scanResult.getStatus().equals("failed")) {
-            send(repoId, commitId, "findbug","failed", scanResult.getDescription());
+            send(repoId, commitId, "failed", scanResult.getDescription());
             logger.error(scanResult.getDescription());
             return;
         }
         logger.info("scan complete ->" + scanResult.getDescription());
         logger.info("start to mapping ......");
         if (!scanOperation.mapping(repoId, commitId)) {
-            send(repoId, commitId, "findbug","failed", "Mapping failed");
+            send(repoId, commitId, "failed", "Mapping failed");
             logger.error("Mapping Failed!");
             return;
         }
@@ -88,12 +88,12 @@ public class ScanTask {
         //映射结束，更新当前scan
         logger.info("start to update scan status");
         if (!scanOperation.updateScan(scanInitialInfo)) {
-            send(repoId, commitId, "findbug","failed", "scan update failed");
+            send(repoId, commitId, "failed", "scan update failed");
             logger.error("Scan Update Failed!");
             return;
         }
         logger.info("scan update complete");
-        send(repoId, commitId, "findbug","success", "all complete");
+        send(repoId, commitId, "success", "all complete");
     }
 
     @Async

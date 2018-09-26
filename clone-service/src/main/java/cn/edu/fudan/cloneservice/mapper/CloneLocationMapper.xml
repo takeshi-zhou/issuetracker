@@ -43,4 +43,8 @@
               )
         </foreach>
     </insert>
+
+    <select id="getCloneLocation" parameterType="String" resultMap="cloneLocation">
+        select * from clone_location where clone_rawIssue_id = #{clone_rawIssue_id}
+    </select>
 </mapper>

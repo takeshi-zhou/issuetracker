@@ -24,4 +24,8 @@ public class CloneRawIssueDao {
     public void insertCloneRawIssueList(List<CloneRawIssue> list){
         cloneRawIssueMapper.insertCloneRawIssueList(list);
     }
+
+    public List<CloneRawIssue> getCloneRawIssueWithLocations(String commit_id){
+        return cloneRawIssueMapper.getCloneRawIssueWithLocations(commit_id);
+    }
 }

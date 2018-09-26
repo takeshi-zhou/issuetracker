@@ -10,6 +10,7 @@
         <result property="scan_id" column="scan_id"/>
         <result property="clone_issue_id" column="clone_issue_id"/>
         <result property="commit_id" column="commit_id"/>
+        <collection property="locations" column="clone_issue_id" select="cn.edu.fudan.cloneservice.mapper.CloneLocationMapper.getCloneLocation"/>
     </resultMap>
 
     <insert id="insertCloneRawIssueList" parameterType="List">
@@ -32,5 +33,9 @@
                 )
         </foreach>
     </insert>
+
+    <select id="getCloneRawIssueWithLocations" parameterType="String" resultMap="cloneRawIssue">
+        select * from clone_rawIssue where commit_id = #{commit_id}
+    </select>
     
 </mapper>

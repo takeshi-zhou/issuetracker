@@ -1,5 +1,7 @@
 package cn.edu.fudan.cloneservice.domain;
 
+import java.util.List;
+
 /**
  * @author WZY
  * @version 1.0
@@ -11,6 +13,15 @@ public class CloneRawIssue {
     private String scan_id;
     private String clone_issue_id;
     private String commit_id;
+    private List<CloneLocation> locations;
+
+    public List<CloneLocation> getLocations() {
+        return locations;
+    }
+
+    public void setLocations(List<CloneLocation> locations) {
+        this.locations = locations;
+    }
 
     public String getUuid() {
         return uuid;
