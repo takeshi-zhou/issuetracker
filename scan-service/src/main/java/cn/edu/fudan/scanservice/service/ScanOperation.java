@@ -9,11 +9,11 @@ public interface ScanOperation {
 
     boolean checkOut(String repoId, String commitId);
 
-    ScanInitialInfo initialScan(String repoId, String commitId);
+    ScanInitialInfo initialScan(String repoId, String commitId,String category);
 
     ScanResult doScan(ScanInitialInfo scanInitialInfo);
 
-    boolean mapping(String repoId, String commitId);
+    boolean mapping(String repoId, String commitId,String category);
 
     boolean updateScan(ScanInitialInfo scanInitialInfo);
 

@@ -121,18 +121,18 @@ public class KafkaServiceImpl implements KafkaService {
     @SuppressWarnings("unchecked")
     @Override
     public void scanByRequest(JSONObject requestParam) {
-        String type=requestParam.getString("type");
+        String category=requestParam.getString("category");
         String projectId = requestParam.getString("projectId");
         String commitId = requestParam.getString("commitId");
         initialProject(projectId);
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
         String repoId = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + projectId, HttpMethod.GET, entity, String.class).getBody();
-        if(type.equals("findbug")){
-           Future<String> future = findBugScanTask.run(repoId, commitId);
+        if(category.equals("bug")){
+           Future<String> future = findBugScanTask.run(repoId, commitId,category);
            //开一个工作者线程来管理异步任务的超时
             setTimeOut(future, repoId);
         }else{
-            cloneScanTask.run(repoId,commitId);
+            cloneScanTask.run(repoId,commitId,category);
         }
     }
 
@@ -149,7 +149,8 @@ public class KafkaServiceImpl implements KafkaService {
         ScanMessage scanMessage = JSONObject.parseObject(msg, ScanMessage.class);
         String repoId = scanMessage.getRepoId();
         String commitId = scanMessage.getCommitId();
-        Future<String> future = findBugScanTask.run(repoId, commitId);
+        String category=scanMessage.getCategory();
+        Future<String> future = findBugScanTask.run(repoId, commitId,category);
         setTimeOut(future, repoId);
     }
 

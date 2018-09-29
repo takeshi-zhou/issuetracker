@@ -6,6 +6,7 @@
 
     <resultMap id="scan" type="Scan">
         <id property="uuid" column="uuid"/>
+        <result property="category" column="category"/>
         <result property="name" column="name"/>
         <result property="start_time" column="start_time"/>
         <result property="end_time" column="end_time"/>
@@ -21,6 +22,7 @@
         insert into scan
         (
         uuid,
+        category,
         name,
         start_time,
         end_time,
@@ -33,6 +35,7 @@
         VALUES
         (
         #{uuid},
+        #{category},
         #{name},
         #{start_time},
         #{end_time},
@@ -60,8 +63,8 @@
     </update>
 
     <select id="getLatestScannedCommitId" parameterType="String" resultType="String">
-        select commit_id from scan where repo_id = #{repo_id} and end_time = (select max(end_time) from scan where
-        repo_id = #{repo_id});
+        select commit_id from scan where repo_id = #{repo_id} and category = #{category} and end_time = (select max(end_time) from scan where
+        repo_id = #{repo_id} and category = #{category});
     </select>
 
     <select id="getScanCountByCommitId" parameterType="String" resultType="Integer">
@@ -69,6 +72,6 @@
     </select>
 
     <select id="getScannedCommits" parameterType="String" resultMap="scan">
-        select * from scan where repo_id=#{repo_id} order by commit_time
+        select * from scan where repo_id=#{repo_id} and category = #{category} order by commit_time
     </select>
 </mapper>

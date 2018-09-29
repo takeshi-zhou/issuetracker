@@ -5,7 +5,6 @@ import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.IssueCount;
 import cn.edu.fudan.issueservice.domain.RawIssue;
-import cn.edu.fudan.issueservice.scheduler.QuartzScheduler;
 import cn.edu.fudan.issueservice.service.IssueService;
 import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONArray;
@@ -41,13 +40,6 @@ public class IssueServiceImpl implements IssueService {
     private String innerServicePath;
 
     private HttpHeaders httpHeaders;
-
-    private QuartzScheduler quartzScheduler;
-
-    @Autowired
-    public void setQuartzScheduler(QuartzScheduler quartzScheduler) {
-        this.quartzScheduler = quartzScheduler;
-    }
 
     @Autowired
     public void setHttpHeaders(HttpHeaders httpHeaders) {
@@ -119,11 +111,13 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public Object getIssueList(String repoId, Integer page, Integer size) {
+    public Object getIssueList(String project_id, Integer page, Integer size,String category) {
+        String repoId=getRepoId(project_id);
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> param = new HashMap<>();
         param.put("repo_id", repoId);
         param.put("size", size);
+        param.put("category",category);
         //获取已经solve的和ignore的issue_ids
         List<String> tag_ids = new ArrayList<>();
         tag_ids.add(solvedTagId);
@@ -147,6 +141,7 @@ public class IssueServiceImpl implements IssueService {
         String project_id = requestParam.getString("project_id");
         int size = requestParam.getIntValue("size");
         int page = requestParam.getIntValue("page");
+        String category=requestParam.getString("category");
         if (project_id == null || size == 0 || page == 0)
             throw new IllegalArgumentException("param lost!");
         String repoId = getRepoId(project_id);
@@ -167,6 +162,7 @@ public class IssueServiceImpl implements IssueService {
             query.put("types", types.toJavaList(String.class));
         }
         query.put("repo_id", repoId);
+        query.put("category",category);
         int count = issueDao.getIssueCount(query);
         query.put("size", size);
         query.put("start", (page - 1) * size);
@@ -322,18 +318,18 @@ public class IssueServiceImpl implements IssueService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void startMapping(String repo_id, String pre_commit_id, String current_commit_id) {
+    public void startMapping(String repo_id, String pre_commit_id, String current_commit_id,String category) {
         List<Issue> insertIssueList = new ArrayList<>();
         if (pre_commit_id.equals(current_commit_id)) {
             //当前project第一次扫描，所有的rawIssue都是issue
-            List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitID(current_commit_id);
+            List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
             if (rawIssues == null || rawIssues.isEmpty())
                 return;
             for (RawIssue rawIssue : rawIssues) {
                 String new_IssueId = UUID.randomUUID().toString();
                 rawIssue.setIssue_id(new_IssueId);
                 String targetFiles = rawIssue.getFile_name();
-                Issue issue = new Issue(new_IssueId, rawIssue.getType(), current_commit_id, current_commit_id, rawIssue.getUuid(), rawIssue.getUuid(), repo_id, targetFiles);
+                Issue issue = new Issue(new_IssueId, rawIssue.getType(),category, current_commit_id, current_commit_id, rawIssue.getUuid(), rawIssue.getUuid(), repo_id, targetFiles);
                 insertIssueList.add(issue);
             }
             int newIssueCount = insertIssueList.size();
@@ -343,13 +339,13 @@ public class IssueServiceImpl implements IssueService {
             rawIssueDao.batchUpdateIssueId(rawIssues);
         } else {
             //不是第一次扫描，需要和前一次的commit进行mapping
-            List<RawIssue> rawIssues1 = rawIssueDao.getRawIssueByCommitID(pre_commit_id);
-            List<RawIssue> rawIssues2 = rawIssueDao.getRawIssueByCommitID(current_commit_id);
+            List<RawIssue> rawIssues1 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,pre_commit_id);
+            List<RawIssue> rawIssues2 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
             if (rawIssues2 == null || rawIssues1.isEmpty())
                 return;
             //当前project已经扫描过的commit列表,是按commit_time从小到大排序的
             HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
-            JSONArray commits = restTemplate.exchange(innerServicePath + "/inner/scan/commits?repo_id=" + repo_id, HttpMethod.GET, requestEntity, JSONArray.class).getBody();
+            JSONArray commits = restTemplate.exchange(innerServicePath + "/inner/scan/commits?repo_id=" + repo_id+"&category="+category, HttpMethod.GET, requestEntity, JSONArray.class).getBody();
             Date start_commit_time = commits.getJSONObject(0).getDate("commit_time");
             Date end_commit_time = commits.getJSONObject(commits.size() - 1).getDate("commit_time");
             JSONObject jsonObject = restTemplate.getForObject(commitServicePath + "/commit-time?commit_id=" + current_commit_id, JSONObject.class);
@@ -396,7 +392,7 @@ public class IssueServiceImpl implements IssueService {
                     String new_IssueId = UUID.randomUUID().toString();
                     issue_2.setIssue_id(new_IssueId);
                     String targetFiles = issue_2.getFile_name();
-                    insertIssueList.add(new Issue(new_IssueId, issue_2.getType(), current_commit_id, current_commit_id, issue_2.getUuid(), issue_2.getUuid(), repo_id, targetFiles));
+                    insertIssueList.add(new Issue(new_IssueId, issue_2.getType(),category, current_commit_id, current_commit_id, issue_2.getUuid(), issue_2.getUuid(), repo_id, targetFiles));
                 }
             }
             if (!issues.isEmpty()) {
@@ -416,10 +412,5 @@ public class IssueServiceImpl implements IssueService {
         if (!pre_commit_id.equals(current_commit_id)) {
             addSolvedTag(repo_id, pre_commit_id);
         }
-    }
-
-    @Override
-    public void updateIssueCount(String time) {
-        quartzScheduler.updateIssueCount(time);
     }
 }

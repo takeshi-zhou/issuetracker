@@ -64,12 +64,12 @@ public class ScanServiceImpl implements ScanService {
     }
 
     @Override
-    public Object getCommits(String project_id, Integer page, Integer size, Boolean is_whole) {
+    public Object getCommits(String project_id, Integer page, Integer size, Boolean is_whole,String category) {
         HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
         String repo_id = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + project_id, HttpMethod.GET, httpEntity, String.class).getBody();
         JSONObject commitResponse = restTemplate.getForObject(commitServicePath + "?repo_id=" + repo_id + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class);
         if (commitResponse != null) {
-            List<String> scannedCommitId = scanDao.getScannedCommits(project_id);
+            List<String> scannedCommitId = scanDao.getScannedCommits(project_id,category);
             JSONArray commitArray = commitResponse.getJSONArray("data");
             int index = 0;
             if (scannedCommitId.isEmpty()) {
@@ -132,7 +132,13 @@ public class ScanServiceImpl implements ScanService {
     }
 
     @Override
-    public Object getScannedCommits(String repoId) {
-        return scanDao.getScans(repoId);
+    public Object getScannedCommits(String repoId,String category) {
+        return scanDao.getScans(repoId,category);
+    }
+
+    @Override
+    public String getLatestScannedCommitId(String repo_id, String category) {
+
+        return scanDao.getLatestScannedCommitId(repo_id, category);
     }
 }

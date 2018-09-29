@@ -133,6 +133,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
                     //只有location解析成功才会插入当前rawIssue
                     JSONObject rawIssue = new JSONObject();
                     rawIssue.put("type", bugInstance.attributeValue("type"));
+                    rawIssue.put("category","bug");
                     rawIssue.put("detail", getJsonString(bugInstance));
                     rawIssue.put("file_name", fileName);
                     rawIssue.put("scan_id", scan.getUuid());

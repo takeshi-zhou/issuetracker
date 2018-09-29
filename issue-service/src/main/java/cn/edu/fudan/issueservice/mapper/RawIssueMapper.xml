@@ -6,6 +6,7 @@
     <resultMap id="rawIssue" type="RawIssue">
         <id property="uuid" column="uuid"/>
         <result property="type" column="type"/>
+        <result property="category" column="category"/>
         <result property="detail" column="detail"/>
         <result property="file_name" column="file_name"/>
         <result property="scan_id" column="scan_id"/>
@@ -20,6 +21,7 @@
     <resultMap id="rawIssue2" type="RawIssue">
         <id property="uuid" column="uuid"/>
         <result property="type" column="type"/>
+        <result property="category" column="category"/>
         <result property="detail" column="detail"/>
         <result property="file_name" column="file_name"/>
         <result property="scan_id" column="scan_id"/>
@@ -35,6 +37,7 @@
         (
         uuid,
         type,
+        category,
         detail,
         file_name,
         scan_id,
@@ -47,6 +50,7 @@
             (
             #{item.uuid},
             #{item.type},
+            #{item.category},
             #{item.detail},
             #{item.file_name},
             #{item.scan_id},
@@ -90,8 +94,8 @@
     </select>
 
 
-    <select id="getRawIssueByCommitID" parameterType="String" resultMap="rawIssue2">
-        select * from rawIssue where commit_id = #{commit_id}
+    <select id="getRawIssueByCommitIDAndCategory" parameterType="String" resultMap="rawIssue2">
+        select * from rawIssue where commit_id = #{commit_id} and category = #{category}
     </select>
 
     <select id="getRawIssueByIssueId" parameterType="String" resultMap="rawIssue">

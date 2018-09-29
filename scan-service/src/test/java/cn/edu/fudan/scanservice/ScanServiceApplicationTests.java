@@ -1,10 +1,6 @@
 package cn.edu.fudan.scanservice;
 
-import cn.edu.fudan.scanservice.dao.ScanDao;
-import cn.edu.fudan.scanservice.service.ScanOperation;
-import cn.edu.fudan.scanservice.service.ScanService;
 import cn.edu.fudan.scanservice.service.impl.ScanOperationAdapter;
-import cn.edu.fudan.scanservice.service.impl.ScanServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
@@ -50,4 +45,10 @@ public class ScanServiceApplicationTests {
         HttpEntity<Object> entity = new HttpEntity<>(requestParam, httpHeaders);
         restTemplate.exchange(innerServicePath + "/inner/project", HttpMethod.PUT, entity, JSONObject.class);
     }
+
+    @Test
+    public void test(){
+
+    }
+
 }

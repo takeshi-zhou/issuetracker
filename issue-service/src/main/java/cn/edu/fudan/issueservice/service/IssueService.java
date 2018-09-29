@@ -16,7 +16,7 @@ public interface IssueService {
 
     Issue getIssueByID(String uuid);
 
-    Object getIssueList(String repoId, Integer page, Integer size);
+    Object getIssueList(String project_id, Integer page, Integer size,String category);
 
     Object getFilteredIssueList(JSONObject requestParam);
 
@@ -26,7 +26,6 @@ public interface IssueService {
 
     Object getExistIssueTypes();
 
-    void startMapping(String repo_id, String pre_commit_id, String current_commit_id);
+    void startMapping(String repo_id, String pre_commit_id, String current_commit_id,String category);
 
-    void updateIssueCount(String time);
 }

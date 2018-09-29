@@ -5,6 +5,7 @@ import java.util.Date;
 public class Scan {
 
     private String uuid;
+    private String category;
     private String name;
     private Date start_time;
     private Date end_time;
@@ -14,12 +15,20 @@ public class Scan {
     private String commit_id;
     private Date commit_time;
 
-    public Date getCommit_time() {
-        return commit_time;
+    public String getUuid() {
+        return uuid;
     }
 
-    public void setCommit_time(Date commit_time) {
-        this.commit_time = commit_time;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getName() {
@@ -78,11 +87,11 @@ public class Scan {
         this.commit_id = commit_id;
     }
 
-    public String getUuid() {
-        return uuid;
+    public Date getCommit_time() {
+        return commit_time;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setCommit_time(Date commit_time) {
+        this.commit_time = commit_time;
     }
 }

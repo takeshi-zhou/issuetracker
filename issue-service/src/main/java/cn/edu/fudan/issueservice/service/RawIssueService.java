@@ -17,7 +17,7 @@ public interface RawIssueService {
 
     void batchUpdateIssueId(List<RawIssue> list);
 
-    List<RawIssue> getRawIssueByCommitID(String commit_id);
+    List<RawIssue> getRawIssueByCommitIDAndCategory(String commit_id,String category);
 
     List<RawIssue> getRawIssueByIssueId(String issueId);
 

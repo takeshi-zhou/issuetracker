@@ -67,7 +67,7 @@ public class RawIssueController {
     }
 
     @GetMapping(value = {"/inner/raw-issue/list-by-commit"})
-    public Object getRawIssues(@RequestParam("commit_id") String commit_id) {
-        return rawIssueService.getRawIssueByCommitID(commit_id);
+    public Object getRawIssues(@RequestParam("commit_id") String commit_id,@RequestParam("category")String category) {
+        return rawIssueService.getRawIssueByCommitIDAndCategory(commit_id,category);
     }
 }

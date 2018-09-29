@@ -6,6 +6,7 @@
     <resultMap id="issue" type="Issue">
         <id property="uuid" column="uuid"/>
         <result property="type" column="type"/>
+        <result property="category" column="category"/>
         <result property="start_commit" column="start_commit"/>
         <result property="end_commit" column="end_commit"/>
         <result property="raw_issue_start" column="raw_issue_start"/>
@@ -17,6 +18,7 @@
     <resultMap id="issue2" type="Issue">
         <id property="uuid" column="uuid"/>
         <result property="type" column="type"/>
+        <result property="category" column="category"/>
         <result property="start_commit" column="start_commit"/>
         <result property="end_commit" column="end_commit"/>
         <result property="raw_issue_start" column="raw_issue_start"/>
@@ -33,6 +35,7 @@
         (
         uuid,
         type,
+        category,
         start_commit,
         end_commit,
         raw_issue_start,
@@ -45,6 +48,7 @@
             (
             #{item.uuid},
             #{item.type},
+            #{item.category},
             #{item.start_commit},
             #{item.end_commit},
             #{item.raw_issue_start},
@@ -78,6 +82,9 @@
                 <foreach collection="solved_issue_ids" separator="," open="(" close=")" item="issue_id">
                     #{issue_id}
                 </foreach>
+            </if>
+            <if test="category != null">
+                and category = #{category}
             </if>
         </where>
         order by (select commit_time from scan where commit_id = end_commit) desc ,
@@ -114,6 +121,9 @@
                 <foreach collection="solved_issue_ids" separator="," open="(" close=")" item="issue_id">
                     #{issue_id}
                 </foreach>
+            </if>
+            <if test="category != null">
+                and category = #{category}
             </if>
         </where>
     </select>

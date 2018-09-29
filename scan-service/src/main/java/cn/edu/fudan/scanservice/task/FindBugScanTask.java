@@ -52,15 +52,15 @@ public class FindBugScanTask {
         kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
     }
 
-    private void scan(String repoId, String commitId) {
-        if (scanOperation.isScanned(commitId)) {
-            //如果当前commit已经扫描过，直接结束
-            logger.info("this commit has been scanned");
-            send(repoId, commitId, "success", "scan success!");
-            logger.info("Scan Success!");
-            return;
-        }
-        logger.info("this commit has not been scanned");
+    private void scan(String repoId, String commitId,String category) {
+//        if (scanOperation.isScanned(commitId)) {
+//            //如果当前commit已经扫描过，直接结束
+//            logger.info("this commit has been scanned");
+//            send(repoId, commitId, "success", "scan success!");
+//            logger.info("Scan Success!");
+//            return;
+//        }
+//        logger.info("this commit has not been scanned");
         logger.info("start to checkout -> " + commitId);
         //checkout,如果失败发送错误消息，直接返回
         if (!scanOperation.checkOut(repoId, commitId)) {
@@ -70,7 +70,7 @@ public class FindBugScanTask {
         }
         logger.info("checkout complete -> start the scan operation......");
 
-        ScanInitialInfo scanInitialInfo = scanOperation.initialScan(repoId, commitId);
+        ScanInitialInfo scanInitialInfo = scanOperation.initialScan(repoId, commitId,category);
         ScanResult scanResult = scanOperation.doScan(scanInitialInfo);
         if (scanResult.getStatus().equals("failed")) {
             send(repoId, commitId, "failed", scanResult.getDescription());
@@ -79,7 +79,7 @@ public class FindBugScanTask {
         }
         logger.info("scan complete ->" + scanResult.getDescription());
         logger.info("start to mapping ......");
-        if (!scanOperation.mapping(repoId, commitId)) {
+        if (!scanOperation.mapping(repoId, commitId,category)) {
             send(repoId, commitId, "failed", "Mapping failed");
             logger.error("Mapping Failed!");
             return;
@@ -97,7 +97,7 @@ public class FindBugScanTask {
     }
 
     @Async
-    public Future<String> run(String repoId, String commitId) {
+    public Future<String> run(String repoId, String commitId,String category) {
         //获取分布式锁，一个repo同一时间只能有一个线程在扫
         //15min恰好是一个整个Scan操作的超时时间，如果某个线程获得锁之后Scan过程卡死导致锁没有释放
         //如果那个锁成功设置了过期时间，那么key过期后，其他线程自然可以获取到锁
@@ -105,7 +105,7 @@ public class FindBugScanTask {
         //那么等待获取同一个锁的线程会因为15min的超时而强行获取到锁，并设置自己的identifier和key的过期时间
         String identifier = redisLock.acquireLock(repoId, 15, 15, TimeUnit.MINUTES);
         try {
-            scan(repoId, commitId);
+            scan(repoId, commitId,category);
         } finally {
             if (redisLock.releaseLock(repoId, identifier)) {
                 logger.error("repo->" + repoId + " release lock failed!");

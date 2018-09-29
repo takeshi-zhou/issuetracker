@@ -66,13 +66,14 @@ public class ScanOperationAdapter implements ScanOperation {
     }
 
     @Override
-    public ScanInitialInfo initialScan(String repoId, String commitId) {
+    public ScanInitialInfo initialScan(String repoId, String commitId,String category) {
         Date startTime = new Date();
         JSONObject currentRepo = restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
         String repoName = currentRepo.getJSONObject("data").getString("repo_name");
         String repoPath = currentRepo.getJSONObject("data").getString("local_addr");
         //新建一个Scan对象
         Scan scan = new Scan();
+        scan.setCategory(category);
         scan.setName(repoName + "-" + startTime.getTime());
         scan.setStart_time(DateTimeUtil.formatedDate(startTime));
         scan.setStatus("doing...");
@@ -95,8 +96,8 @@ public class ScanOperationAdapter implements ScanOperation {
     }
 
     @Override
-    public boolean mapping(String repoId, String commitId) {
-        String pre_commit_id = scanDao.getLatestScannedCommitId(repoId);
+    public boolean mapping(String repoId, String commitId,String category) {
+        String pre_commit_id = scanDao.getLatestScannedCommitId(repoId,category);
         JSONObject requestParam = new JSONObject();
         requestParam.put("repo_id", repoId);
         if (pre_commit_id != null)

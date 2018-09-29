@@ -29,35 +29,10 @@ public class CloneScanTask {
     @Resource(name = "GPUClone")
     private ScanOperation scanOperation;
 
-    private KafkaTemplate kafkaTemplate;
-
-    @Autowired
-    public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
-        this.kafkaTemplate = kafkaTemplate;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void send(String repoId, String commitId,String status, String description) {
-        ScanResult scanResult = new ScanResult(repoId, commitId,"clone" ,status, description);
-        kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
-    }
-
-    private void scan(String repoId, String commitId) {
-        logger.info("start to checkout -> " + commitId);
-        //checkout,如果失败发送错误消息，直接返回
-        if (!scanOperation.checkOut(repoId, commitId)) {
-            send(repoId, commitId, "failed", "check out failed");
-            logger.error("Check Out Failed!");
-            return;
-        }
-        logger.info("checkout complete -> start the scan operation......");
-        ScanInitialInfo scanInitialInfo = scanOperation.initialScan(repoId, commitId);
-        scanOperation.doScan(scanInitialInfo);
-    }
-
     @Async
-    public void run(String repoId, String commitId) {
-        scan(repoId, commitId);
+    public void run(String repoId, String commitId,String category) {
+        ScanInitialInfo scanInitialInfo = scanOperation.initialScan(repoId, commitId,category);
+        scanOperation.doScan(scanInitialInfo);
     }
 
 }

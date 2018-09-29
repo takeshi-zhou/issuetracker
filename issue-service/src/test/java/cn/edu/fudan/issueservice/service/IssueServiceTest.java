@@ -89,7 +89,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
 
     @Test
     public void getIssueList() {
-        Map<String, Object> result = (Map<String, Object>) issueService.getIssueList("9151ecba-e749-4a14-b6e3-f3a1388139ec", 1, 2);
+        Map<String, Object> result = (Map<String, Object>) issueService.getIssueList("9151ecba-e749-4a14-b6e3-f3a1388139ec", 1, 2,"");
         System.out.println(result.toString());
     }
 

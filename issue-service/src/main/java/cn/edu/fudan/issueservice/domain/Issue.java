@@ -7,6 +7,7 @@ public class Issue {
 
     private String uuid;
     private String type;
+    private String category;
     private String start_commit;
     private String end_commit;
     private String raw_issue_start;
@@ -27,9 +28,10 @@ public class Issue {
     public Issue() {
     }
 
-    public Issue(String uuid, String type, String start_commit, String end_commit, String raw_issue_start, String raw_issue_end, String repo_id, String target_files) {
+    public Issue(String uuid, String type, String category,String start_commit, String end_commit, String raw_issue_start, String raw_issue_end, String repo_id, String target_files) {
         this.uuid = uuid;
         this.type = type;
+        this.category=category;
         this.start_commit = start_commit;
         this.end_commit = end_commit;
         this.raw_issue_start = raw_issue_start;
@@ -52,6 +54,14 @@ public class Issue {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getStart_commit() {

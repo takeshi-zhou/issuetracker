@@ -100,8 +100,8 @@ public class RawIssueServiceImpl implements RawIssueService {
     }
 
     @Override
-    public List<RawIssue> getRawIssueByCommitID(String commit_id) {
-        return rawIssueDao.getRawIssueByCommitID(commit_id);
+    public List<RawIssue> getRawIssueByCommitIDAndCategory(String commit_id,String category) {
+        return rawIssueDao.getRawIssueByCommitIDAndCategory(commit_id,category);
     }
 
     @Override

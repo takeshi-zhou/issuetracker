@@ -7,6 +7,7 @@ public class RawIssue {
 
     private String uuid;
     private String type;
+    private String category;
     private String detail;
     private String file_name;
     private String scan_id;
@@ -38,6 +39,14 @@ public class RawIssue {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getDetail() {
@@ -118,7 +127,7 @@ public class RawIssue {
         if (!(obj instanceof RawIssue)) return false;
         RawIssue rawIssue = (RawIssue) obj;
         return rawIssue.type.equals(type) &&
-                rawIssue.detail.equals(detail) &&
+                //rawIssue.detail.equals(detail) &&
                 rawIssue.file_name.equals(file_name);
     }
 }

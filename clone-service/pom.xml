@@ -43,6 +43,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.kafka</groupId>
@@ -89,6 +90,7 @@
             <resource>
                 <directory>src/main/java</directory>
                 <includes>
+                    <include>**/*.lua</include>
                     <include>**/*.xml</include>
                 </includes>
             </resource>

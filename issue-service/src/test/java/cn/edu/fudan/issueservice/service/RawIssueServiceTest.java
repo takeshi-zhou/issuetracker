@@ -72,7 +72,7 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
 
     @Test
     public void getRawIssueByCommitID() {
-        List<RawIssue> list = rawIssueService.getRawIssueByCommitID("94628087eaf6c81584223617d287c26af2116a96");
+        List<RawIssue> list = rawIssueService.getRawIssueByCommitIDAndCategory("94628087eaf6c81584223617d287c26af2116a96","bug");
         for (RawIssue rawIssue : list) {
             System.out.println(rawIssue.getUuid());
         }

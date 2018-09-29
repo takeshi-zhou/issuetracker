@@ -7,8 +7,10 @@
         <id property="uuid" column="uuid"/>
         <result property="start_line" column="start_line"/>
         <result property="end_line" column="end_line"/>
-        <result property="file_path" column="file_path"/>
         <result property="bug_lines" column="bug_lines"/>
+        <result property="start_token" column="start_token"/>
+        <result property="end_token" column="end_token"/>
+        <result property="file_path" column="file_path"/>
         <result property="class_name" column="class_name"/>
         <result property="method_name" column="method_name"/>
         <result property="rawIssue_id" column="rawIssue_id"/>
@@ -23,6 +25,8 @@
         start_line,
         end_line,
         bug_lines,
+        start_token,
+        end_token,
         file_path,
         class_name,
         method_name,
@@ -36,6 +40,8 @@
             #{item.start_line},
             #{item.end_line},
             #{item.bug_lines},
+            #{item.start_token},
+            #{item.end_token},
             #{item.file_path},
             #{item.class_name},
             #{item.method_name},

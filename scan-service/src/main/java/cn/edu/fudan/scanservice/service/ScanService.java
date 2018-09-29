@@ -12,7 +12,9 @@ public interface ScanService {
 
     void updateOneScan(Scan scan);
 
-    Object getCommits(String project_id, Integer page, Integer size, Boolean is_whole);
+    Object getCommits(String project_id, Integer page, Integer size, Boolean is_whole,String category);
 
-    Object getScannedCommits(String repo_id);
+    Object getScannedCommits(String repo_id,String category);
+
+    String getLatestScannedCommitId(String repo_id,String category);
 }

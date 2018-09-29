@@ -4,6 +4,7 @@ public class ScanMessage {
 
     private String repoId;
     private String commitId;
+    private String category;
 
     public String getRepoId() {
         return repoId;
@@ -19,5 +20,13 @@ public class ScanMessage {
 
     public void setCommitId(String commitId) {
         this.commitId = commitId;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

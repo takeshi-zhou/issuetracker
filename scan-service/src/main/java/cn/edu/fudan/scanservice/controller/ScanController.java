@@ -4,7 +4,6 @@ import cn.edu.fudan.scanservice.domain.ResponseBean;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.service.KafkaService;
 import cn.edu.fudan.scanservice.service.ScanService;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -41,11 +40,12 @@ public class ScanController {
 
     @GetMapping(value = {"/scan/commits"})
     @CrossOrigin
-    public Object getCommits(@RequestParam(name = "project_id", required = true) String project_id,
+    public Object getCommits(@RequestParam(name = "project_id") String project_id,
                              @RequestParam(name = "page", required = false, defaultValue = "1") Integer page,
                              @RequestParam(name = "size", required = false, defaultValue = "10") Integer size,
-                             @RequestParam(name = "is_whole", required = false, defaultValue = "false") Boolean is_whole) {
-        return scanService.getCommits(project_id, page, size, is_whole);
+                             @RequestParam(name = "is_whole", required = false, defaultValue = "false") Boolean is_whole,
+                             @RequestParam(name="category")String category) {
+        return scanService.getCommits(project_id, page, size, is_whole,category);
     }
 
     //下面都是供其它服务调用的内部接口
@@ -84,8 +84,13 @@ public class ScanController {
     }
 
     @GetMapping(value = {"/inner/scan/commits"})
-    public Object getScannedCommits(@RequestParam("repo_id") String repo_id) {
-        return scanService.getScannedCommits(repo_id);
+    public Object getScannedCommits(@RequestParam("repo_id") String repo_id,@RequestParam("category")String category) {
+        return scanService.getScannedCommits(repo_id,category);
+    }
+
+    @GetMapping(value = "inner/scan/last-commit")
+    public String getLatestScannedCommitId(@RequestParam("repo_id") String repo_id,@RequestParam("category")String category){
+        return scanService.getLatestScannedCommitId(repo_id, category);
     }
 
 }

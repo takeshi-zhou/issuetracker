@@ -25,8 +25,9 @@ public class IssueController {
     @GetMapping(value = {"/issue"})
     public Object getIssues(@RequestParam("project_id") String project_id,
                             @RequestParam("page") Integer page,
-                            @RequestParam("size") Integer size) {
-        return issueService.getIssueList(project_id, page, size);
+                            @RequestParam("size") Integer size,
+                            @RequestParam("category")String category) {
+        return issueService.getIssueList(project_id, page, size,category);
     }
 
     @GetMapping(value = {"/issue/issue-types"})
@@ -97,22 +98,12 @@ public class IssueController {
             String repo_id = requestParam.getString("repo_id");
             String pre_commit_id = requestParam.getString("pre_commit_id");
             String current_commit_id = requestParam.getString("current_commit_id");
-            issueService.startMapping(repo_id, pre_commit_id, current_commit_id);
+            String category=requestParam.getString("category");
+            issueService.startMapping(repo_id, pre_commit_id, current_commit_id,category);
             return new ResponseBean(200, "issues mapping success!", null);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseBean(401, "issues mapping failed!", null);
-        }
-    }
-
-    @GetMapping(value = "/inner/issue/dashbaord")
-    public Object updateIssueCount(@RequestParam ("time") String time){
-        try {
-            issueService.updateIssueCount(time);
-            return new ResponseBean(200, "update success!", null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseBean(401, " update failed!", null);
         }
     }
 

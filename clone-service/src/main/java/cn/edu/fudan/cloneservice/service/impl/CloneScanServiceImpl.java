@@ -36,6 +36,7 @@ public class CloneScanServiceImpl implements CloneScanService {
         this.cloneScanTask = cloneScanTask;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     @KafkaListener(id = "cloneScan", topics = {"Clone"}, groupId = "clone")
     public void cloneMessageListener(ConsumerRecord<String, String> consumerRecord) {
@@ -50,12 +51,13 @@ public class CloneScanServiceImpl implements CloneScanService {
         Future<?> future=cloneScanTask.run(repoId,repoName,repoPath,scan);
         new Thread(() -> {
             try {
-                future.get(15, TimeUnit.SECONDS);//设置15s的超时时间
+                future.get(60, TimeUnit.SECONDS);//设置15s的超时时间
             } catch (TimeoutException e) {
                 //因scan超时而抛出异常
                 logger.error("超时了");
                 future.cancel(false);
-                send(repoId,scan.getCommit_id(),"failed","Time Out");
+                ScanResult scanResult = new ScanResult(repoId, scan.getCommit_id(),"clone" ,"failed", "Time Out");
+                kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
             } catch (InterruptedException e) {
                 logger.error(e.getMessage());
                 e.printStackTrace();
@@ -63,11 +65,5 @@ public class CloneScanServiceImpl implements CloneScanService {
                 e.printStackTrace();
             }
         }).start();
-    }
-
-    @SuppressWarnings("unchecked")
-    private void send(String repoId, String commitId ,String status, String description) {
-        ScanResult scanResult = new ScanResult(repoId, commitId,"clone" ,status, description);
-        kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
     }
 }

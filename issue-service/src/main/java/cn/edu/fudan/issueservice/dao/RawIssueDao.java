@@ -37,8 +37,8 @@ public class RawIssueDao {
         return rawIssueMapper.getIssueCountBeforeSpecificTime(account_id, specificTime);
     }
 
-    public List<RawIssue> getRawIssueByCommitID(String commit_id) {
-        return rawIssueMapper.getRawIssueByCommitID(commit_id);
+    public List<RawIssue> getRawIssueByCommitIDAndCategory(String category,String commit_id) {
+        return rawIssueMapper.getRawIssueByCommitIDAndCategory(category, commit_id);
     }
 
     public List<RawIssue> getRawIssueByIssueId(String issueId) {

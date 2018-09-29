@@ -18,7 +18,7 @@ public interface RawIssueMapper {
 
     Integer getIssueCountBeforeSpecificTime(@Param("account_id") String account_id, @Param("specificTime") String specificTime);
 
-    List<RawIssue> getRawIssueByCommitID(String commit_id);
+    List<RawIssue> getRawIssueByCommitIDAndCategory(@Param("category") String category,@Param("commit_id") String commit_id);
 
     List<RawIssue> getRawIssueByIssueId(@Param("issueId") String issueId);
 

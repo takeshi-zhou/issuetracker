@@ -31,8 +31,8 @@ public class ScanDao {
         scanMapper.updateOneScan(scan);
     }
 
-    public String getLatestScannedCommitId(String repo_id) {
-        return scanMapper.getLatestScannedCommitId(repo_id);
+    public String getLatestScannedCommitId(String repo_id,String category) {
+        return scanMapper.getLatestScannedCommitId(repo_id,category);
     }
 
     public boolean isScanned(String commit_id) {
@@ -40,8 +40,8 @@ public class ScanDao {
         return count != null && count > 0;
     }
 
-    public List<String> getScannedCommits(String repo_id) {
-        List<Scan> scans = scanMapper.getScannedCommits(repo_id);
+    public List<String> getScannedCommits(String repo_id,String category) {
+        List<Scan> scans = scanMapper.getScannedCommits(repo_id,category);
         List<String> list = new ArrayList<>();
         for (Scan scan : scans) {
             list.add(scan.getCommit_id());
@@ -49,7 +49,7 @@ public class ScanDao {
         return list;
     }
 
-    public List<Scan> getScans(String repo_id) {
-        return scanMapper.getScannedCommits(repo_id);
+    public List<Scan> getScans(String repo_id,String category) {
+        return scanMapper.getScannedCommits(repo_id,category);
     }
 }

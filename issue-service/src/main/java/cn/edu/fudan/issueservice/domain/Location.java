@@ -6,6 +6,8 @@ public class Location {
     private int start_line;
     private int end_line;
     private String bug_lines;
+    private int start_token;
+    private int end_token;
     private String file_path;
     private String class_name;
     private String method_name;
@@ -58,6 +60,22 @@ public class Location {
 
     public void setBug_lines(String bug_lines) {
         this.bug_lines = bug_lines;
+    }
+
+    public int getStart_token() {
+        return start_token;
+    }
+
+    public void setStart_token(int start_token) {
+        this.start_token = start_token;
+    }
+
+    public int getEnd_token() {
+        return end_token;
+    }
+
+    public void setEnd_token(int end_token) {
+        this.end_token = end_token;
     }
 
     public String getClass_name() {

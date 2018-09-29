@@ -94,7 +94,7 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
     @Test
     public void getIssues() throws Exception {
         request.addHeader("token", "ec15d79e36e14dd258cfff3d48b73d35");
-        Map<String, Object> mapIssues = (Map<String, Object>) issueController.getIssues("9151ecba-e749-4a14-b6e3-f3a1388139ec", 1, 2);
+        Map<String, Object> mapIssues = (Map<String, Object>) issueController.getIssues("9151ecba-e749-4a14-b6e3-f3a1388139ec", 1, 2,"");
         System.out.println(mapIssues.toString());
         for (Issue issue : (List<Issue>) mapIssues.get("issueList")) {
             System.out.println(issue.getUuid());

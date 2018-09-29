@@ -17,7 +17,7 @@ public interface ScanMapper {
 
     void updateOneScan(Scan scan);
 
-    String getLatestScannedCommitId(String repo_id);
+    String getLatestScannedCommitId(@Param("repo_id") String repo_id,@Param("category")String category);
 
-    List<Scan> getScannedCommits(@Param("repo_id") String repo_id);
+    List<Scan> getScannedCommits(@Param("repo_id") String repo_id,@Param("category")String category);
 }

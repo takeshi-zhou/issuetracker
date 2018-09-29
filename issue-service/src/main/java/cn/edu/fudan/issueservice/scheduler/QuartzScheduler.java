@@ -99,7 +99,7 @@ public class QuartzScheduler {
     }
 
     @Scheduled(cron = "0 0 0 * * *")
-    private void perDay() {
+    private void PerDay() {
         for (String account_id : getAccountIds()) {
             List<String> projectIds = getCurrentProjectList(account_id);
             if (projectIds == null) continue;
@@ -211,16 +211,6 @@ public class QuartzScheduler {
         if (projectList == null) return;
         for (String project_id : projectList) {
             redisTemplate.opsForHash().put(project_id, "month", new IssueCount(0, 0, 0));
-        }
-    }
-
-    public void updateIssueCount(String time) {
-        if (time.equals("day")) {
-            perDay();
-        }else if (time.equals("week")){
-            perWeek();
-        }else {
-            perMonth();
         }
     }
 }
