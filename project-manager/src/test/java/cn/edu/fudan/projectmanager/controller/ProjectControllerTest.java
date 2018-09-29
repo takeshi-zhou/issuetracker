@@ -298,7 +298,7 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
         List<String> projectIds = new ArrayList<String>();
         projectIds.add(proId1);
         projectIds.add(proId2);
-        Mockito.when(service.getProjectIdList(accoutId, "")).thenReturn(projectIds);
+        Mockito.when(service.getProjectIdList(accoutId)).thenReturn(projectIds);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/inner/project/project-id")
                 .param("account_id", accoutId)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)

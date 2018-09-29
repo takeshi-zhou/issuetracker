@@ -2,7 +2,7 @@ package cn.edu.fudan.scanservice.task;
 
 import cn.edu.fudan.scanservice.domain.ScanInitialInfo;
 import cn.edu.fudan.scanservice.domain.ScanResult;
-import cn.edu.fudan.scanservice.lock.RedisLock;
+import cn.edu.fudan.scanservice.lock.RedisLuaLock;
 import cn.edu.fudan.scanservice.service.ScanOperation;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -32,10 +32,10 @@ public class FindBugScanTask {
     @Resource(name = "findBug")
     private ScanOperation scanOperation;
 
-    private RedisLock redisLock;
+    private RedisLuaLock redisLock;
 
     @Autowired
-    public void setRedisLock(RedisLock redisLock) {
+    public void setRedisLock(RedisLuaLock redisLock) {
         this.redisLock = redisLock;
     }
 
@@ -48,7 +48,7 @@ public class FindBugScanTask {
 
     @SuppressWarnings("unchecked")
     private void send(String repoId, String commitId,String status, String description) {
-        ScanResult scanResult = new ScanResult(repoId, commitId, "findbug",status, description);
+        ScanResult scanResult = new ScanResult(repoId, commitId, "bug",status, description);
         kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
     }
 
@@ -103,11 +103,11 @@ public class FindBugScanTask {
         //如果那个锁成功设置了过期时间，那么key过期后，其他线程自然可以获取到锁
         //如果那个锁并没有成功地设置过期时间
         //那么等待获取同一个锁的线程会因为15min的超时而强行获取到锁，并设置自己的identifier和key的过期时间
-        String identifier = redisLock.acquireLock(repoId, 15, 15, TimeUnit.MINUTES);
+        String identifier = redisLock.acquireLockWithTimeOut(repoId, 15, 15, TimeUnit.MINUTES);
         try {
             scan(repoId, commitId,category);
         } finally {
-            if (redisLock.releaseLock(repoId, identifier)) {
+            if (!redisLock.releaseLock(repoId, identifier)) {
                 logger.error("repo->" + repoId + " release lock failed!");
             }
         }

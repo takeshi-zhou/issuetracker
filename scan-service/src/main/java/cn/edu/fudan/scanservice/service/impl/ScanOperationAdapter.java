@@ -100,6 +100,7 @@ public class ScanOperationAdapter implements ScanOperation {
         String pre_commit_id = scanDao.getLatestScannedCommitId(repoId,category);
         JSONObject requestParam = new JSONObject();
         requestParam.put("repo_id", repoId);
+        requestParam.put("category",category);
         if (pre_commit_id != null)
             requestParam.put("pre_commit_id", pre_commit_id);
         else

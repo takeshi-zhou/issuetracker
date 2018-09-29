@@ -131,7 +131,7 @@ public class CloneScanTask {
 
     private boolean mapping(String repo_id,String current_commit_id,String category){
         HttpEntity<Object> entity=new HttpEntity<>(httpHeaders);
-        String pre_commit_id = restTemplate.exchange( "http://127.0.0.1:8003/inner/scan/last-commit?repo_id="+repo_id+"&category="+category, HttpMethod.GET, entity, String.class).getBody();
+        String pre_commit_id = restTemplate.exchange( innerServicePath+"/inner/scan/last-commit?repo_id="+repo_id+"&category="+category, HttpMethod.GET, entity, String.class).getBody();
         JSONObject requestParam = new JSONObject();
         requestParam.put("repo_id", repo_id);
         if (pre_commit_id != null)

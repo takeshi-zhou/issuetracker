@@ -239,7 +239,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         list.add(projectInitial);
         PowerMockito.when(projectDao.getProjectByAccountId(accountId)).thenReturn(list);
 
-        List<String> projectIds = (List<String>) projectService.getProjectIdList("1", "");
+        List<String> projectIds = (List<String>) projectService.getProjectIdList("1");
         Assert.assertEquals(list.size(), projectIds.size());
         Assert.assertEquals(project.getUuid(), projectIds.get(0));
         Assert.assertEquals(projectInitial.getUuid(), projectIds.get(1));

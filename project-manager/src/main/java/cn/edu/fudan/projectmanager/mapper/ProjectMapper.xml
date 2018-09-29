@@ -9,6 +9,7 @@
         <result property="language" column="language"/>
         <result property="url" column="url"/>
         <result property="vcs_type" column="vcs_type"/>
+        <result property="type" column="type"/>
         <result property="account_id" column="account_id"/>
         <result property="download_status" column="download_status"/>
         <result property="scan_status" column="scan_status"/>
@@ -72,7 +73,7 @@
     </select>
 
     <select id="getProjectByRepoId" parameterType="String" resultMap="project">
-        select * from project wehre repo_id = #{repo_id}
+        select * from project where repo_id = #{repo_id}
     </select>
 
     <select id="getProjectByID" parameterType="String" resultMap="project">

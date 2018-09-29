@@ -149,7 +149,7 @@ public class IssueServiceImpl implements IssueService {
         JSONArray types = requestParam.getJSONArray("types");
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> query = new HashMap<>();
-        if(tag_ids!=null&&types!=null&&!tag_ids.isEmpty()&&!types.isEmpty()){
+        if(tag_ids!=null&&!tag_ids.isEmpty()){
             //只有在筛选条件都不为null的条件下才启用过滤
             JSONArray issue_ids = restTemplate.postForObject(tagServicePath + "/item-ids", tag_ids, JSONArray.class);
             if (issue_ids == null || issue_ids.size() == 0) {//没找到打了这些tag的issue
@@ -159,6 +159,8 @@ public class IssueServiceImpl implements IssueService {
                 return result;
             }
             query.put("issue_ids", issue_ids.toJavaList(String.class));
+        }
+        if(types!=null&&!types.isEmpty()){
             query.put("types", types.toJavaList(String.class));
         }
         query.put("repo_id", repoId);

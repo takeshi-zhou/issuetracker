@@ -126,8 +126,12 @@ public class RawIssue {
         if (obj == this) return true;
         if (!(obj instanceof RawIssue)) return false;
         RawIssue rawIssue = (RawIssue) obj;
-        return rawIssue.type.equals(type) &&
-                //rawIssue.detail.equals(detail) &&
-                rawIssue.file_name.equals(file_name);
+        if(this.detail==null||((RawIssue) obj).detail==null)
+            return rawIssue.type.equals(type) &&
+                   rawIssue.file_name.equals(file_name);
+        else
+            return rawIssue.type.equals(type) &&
+                    rawIssue.detail.equals(detail) &&
+                    rawIssue.file_name.equals(file_name);
     }
 }
