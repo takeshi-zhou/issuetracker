@@ -38,6 +38,8 @@ public class CloneScanTask {
 
     @Value("${resultFileHome}")
     private String resultFileHome;
+    @Value("${repoHome}")
+    private String repoHome;
     @Value("${inner.service.path}")
     private String innerServicePath;
     @Value("${commit.service.path}")
@@ -101,7 +103,7 @@ public class CloneScanTask {
                     cloneLocation.put("end_token",Integer.parseInt(cloneInstance.attributeValue("endToken")));
                     cloneLocation.put("file_path",filePath);
                     cloneLocation.put("rawIssue_id",cloneRawIssueId);
-                    //cloneLocation.put("code",ASTUtil.getCodeFormSmb(startLine,endLine,filePath));
+                    cloneLocation.put("code",ASTUtil.getCode(startLine,endLine,repoHome+filePath));
                     cloneLocations.add(cloneLocation);
 
                     cloneRawIssue.put("locations",cloneLocations);

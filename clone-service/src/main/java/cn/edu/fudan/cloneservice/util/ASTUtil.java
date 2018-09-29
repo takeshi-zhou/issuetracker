@@ -1,7 +1,4 @@
 package cn.edu.fudan.cloneservice.util;
-
-import jcifs.smb.SmbFile;
-import jcifs.smb.SmbFileInputStream;
 import org.eclipse.jdt.core.dom.*;
 
 import java.io.*;
@@ -107,47 +104,7 @@ public class ASTUtil {
         return code.toString();
     }
 
-    public static String getCodeFormSmb(int startLine,int endLine,String filePath){
-        String url=filePath.substring(0,filePath.lastIndexOf('/')+1);
-        String fileName=filePath.substring(filePath.lastIndexOf('/')+1);
-        StringBuilder code = new StringBuilder();
-        String s = "";
-        int line = 1;
-        SmbFileInputStream smbFileInputStream = null;
-        try {
-            SmbFile shareDir = new SmbFile(url);
-            if(shareDir.isDirectory()){
-                SmbFile []fileList = shareDir.listFiles();
-                for(SmbFile file:fileList){
-                    if(file.isFile()&&file.getName().equals(fileName)){
-                        smbFileInputStream=new SmbFileInputStream(file);
-                        BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(smbFileInputStream));
-                        while ((s = bufferedReader.readLine()) != null) {
-                            if (line >= startLine && line <= endLine) {
-                                code.append(s);
-                                code.append("/n");
-                            }
-                            line++;
-                            if (line > endLine) break;
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }finally {
-            if(smbFileInputStream!=null){
-                try {
-                    smbFileInputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return code.toString();
-    }
-
     public static void main(String[] args) {
-        System.out.println(getCodeFormSmb(5,10,"smb://fdse:smbcloudfdse@10.141.221.80/Share/test/testRepo/test.java"));
+        System.out.println(getCode(5,10,"Z:/test/test.java"));
     }
 }
