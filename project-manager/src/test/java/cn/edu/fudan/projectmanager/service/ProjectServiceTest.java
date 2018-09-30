@@ -170,7 +170,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
 
         MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "getAccountId")).toReturn("1");
 
-        List<Project> listResult = (List<Project>) projectService.getProjectList("22222");
+        List<Project> listResult = (List<Project>) projectService.getProjectList("22222","bug");
         Assert.assertEquals(2, listResult.size());
         Assert.assertEquals("pro2", listResult.get(0).getUuid());
         Assert.assertEquals("pro1", listResult.get(1).getUuid());

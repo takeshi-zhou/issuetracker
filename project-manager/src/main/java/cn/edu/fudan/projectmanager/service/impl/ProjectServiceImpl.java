@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -141,9 +139,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Object getProjectList(String userToken) {
+    public Object getProjectList(String userToken,String type) {
         String account_id = getAccountId(userToken);
-        return projectDao.getProjectByAccountId(account_id);
+        return projectDao.getProjectList(account_id,type);
     }
 
     @Override

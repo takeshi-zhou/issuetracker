@@ -76,6 +76,10 @@
         select * from project where repo_id = #{repo_id}
     </select>
 
+    <select id="getProjectList" parameterType="String" resultMap="project">
+        select * from project where account_id = #{account_id} and type = #{type}
+    </select>
+
     <select id="getProjectByID" parameterType="String" resultMap="project">
         select * from project where uuid = #{uuid}
     </select>

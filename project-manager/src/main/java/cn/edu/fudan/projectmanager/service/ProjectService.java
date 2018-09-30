@@ -7,7 +7,7 @@ public interface ProjectService {
 
     void addOneProject(String userToken, Project project);
 
-    Object getProjectList(String userToken);
+    Object getProjectList(String userToken,String type);
 
     Object getProjectByRepoId(String repo_id);
 

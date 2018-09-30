@@ -32,9 +32,9 @@ public class ProjectController {
 
     //get project list
     @GetMapping(value = {"/project"})
-    public Object query(HttpServletRequest request) {
+    public Object query(HttpServletRequest request,@RequestParam("type")String type) {
         String userToken = request.getHeader("token");
-        return projectService.getProjectList(userToken);
+        return projectService.getProjectList(userToken,type);
     }
 
     @GetMapping(value = {"/project/filter"})
