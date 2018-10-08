@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -126,6 +127,17 @@ public class CloneScanTask {
     private boolean invokeCloneTool(String repoName,String repoPath){
         //调用克隆工具，生成结果文件到本地某个固定的目录，文件名以repoName命名
         //结果文件中文件的路径直接用smb的路径，类似于smb://fdse:smbcloudfdse@10.141.221.80/Share/test/testRepo/test.java
+        //ex：repoName = "genson"
+        //ex: repoPath = "Z:\github"
+        //扫描结果返回至 smb://fdse:smbcloudfdse@10.141.221.80/Share/res
+        String cmd = "java -jar C:\\Users\\njz\\Desktop\\gpu\\gpu片段制品\\SAGA.jar " + repoPath + " " + repoName;
+        try {
+            Process process = Runtime.getRuntime().exec(cmd);
+            process.waitFor();
+            System.out.println(process.exitValue());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         return true;
     }
 
