@@ -20,7 +20,64 @@ tags:
 schemes:
 - "http"
 paths:
-  /user:
+  /user/account-name/check:
+    get:
+      tags:
+      - "account-service"
+      summary: "Check Account Name"
+      operationId: "check_account_name"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "accountName"
+        in: "query"
+        description: "The account name for register"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description : "succsss"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+  /user/email/check:
+    get:
+      tags:
+      - "account-service"
+      summary: "Check Email"
+      operationId: "check_email"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "email"
+        in: "query"
+        description: "The emailfor register"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description : "succsss"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+  /user/nick-name/check:
+    get:
+      tags:
+      - "account-service"
+      summary: "Check Nick Name"
+      operationId: "check_nick_name"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "nickName"
+        in: "query"
+        description: "The nickName for register"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description : "succsss"
+          schema:
+            $ref: "#/definitions/ResponseBean"
+  /user/register:
     post:
       tags:
       - "account-service"
@@ -121,7 +178,6 @@ paths:
           description: "failed"
         401:
           description: "Incorrect userToken"
-
   /user/accountIds:
     get:
       tags:
@@ -156,7 +212,7 @@ paths:
         description: "project that user want to add"
         required: true
         schema:
-          $ref: "#/definitions/Project"
+          $ref: "#/definitions/AddProjectJson"
       - in: "header"
         name: "token"
         description: "get userToken from Header"
@@ -182,6 +238,10 @@ paths:
       - in: "header"
         name: "token"
         description: "get userToken from Header"
+        required: true
+        type: "string"
+      - in: "query"
+        name: "type"
         required: true
         type: "string"
       responses:
@@ -217,8 +277,6 @@ paths:
           description: "Invalid ID supplied"
           schema:
             $ref: "#/definitions/ResponseBean"
-
-
   /project/filter:
     get:
       tags:
@@ -246,7 +304,6 @@ paths:
               $ref: "#/definitions/Project"
         400:
           description: "failed"
-
   /inner/project:
     put:
       tags:
@@ -271,7 +328,6 @@ paths:
           description: "failed"
           schema:
             $ref: "#/definitions/ResponseBean"
-
   /inner/project/repo-path/{project_id}:
     get:
       tags:
@@ -294,7 +350,6 @@ paths:
             type: "string"
         401:
           description: "Invalid ID supplied"
-
   /inner/project/repo-id:
     get:
       tags:
@@ -317,7 +372,6 @@ paths:
             type: "string"
         401:
           description: "Invalid ID supplied"
-
   /inner/project/{projectId}:
     get:
       tags:
@@ -340,7 +394,6 @@ paths:
             $ref: "#/definitions/Project"
         401:
           description: "Invalid ID supplied"
-
   /inner/project/project-id:
     get:
       tags:
@@ -354,7 +407,7 @@ paths:
       - in: "query"
         name: "account_id"
         description: "account_id that user want to get"
-        required: true
+        required: false
         type : "string"
       responses:
         200:
@@ -365,11 +418,12 @@ paths:
               type: "string"
         401:
           description: "Invalid ID supplied"
+
   /scan:
     post:
       tags:
       - "scan-service"
-      summary: "add a Scan"
+      summary: "Send Scan Message"
       description: " "
       operationId: "addScan"
       parameters:
@@ -390,7 +444,6 @@ paths:
           description: "failed operation"
           schema:
             $ref: "#/definitions/ResponseBean"
-
   /scan/commits:
     get:
       tags:
@@ -422,6 +475,11 @@ paths:
         type: "string"
         required: false
         default: "false"
+      - in: "query"
+        name: "category"
+        description: ""
+        type: "string"
+        required: true
       produces:
       - "application/json"
       responses:
@@ -432,8 +490,6 @@ paths:
               $ref: "#/definitions/CommitsMsg"
         401:
           description: "failed operation"
-
-
   /inner/scan:
     put:
       tags:
@@ -459,19 +515,39 @@ paths:
           description: "failed operation"
           schema:
             $ref: "#/definitions/ResponseBean"
-
-  /inner/scan/{projectId}:
+    post:
+      tags:
+      - "scan-service"
+      summary: "add one scan"
+      operationId: "addscan"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "scan"
+        description: "scan json object"
+        required: true
+        schema:
+          $ref: "#/definitions/Scan"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+        401:
+          description: "failed operation"
+  /inner/scan/{repoId}:
     delete:
       tags:
       - "scan-service"
-      summary: "delet  Scans by projectId"
+      summary: "delet  Scans by repoId"
       operationId: "deleteScans"
       produces:
       - "application/json"
       parameters:
       - in: "path"
-        name: "projectId"
-        description: "a project id"
+        name: "repoId"
+        description: "a repo id"
         required: true
         type: "string"
       responses:
@@ -483,19 +559,23 @@ paths:
           description: "failed operation"
           schema:
             $ref: "#/definitions/ResponseBean"
-
-  /inner/scan/last-commit-date:
+  /inner/scan/last-commit:
     get:
       tags:
       - "scan-service"
-      summary: "get TillCommitDate by projectId"
-      operationId: "getTillCommitDateByProjectId"
+      summary: "get Latest Scanned CommitId"
+      operationId: "getLatestScannedCommitId"
       produces:
       - "application/json"
       parameters:
       - in: "query"
-        name: "project-id"
-        description: "a project id"
+        name: "repo_id"
+        description: "a repo_id id"
+        required: true
+        type: "string"
+      - in: "query"
+        name: "category"
+        description: "category"
         required: true
         type: "string"
       responses:
@@ -505,8 +585,6 @@ paths:
             type: "string"
         401:
           description: "failed operation"
-
-
   /inner/scan/commits:
     get:
       tags:
@@ -517,8 +595,8 @@ paths:
       - "application/json"
       parameters:
       - in: "query"
-        name: "project-id"
-        description: "a project id"
+        name: "repo_id"
+        description: "a repo id"
         required: true
         type: "string"
       responses:
@@ -528,7 +606,6 @@ paths:
             $ref: "#/definitions/Scan"
         401:
           description: "failed operation"
-      deprecated: true
 
   /issue:
     get:
@@ -552,6 +629,11 @@ paths:
       - in: "query"
         name: "size"
         description: " "
+        required: true
+        type: "string"
+      - in: "query"
+        name: "category"
+        description: "category"
         required: true
         type: "string"
       responses:
@@ -744,17 +826,17 @@ paths:
             $ref: '#/definitions/ResponseBean'
 
 
-  /inner/issue/{projectId}:
+  /inner/issue/{repoId}:
     delete:
       tags:
       - "issue-service"
-      summary: "delete Issues by projectid"
+      summary: "delete Issues by repoId"
       operationId: "deleteIssues"
       produces:
       - "application/json"
       parameters:
       - in: "path"
-        name: "projectId"
+        name: "repoId"
         description: ""
         required: true
         type: "string"
@@ -899,7 +981,7 @@ paths:
           schema:
             $ref: "#/definitions/ResponseBean"
 
-  /inner/raw-issue/{projectId}:
+  /inner/raw-issue/{repoId}:
     delete:
       tags:
       - "issue-service"
@@ -909,7 +991,7 @@ paths:
       - "application/json"
       parameters:
       - in: "path"
-        name: "projectId"
+        name: "repoId"
         description: " "
         required: true
         type: "string"
@@ -934,6 +1016,11 @@ paths:
       parameters:
       - in: "query"
         name: "commit_id"
+        description: " "
+        required: true
+        type: "string"
+      - in: "query"
+        name: "category"
         description: " "
         required: true
         type: "string"
@@ -1294,8 +1381,6 @@ definitions:
   User:
     type: "object"
     properties:
-      uuid:
-        type: "string"
       accountName:
         type: "string"
       password:
@@ -1304,6 +1389,17 @@ definitions:
         type: "string"
       email:
         type: "string"
+
+  AddProjectJson:
+    type: "object"
+    properties:
+      url:
+        type: "string"
+      name:
+        type: "string"
+      type:
+        type: "string"
+
 
   Project:
     type: "object"
@@ -1358,6 +1454,8 @@ definitions:
   ScanJSONObject:
     type: "object"
     properties:
+      category:
+        type: "string"
       projectId:
         type: "string"
       commitId:
@@ -1489,11 +1587,13 @@ definitions:
   IssueJSONObject:
     type: "object"
     properties:
-      project_id:
+      repo_id:
         type: "string"
       pre_commit_id:
         type: "string"
       current_commit_id:
+        type: "string"
+      category:
         type: "string"
 
   RawIssueList:
