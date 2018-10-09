@@ -128,9 +128,11 @@ public class Location {
         if (obj == this) return true;
         if (!(obj instanceof Location)) return false;
         Location location = (Location) obj;
-
-        return location.class_name.equals(class_name) &&
-                location.method_name.equals(method_name) &&
-                location.file_path.equals(file_path);
+        if(this.class_name!=null&&location.class_name!=null&&this.method_name!=null&&location.method_name!=null)
+            return location.class_name.equals(class_name) &&
+                    location.method_name.equals(method_name) &&
+                    location.file_path.equals(file_path);
+        else
+            return location.file_path.equals(file_path);
     }
 }
