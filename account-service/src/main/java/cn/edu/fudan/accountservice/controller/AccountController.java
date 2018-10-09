@@ -46,7 +46,7 @@ public class AccountController {
             accountService.addAccount(account);
             return new ResponseBean(200, "Congratulations！successful registration.", null);
         } catch (Exception e) {
-            return new ResponseBean(401, "sigh up failed! " + e.getMessage(), null);
+            return new ResponseBean(401, "sign up failed! " + e.getMessage(), null);
         }
     }
 
