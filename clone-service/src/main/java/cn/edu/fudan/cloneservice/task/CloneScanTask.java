@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -124,16 +126,29 @@ public class CloneScanTask {
         }
     }
 
-    private boolean invokeCloneTool(String repoName,String repoPath){
+    private boolean invokeCloneTool(String repoPath,String repoName){
         //调用克隆工具，生成结果文件到本地某个固定的目录，文件名以repoName命名
         //结果文件中文件的路径直接用smb的路径，类似于smb://fdse:smbcloudfdse@10.141.221.80/Share/test/testRepo/test.java
         //ex：repoName = "genson"
         //ex: repoPath = "Z:\github"
         //扫描结果返回至 smb://fdse:smbcloudfdse@10.141.221.80/Share/res
-        String cmd = "java -jar C:\\Users\\njz\\Desktop\\gpu\\gpu片段制品\\SAGA.jar " + repoPath + " " + repoName;
+
+        String cmd = "java -jar SAGA.jar " + repoPath + " " + repoName;
         try {
-            Process process = Runtime.getRuntime().exec(cmd);
+
+            Process process = Runtime.getRuntime().exec(cmd,null,new File("E:\\clone_service"));
+
+            //输出process打印信息
+            BufferedInputStream br = new BufferedInputStream(process.getInputStream());
+            int ch;
+            StringBuffer text = new StringBuffer("getInfo: \n");
+            while ((ch = br.read()) != -1) {
+                text.append((char) ch);
+            }
+            logger.info(text.toString());
+
             process.waitFor();
+
             System.out.println(process.exitValue());
         }catch (Exception e){
             e.printStackTrace();
@@ -233,6 +248,11 @@ public class CloneScanTask {
     private void send(String repoId, String commitId ,String status, String description) {
         ScanResult scanResult = new ScanResult(repoId, commitId,"clone" ,status, description);
         kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
+    }
+
+    @Test
+    public void trst(){
+        invokeCloneTool("Z:\\github\\apache\\maven"," maven");
     }
 
 
