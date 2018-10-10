@@ -245,5 +245,18 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         Assert.assertEquals(projectInitial.getUuid(), projectIds.get(1));
     }
 
+    @Test
+    public void getProjectByRepoId() {
+        String repo_id = "RepoId";
+        List<Project> projects = new ArrayList<Project>();
+        projects.add(project);
+        Mockito.when(projectDao.getProjectByRepoId(repo_id)).thenReturn(projects);
+        List<Project> projectsResult = (List<Project>) projectService.getProjectByRepoId(repo_id);
+        Assert.assertEquals(projects.size(), projectsResult.size());
+        for(int i=0;i<projectsResult.size();i++){
+            Assert.assertEquals(projects.get(i).getUuid(), projectsResult.get(i).getUuid());
+        }
+    }
+
 
 }

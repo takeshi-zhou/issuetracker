@@ -294,5 +294,23 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
         Assert.assertEquals(proId2, listResult.get(1));
     }
 
+    @Test
+    public void getProjectByRepoId() throws Exception {
+        String repo_id = "RepoId";
+        List<Project> projects = new ArrayList<Project>();
+        projects.add(project);
+        Mockito.when(service.getProjectByRepoId(repo_id)).thenReturn(projects);
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/inner/project")
+                .param("repo_id", repo_id)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .session(session)
+        ).andReturn();
+        List<Project> projectsResult  = JSONObject.parseObject(result.getResponse().getContentAsString(), List.class);
+        Assert.assertEquals(projects.size(), projectsResult.size());
+        for(int i=0;i<projectsResult.size();i++){
+            Assert.assertEquals(projects.get(i).getUuid(), projectsResult.get(i).getUuid());
+        }
+
+    }
 
 }
