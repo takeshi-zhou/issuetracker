@@ -9,7 +9,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +25,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author WZY
@@ -42,6 +40,8 @@ public class CloneScanTask {
     private String resultFileHome;
     @Value("${repoHome}")
     private String repoHome;
+    @Value("${shareDir}")
+    private String shareDir;
     @Value("${inner.service.path}")
     private String innerServicePath;
     @Value("${commit.service.path}")
@@ -126,17 +126,9 @@ public class CloneScanTask {
     }
 
     private boolean invokeCloneTool(String repoPath,String repoName){
-        //调用克隆工具，生成结果文件到本地某个固定的目录，文件名以repoName命名
-        //结果文件中文件的路径直接用smb的路径，类似于smb://fdse:smbcloudfdse@10.141.221.80/Share/test/testRepo/test.java
-        //ex：repoName = "genson"
-        //ex: repoPath = "Z:\github"
-        //扫描结果返回至 smb://fdse:smbcloudfdse@10.141.221.80/Share/res
-
-        String cmd = "java -jar SAGA.jar " + repoPath + " " + repoName;
+        String cmd = "java -jar SAGA.jar  " + repoPath + " " + repoName;
         try {
-
             Process process = Runtime.getRuntime().exec(cmd,null,new File("E:\\clone_service"));
-
             //输出process打印信息
             BufferedInputStream br = new BufferedInputStream(process.getInputStream());
             int ch;
@@ -145,14 +137,12 @@ public class CloneScanTask {
                 text.append((char) ch);
             }
             logger.info(text.toString());
-
             process.waitFor();
-
-            System.out.println(process.exitValue());
+            return process.exitValue()==0;
         }catch (Exception e){
             e.printStackTrace();
+            return false;
         }
-        return true;
     }
 
     private boolean mapping(String repo_id,String current_commit_id,String category){
@@ -178,6 +168,7 @@ public class CloneScanTask {
     }
 
     private void startScan(String repoId,String repoName,String repoPath,Scan scan){
+        logger.info(repoPath+"  : "+repoName);
         String scanId=scan.getUuid();
         String commitId=scan.getCommit_id();
         logger.info("start to checkout -> " + commitId);
@@ -189,14 +180,14 @@ public class CloneScanTask {
         }
         logger.info("checkout complete -> start the scan operation......");
         logger.info("start to invoke clone tool to scan......");
-        if(!invokeCloneTool(repoName, repoPath)){
+        if(!invokeCloneTool(repoPath, repoName)){
             send(repoId,commitId,"failed","tool invoke failed!");
             logger.error("tool invoke failed!");
             return;
         }
         logger.info("tool invoke complete!");
         logger.info("start to analyze result file");
-        String resultFilePath=resultFileHome+repoName+".xml";
+        String resultFilePath=resultFileHome+repoName+"_filtedA_type12.csv.xml";
         if(!analyzeResultFile(scanId,commitId,resultFilePath)){
             send(repoId,commitId,"failed","file analyze failed!");
             logger.error("file analyze failed!");
@@ -231,9 +222,10 @@ public class CloneScanTask {
         //如果那个锁成功设置了过期时间，那么key过期后，其他线程自然可以获取到锁
         //如果那个锁并没有成功地设置过期时间
         //那么等待获取同一个锁的线程会因为60s的超时而强行获取到锁，并设置自己的identifier和key的过期时间
-        String identifier = redisLock.acquireLockWithTimeOut(repoId, 60, 60, TimeUnit.SECONDS);
+        String identifier = redisLock.acquireLockWithTimeOut(repoId, 10, 10, TimeUnit.SECONDS);
+        logger.info("repo->" + repoId + "get the lock :"+identifier);
         try {
-            startScan(repoId, repoName, repoPath, scan);
+            startScan(repoId, repoName, shareDir+repoPath, scan);
         } finally {
             if (redisLock.releaseLock(repoId, identifier)) {
                 logger.error("repo->" + repoId + " release lock success!");
@@ -248,11 +240,5 @@ public class CloneScanTask {
         ScanResult scanResult = new ScanResult(repoId, commitId,"clone" ,status, description);
         kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
     }
-
-    @Test
-    public void trst(){
-        invokeCloneTool("Z:\\github\\apache\\maven"," maven");
-    }
-
 
 }
