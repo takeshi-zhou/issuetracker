@@ -111,6 +111,7 @@ public class RawIssueServiceImpl implements RawIssueService {
 
     @Override
     public Object getCode(String project_id, String commit_id, String file_path) {
+        file_path=file_path.replaceAll("\\\\","/");
         Map<String, Object> result = new HashMap<>();
         HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
         String repo_id = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + project_id, HttpMethod.GET, requestEntity, String.class).getBody();
