@@ -33,6 +33,8 @@
         download_status,
         scan_status,
         add_time,
+        till_commit_time,
+        last_scan_time,
         description,
         repo_id
         )
@@ -48,6 +50,8 @@
         #{download_status},
         #{scan_status},
         #{add_time},
+        #{till_commit_time},
+        #{last_scan_time},
         #{description},
         #{repo_id}
         )
@@ -101,8 +105,19 @@
         select repo_id from project where uuid = #{projectId}
     </select>
 
-    <select id="getProjectIds" parameterType="String" resultType="String">
-        select uuid from project where repo_id = {repo_id}
+    <select id="getProjectIdsByRepoIdAndType" parameterType="String" resultType="String">
+        select uuid from project where repo_id = #{repo_id} and type = #{type}
+    </select>
+
+    <select id="getProjectsByURLAndType" parameterType="String" resultMap="project">
+        select * from project where url = #{url}and type = #{type}
+    </select>
+
+    <select id="getRepoIdsByAccountId" parameterType="String" resultType="String">
+        select distinct repo_id from project
+        <if test="account_id != null">
+            where account_id = #{account_id}
+        </if>
     </select>
 
     <delete id="remove" parameterType="String">

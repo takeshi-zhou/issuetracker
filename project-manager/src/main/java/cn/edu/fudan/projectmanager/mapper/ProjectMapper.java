@@ -24,6 +24,8 @@ public interface ProjectMapper {
 
     Project getProjectByURLTypeAndAccountId(@Param("account_id") String account_id, @Param("url") String url, @Param("type") String type);
 
+    List<Project> getProjectsByURLAndType(@Param("url") String url, @Param("type") String type);
+
     void updateProjectStatus(Project project);
 
     void remove(@Param("projectId") String projectId);
@@ -34,5 +36,7 @@ public interface ProjectMapper {
 
     String getRepoId(@Param("projectId") String projectId);
 
-    List<String> getProjectIds(@Param("repo_id") String repo_id);
+    List<String> getRepoIdsByAccountId(@Param("account_id") String account_id);
+
+    List<String> getProjectIdsByRepoIdAndType(@Param("repo_id") String repo_id,@Param("type") String type);
 }

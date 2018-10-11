@@ -44,9 +44,11 @@ public class ProjectController {
     }
 
     @DeleteMapping(value = {"/project/{projectId}"})
-    public Object delete(@PathVariable("projectId") String projectId, HttpServletRequest request) {
+    public Object delete(@PathVariable("projectId") String projectId,
+                         @RequestParam(name = "type",required = false,defaultValue = "bug")String type,
+                         HttpServletRequest request) {
         try {
-            projectService.remove(projectId, request.getHeader("token"));
+            projectService.remove(projectId, type,request.getHeader("token"));
             return new ResponseBean(200, "project delete success!", null);
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,9 +84,9 @@ public class ProjectController {
         return projectService.getRepoId(projectId);
     }
 
-    @GetMapping(value = "/inner/project/project-id")
+    @GetMapping(value = "/inner/project/repo-ids")
     public Object getProjectIds(@RequestParam(name = "account_id", required = false) String account_id) {
-        return projectService.getProjectIdList(account_id);
+        return projectService.getRepoIdsByAccountId(account_id);
     }
 
 

@@ -3,6 +3,8 @@ package cn.edu.fudan.projectmanager.service;
 
 import cn.edu.fudan.projectmanager.domain.Project;
 
+import java.util.List;
+
 public interface ProjectService {
 
     void addOneProject(String userToken, Project project);
@@ -15,11 +17,13 @@ public interface ProjectService {
 
     Object getProjectListByKeyWord(String userToken, String keyWord);
 
+    List<String> getRepoIdsByAccountId(String account_id);
+
     Project getProjectByID(String projectId);
 
     void updateProjectStatus(Project project);
 
-    void remove(String projectId, String userToken);
+    void remove(String projectId,String type, String userToken);
 
     String getRepoId(String projectId);
 }
