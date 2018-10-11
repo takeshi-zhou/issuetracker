@@ -28,7 +28,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -36,7 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 
 @PrepareForTest({AccountController.class, AccountService.class, AccountServiceImpl.class})
@@ -80,7 +78,7 @@ public class AccountControllerTest extends AccountServiceApplicationTests {
 
     @Test
     //
-    public void loginTestSucces() throws Exception {
+    public void loginTestSuccess() throws Exception {
         String username = "admin";
         String password = "admin";
 
