@@ -106,7 +106,7 @@
     </select>
 
     <select id="getAllDefaultTags" resultMap="tag">
-        select * from tag
+        select * from tag order by name
     </select>
 
     <select id="hasBeenTagged" parameterType="String" resultType="Integer">
