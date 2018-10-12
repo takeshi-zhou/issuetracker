@@ -1,5 +1,6 @@
 package cn.edu.fudan.issueservice;
 
+import cn.edu.fudan.issueservice.scheduler.QuartzScheduler;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,8 +30,15 @@ public class Test {
         this.stringRedisTemplate = stringRedisTemplate;
     }
 
+    @Autowired
+    private QuartzScheduler quartzScheduler;
+
     @org.junit.Test
     public void test(){
-        System.out.println(stringRedisTemplate.opsForHash().get("dashboard:day:123", "new"));
+        for(int i=0;i<30;i++){
+            quartzScheduler.perWeek();
+        }
     }
+
+
 }

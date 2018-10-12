@@ -43,8 +43,8 @@ public class IssueDao {
         return issueMapper.getIssueList(map);
     }
 
-    public List<String> getExistIssueTypes() {
-        return issueMapper.getExistIssueTypes();
+    public List<String> getExistIssueTypes(String category) {
+        return issueMapper.getExistIssueTypes(category);
     }
 
     public List<String> getIssueIdsByRepoId(String repo_id) {

@@ -1,5 +1,7 @@
 package cn.edu.fudan.issueservice.scheduler;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -10,7 +12,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class QuartzScheduler {
@@ -45,94 +49,94 @@ public class QuartzScheduler {
         return restTemplate.exchange(innerServicePath + "/user/accountIds", HttpMethod.GET, requestEntity, List.class).getBody();
     }
 
-    @SuppressWarnings("unchecked")
-    private List<String> getCurrentRepoList(String account_id) {
+    private JSONArray getProjectList(String account_id) {
         HttpEntity<String> requestEntity=new HttpEntity<>(headers);
-        return restTemplate.exchange(innerServicePath + "/inner/project/repo-ids?account_id=" + account_id, HttpMethod.GET, requestEntity, List.class).getBody();
+        return restTemplate.exchange(innerServicePath + "/inner/projects?account_id=" + account_id, HttpMethod.GET, requestEntity, JSONArray.class).getBody();
     }
 
-    private void updateTrend(String duration, String account_id, String project_id, int newIssueCount, int remainingIssueCount, int eliminatedIssueCount) {
+    private void updateTrend(String duration, String account_id, String repo_id, String category,int newIssueCount, int remainingIssueCount, int eliminatedIssueCount) {
         String newKey = "";
         String remainingKey = "";
         String eliminatedKey = "";
-        if (project_id == null) {
-            newKey = "trend:" + duration + ":new:" + account_id;
-            remainingKey = "trend:" + duration + ":remaining:" + account_id;
-            eliminatedKey = "trend:" + duration + ":eliminated:" + account_id;
+        if (repo_id == null) {
+            newKey = "trend:"+category+":"+ duration + ":new:" + account_id;
+            remainingKey = "trend:"+category+":"+ duration + ":remaining:" + account_id;
+            eliminatedKey = "trend:"+category+":"+ duration + ":eliminated:" + account_id;
         } else {
-            newKey = "trend:" + duration + ":new:" + account_id + ":" + project_id;
-            remainingKey = "trend:" + duration + ":remaining:" + account_id + ":" + project_id;
-            eliminatedKey = "trend:" + duration + ":eliminated:" + account_id + ":" + project_id;
+            newKey = "trend:"+category+":"+ duration + ":new:" + account_id + ":" + repo_id;
+            remainingKey = "trend:"+category+":"+ duration + ":remaining:" + account_id + ":" + repo_id;
+            eliminatedKey = "trend:"+category+":"+ duration + ":eliminated:" + account_id + ":" + repo_id;
         }
         stringRedisTemplate.setEnableTransactionSupport(true);
         stringRedisTemplate.multi();
         stringRedisTemplate.opsForList().rightPush(newKey, String.valueOf(newIssueCount));
+        stringRedisTemplate.opsForList().trim(newKey,0,29);
         stringRedisTemplate.opsForList().rightPush(remainingKey, String.valueOf(remainingIssueCount));
+        stringRedisTemplate.opsForList().trim(remainingKey,0,29);
         stringRedisTemplate.opsForList().rightPush(eliminatedKey, String.valueOf(eliminatedIssueCount));
+        stringRedisTemplate.opsForList().trim(eliminatedKey,0,29);
         stringRedisTemplate.exec();
     }
 
     @Scheduled(cron = "0 0 0 * * *")
-    private void PerDay() {
-        for (String account_id : getAccountIds()) {
-            List<String> repoIds = getCurrentRepoList(account_id);
-            if (repoIds == null) continue;
-            int newSummary = 0;
-            int remainingSummary = 0;
-            int eliminatedSummary = 0;
-            for (String repo_id : repoIds) {
-                //该用户当前项目前一天的统计结果
-                String dashboardKey = "dashboard:day:" + repo_id;
-                if (!stringRedisTemplate.hasKey(dashboardKey))
-                    continue;
-                int newIssueCount = Integer.parseInt((String) stringRedisTemplate.opsForHash().get(dashboardKey, "new"));
-                int remainingIssueCount = Integer.parseInt((String) stringRedisTemplate.opsForHash().get(dashboardKey, "remaining"));
-                int eliminatedIssueCount = Integer.parseInt((String) stringRedisTemplate.opsForHash().get(dashboardKey, "eliminated"));
-                updateTrend("day", account_id, repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount);
-                newSummary += newIssueCount;
-                remainingSummary += remainingIssueCount;
-                eliminatedSummary += eliminatedIssueCount;
-                //清零
-                stringRedisTemplate.delete(dashboardKey);
-            }
-            updateTrend("day", account_id, null, newSummary, remainingSummary, eliminatedSummary);
-        }
+    public void perDay() {
+       durationUpdate("day");
     }
 
     @Scheduled(cron = "0 5 0 * * Mon")
     public void perWeek() {
-        for (String account_id : getAccountIds()) {
-            List<String> repoIds = getCurrentRepoList(account_id);
-            if (repoIds == null) continue;
-            int newSummary = 0;
-            int remainingSummary = 0;
-            int eliminatedSummary = 0;
-            for (String repo_id : repoIds) {
-                //该用户当前项目前一周的统计结果
-                String dashboardKey = "dashboard:week:" + repo_id;
-                if (!stringRedisTemplate.hasKey(dashboardKey))
-                    continue;
-                int newIssueCount = Integer.parseInt((String) stringRedisTemplate.opsForHash().get(dashboardKey, "new"));
-                int remainingIssueCount = Integer.parseInt((String) stringRedisTemplate.opsForHash().get(dashboardKey, "remaining"));
-                int eliminatedIssueCount = Integer.parseInt((String) stringRedisTemplate.opsForHash().get(dashboardKey, "eliminated"));
-                updateTrend("week", account_id, repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount);
-                newSummary += newIssueCount;
-                remainingSummary += remainingIssueCount;
-                eliminatedSummary += eliminatedIssueCount;
-                //清零
-                stringRedisTemplate.delete(dashboardKey);
-            }
-            updateTrend("week", account_id, null, newSummary, remainingSummary, eliminatedSummary);
-        }
+        durationUpdate("week");
     }
 
     @Scheduled(cron = "0 10 0 1 * *")
-    private void perMonth() {
-        List<String> repoList = getCurrentRepoList(null);
-        if (repoList == null) return;
-        for (String repo_id : repoList) {
-            String dashboardKey = "dashboard:month:" + repo_id;
-            stringRedisTemplate.delete(dashboardKey);
+    public void perMonth() {
+        JSONArray projects = getProjectList(null);//所有用户的所有project
+        if (projects == null||projects.isEmpty()) return;
+        for (int i=0;i<projects.size();i++) {
+            JSONObject project=projects.getJSONObject(i);
+            if(project!=null){
+                String repo_id=project.getString("uuid");
+                String category=project.getString("type");
+                String dashboardKey = "dashboard:"+category+":month:"+ repo_id;
+                stringRedisTemplate.delete(dashboardKey);
+            }
+        }
+    }
+
+    private void durationUpdate(String duration){
+        List<String> accountIds=getAccountIds();
+        for (String account_id : accountIds) {
+            JSONArray projects = getProjectList(account_id);
+            if (projects == null||projects.isEmpty()) continue;
+            int newSummary = 0;
+            int remainingSummary = 0;
+            int eliminatedSummary = 0;
+            Set<String> categories=new HashSet<>();
+            for (int i=0;i<projects.size();i++) {
+                JSONObject project=projects.getJSONObject(i);
+                if(project!=null){
+                    String repo_id=project.getString("repo_id");
+                    String category=project.getString("type");
+                    String dashboardKey = "dashboard:"+category+":"+duration+":"+ repo_id;
+                    Boolean hasKey=stringRedisTemplate.hasKey(dashboardKey);
+                    if(hasKey!=null&&hasKey){
+                        categories.add(category);
+                        int newIssueCount = Integer.parseInt((String) stringRedisTemplate.opsForHash().get(dashboardKey, "new"));
+                        int remainingIssueCount = Integer.parseInt((String) stringRedisTemplate.opsForHash().get(dashboardKey, "remaining"));
+                        int eliminatedIssueCount = Integer.parseInt((String) stringRedisTemplate.opsForHash().get(dashboardKey, "eliminated"));
+                        updateTrend(duration, account_id, repo_id,category, newIssueCount, remainingIssueCount, eliminatedIssueCount);
+                        newSummary += newIssueCount;
+                        remainingSummary += remainingIssueCount;
+                        eliminatedSummary += eliminatedIssueCount;
+                        //清零
+                       // stringRedisTemplate.delete(dashboardKey);
+                    }
+                }
+            }
+            //当前用户所有
+            for(String category:categories){
+                updateTrend(duration, account_id, null,category, newSummary, remainingSummary, eliminatedSummary);
+            }
         }
     }
 }

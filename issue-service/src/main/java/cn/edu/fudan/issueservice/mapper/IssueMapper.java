@@ -25,7 +25,7 @@ public interface IssueMapper {
 
     List<Issue> getIssueList(Map<String, Object> map);
 
-    List<String> getExistIssueTypes();
+    List<String> getExistIssueTypes(@Param("category")String category);
 
     List<String> getIssueIdsByRepoId(String repo_id);
 }

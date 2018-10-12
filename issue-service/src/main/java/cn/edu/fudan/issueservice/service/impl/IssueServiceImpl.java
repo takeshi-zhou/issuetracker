@@ -192,18 +192,18 @@ public class IssueServiceImpl implements IssueService {
         return restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + projectId, HttpMethod.GET, entity, String.class).getBody();
     }
 
-    private IssueCount getOneRepoDashBoardInfo(String duration,String repoId){
-        Object newObject=stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + repoId, "new");
+    private IssueCount getOneRepoDashBoardInfo(String duration,String repoId,String category){
+        Object newObject=stringRedisTemplate.opsForHash().get("dashboard:"+category+":"+ duration + ":" + repoId, "new");
         int newCount = newObject==null?0:Integer.parseInt((String)newObject);
-        Object remainingObject=stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + repoId, "remaining");
+        Object remainingObject=stringRedisTemplate.opsForHash().get("dashboard:"+category+":" + duration + ":" + repoId, "remaining");
         int remainingCount = remainingObject==null?0:Integer.parseInt((String)remainingObject);
-        Object eliminatedObject=stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + repoId, "eliminated");
+        Object eliminatedObject=stringRedisTemplate.opsForHash().get("dashboard:"+category+":" + duration + ":" + repoId, "eliminated");
         int eliminatedCount = eliminatedObject==null?0:Integer.parseInt((String)eliminatedObject);
         return new IssueCount(newCount,eliminatedCount,remainingCount);
     }
 
     @Override
-    public Object getDashBoardInfo(String duration, String project_id, String userToken) {
+    public Object getDashBoardInfo(String duration, String project_id, String userToken,String category) {
         IssueCount result=new IssueCount(0,0,0);
         String account_id = getAccountId(userToken);
         if (project_id == null) {
@@ -212,13 +212,13 @@ public class IssueServiceImpl implements IssueService {
             if (repoIds != null&&!repoIds.isEmpty()) {
                 for (int i = 0; i < repoIds.size(); i++) {
                     String currentRepoId = repoIds.getString(i);
-                    result.issueCountUpdate(getOneRepoDashBoardInfo(duration,currentRepoId));
+                    result.issueCountUpdate(getOneRepoDashBoardInfo(duration,currentRepoId,category));
                 }
             }
         } else {
             //只显示当前所选project的相关dashboard信息
             String currentRepoId = getRepoId(project_id);
-            result.issueCountUpdate(getOneRepoDashBoardInfo(duration,currentRepoId));
+            result.issueCountUpdate(getOneRepoDashBoardInfo(duration,currentRepoId,category));
         }
         return result;
     }
@@ -234,7 +234,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public Object getStatisticalResults(Integer month, String project_id, String userToken) {
+    public Object getStatisticalResults(Integer month, String project_id, String userToken,String category) {
         Map<String, Object> result = new HashMap<>();
         String account_id = getAccountId(userToken);
         String newKey = "";
@@ -242,24 +242,24 @@ public class IssueServiceImpl implements IssueService {
         String eliminatedKey = "";
         if (project_id == null) {
             if (month == 1) {
-                newKey = "trend:day:new:" + account_id;
-                remainingKey = "trend:day:remaining:" + account_id;
-                eliminatedKey = "trend:day:eliminated:" + account_id;
+                newKey = "trend:"+category+":day:new:" + account_id;
+                remainingKey = "trend:"+category+":day:remaining:" + account_id;
+                eliminatedKey = "trend:"+category+":day:eliminated:" + account_id;
             } else {
-                newKey = "trend:week:new:" + account_id;
-                remainingKey = "trend:week:remaining:" + account_id;
-                eliminatedKey = "trend:week:eliminated:" + account_id;
+                newKey = "trend:"+category+":week:new:" + account_id;
+                remainingKey = "trend:"+category+":week:remaining:" + account_id;
+                eliminatedKey = "trend:"+category+":week:eliminated:" + account_id;
             }
         } else {
             String repoId = getRepoId(project_id);
             if (month == 1) {
-                newKey = "trend:day:new:" + account_id + ":" + repoId;
-                remainingKey = "trend:day:remaining:" + account_id + ":" + repoId;
-                eliminatedKey = "trend:day:eliminated:" + account_id + ":" + repoId;
+                newKey = "trend:"+category+":day:new:" + account_id + ":" + repoId;
+                remainingKey = "trend:"+category+":day:remaining:" + account_id + ":" + repoId;
+                eliminatedKey = "trend:"+category+":day:eliminated:" + account_id + ":" + repoId;
             } else {
-                newKey = "trend:week:new:" + account_id + ":" + repoId;
-                remainingKey = "trend:week:remaining:" + account_id + ":" + repoId;
-                eliminatedKey = "trend:week:eliminated:" + account_id + ":" + repoId;
+                newKey = "trend:"+category+":week:new:" + account_id + ":" + repoId;
+                remainingKey = "trend:"+category+":week:remaining:" + account_id + ":" + repoId;
+                eliminatedKey = "trend:"+category+":week:eliminated:" + account_id + ":" + repoId;
             }
         }
         List<String> newList = stringRedisTemplate.opsForList().range(newKey, 0, -1);
@@ -270,8 +270,8 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public Object getExistIssueTypes() {
-        return issueDao.getExistIssueTypes();
+    public Object getExistIssueTypes(String category) {
+        return issueDao.getExistIssueTypes(category);
     }
 
     private void addSolvedTag(String repo_id, String pre_commit_id) {
@@ -288,11 +288,11 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
-    private void dashboardUpdate(String repo_id, int newIssueCount, int remainingIssueCount, int eliminatedIssueCount) {
+    private void dashboardUpdate(String repo_id, int newIssueCount, int remainingIssueCount, int eliminatedIssueCount,String category) {
         //注意只有remaining是覆盖的，其余是累增的
-        String todayKey = "dashboard:day:" + repo_id;
-        String weekKey = "dashboard:week:" + repo_id;
-        String monthKey = "dashboard:month:" + repo_id;
+        String todayKey = "dashboard:"+category+":day:" + repo_id;
+        String weekKey = "dashboard:"+category+":week:" + repo_id;
+        String monthKey = "dashboard:"+category+":month:" + repo_id;
         stringRedisTemplate.setEnableTransactionSupport(true);
         stringRedisTemplate.multi();
         stringRedisTemplate.opsForHash().increment(todayKey, "new", newIssueCount);
@@ -326,7 +326,7 @@ public class IssueServiceImpl implements IssueService {
             int newIssueCount = insertIssueList.size();
             int remainingIssueCount = insertIssueList.size();
             int eliminatedIssueCount = 0;
-            dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount);
+            dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
             rawIssueDao.batchUpdateIssueId(rawIssues);
         } else {
             //不是第一次扫描，需要和前一次的commit进行mapping
@@ -393,7 +393,7 @@ public class IssueServiceImpl implements IssueService {
             int eliminatedIssueCount = rawIssues1.size() - equalsCount;
             int remainingIssueCount = rawIssues2.size();
             int newIssueCount = rawIssues2.size() - equalsCount;
-            dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount);
+            dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
             rawIssueDao.batchUpdateIssueId(rawIssues2);
         }
         //新的issue
