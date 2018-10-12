@@ -73,6 +73,9 @@
             <if test="keyWord != null and keyWord != '' ">
                 and url like "%"#{keyWord}"%"
             </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
         </where>
     </select>
 

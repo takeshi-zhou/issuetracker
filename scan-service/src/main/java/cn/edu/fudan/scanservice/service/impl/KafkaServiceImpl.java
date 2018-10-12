@@ -122,17 +122,20 @@ public class KafkaServiceImpl implements KafkaService {
     @Override
     public void scanByRequest(JSONObject requestParam) {
         String category=requestParam.getString("category");
+        if(category==null){
+            category="bug";
+        }
         String projectId = requestParam.getString("projectId");
         String commitId = requestParam.getString("commitId");
         initialProject(projectId);
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
         String repoId = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + projectId, HttpMethod.GET, entity, String.class).getBody();
-        if(category.equals("bug")){
-           Future<String> future = findBugScanTask.run(repoId, commitId,category);
-           //开一个工作者线程来管理异步任务的超时
-            setTimeOut(future, repoId);
-        }else{
+        if(category.equals("clone")){
             cloneScanTask.run(repoId,commitId,category);
+        }else{
+            Future<String> future = findBugScanTask.run(repoId, commitId,category);
+            //开一个工作者线程来管理异步任务的超时
+            setTimeOut(future, repoId);
         }
     }
 

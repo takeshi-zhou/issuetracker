@@ -15,7 +15,7 @@ public interface ProjectService {
 
     Object getProjectIdList(String account_id);
 
-    Object getProjectListByKeyWord(String userToken, String keyWord);
+    Object getProjectListByKeyWord(String userToken, String keyWord,String type);
 
     List<String> getRepoIdsByAccountId(String account_id);
 

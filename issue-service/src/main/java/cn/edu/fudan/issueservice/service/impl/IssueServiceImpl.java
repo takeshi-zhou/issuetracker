@@ -182,9 +182,9 @@ public class IssueServiceImpl implements IssueService {
         return restTemplate.exchange(innerServicePath + "/user/accountId?userToken=" + userToken, HttpMethod.GET, requestEntity, String.class).getBody();
     }
 
-    private JSONArray getProjectIds(String account_id) {
+    private JSONArray getRepoIds(String account_id) {
         HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
-        return restTemplate.exchange(innerServicePath + "/inner/project/project-id?account_id=" + account_id, HttpMethod.GET, requestEntity, JSONArray.class).getBody();
+        return restTemplate.exchange(innerServicePath + "/inner/project/repo-ids?account_id=" + account_id, HttpMethod.GET, requestEntity, JSONArray.class).getBody();
     }
 
     private String getRepoId(String projectId) {
@@ -192,45 +192,34 @@ public class IssueServiceImpl implements IssueService {
         return restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + projectId, HttpMethod.GET, entity, String.class).getBody();
     }
 
+    private IssueCount getOneRepoDashBoardInfo(String duration,String repoId){
+        Object newObject=stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + repoId, "new");
+        int newCount = newObject==null?0:Integer.parseInt((String)newObject);
+        Object remainingObject=stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + repoId, "remaining");
+        int remainingCount = remainingObject==null?0:Integer.parseInt((String)remainingObject);
+        Object eliminatedObject=stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + repoId, "eliminated");
+        int eliminatedCount = eliminatedObject==null?0:Integer.parseInt((String)eliminatedObject);
+        return new IssueCount(newCount,eliminatedCount,remainingCount);
+    }
+
     @Override
     public Object getDashBoardInfo(String duration, String project_id, String userToken) {
-        int newIssueCount = 0;
-        int eliminatedIssueCount = 0;
-        int remainingIssueCount = 0;
+        IssueCount result=new IssueCount(0,0,0);
         String account_id = getAccountId(userToken);
         if (project_id == null) {
             //未选择某一个project,显示该用户所有project的dashboard信息
-            JSONArray projectIds = getProjectIds(account_id);
-            if (projectIds != null) {
-                for (int i = 0; i < projectIds.size(); i++) {
-                    String currentProjectId = projectIds.getString(i);
-                    String currentRepoId = getRepoId(currentProjectId);
-                    Integer newCount = (Integer) stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + currentRepoId, "new");
-                    Integer remainingCount = (Integer) stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + currentRepoId, "remaining");
-                    Integer eliminatedCount = (Integer) stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + currentRepoId, "eliminated");
-                    if (newCount != null && remainingCount != null && eliminatedCount != null) {
-                        newIssueCount += newCount;
-                        eliminatedIssueCount += remainingCount;
-                        remainingIssueCount += eliminatedCount;
-                    }
+            JSONArray repoIds = getRepoIds(account_id);
+            if (repoIds != null&&!repoIds.isEmpty()) {
+                for (int i = 0; i < repoIds.size(); i++) {
+                    String currentRepoId = repoIds.getString(i);
+                    result.issueCountUpdate(getOneRepoDashBoardInfo(duration,currentRepoId));
                 }
             }
         } else {
             //只显示当前所选project的相关dashboard信息
             String currentRepoId = getRepoId(project_id);
-            Integer newCount = (Integer) stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + currentRepoId, "new");
-            Integer remainingCount = (Integer) stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + currentRepoId, "remaining");
-            Integer eliminatedCount = (Integer) stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + currentRepoId, "eliminated");
-            if (newCount != null && remainingCount != null && eliminatedCount != null) {
-                newIssueCount += newCount;
-                eliminatedIssueCount += remainingCount;
-                remainingIssueCount += eliminatedCount;
-            }
+            result.issueCountUpdate(getOneRepoDashBoardInfo(duration,currentRepoId));
         }
-        Map<String, Object> result = new HashMap<>();
-        result.put("newIssueCount", newIssueCount);
-        result.put("eliminatedIssueCount", eliminatedIssueCount);
-        result.put("remainingIssueCount", remainingIssueCount);
         return result;
     }
 

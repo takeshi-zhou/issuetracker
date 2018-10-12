@@ -114,7 +114,7 @@ public class ProjectDaoTest extends ProjectManagerApplicationTests {
 
     @Test
     public void getProjectByKeyWordAndAccountId() {
-        List<Project> projects = projectDao.getProjectByKeyWordAndAccountId("1", "x");
+        List<Project> projects = projectDao.getProjectByKeyWordAndAccountId("1", "x","bug");
         System.out.println(projects);
         for (Project project : projects) {
             System.out.println(project.getUuid());

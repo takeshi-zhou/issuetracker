@@ -32,15 +32,18 @@ public class ProjectController {
 
     //get project list
     @GetMapping(value = {"/project"})
-    public Object query(HttpServletRequest request,@RequestParam("type")String type) {
+    public Object query(HttpServletRequest request,
+                        @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
         String userToken = request.getHeader("token");
         return projectService.getProjectList(userToken,type);
     }
 
     @GetMapping(value = {"/project/filter"})
-    public Object keyWordQuery(HttpServletRequest request, @RequestParam("keyWord") String keyWord) {
+    public Object keyWordQuery(HttpServletRequest request,
+                               @RequestParam("keyWord") String keyWord,
+                               @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
         String userToken = request.getHeader("token");
-        return projectService.getProjectListByKeyWord(userToken, keyWord);
+        return projectService.getProjectListByKeyWord(userToken, keyWord,type);
     }
 
     @DeleteMapping(value = {"/project/{projectId}"})

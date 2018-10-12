@@ -165,9 +165,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Object getProjectListByKeyWord(String userToken, String keyWord) {
+    public Object getProjectListByKeyWord(String userToken, String keyWord,String type) {
         String account_id = getAccountId(userToken);
-        return projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim());
+        return projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim(),type);
     }
 
     @Override
