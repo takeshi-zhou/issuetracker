@@ -87,8 +87,8 @@
                 and category = #{category}
             </if>
         </where>
-        order by (select commit_time from scan where commit_id = end_commit) desc ,
-        (select commit_time from scan where commit_id = start_commit ) desc
+        order by (select commit_time from scan where commit_id = end_commit and category = #{category}) desc ,
+        (select commit_time from scan where commit_id = start_commit and category = #{category}) desc
         <if test="start != null  and size != null ">
             limit #{start},#{size}
         </if>
