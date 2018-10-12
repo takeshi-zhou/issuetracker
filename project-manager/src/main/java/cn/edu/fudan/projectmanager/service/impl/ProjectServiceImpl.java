@@ -160,8 +160,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Object getProjectIdList(String account_id) {
-        return projectDao.getProjectByAccountId(account_id).stream().map(Project::getUuid).collect(Collectors.toList());
+    public Object getProjectByAccountId(String account_id) {
+        return projectDao.getProjectByAccountId(account_id);
     }
 
     @Override

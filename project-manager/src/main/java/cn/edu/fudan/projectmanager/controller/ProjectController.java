@@ -92,5 +92,10 @@ public class ProjectController {
         return projectService.getRepoIdsByAccountId(account_id);
     }
 
+    @GetMapping(value = "/inner/projects")
+    public Object getProjectByAccountId(@RequestParam(name = "account_id", required = false) String account_id){
+        return projectService.getProjectByAccountId(account_id);
+    }
+
 
 }

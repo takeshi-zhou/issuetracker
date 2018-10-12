@@ -13,7 +13,7 @@ public interface ProjectService {
 
     Object getProjectByRepoId(String repo_id);
 
-    Object getProjectIdList(String account_id);
+    Object getProjectByAccountId(String account_id);
 
     Object getProjectListByKeyWord(String userToken, String keyWord,String type);
 
