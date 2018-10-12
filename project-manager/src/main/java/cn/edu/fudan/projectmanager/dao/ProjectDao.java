@@ -68,11 +68,16 @@ public class ProjectDao {
         return projectMapper.getRepoId(projectId);
     }
 
-    public List<String> getProjectIds(String repo_id) {
-        return projectMapper.getProjectIds(repo_id);
+
+    public boolean existOtherProjectWithThisRepoIdAndType(String repoId,String type) {
+        return projectMapper.getProjectIdsByRepoIdAndType(repoId,type).size() >= 2;
     }
 
-    public boolean existOtherProjectWithThisRepoId(String repoId) {
-        return projectMapper.getProjectIds(repoId).size() >= 2;
+    public List<Project> getProjectsByURLAndType(String url,String type){
+        return projectMapper.getProjectsByURLAndType(url, type);
+    }
+
+    public List<String> getRepoIdsByAccountId(String account_id){
+        return projectMapper.getRepoIdsByAccountId(account_id);
     }
 }

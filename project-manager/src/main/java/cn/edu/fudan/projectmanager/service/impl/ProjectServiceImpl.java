@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -126,12 +127,21 @@ public class ProjectServiceImpl implements ProjectService {
         if (projectDao.hasBeenAdded(account_id, url, project.getType())) {
             throw new RuntimeException("The project has been added!");
         }
+        List<Project> projects=projectDao.getProjectsByURLAndType(url,project.getType());
+        if(projects!=null&&!projects.isEmpty()){
+            //如果存在其他用户的project和当前添加的URL和type相同，需要将扫描状态同步
+            Project oneProject=projects.get(0);
+            project.setScan_status(oneProject.getScan_status());
+            project.setTill_commit_time(oneProject.getTill_commit_time());
+            project.setLast_scan_time(oneProject.getLast_scan_time());
+       }else{
+            project.setScan_status("Not Scanned");
+        }
         String projectId = UUID.randomUUID().toString();
         project.setUuid(projectId);
         project.setUrl(url);
         project.setAccount_id(account_id);
         project.setDownload_status("Downloading");
-        project.setScan_status("Not Scanned");
         project.setAdd_time(DateTimeUtil.formatedDate(new Date()));
         projectDao.addOneProject(project);
         //向RepoManager这个Topic发送消息，请求开始下载
@@ -161,6 +171,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public List<String> getRepoIdsByAccountId(String account_id) {
+        return projectDao.getRepoIdsByAccountId(account_id);
+    }
+
+    @Override
     public Project getProjectByID(String projectId) {
         return projectDao.getProjectByID(projectId);
     }
@@ -172,13 +187,13 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Override
-    public void remove(String projectId, String userToken) {
+    public void remove(String projectId, String type,String userToken) {
         HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
         String repoId = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + projectId, HttpMethod.GET, requestEntity, String.class).getBody();
         String account_id = getAccountId(userToken);
-        //如果当前repoId只有这一个projectId与其对应，那么删除project的同时会删除repo的相关内容
-        //否则还有其他project与当前repoId对应，该repo的相关内容就不删
-        if (!projectDao.existOtherProjectWithThisRepoId(repoId)) {
+        //如果当前repoId和type只有这一个projectId与其对应，那么删除project的同时会删除repo的相关内容
+        //否则还有其他project与当前repoId和type对应，该repo的相关内容就不删
+        if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId,type)) {
             JSONObject response = null;
             response = restTemplate.exchange(innerServicePath + "/inner/issue/" + repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
             if (response != null)
@@ -190,6 +205,7 @@ public class ProjectServiceImpl implements ProjectService {
             if (response != null)
                 logger.info(response.toJSONString());
             //delete info in redis
+            stringRedisTemplate.setEnableTransactionSupport(true);
             stringRedisTemplate.multi();
             stringRedisTemplate.delete("dashboard:day:" + repoId);
             stringRedisTemplate.delete("dashboard:week:" + repoId);
