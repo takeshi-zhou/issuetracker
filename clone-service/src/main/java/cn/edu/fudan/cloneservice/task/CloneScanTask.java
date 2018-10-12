@@ -187,8 +187,9 @@ public class CloneScanTask {
         }
         logger.info("tool invoke complete!");
         logger.info("start to analyze result file");
-        String resultFilePath=resultFileHome+repoName+"_filtedA_type12.csv.xml";
-        if(!analyzeResultFile(scanId,commitId,resultFilePath)){
+        String resultFilePath1=resultFileHome+repoName+"_filtedA_type12.csv.xml";
+        String resultFilePath2=resultFileHome+repoName+"_filtedB_merge.csv.xml";
+        if(!analyzeResultFile(scanId,commitId,resultFilePath1)||!analyzeResultFile(scanId,commitId,resultFilePath2)){
             send(repoId,commitId,"failed","file analyze failed!");
             logger.error("file analyze failed!");
             return;
