@@ -1,18 +1,32 @@
 package cn.edu.fudan.issueservice.controller;
 
 import cn.edu.fudan.issueservice.IssueServiceApplicationTests;
-import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.Location;
 import cn.edu.fudan.issueservice.domain.RawIssue;
+import cn.edu.fudan.issueservice.domain.ResponseBean;
+import cn.edu.fudan.issueservice.interceptor.AuthTokenInterceptor;
+import cn.edu.fudan.issueservice.service.RawIssueService;
+import cn.edu.fudan.issueservice.service.impl.RawIssueServiceImpl;
+import cn.edu.fudan.issueservice.util.TestDataMaker;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.api.support.membermodification.MemberMatcher;
+import org.powermock.api.support.membermodification.MemberModifier;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -22,17 +36,26 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 
+@PrepareForTest({RawIssueController.class, RawIssueService.class, RawIssueServiceImpl.class, AuthTokenInterceptor.class})
+@WebAppConfiguration
 public class RawIssueControllerTest extends IssueServiceApplicationTests {
 
     @Autowired
     private WebApplicationContext context;
 
     @Autowired
+    RawIssueService service;
+
+    @Autowired
+    @InjectMocks
     RawIssueController rawIssueController;
 
     private MockMvc mockMvc;
@@ -45,34 +68,25 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
     RawIssue rawIssue1;
     RawIssue rawIssue2;
     List<RawIssue> list;
+    TestDataMaker testDataMaker;
+    String token ;
 
     @Before
     public void setupMockMvc() throws Exception {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+        service = Mockito.mock(RawIssueService.class);
+        MemberModifier.field(RawIssueController.class, "rawIssueService").set(rawIssueController, service);
         session = new MockHttpSession();
         request = new MockHttpServletRequest();
         request.setCharacterEncoding("UTF-8");
         response = new MockHttpServletResponse();
 
         mapper = new ObjectMapper();
+        testDataMaker = new TestDataMaker();
+        token = "token";
 
-        rawIssue1 = new RawIssue();
-        rawIssue1.setUuid("111");
-        rawIssue1.setType("OBL_UNSATISFIED_OBLIGATION");
-        rawIssue1.setDetail("{\"type\":\"OBL_UNSATISFIED_OBLIGATION\",\"priority\":\"2\",\"rank\":\"20\",\"abbrev\":\"OBL\",\"category\":\"EXPERIMENTAL\"}");
-        rawIssue1.setFile_name("DatabaseTool.java");
-        rawIssue1.setScan_id("f012de17-318e-4bef-9f8c-9a263bbece6b");
-        rawIssue1.setIssue_id("fe491c9a-4fd1-48d8-a577-057ce3c93a34");
-        rawIssue1.setCommit_id("94628087eaf6c81584223617d287c26af2116a96");
-
-        rawIssue2 = new RawIssue();
-        rawIssue2.setUuid("222");
-        rawIssue2.setType("OBL_UNSATISFIED_OBLIGATION");
-        rawIssue2.setDetail("{\"type\":\"OBL_UNSATISFIED_OBLIGATION\",\"priority\":\"2\",\"rank\":\"20\",\"abbrev\":\"OBL\",\"category\":\"EXPERIMENTAL\"}");
-        rawIssue2.setFile_name("DatabaseTool.java");
-        rawIssue2.setScan_id("f012de17-318e-4bef-9f8c-9a263bbece6b");
-        rawIssue2.setIssue_id("fe491c9a-4fd1-48d8-a577-057ce3c93a34");
-        rawIssue2.setCommit_id("94628087eaf6c81584223617d287c26af2116a96");
+        rawIssue1 = testDataMaker.rawIssueMaker1();
+        rawIssue2 = testDataMaker.rawIssueMaker2();
 
         list = new ArrayList<RawIssue>();
         list.add(rawIssue1);
@@ -82,62 +96,137 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
 
     @Test
     public void getRawIssueList() throws Exception {
-        request.addHeader("token", "ec15d79e36e14dd258cfff3d48b73d35");
-        List<RawIssue> listRaw = (List<RawIssue>) rawIssueController.getRawIssueList("fe491c9a-4fd1-48d8-a577-057ce3c93a34");
-        for (RawIssue rawIssue : listRaw) {
-            System.out.println(rawIssue.getUuid());
+        String issue_id = "iss1";
+        PowerMockito.when(service.getRawIssueByIssueId(issue_id)).thenReturn(list);
+        MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class, "preHandle")).toReturn(true);
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/raw-issue")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .header("token", token)
+                .param("issue_id", issue_id)
+                .session(session)
+        ).andReturn();
+        List<RawIssue> listResult = JSONObject.parseArray(result.getResponse().getContentAsString(), RawIssue.class);
+        Assert.assertEquals(list.size(), listResult.size());
+        for (int i = 0; i < listResult.size(); ++i) {
+            Assert.assertEquals(list.get(i).getUuid(), listResult.get(i).getUuid());
         }
     }
 
     @Test
-    public void getLocationList() throws Exception {
-        request.addHeader("token", "ec15d79e36e14dd258cfff3d48b73d35");
-        List<Location> listLocation = (List<Location>) rawIssueController.getRawIssueList("00b70f51-5cc4-45f1-bfed-9874a275af96");
-        for (Location location : listLocation) {
-            System.out.println(location.getUuid());
-        }
-
-
+    public void getCode() throws Exception {
+        Map<String, Object> initialMap = new HashMap<>();
+        String codeDetail = "{\"code\":\"XXXXXX\"}";
+        JSONObject codeResponse = JSONObject.parseObject(codeDetail);
+        initialMap.put("code", codeResponse);
+        String project_id = "pro1";
+        String commit_id = "cmm1";
+        String file_path = "file_path";
+        PowerMockito.when(service.getCode(project_id,commit_id,file_path)).thenReturn(initialMap);
+        MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class, "preHandle")).toReturn(true);
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/raw-issue/code")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .header("token", token)
+                .param("project_id", project_id)
+                .param("commit_id", commit_id)
+                .param("file_path", file_path)
+                .session(session)
+        ).andReturn();
+        Map responseMap = JSON.parseObject(result.getResponse().getContentAsString());
+        Assert.assertEquals(initialMap.get("code").toString(),responseMap.get("code").toString());
     }
 
     @Test
-    @Transactional
     public void addRawIssues() throws Exception {
+        /*
+            添加成功
+         */
+        ResponseBean responseBean = new ResponseBean();
+        responseBean.setCode(200);
+        responseBean.setMsg("rawIssue add success!");
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
         java.lang.String requestJson = ow.writeValueAsString(list);
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/inner/raw-issue")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
+        doNothing().when(service).insertRawIssueList(list);
+        MvcResult resultCorrect = mockMvc.perform(MockMvcRequestBuilders.post("/inner/raw-issue")
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson)
-        ).andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
-
-        System.out.println(result.getResponse().getContentAsString());
+        ).andReturn();
+        ResponseBean responseBeanResult = JSONObject.parseObject(resultCorrect.getResponse().getContentAsString(), ResponseBean.class);
+        Assert.assertEquals(responseBean.getCode(), responseBeanResult.getCode());
+        /*
+            添加失败
+         */
+        PowerMockito.when(service, "insertRawIssueList", any(List.class)).thenThrow(new RuntimeException());
+        responseBean.setCode(401);
+        responseBean.setMsg("rawIssue add failed!");
+        MvcResult resultIncorrect = mockMvc.perform(MockMvcRequestBuilders.post("/inner/raw-issue")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson)
+        ).andReturn();
+        ResponseBean responseBeanResultIncorrect = JSONObject.parseObject(resultIncorrect.getResponse().getContentAsString(), ResponseBean.class);
+        Assert.assertEquals(responseBean.getCode(), responseBeanResultIncorrect.getCode());
     }
 
     @Test
-    @Transactional
     public void deleteRawIssue() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/raw-issue/9151ecba-e749-4a14-b6e3-f3a1388139ec")
+        /*
+            删除成功
+         */
+        String repo = "repo";
+        ResponseBean responseBean = new ResponseBean();
+        responseBean.setCode(200);
+        responseBean.setMsg("rawIssue delete success!");
+        doNothing().when(service).deleteRawIssueByRepoId(repo);
+        MvcResult resultCorrect = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/raw-issue/"+repo)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .session(session)
-        ).andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
+        ).andReturn();
+        ResponseBean responseBeanResult = JSONObject.parseObject(resultCorrect.getResponse().getContentAsString(), ResponseBean.class);
+        Assert.assertEquals(responseBean.getCode(), responseBeanResult.getCode());
 
-        System.out.println(result.getResponse().getContentAsString());
+        /*
+            删除失败
+         */
+        responseBean.setCode(401);
+        responseBean.setMsg("rawIssue delete failed!");
+        PowerMockito.when(service, "deleteRawIssueByRepoId", eq(repo)).thenThrow(new RuntimeException());
+        MvcResult resultInCorrect = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/raw-issue/"+repo)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .session(session)
+        ).andReturn();
+        ResponseBean responseBeanResultIncorrect = JSONObject.parseObject(resultInCorrect.getResponse().getContentAsString(), ResponseBean.class);
+        Assert.assertEquals(responseBean.getCode(), responseBeanResultIncorrect.getCode());
     }
 
     @Test
-    @Transactional
     public void updateRawIssues() throws Exception {
+        /*
+            issue 更新成功
+         */
+        ResponseBean responseBean = new ResponseBean();
+        responseBean.setCode(200);
+        responseBean.setMsg("rawIssue update success!");
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
         java.lang.String requestJson = ow.writeValueAsString(list);
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/inner/raw-issue")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
+        doNothing().when(service).batchUpdateIssueId(list);
+        MvcResult resultCorrect = mockMvc.perform(MockMvcRequestBuilders.put("/inner/raw-issue")
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson)
-        ).andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
+        ).andReturn();
+        ResponseBean responseBeanResult = JSONObject.parseObject(resultCorrect.getResponse().getContentAsString(), ResponseBean.class);
+        Assert.assertEquals(responseBean.getCode(), responseBeanResult.getCode());
 
-        System.out.println(result.getResponse().getContentAsString());
+        /*
+            issue 更新失败
+         */
+        responseBean.setCode(401);
+        responseBean.setMsg("rawIssue update failed!");
+        PowerMockito.when(service, "batchUpdateIssueId", any(List.class)).thenThrow(new RuntimeException());
+        MvcResult resultInCorrect = mockMvc.perform(MockMvcRequestBuilders.put("/inner/raw-issue")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson)
+        ).andReturn();
+        ResponseBean responseBeanResultIncorrect = JSONObject.parseObject(resultInCorrect.getResponse().getContentAsString(), ResponseBean.class);
+        Assert.assertEquals(responseBean.getCode(), responseBeanResultIncorrect.getCode());
     }
 
     /*
@@ -145,13 +234,19 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
      */
     @Test
     public void getRawIssues() throws Exception {
+        String commit_id = "cmm1";
+        String category = "category";
+        PowerMockito.when(service.getRawIssueByCommitIDAndCategory(commit_id,category)).thenReturn(list);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/inner/raw-issue/list-by-commit")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .param("commit_id", "")
+                .param("commit_id", commit_id)
+                .param("category",category)
                 .session(session)
-        ).andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
-
-        System.out.println(result.getResponse().getContentAsString());
+        ).andReturn();
+        List<RawIssue> listResult = JSONObject.parseArray(result.getResponse().getContentAsString(), RawIssue.class);
+        Assert.assertEquals(list.size(), listResult.size());
+        for (int i = 0; i < listResult.size(); ++i) {
+            Assert.assertEquals(list.get(i).getUuid(), listResult.get(i).getUuid());
+        }
     }
 }

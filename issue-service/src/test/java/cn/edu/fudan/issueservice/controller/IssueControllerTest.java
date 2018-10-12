@@ -8,6 +8,7 @@ import cn.edu.fudan.issueservice.interceptor.AuthTokenInterceptor;
 import cn.edu.fudan.issueservice.service.IssueService;
 import cn.edu.fudan.issueservice.service.impl.IssueServiceImpl;
 import cn.edu.fudan.issueservice.util.TestDataMaker;
+import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
@@ -31,11 +33,15 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+
 
 import java.util.*;
 
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -302,8 +308,8 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
                 .content(requestParam.toJSONString())
                 .session(session)
         ).andReturn();
-        ResponseBean responseBeanResultIncorrect = JSONObject.parseObject(resultInCorrect.getResponse().getContentAsString(), ResponseBean.class);
-        Assert.assertEquals(responseBean.getCode(), responseBeanResultIncorrect.getCode());
+        ResponseBean responseBeanResultIncorrect  = JSONObject.parseObject(resultInCorrect.getResponse().getContentAsString(), ResponseBean.class);
+        Assert.assertEquals(responseBean.getCode(), responseBeanResultIncorrect .getCode());
     }
 
     @Test
@@ -343,10 +349,10 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
         Map responseMap = JSON.parseObject(result.getResponse().getContentAsString());
         Assert.assertEquals(resultMap.get("totalPage"),responseMap.get("totalPage"));
         Assert.assertEquals(resultMap.get("totalCount"),responseMap.get("totalCount"));
-        List<Issue> listRresultIssues = JSONObject.parseArray(responseMap.get("issueList").toString(),Issue.class);
-        Assert.assertEquals(list.size(), listRresultIssues.size());
-        for (int i = 0; i < listRresultIssues.size(); ++i) {
-            Assert.assertEquals(list.get(i).getUuid(), listRresultIssues.get(i).getUuid());
+        List<Issue> listResultIssues = JSONObject.parseArray(responseMap.get("issueList").toString(),Issue.class);
+        Assert.assertEquals(list.size(), listResultIssues.size());
+        for (int i = 0; i < listResultIssues.size(); ++i) {
+            Assert.assertEquals(list.get(i).getUuid(), listResultIssues.get(i).getUuid());
         }
     }
 
