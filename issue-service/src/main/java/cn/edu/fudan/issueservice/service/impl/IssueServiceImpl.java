@@ -5,6 +5,7 @@ import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.IssueCount;
 import cn.edu.fudan.issueservice.domain.RawIssue;
+import cn.edu.fudan.issueservice.scheduler.QuartzScheduler;
 import cn.edu.fudan.issueservice.service.IssueService;
 import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONArray;
@@ -40,6 +41,13 @@ public class IssueServiceImpl implements IssueService {
     private String innerServicePath;
 
     private HttpHeaders httpHeaders;
+
+    private QuartzScheduler quartzScheduler;
+
+    @Autowired
+    public void setQuartzScheduler(QuartzScheduler quartzScheduler) {
+        this.quartzScheduler = quartzScheduler;
+    }
 
     @Autowired
     public void setHttpHeaders(HttpHeaders httpHeaders) {
@@ -403,5 +411,10 @@ public class IssueServiceImpl implements IssueService {
         if (!pre_commit_id.equals(current_commit_id)) {
             addSolvedTag(repo_id, pre_commit_id);
         }
+    }
+
+    @Override
+    public void updateIssueCount(String time) {
+        quartzScheduler.updateIssueCount(time);
     }
 }

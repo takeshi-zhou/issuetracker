@@ -28,4 +28,5 @@ public interface IssueService {
 
     void startMapping(String repo_id, String pre_commit_id, String current_commit_id,String category);
 
+    void updateIssueCount(String time);
 }

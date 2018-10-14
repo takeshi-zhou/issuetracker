@@ -139,4 +139,15 @@ public class QuartzScheduler {
             }
         }
     }
+
+    public void updateIssueCount(String time) {
+        if (time.equals("day")) {
+            perDay();
+        }else if (time.equals("week")){
+            perWeek();
+        }else {
+            perMonth();
+        }
+    }
+
 }
