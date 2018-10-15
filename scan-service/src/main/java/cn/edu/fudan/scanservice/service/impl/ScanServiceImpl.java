@@ -69,7 +69,7 @@ public class ScanServiceImpl implements ScanService {
         String repo_id = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + project_id, HttpMethod.GET, httpEntity, String.class).getBody();
         JSONObject commitResponse = restTemplate.getForObject(commitServicePath + "?repo_id=" + repo_id + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class);
         if (commitResponse != null) {
-            List<String> scannedCommitId = scanDao.getScannedCommits(project_id,category);
+            List<String> scannedCommitId = scanDao.getScannedCommits(repo_id,category);
             JSONArray commitArray = commitResponse.getJSONArray("data");
             int index = 0;
             if (scannedCommitId.isEmpty()) {
