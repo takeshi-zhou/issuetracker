@@ -71,7 +71,7 @@
         <where>
             account_id = #{account_id}
             <if test="keyWord != null and keyWord != '' ">
-                and url like "%"#{keyWord}"%"
+                and name like "%"#{keyWord}"%"
             </if>
             <if test="type != null and type != ''">
                 and type = #{type}
