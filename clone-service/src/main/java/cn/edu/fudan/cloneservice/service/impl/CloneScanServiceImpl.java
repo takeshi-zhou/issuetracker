@@ -51,7 +51,7 @@ public class CloneScanServiceImpl implements CloneScanService {
         Future<?> future=cloneScanTask.run(repoId,repoName,repoPath,scan);
         new Thread(() -> {
             try {
-                future.get(60, TimeUnit.SECONDS);//设置15s的超时时间
+                future.get(10, TimeUnit.MINUTES);//设置10min的超时时间
             } catch (TimeoutException e) {
                 //因scan超时而抛出异常
                 logger.error("超时了");

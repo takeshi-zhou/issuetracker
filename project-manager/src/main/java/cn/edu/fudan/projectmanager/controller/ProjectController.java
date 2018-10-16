@@ -32,15 +32,18 @@ public class ProjectController {
 
     //get project list
     @GetMapping(value = {"/project"})
-    public Object query(HttpServletRequest request,@RequestParam("type")String type) {
+    public Object query(HttpServletRequest request,
+                        @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
         String userToken = request.getHeader("token");
         return projectService.getProjectList(userToken,type);
     }
 
     @GetMapping(value = {"/project/filter"})
-    public Object keyWordQuery(HttpServletRequest request, @RequestParam("keyWord") String keyWord) {
+    public Object keyWordQuery(HttpServletRequest request,
+                               @RequestParam("keyWord") String keyWord,
+                               @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
         String userToken = request.getHeader("token");
-        return projectService.getProjectListByKeyWord(userToken, keyWord);
+        return projectService.getProjectListByKeyWord(userToken, keyWord,type);
     }
 
     @DeleteMapping(value = {"/project/{projectId}"})
@@ -87,6 +90,11 @@ public class ProjectController {
     @GetMapping(value = "/inner/project/repo-ids")
     public Object getProjectIds(@RequestParam(name = "account_id", required = false) String account_id) {
         return projectService.getRepoIdsByAccountId(account_id);
+    }
+
+    @GetMapping(value = "/inner/projects")
+    public Object getProjectByAccountId(@RequestParam(name = "account_id", required = false) String account_id){
+        return projectService.getProjectByAccountId(account_id);
     }
 
 

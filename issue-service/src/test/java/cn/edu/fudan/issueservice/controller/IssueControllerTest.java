@@ -147,7 +147,7 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
         resultMap.put("newIssueCount", 1);
         resultMap.put("eliminatedIssueCount", 2);
         resultMap.put("remainingIssueCount", 3);
-        PowerMockito.when(service.getDashBoardInfo(duration,project_id,token)).thenReturn(resultMap);
+        PowerMockito.when(service.getDashBoardInfo(duration,project_id,token,"bug")).thenReturn(resultMap);
         MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class, "preHandle")).toReturn(true);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/issue/dashboard")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -317,7 +317,7 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
         List<String> listString = new ArrayList<String>();
         listString.add("dl");
         listString.add("ball");
-        PowerMockito.when(service.getExistIssueTypes()).thenReturn(listString);
+        PowerMockito.when(service.getExistIssueTypes("bug")).thenReturn(listString);
         MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class, "preHandle")).toReturn(true);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/issue/issue-types")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -365,7 +365,7 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
         listIssueCount.add(new IssueCount(1, 2, 3));
         listIssueCount.add(new IssueCount(2, 3, 4));
         resultMap.put("data",listIssueCount);
-        PowerMockito.when(service.getStatisticalResults(month, project_id,token)).thenReturn(resultMap);
+        PowerMockito.when(service.getStatisticalResults(month, project_id,token,"bug")).thenReturn(resultMap);
         MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class, "preHandle")).toReturn(true);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/issue/statistical-results")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)

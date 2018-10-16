@@ -16,7 +16,7 @@ public interface ProjectMapper {
 
     List<Project> getProjectList(@Param("account_id") String account_id,@Param("type") String type);
 
-    List<Project> getProjectByKeyWordAndAccountId(@Param("account_id") String account_id, @Param("keyWord") String keyWord);
+    List<Project> getProjectByKeyWordAndAccountId(@Param("account_id") String account_id, @Param("keyWord") String keyWord,@Param("type") String type);
 
     List<Project> getProjectByRepoId(@Param("repo_id") String repo_id);
 

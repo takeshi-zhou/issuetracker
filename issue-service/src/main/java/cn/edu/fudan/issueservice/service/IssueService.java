@@ -20,12 +20,13 @@ public interface IssueService {
 
     Object getFilteredIssueList(JSONObject requestParam);
 
-    Object getDashBoardInfo(String duration, String project_id, String userToken);
+    Object getDashBoardInfo(String duration, String project_id, String userToken,String category);
 
-    Object getStatisticalResults(Integer month, String project_id, String userToken);
+    Object getStatisticalResults(Integer month, String project_id, String userToken,String category);
 
-    Object getExistIssueTypes();
+    Object getExistIssueTypes(String category);
 
     void startMapping(String repo_id, String pre_commit_id, String current_commit_id,String category);
 
+    void updateIssueCount(String time);
 }

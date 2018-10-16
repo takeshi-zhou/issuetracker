@@ -184,8 +184,9 @@
     </delete>
 
     <select id="getExistIssueTypes" resultType="String">
-        select distinct(type)
+        select distinct type  as types
         from issue
+        where category = #{category} order by types
     </select>
 
     <select id="getIssueIdsByRepoId" resultType="String" parameterType="String">

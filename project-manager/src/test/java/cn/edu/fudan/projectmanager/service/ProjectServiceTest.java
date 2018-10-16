@@ -214,9 +214,9 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         list.add(project);
         list.add(projectInitial);
         MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "getAccountId")).toReturn(accountId);
-        PowerMockito.when(projectDao.getProjectByKeyWordAndAccountId(accountId, "ja")).thenReturn(list);
+        PowerMockito.when(projectDao.getProjectByKeyWordAndAccountId(accountId, "ja","bug")).thenReturn(list);
 
-        List<Project> projects = (List<Project>) projectService.getProjectListByKeyWord("1", "ja");
+        List<Project> projects = (List<Project>) projectService.getProjectListByKeyWord("1", "ja","bug");
         for (Project eachProject : projects) {
             Assert.assertEquals("Java", eachProject.getName());
         }
@@ -231,7 +231,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         list.add(projectInitial);
         PowerMockito.when(projectDao.getProjectByAccountId(accountId)).thenReturn(list);
 
-        List<String> projectIds = (List<String>) projectService.getProjectIdList("1");
+        List<String> projectIds = (List<String>) projectService.getProjectByAccountId("1");
         Assert.assertEquals(list.size(), projectIds.size());
         Assert.assertEquals(project.getUuid(), projectIds.get(0));
         Assert.assertEquals(projectInitial.getUuid(), projectIds.get(1));

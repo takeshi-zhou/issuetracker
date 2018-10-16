@@ -31,8 +31,8 @@ public class IssueController {
     }
 
     @GetMapping(value = {"/issue/issue-types"})
-    public Object getExistIssueTypes() {
-        return issueService.getExistIssueTypes();
+    public Object getExistIssueTypes(@RequestParam(name = "category",defaultValue = "bug")String category) {
+        return issueService.getExistIssueTypes(category);
     }
 
     //参数超过三个不宜采用requestParameter、post请求（参数封装成一个类自动解析）、get+requestBody
@@ -44,17 +44,19 @@ public class IssueController {
     @GetMapping(value = {"/issue/dashboard"})
     public Object getDashBoardInfo(@RequestParam("duration") String duration,
                                    @RequestParam(name = "project_id", required = false) String project_id,
+                                   @RequestParam(name="category",required = false,defaultValue = "bug")String category,
                                    HttpServletRequest request) {
         String userToken = request.getHeader("token");
-        return issueService.getDashBoardInfo(duration, project_id, userToken);
+        return issueService.getDashBoardInfo(duration, project_id, userToken,category);
     }
 
     @GetMapping(value = {"/issue/statistical-results"})
     public Object getStatisticalResults(@RequestParam("month") Integer month,
                                         @RequestParam(name = "project_id", required = false) String project_id,
+                                        @RequestParam(name="category",required = false,defaultValue = "bug")String category,
                                         HttpServletRequest request) {
         String userToken = request.getHeader("token");
-        return issueService.getStatisticalResults(month, project_id, userToken);
+        return issueService.getStatisticalResults(month, project_id, userToken,category);
     }
 
     //下面都是供其他服务调用的内部接口
@@ -104,6 +106,17 @@ public class IssueController {
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseBean(401, "issues mapping failed!", null);
+        }
+    }
+
+    @GetMapping(value = "/inner/issue/dashboard")
+    public Object updateIssueCount(@RequestParam ("time") String time){
+        try {
+            issueService.updateIssueCount(time);
+            return new ResponseBean(200, "update success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, " update failed!", null);
         }
     }
 

@@ -71,9 +71,13 @@
         <where>
             account_id = #{account_id}
             <if test="keyWord != null and keyWord != '' ">
-                and url like "%"#{keyWord}"%"
+                and name like "%"#{keyWord}"%"
+            </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
             </if>
         </where>
+        order by add_time desc
     </select>
 
     <select id="getProjectByRepoId" parameterType="String" resultMap="project">
@@ -81,7 +85,7 @@
     </select>
 
     <select id="getProjectList" parameterType="String" resultMap="project">
-        select * from project where account_id = #{account_id} and type = #{type}
+        select * from project where account_id = #{account_id} and type = #{type} order by add_time desc
     </select>
 
     <select id="getProjectByID" parameterType="String" resultMap="project">
