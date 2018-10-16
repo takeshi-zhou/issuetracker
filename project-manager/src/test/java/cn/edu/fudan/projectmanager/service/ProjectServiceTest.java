@@ -1,37 +1,29 @@
 package cn.edu.fudan.projectmanager.service;
 
-import cn.edu.fudan.projectmanager.ProjectManagerApplication;
 import cn.edu.fudan.projectmanager.ProjectManagerApplicationTests;
 import cn.edu.fudan.projectmanager.dao.ProjectDao;
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.service.impl.ProjectServiceImpl;
-import cn.edu.fudan.projectmanager.tool.MockTestConnection;
 import cn.edu.fudan.projectmanager.tool.TestDataMaker;
-
-import static org.junit.Assert.*;
-
-import org.junit.*;
-import org.junit.runner.RunWith;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
-
-import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 
 
 @PrepareForTest({ProjectService.class, ProjectServiceImpl.class, ProjectDao.class})
