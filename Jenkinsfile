@@ -23,6 +23,7 @@ pipeline {
                 echo 'Build'
                 // Run the maven build
                 sh "'${mvnHome}/bin/mvn' -Dmaven.test.failure.ignore compile "
+            }
         }
         stage('Tests') {
             steps {
