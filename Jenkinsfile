@@ -22,12 +22,7 @@ pipeline {
             steps {
                 echo 'Build'
                 // Run the maven build
-                if (isUnix()) {
-                    sh "'${mvnHome}/bin/mvn' -Dmaven.test.failure.ignore compile "
-                } else {
-                    bat(/"${mvnHome}\bin\mvn" -Dmaven.test.failure.ignore compile /)
-                }
-            }
+                sh "'${mvnHome}/bin/mvn' -Dmaven.test.failure.ignore compile "
         }
         stage('Tests') {
             steps {
