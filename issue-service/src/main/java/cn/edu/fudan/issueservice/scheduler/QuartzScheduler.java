@@ -129,7 +129,7 @@ public class QuartzScheduler {
                         remainingSummary += remainingIssueCount;
                         eliminatedSummary += eliminatedIssueCount;
                         //清零
-                       // stringRedisTemplate.delete(dashboardKey);
+                        stringRedisTemplate.delete(dashboardKey);
                     }
                 }
             }
