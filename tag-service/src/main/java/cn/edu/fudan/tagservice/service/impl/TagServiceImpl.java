@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -105,7 +106,9 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<Tag> getAllDefaultTags() {
-        return tagDao.getAllDefaultTags();
+        List<Tag> tags= tagDao.getAllDefaultTags();
+        tags.sort(Comparator.comparingInt((Tag tag)->Priority.getByValue(tag.getName()).getLevel()));
+        return tags;
     }
 
     @Override
