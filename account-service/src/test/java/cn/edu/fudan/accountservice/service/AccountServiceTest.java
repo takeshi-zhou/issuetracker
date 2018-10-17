@@ -16,21 +16,31 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
-@PrepareForTest({AccountService.class, AccountServiceImpl.class, AccountDao.class})
+@PrepareForTest({AccountService.class, AccountServiceImpl.class, AccountDao.class,StringRedisTemplate.class,ValueOperations.class})
 public class AccountServiceTest extends AccountServiceApplicationTests {
 
     @Mock
     private AccountDao accountDao;
+
+    @Mock
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Mock
+    private ValueOperations valueOperations;
 
     @Autowired
     @InjectMocks
@@ -45,19 +55,23 @@ public class AccountServiceTest extends AccountServiceApplicationTests {
         responseBean = new ResponseBean();
         account = TestDataMaker.accountMaker();
         MemberModifier.field(AccountServiceImpl.class, "accountDao").set(accountService, accountDao);
+        MemberModifier.field(AccountServiceImpl.class, "stringRedisTemplate").set(accountService, stringRedisTemplate);
         System.out.println("finish mocking");
     }
 
 
     @Test
     public void login() {
-
+        String token = "token";
         /*
             正确的用户名及密码
          */
         String username = "admin";
         String password = "admin";
         String encodePassword = MD5Util.md5(username + password);
+        PowerMockito.when(stringRedisTemplate.expire("login:" + token,7, TimeUnit.DAYS)).thenReturn(true);
+        PowerMockito.when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        doNothing().when(valueOperations).set("login:" + token, username);
         responseBean.setCode(200);
         responseBean.setData(new AccountInfo(username,  MD5Util.md5(encodePassword)));
         responseBean.setMsg("登录成功!");
