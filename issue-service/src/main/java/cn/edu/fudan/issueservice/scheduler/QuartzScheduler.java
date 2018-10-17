@@ -103,6 +103,14 @@ public class QuartzScheduler {
         }
     }
 
+    private void initialNewAndEliminated(String key){
+        stringRedisTemplate.setEnableTransactionSupport(true);
+        stringRedisTemplate.multi();
+        stringRedisTemplate.opsForHash().put(key,"new",0);
+        stringRedisTemplate.opsForHash().put(key,"eliminated",0);
+        stringRedisTemplate.exec();
+    }
+
     private void durationUpdate(String duration){
         List<String> accountIds=getAccountIds();
         for (String account_id : accountIds) {
@@ -128,8 +136,8 @@ public class QuartzScheduler {
                         newSummary += newIssueCount;
                         remainingSummary += remainingIssueCount;
                         eliminatedSummary += eliminatedIssueCount;
-                        //清零
-                        stringRedisTemplate.delete(dashboardKey);
+                        //new和eliminated清零
+                        initialNewAndEliminated(dashboardKey);
                     }
                 }
             }
