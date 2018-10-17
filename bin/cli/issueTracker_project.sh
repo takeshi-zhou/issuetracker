@@ -16,12 +16,24 @@ option=$1
 case ${option} in
 
   (add)
-	curl -H "token:$TOKEN" -X POST -d '{"url": "$2"}' http://$IP:$PORT/project -s | grep -Po 'msg[":]+\K[^"]+'
+	read  -p "please enter the tool name you want to use: "	tool
+	read  -p "please enter project name: " name
+    if [ ${tool} == "bug" -o ${tool} == "clone" ]; then
+          echo "export  TOOL=\""${tool}"\"" >> ${baseDir}/.env
+          curl -H "token:$TOKEN" -H "Content-Type:application/json"  -X POST -d '{"url": "'${url}'" , "type":"'${tool}'" ,"name":"'${name}'"}' http://$IP:$PORT/proj    ect -s | grep -Po 'msg[":]+\K[^"]+'
+    else
+        echo "Error"
+    fi
 	exit 0
 	;;
   (list)
-   # need Formatted output display
-    curl -H "token:$TOKEN" http://$IP:$PORT/project -s  | jq -r
+	read  -p "please enter the tool name you want to use: "	tool
+    if [ ${tool} == "bug" -o ${tool} == "clone" ]; then
+          echo "export  TOOL=\""${tool}"\"" >> ${baseDir}/.env
+          curl -H "token:$TOKEN" http://$IP:$PORT/project?type=${tool} -s  | jq -r
+    else
+        echo "Error"
+    fi
     ;;
   (delete)
 	curl -v -X DELETE -H "token:$TOKEN" http://$IP:$PORT/project/$2 -s | grep -Po 'msg[":]+\K[^"]+'
@@ -31,6 +43,7 @@ case ${option} in
 	# echo $2 > ${baseDir}/project
 	PROJECT_ID=$2
 	echo "export  PROJECT_ID=\""${PROJECT_ID}"\"" >> ${baseDir}/.env
+
 	echo -e "successful loaded"
     ;;
   (*)
