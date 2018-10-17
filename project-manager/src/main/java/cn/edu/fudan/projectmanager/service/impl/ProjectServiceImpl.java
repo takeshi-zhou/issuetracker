@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 @Service
 public class ProjectServiceImpl implements ProjectService {
 
@@ -74,9 +72,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @SuppressWarnings("unchecked")
-    private void send(String projectId, String url) {
-        NeedDownload needDownload = new NeedDownload(projectId, url);
-        kafkaTemplate.send("ProjectManager", JSONObject.toJSONString(needDownload));
+    private void send(String projectId, String url,boolean isPrivate,String username,String password) {
+        NeedDownload needDownload = new NeedDownload(projectId, url,isPrivate,username,password);
+       // kafkaTemplate.send("ProjectManager", JSONObject.toJSONString(needDownload));
         logger.info("send message to topic ProjectManage ---> " + JSONObject.toJSONString(needDownload));
     }
 
@@ -85,49 +83,60 @@ public class ProjectServiceImpl implements ProjectService {
         return restTemplate.exchange(innerServicePath + "/user/accountId?userToken=" + userToken, HttpMethod.GET, requestEntity, String.class).getBody();
     }
 
-    private void checkProjectURL(String url) {
+    private void checkProjectURL(String url,boolean isPrivate) {
         Pattern pattern = Pattern.compile("https://github.com(/[\\w-]+/[\\w-]+)");
         Matcher matcher = pattern.matcher(url);
         if (!matcher.matches()) {
             throw new RuntimeException("invalid url!");
         }
-        //前面做过一次全匹配，需要把matcher重置一下才能接着从头匹配
-        matcher.reset();
-        boolean isMavenProject = false;
-        while (matcher.find()) {
-            String author_projectName = matcher.group(1);
-            JSONArray fileList = restTemplate.getForEntity(githubAPIPath + author_projectName + "/contents", JSONArray.class).getBody();
-            if (fileList != null) {
-                for (int i = 0; i < fileList.size(); i++) {
-                    JSONObject file = fileList.getJSONObject(i);
-                    if (file.getString("name").equals("pom.xml")) {
-                        isMavenProject = true;
-                        break;
+        if(!isPrivate){
+            //前面做过一次全匹配，需要把matcher重置一下才能接着从头匹配
+            matcher.reset();
+            boolean isMavenProject = false;
+            while (matcher.find()) {
+                String author_projectName = matcher.group(1);
+                JSONArray fileList = restTemplate.getForEntity(githubAPIPath + author_projectName + "/contents", JSONArray.class).getBody();
+                if (fileList != null) {
+                    for (int i = 0; i < fileList.size(); i++) {
+                        JSONObject file = fileList.getJSONObject(i);
+                        if (file.getString("name").equals("pom.xml")) {
+                            isMavenProject = true;
+                            break;
+                        }
                     }
+                    if (!isMavenProject)
+                        throw new RuntimeException("failed,this project is not maven project!");
+                } else {
+                    throw new RuntimeException("invalid url!");
                 }
-                if (!isMavenProject)
-                    throw new RuntimeException("failed,this project is not maven project!");
-            } else {
-                throw new RuntimeException("invalid url!");
             }
         }
     }
 
     @Override
-    public void addOneProject(String userToken, Project project) {
-        String url = project.getUrl();
+    public void addOneProject(String userToken, JSONObject projectInfo) {
+        String url = projectInfo.getString("url");
         if (url == null) {
             throw new RuntimeException("please input the project url!");
         }
         url = url.trim();
-        checkProjectURL(url);
-        if (project.getType() == null)
-            project.setType("bug");
+        boolean isPrivate=projectInfo.getBooleanValue("isPrivate");
+        checkProjectURL(url,isPrivate);
+        String username=projectInfo.getString("username");
+        String password=projectInfo.getString("password");
+        if(isPrivate){
+            if(username==null||password==null){
+                throw new RuntimeException("this project is private,please provide your git username and password!");
+            }
+        }
+        Project project=new Project();
+        String name=projectInfo.getString("name");
+        String type=projectInfo.getString("type");
         String account_id = getAccountId(userToken);
-        if (projectDao.hasBeenAdded(account_id, url, project.getType())) {
+        if (projectDao.hasBeenAdded(account_id, url, type)) {
             throw new RuntimeException("The project has been added!");
         }
-        List<Project> projects=projectDao.getProjectsByURLAndType(url,project.getType());
+        List<Project> projects=projectDao.getProjectsByURLAndType(url,type);
         if(projects!=null&&!projects.isEmpty()){
             //如果存在其他用户的project和当前添加的URL和type相同，需要将扫描状态同步
             Project oneProject=projects.get(0);
@@ -139,13 +148,15 @@ public class ProjectServiceImpl implements ProjectService {
         }
         String projectId = UUID.randomUUID().toString();
         project.setUuid(projectId);
+        project.setName(name);
         project.setUrl(url);
+        project.setVcs_type("git");
         project.setAccount_id(account_id);
         project.setDownload_status("Downloading");
         project.setAdd_time(DateTimeUtil.formatedDate(new Date()));
-        projectDao.addOneProject(project);
+        //projectDao.addOneProject(project);
         //向RepoManager这个Topic发送消息，请求开始下载
-        send(projectId, url);
+        send(projectId, url,isPrivate,username,password);
     }
 
     @Override
@@ -194,8 +205,7 @@ public class ProjectServiceImpl implements ProjectService {
         //如果当前repoId和type只有这一个projectId与其对应，那么删除project的同时会删除repo的相关内容
         //否则还有其他project与当前repoId和type对应，该repo的相关内容就不删
         if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId,type)) {
-            JSONObject response = null;
-            response = restTemplate.exchange(innerServicePath + "/inner/issue/" + repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
+            JSONObject response = restTemplate.exchange(innerServicePath + "/inner/issue/" + repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
             if (response != null)
                 logger.info(response.toJSONString());
             response = restTemplate.exchange(innerServicePath + "/inner/raw-issue/" + repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();

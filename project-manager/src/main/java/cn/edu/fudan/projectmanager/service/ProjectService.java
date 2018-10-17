@@ -2,12 +2,13 @@ package cn.edu.fudan.projectmanager.service;
 
 
 import cn.edu.fudan.projectmanager.domain.Project;
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
 public interface ProjectService {
 
-    void addOneProject(String userToken, Project project);
+    void addOneProject(String userToken, JSONObject projectInfo);
 
     Object getProjectList(String userToken,String type);
 
