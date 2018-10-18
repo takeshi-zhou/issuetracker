@@ -3,6 +3,7 @@ package cn.edu.fudan.projectmanager.controller;
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.domain.ResponseBean;
 import cn.edu.fudan.projectmanager.service.ProjectService;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,10 +21,10 @@ public class ProjectController {
 
 
     @PostMapping(value = {"/project"})
-    public Object addProject(HttpServletRequest request, @RequestBody Project project) {
+    public Object addProject(HttpServletRequest request, @RequestBody JSONObject projectInfo) {
         String userToken = request.getHeader("token");
         try {
-            projectService.addOneProject(userToken, project);
+            projectService.addOneProject(userToken, projectInfo);
             return new ResponseBean(200, "add success", null);
         } catch (Exception e) {
             return new ResponseBean(401, "add failed :" + e.getMessage(), null);

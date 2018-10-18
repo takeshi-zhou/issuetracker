@@ -25,28 +25,21 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
 
     @Value("${inner.service.path}")
     private String innerServicePath;
-    @Value("${inner.header.key}")
-    private String headerKey;
-    @Value("${inner.header.value}")
-    private String headerValue;
 
     private RestTemplate restTemplate;
+    private HttpHeaders httpHeaders;
 
     @Autowired
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
-
-    private HttpEntity<?> requestEntity;
-
-    private void initRequestEntity() {
-        if (requestEntity != null) {
-            return;
-        }
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(headerKey, headerValue);
-        requestEntity = new HttpEntity<>(headers);
+    @Autowired
+    public void setHttpHeaders(HttpHeaders httpHeaders) {
+        this.httpHeaders = httpHeaders;
     }
+
+
+
 
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object handler) throws Exception {
@@ -62,7 +55,7 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
         if (userToken == null) {
             throw new AuthException("need user token!");
         }
-        initRequestEntity();
+        HttpEntity<String> requestEntity=new HttpEntity<>(httpHeaders);
         JSONObject result = restTemplate.exchange(innerServicePath + "/user/auth/" + userToken, HttpMethod.GET, requestEntity, JSONObject.class).getBody();
         if (result == null || result.getIntValue("code") != 200) {
             throw new AuthException("auth failed!");

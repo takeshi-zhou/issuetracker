@@ -107,7 +107,7 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
     public void addProjectTest1() throws Exception {
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
         java.lang.String requestJson = ow.writeValueAsString(project);
-        doNothing().when(service).addOneProject(eq(token), any(Project.class));
+        //doNothing().when(service).addOneProject(eq(token), any(Project.class));
         MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class, "preHandle")).toReturn(true);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/project")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)

@@ -24,7 +24,6 @@ case ${option} in
 	#echo -e "please enter your password"
 	#password=$3
 	read -p "please enter username: "	username
-	echo
 	read -s -p "please enter your password: "	password
 	echo
 	url="http://$IP:$PORT/user/login?username=$username&password=$password"
@@ -40,7 +39,7 @@ case ${option} in
 
     ;;
   (sighout)
-    if [! -f   "${baseDir}/.envCopy" ];then
+    if [ ! -f   "${baseDir}/.envCopy" ];then
         cp ${baseDir}/.env ${baseDir}/.envCopy
     fi
 	sed  '5,$d' ${baseDir}/.envCopy > ${baseDir}/.env
