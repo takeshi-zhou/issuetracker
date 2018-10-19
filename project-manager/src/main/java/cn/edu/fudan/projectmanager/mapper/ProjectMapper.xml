@@ -92,18 +92,10 @@
         select * from project where uuid = #{uuid}
     </select>
 
-    <select id="getProjectNameById" parameterType="String" resultType="String">
-        select name from project where uuid = #{projectId} order by
-    </select>
-
     <select id="getProjectByURLTypeAndAccountId" parameterType="String" resultType="project">
         select * from project where account_id = #{account_id} and url = #{url}and type = #{type}
     </select>
 
-    <select id="getRepoPath" parameterType="String" resultType="String">
-        select local_addr from repository where uuid =
-        (select repo_id from project where uuid=#{project_id});
-    </select>
 
     <select id="getRepoId" parameterType="String" resultType="String">
         select repo_id from project where uuid = #{projectId}
@@ -117,11 +109,8 @@
         select * from project where url = #{url}and type = #{type}
     </select>
 
-    <select id="getRepoIdsByAccountId" parameterType="String" resultType="String">
-        select distinct repo_id from project
-        <if test="account_id != null">
-            where account_id = #{account_id}
-        </if>
+    <select id="getRepoIdsByAccountIdAndType" parameterType="String" resultType="String">
+        select repo_id from project where account_id = #{account_id} and type = #{type}
     </select>
 
     <delete id="remove" parameterType="String">

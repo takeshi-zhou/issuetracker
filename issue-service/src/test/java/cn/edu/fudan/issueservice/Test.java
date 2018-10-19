@@ -72,12 +72,6 @@ public class Test {
 
     @org.junit.Test
     public void test(){
-        for(int i=0;i<30*7;i++){
-            scan();
-            quartzScheduler.perDay();
-            if(i%7==0)
-                quartzScheduler.perWeek();
-        }
     }
 
 

@@ -30,13 +30,9 @@ public interface ProjectMapper {
 
     void remove(@Param("projectId") String projectId);
 
-    String getProjectNameById(@Param("projectId") String projectId);
-
-    String getRepoPath(String project_id);
-
     String getRepoId(@Param("projectId") String projectId);
 
-    List<String> getRepoIdsByAccountId(@Param("account_id") String account_id);
+    List<String> getRepoIdsByAccountIdAndType(@Param("account_id") String account_id,@Param("type") String type);
 
     List<String> getProjectIdsByRepoIdAndType(@Param("repo_id") String repo_id,@Param("type") String type);
 }

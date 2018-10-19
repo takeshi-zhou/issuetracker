@@ -74,7 +74,7 @@ public class ProjectServiceImpl implements ProjectService {
     @SuppressWarnings("unchecked")
     private void send(String projectId, String url,boolean isPrivate,String username,String password) {
         NeedDownload needDownload = new NeedDownload(projectId, url,isPrivate,username,password);
-       // kafkaTemplate.send("ProjectManager", JSONObject.toJSONString(needDownload));
+        kafkaTemplate.send("ProjectManager", JSONObject.toJSONString(needDownload));
         logger.info("send message to topic ProjectManage ---> " + JSONObject.toJSONString(needDownload));
     }
 
@@ -150,11 +150,12 @@ public class ProjectServiceImpl implements ProjectService {
         project.setUuid(projectId);
         project.setName(name);
         project.setUrl(url);
+        project.setType(type);
         project.setVcs_type("git");
         project.setAccount_id(account_id);
         project.setDownload_status("Downloading");
         project.setAdd_time(DateTimeUtil.formatedDate(new Date()));
-        //projectDao.addOneProject(project);
+        projectDao.addOneProject(project);
         //向RepoManager这个Topic发送消息，请求开始下载
         send(projectId, url,isPrivate,username,password);
     }
@@ -182,8 +183,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<String> getRepoIdsByAccountId(String account_id) {
-        return projectDao.getRepoIdsByAccountId(account_id);
+    public List<String> getRepoIdsByAccountIdAndType(String account_id,String type) {
+        return projectDao.getRepoIdsByAccountIdAndType(account_id,type);
     }
 
     @Override
@@ -217,15 +218,15 @@ public class ProjectServiceImpl implements ProjectService {
             //delete info in redis
             stringRedisTemplate.setEnableTransactionSupport(true);
             stringRedisTemplate.multi();
-            stringRedisTemplate.delete("dashboard:day:" + repoId);
-            stringRedisTemplate.delete("dashboard:week:" + repoId);
-            stringRedisTemplate.delete("dashboard:month:" + repoId);
-            stringRedisTemplate.delete("trend:day:new:" + account_id + ":" + repoId);
-            stringRedisTemplate.delete("trend:day:remaining:" + account_id + ":" + repoId);
-            stringRedisTemplate.delete("trend:day:eliminated:" + account_id + ":" + repoId);
-            stringRedisTemplate.delete("trend:week:new:" + account_id + ":" + repoId);
-            stringRedisTemplate.delete("trend:week:remaining:" + account_id + ":" + repoId);
-            stringRedisTemplate.delete("trend:week:eliminated:" + account_id + ":" + repoId);
+            stringRedisTemplate.delete("dashboard:"+type+":day:" + repoId);
+            stringRedisTemplate.delete("dashboard:"+type+":week:" + repoId);
+            stringRedisTemplate.delete("dashboard:"+type+":month:" + repoId);
+            stringRedisTemplate.delete("trend:"+type +":day:new:" + account_id + ":" + repoId);
+            stringRedisTemplate.delete("trend:"+type+":day:remaining:" + account_id + ":" + repoId);
+            stringRedisTemplate.delete("trend:"+type+":day:eliminated:" + account_id + ":" + repoId);
+            stringRedisTemplate.delete("trend:"+type+":week:new:" + account_id + ":" + repoId);
+            stringRedisTemplate.delete("trend:"+type+":week:remaining:" + account_id + ":" + repoId);
+            stringRedisTemplate.delete("trend:"+type+":week:eliminated:" + account_id + ":" + repoId);
             stringRedisTemplate.exec();
         }
         projectDao.remove(projectId);

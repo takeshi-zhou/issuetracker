@@ -95,18 +95,6 @@ public class ProjectDaoTest extends ProjectManagerApplicationTests {
     }
 
     @Test
-    public void getProjectNameById() {
-        String projectName = projectDao.getProjectNameById("pro1");
-        System.out.println(projectName);
-    }
-
-    @Test
-    public void getRepoPath() {
-        String repoPath = projectDao.getRepoPath("pro1");
-        System.out.println(repoPath);
-    }
-
-    @Test
     public void getRepoId() {
         String repoId = projectDao.getRepoId("pro1");
         System.out.println(repoId);

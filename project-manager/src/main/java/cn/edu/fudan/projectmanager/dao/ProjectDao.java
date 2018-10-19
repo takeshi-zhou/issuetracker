@@ -51,17 +51,7 @@ public class ProjectDao {
     }
 
     public void remove(String projectId) {
-
         projectMapper.remove(projectId);
-    }
-
-    public String getProjectNameById(String projectId) {
-
-        return projectMapper.getProjectNameById(projectId);
-    }
-
-    public String getRepoPath(String project_id) {
-        return projectMapper.getRepoPath(project_id);
     }
 
     public String getRepoId(String projectId) {
@@ -77,7 +67,7 @@ public class ProjectDao {
         return projectMapper.getProjectsByURLAndType(url, type);
     }
 
-    public List<String> getRepoIdsByAccountId(String account_id){
-        return projectMapper.getRepoIdsByAccountId(account_id);
+    public List<String> getRepoIdsByAccountIdAndType(String account_id,String type){
+        return projectMapper.getRepoIdsByAccountIdAndType(account_id,type);
     }
 }

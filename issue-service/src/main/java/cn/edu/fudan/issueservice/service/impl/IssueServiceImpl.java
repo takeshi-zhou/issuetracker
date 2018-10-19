@@ -190,9 +190,9 @@ public class IssueServiceImpl implements IssueService {
         return restTemplate.exchange(innerServicePath + "/user/accountId?userToken=" + userToken, HttpMethod.GET, requestEntity, String.class).getBody();
     }
 
-    private JSONArray getRepoIds(String account_id) {
+    private JSONArray getRepoIds(String account_id,String type) {
         HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
-        return restTemplate.exchange(innerServicePath + "/inner/project/repo-ids?account_id=" + account_id, HttpMethod.GET, requestEntity, JSONArray.class).getBody();
+        return restTemplate.exchange(innerServicePath + "/inner/project/repo-ids?account_id=" + account_id+"&type="+type, HttpMethod.GET, requestEntity, JSONArray.class).getBody();
     }
 
     private String getRepoId(String projectId) {
@@ -216,7 +216,7 @@ public class IssueServiceImpl implements IssueService {
         String account_id = getAccountId(userToken);
         if (project_id == null) {
             //未选择某一个project,显示该用户所有project的dashboard信息
-            JSONArray repoIds = getRepoIds(account_id);
+            JSONArray repoIds = getRepoIds(account_id,category);
             if (repoIds != null&&!repoIds.isEmpty()) {
                 for (int i = 0; i < repoIds.size(); i++) {
                     String currentRepoId = repoIds.getString(i);

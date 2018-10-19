@@ -106,8 +106,8 @@ public class QuartzScheduler {
     private void initialNewAndEliminated(String key){
         stringRedisTemplate.setEnableTransactionSupport(true);
         stringRedisTemplate.multi();
-        stringRedisTemplate.opsForHash().put(key,"new",0);
-        stringRedisTemplate.opsForHash().put(key,"eliminated",0);
+        stringRedisTemplate.opsForHash().put(key,"new","0");
+        stringRedisTemplate.opsForHash().put(key,"eliminated","0");
         stringRedisTemplate.exec();
     }
 

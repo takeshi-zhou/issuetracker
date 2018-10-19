@@ -89,8 +89,9 @@ public class ProjectController {
     }
 
     @GetMapping(value = "/inner/project/repo-ids")
-    public Object getProjectIds(@RequestParam(name = "account_id", required = false) String account_id) {
-        return projectService.getRepoIdsByAccountId(account_id);
+    public Object getProjectIds(@RequestParam(name = "account_id", required = false) String account_id,
+                                @RequestParam("type")String type) {
+        return projectService.getRepoIdsByAccountIdAndType(account_id,type);
     }
 
     @GetMapping(value = "/inner/projects")
