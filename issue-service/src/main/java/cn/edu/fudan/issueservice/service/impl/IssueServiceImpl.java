@@ -10,6 +10,8 @@ import cn.edu.fudan.issueservice.service.IssueService;
 import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -27,6 +29,8 @@ import java.util.*;
  **/
 @Service
 public class IssueServiceImpl implements IssueService {
+
+    private Logger logger=LoggerFactory.getLogger(this.getClass());
 
     @Value("${solved.tag_id}")
     private String solvedTagId;
@@ -245,9 +249,9 @@ public class IssueServiceImpl implements IssueService {
     public Object getStatisticalResults(Integer month, String project_id, String userToken,String category) {
         Map<String, Object> result = new HashMap<>();
         String account_id = getAccountId(userToken);
-        String newKey = "";
-        String remainingKey = "";
-        String eliminatedKey = "";
+        String newKey;
+        String remainingKey;
+        String eliminatedKey;
         if (project_id == null) {
             if (month == 1) {
                 newKey = "trend:"+category+":day:new:" + account_id;
@@ -342,13 +346,6 @@ public class IssueServiceImpl implements IssueService {
             List<RawIssue> rawIssues2 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
             if (rawIssues2 == null || rawIssues1.isEmpty())
                 return;
-            //当前project已经扫描过的commit列表,是按commit_time从小到大排序的
-            HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
-            JSONArray commits = restTemplate.exchange(innerServicePath + "/inner/scan/commits?repo_id=" + repo_id+"&category="+category, HttpMethod.GET, requestEntity, JSONArray.class).getBody();
-            Date start_commit_time = commits.getJSONObject(0).getDate("commit_time");
-            Date end_commit_time = commits.getJSONObject(commits.size() - 1).getDate("commit_time");
-            JSONObject jsonObject = restTemplate.getForObject(commitServicePath + "/commit-time?commit_id=" + current_commit_id, JSONObject.class);
-            Date commit_time = jsonObject.getJSONObject("data").getDate("commit_time");
             //装需要更新的
             List<Issue> issues = new ArrayList<>();
             int equalsCount = 0;
@@ -356,33 +353,18 @@ public class IssueServiceImpl implements IssueService {
                 boolean mapped = false;
                 for (RawIssue issue_1 : rawIssues1) {
                     //如果issue_1已经匹配到一个issue_2,内部循环不再继续
-                    if (LocationCompare.isUniqueIssue(issue_1, issue_2)) {
+                    if (!issue_1.isMapped()&&!issue_2.isMapped()&&LocationCompare.isUniqueIssue(issue_1, issue_2)) {
+                        issue_1.setMapped(true);
+                        issue_2.setMapped(true);
                         mapped = true;
                         equalsCount++;
                         String pre_issue_id = issue_1.getIssue_id();
                         //如果匹配到的上个commit的某个rawIssue已经有了issue_id,说明当前commit这个rawIssue也应该对应到这个issue
                         issue_2.setIssue_id(pre_issue_id);
                         Issue issue = issueDao.getIssueByID(pre_issue_id);
-                        //更新当前issue的targetFiles
-                        String currentTargetFiles = issue.getTarget_files();
-                        if (!currentTargetFiles.contains(issue_2.getFile_name())) {
-                            currentTargetFiles = currentTargetFiles + "," + issue_2.getFile_name();
-                        }
-                        if (!currentTargetFiles.contains(issue_1.getFile_name())) {
-                            currentTargetFiles = currentTargetFiles + "," + issue_1.getFile_name();
-                        }
-                        issue.setTarget_files(currentTargetFiles);
-                        if (commit_time.compareTo(start_commit_time) < 0) {
-                            //如果当前扫的commit的时间比最先扫的commit还要提前，需要把当前issue的start更新
-                            issue.setStart_commit(current_commit_id);
-                            issue.setRaw_issue_start(issue_2.getUuid());
-                            issues.add(issue);
-                        } else if (commit_time.compareTo(end_commit_time) > 0) {
-                            //如果当前扫的commit的时间比最后扫的commit还要往后，需要把当前issue的end更新
-                            issue.setEnd_commit(current_commit_id);
-                            issue.setRaw_issue_end(issue_2.getUuid());
-                            issues.add(issue);
-                        }
+                        issue.setEnd_commit(current_commit_id);
+                        issue.setRaw_issue_end(issue_2.getUuid());
+                        issues.add(issue);
                         break;
                     }
                 }
@@ -396,17 +378,25 @@ public class IssueServiceImpl implements IssueService {
             }
             if (!issues.isEmpty()) {
                 //更新issue
+                logger.info("issue update count: "+issues.size());
                 issueDao.batchUpdateIssue(issues);
             }
             int eliminatedIssueCount = rawIssues1.size() - equalsCount;
             int remainingIssueCount = rawIssues2.size();
             int newIssueCount = rawIssues2.size() - equalsCount;
+            logger.info("rawIssue count in previous commit: "+rawIssues1.size());
+            logger.info("rawIssue count in current commit: "+rawIssues2.size());
+            logger.info("equals count: "+equalsCount);
+            logger.info("eliminatedIssueCount: "+eliminatedIssueCount);
+            logger.info("remainingIssueCount: "+remainingIssueCount);
+            logger.info("newIssueCount: "+newIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
             rawIssueDao.batchUpdateIssueId(rawIssues2);
         }
         //新的issue
         if (!insertIssueList.isEmpty()) {
             issueDao.insertIssueList(insertIssueList);
+            logger.info("new insert issue count: "+insertIssueList.size());
         }
         if (!pre_commit_id.equals(current_commit_id)) {
             addSolvedTag(repo_id, pre_commit_id);

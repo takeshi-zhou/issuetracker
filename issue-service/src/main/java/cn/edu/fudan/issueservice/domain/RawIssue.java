@@ -17,6 +17,16 @@ public class RawIssue {
     private Date commit_time;
     private String developer_email;
 
+    private boolean mapped=false;
+
+    public boolean isMapped() {
+        return mapped;
+    }
+
+    public void setMapped(boolean mapped) {
+        this.mapped = mapped;
+    }
+
     public String getDeveloper_email() {
         return developer_email;
     }
