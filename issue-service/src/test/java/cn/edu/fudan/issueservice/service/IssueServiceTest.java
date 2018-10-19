@@ -3,6 +3,7 @@ package cn.edu.fudan.issueservice.service;
 import cn.edu.fudan.issueservice.IssueServiceApplicationTests;
 import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.domain.Issue;
+import cn.edu.fudan.issueservice.domain.IssueCount;
 import cn.edu.fudan.issueservice.domain.ResponseBean;
 import cn.edu.fudan.issueservice.service.impl.IssueServiceImpl;
 import cn.edu.fudan.issueservice.util.TestDataMaker;
@@ -21,6 +22,7 @@ import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -32,7 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
-@PrepareForTest({IssueService.class, IssueServiceImpl.class, IssueDao.class,RestTemplate.class, StringRedisTemplate.class})
+@PrepareForTest({IssueService.class, IssueServiceImpl.class, IssueDao.class,RestTemplate.class, StringRedisTemplate.class,HashOperations.class})
 public class IssueServiceTest extends IssueServiceApplicationTests {
 
     @Value("${tag.service.path}")
@@ -50,6 +52,9 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
 
     @Mock
     private StringRedisTemplate stringRedisTemplate;
+
+    @Mock
+    private HashOperations hashOperations;
 
     @Autowired
     @InjectMocks
@@ -260,28 +265,64 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
 
     @Test
     public void getDashBoardInfo() {
-        int newIssueCount = 1;
-        int eliminatedIssueCount = 2;
-        int remainingIssueCount = 3;
-        String repoId = "repoId";
+        String repoId1 = "repoId1";
+        String repoId2= "repoId2";
         String duration = "duration";
         String project_id = "proId";
         String userToken = "token";
+        String category = "category";
         String account_id = "acc_id";
         MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getAccountId")).toReturn(account_id);
-        String proId1= "proId1";
-        List<String> listProjectIds = new ArrayList<String>();
-        listProjectIds.add(proId1);
-        JSONArray projectIds = JSON.parseArray(JSONObject.toJSON(listProjectIds).toString());
-        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getProjectIds")).toReturn(projectIds);
-        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getRepoId")).toReturn(repoId);
-        PowerMockito.when(stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + repoId, "new")).thenReturn(newIssueCount);
-        PowerMockito.when(stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + repoId, "remaining")).thenReturn(eliminatedIssueCount);
-        PowerMockito.when(stringRedisTemplate.opsForHash().get("dashboard:" + duration + ":" + repoId, "eliminated")).thenReturn(remainingIssueCount);
-        /*
 
+        List<String> listRepoIds = new ArrayList<String>();
+        listRepoIds.add(repoId1);
+        listRepoIds.add(repoId2);
+        JSONArray repoIds = JSON.parseArray(JSONObject.toJSON(listRepoIds).toString());
+        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getRepoId")).toReturn(repoId1);
+        PowerMockito.when(stringRedisTemplate.opsForHash()).thenReturn(hashOperations);
+        Object newIssueCount = "1";
+        Object eliminatedIssueCount = "2";
+        Object remainingIssueCount = "3";
+        PowerMockito.when(hashOperations.get("dashboard:"+category+":"+ duration + ":" + repoId1, "new")).thenReturn(newIssueCount);
+        PowerMockito.when(hashOperations.get("dashboard:"+category+":"+ duration + ":" + repoId1, "remaining")).thenReturn(remainingIssueCount);
+        PowerMockito.when(hashOperations.get("dashboard:"+category+":"+ duration + ":" + repoId1, "eliminated")).thenReturn(eliminatedIssueCount);
+        PowerMockito.when(hashOperations.get("dashboard:"+category+":"+ duration + ":" + repoId2, "new")).thenReturn(newIssueCount);
+        PowerMockito.when(hashOperations.get("dashboard:"+category+":"+ duration + ":" + repoId2, "remaining")).thenReturn(remainingIssueCount);
+        PowerMockito.when(hashOperations.get("dashboard:"+category+":"+ duration + ":" + repoId2, "eliminated")).thenReturn(eliminatedIssueCount);
+        /*
+            当project_id为null时，且当用户没有添加project时
          */
+        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getRepoIds")).toReturn(null);
+        IssueCount result = (IssueCount)issueService.getDashBoardInfo(duration,null,userToken,category);
+        Assert.assertEquals(0,result.getNewIssueCount());
+        Assert.assertEquals(0,result.getEliminatedIssueCount());
+        Assert.assertEquals(0,result.getRemainingIssueCount());
+        /*
+             当project_id为null时，且当用户有添加project时
+         */
+        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getRepoIds")).toReturn(repoIds);
+        IssueCount resultAddProject = (IssueCount)issueService.getDashBoardInfo(duration,null,userToken,category);
+        Assert.assertEquals(2,resultAddProject.getNewIssueCount());
+        Assert.assertEquals(4,resultAddProject.getEliminatedIssueCount());
+        Assert.assertEquals(6,resultAddProject.getRemainingIssueCount());
+        /*
+             当project_id为null时，且当用户有添加project时
+         */
+        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getRepoIds")).toReturn(repoIds);
+        IssueCount resultProjectIsNull = (IssueCount)issueService.getDashBoardInfo(duration,project_id,userToken,category);
+        Assert.assertEquals(1,resultProjectIsNull.getNewIssueCount());
+        Assert.assertEquals(2,resultProjectIsNull.getEliminatedIssueCount());
+        Assert.assertEquals(3,resultProjectIsNull.getRemainingIssueCount());
     }
+
+
+    @Test
+    public void getStatisticalResults() {
+
+
+    }
+
+
 
     /*
         等scan单元测试之后补充

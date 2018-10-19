@@ -3,7 +3,7 @@ pipeline {
     agent any
 
     environment {
-        mvnHome = "tool 'M3'"
+        mvnHome = tool 'M3'
     }
 
     triggers {
@@ -22,18 +22,20 @@ pipeline {
             steps {
                 echo 'Build'
                 // Run the maven build
+                sh "'${mvnHome}/bin/mvn' clean "
                 sh "'${mvnHome}/bin/mvn' -Dmaven.test.failure.ignore compile "
             }
         }
         stage('Tests') {
             steps {
                 echo 'Tests'
-                sh "'${mvnHome}/bin/mvn' test"
+                sh "'${mvnHome}/bin/mvn' -Dmaven.test.failure.ignore test"
             }
         }
         stage('Deploy') {
             steps {
                 echo 'Deploying....'
+                sh "'${mvnHome}/bin/mvn' -Dmaven.test.skip=true package"
             }
         }
     }
