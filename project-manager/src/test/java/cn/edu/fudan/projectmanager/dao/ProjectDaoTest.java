@@ -14,6 +14,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class ProjectDaoTest extends ProjectManagerApplicationTests {
 
     @Autowired

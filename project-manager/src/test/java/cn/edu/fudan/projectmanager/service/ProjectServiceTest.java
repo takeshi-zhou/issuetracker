@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 
 
 @PrepareForTest({ProjectService.class, ProjectServiceImpl.class, ProjectDao.class})
+@Ignore
 public class ProjectServiceTest extends ProjectManagerApplicationTests {
 
     Project project;

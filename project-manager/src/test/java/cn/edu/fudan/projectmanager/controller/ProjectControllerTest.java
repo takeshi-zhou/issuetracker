@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.doNothing;
 
 @PrepareForTest({ProjectController.class, ProjectService.class, ProjectServiceImpl.class, AuthTokenInterceptor.class})
 @WebAppConfiguration
+@Ignore
 public class ProjectControllerTest extends ProjectManagerApplicationTests {
 
     @Autowired
