@@ -7,6 +7,7 @@ import cn.edu.fudan.issueservice.domain.IssueCount;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 import cn.edu.fudan.issueservice.scheduler.QuartzScheduler;
 import cn.edu.fudan.issueservice.service.IssueService;
+import cn.edu.fudan.issueservice.util.DateTimeUtil;
 import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -328,11 +329,12 @@ public class IssueServiceImpl implements IssueService {
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
             if (rawIssues == null || rawIssues.isEmpty())
                 return;
+            Date date= DateTimeUtil.getCurrentFormattedDate();
             for (RawIssue rawIssue : rawIssues) {
                 String new_IssueId = UUID.randomUUID().toString();
                 rawIssue.setIssue_id(new_IssueId);
                 String targetFiles = rawIssue.getFile_name();
-                Issue issue = new Issue(new_IssueId, rawIssue.getType(),category, current_commit_id, current_commit_id, rawIssue.getUuid(), rawIssue.getUuid(), repo_id, targetFiles);
+                Issue issue = new Issue(new_IssueId, rawIssue.getType(),category, current_commit_id, current_commit_id, rawIssue.getUuid(), rawIssue.getUuid(), repo_id, targetFiles,date,date);
                 insertIssueList.add(issue);
             }
             int newIssueCount = insertIssueList.size();
@@ -364,6 +366,7 @@ public class IssueServiceImpl implements IssueService {
                         Issue issue = issueDao.getIssueByID(pre_issue_id);
                         issue.setEnd_commit(current_commit_id);
                         issue.setRaw_issue_end(issue_2.getUuid());
+                        issue.setUpdate_time(DateTimeUtil.getCurrentFormattedDate());
                         issues.add(issue);
                         break;
                     }
@@ -373,7 +376,8 @@ public class IssueServiceImpl implements IssueService {
                     String new_IssueId = UUID.randomUUID().toString();
                     issue_2.setIssue_id(new_IssueId);
                     String targetFiles = issue_2.getFile_name();
-                    insertIssueList.add(new Issue(new_IssueId, issue_2.getType(),category, current_commit_id, current_commit_id, issue_2.getUuid(), issue_2.getUuid(), repo_id, targetFiles));
+                    Date date= DateTimeUtil.getCurrentFormattedDate();
+                    insertIssueList.add(new Issue(new_IssueId, issue_2.getType(),category, current_commit_id, current_commit_id, issue_2.getUuid(), issue_2.getUuid(), repo_id, targetFiles,date,date));
                 }
             }
             if (!issues.isEmpty()) {

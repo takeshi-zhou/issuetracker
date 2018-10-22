@@ -14,6 +14,8 @@ public class Issue {
     private String raw_issue_end;
     private String repo_id;
     private String target_files;
+    private Date create_time;
+    private Date update_time;
     private IssueType issueType;
     private List<Object> tags;
 
@@ -28,16 +30,34 @@ public class Issue {
     public Issue() {
     }
 
-    public Issue(String uuid, String type, String category,String start_commit, String end_commit, String raw_issue_start, String raw_issue_end, String repo_id, String target_files) {
+    public Issue(String uuid, String type, String category, String start_commit, String end_commit, String raw_issue_start, String raw_issue_end, String repo_id, String target_files, Date create_time, Date update_time) {
         this.uuid = uuid;
         this.type = type;
-        this.category=category;
+        this.category = category;
         this.start_commit = start_commit;
         this.end_commit = end_commit;
         this.raw_issue_start = raw_issue_start;
         this.raw_issue_end = raw_issue_end;
         this.repo_id = repo_id;
         this.target_files = target_files;
+        this.create_time = create_time;
+        this.update_time = update_time;
+    }
+
+    public Date getCreate_time() {
+        return create_time;
+    }
+
+    public void setCreate_time(Date create_time) {
+        this.create_time = create_time;
+    }
+
+    public Date getUpdate_time() {
+        return update_time;
+    }
+
+    public void setUpdate_time(Date update_time) {
+        this.update_time = update_time;
     }
 
     public List<Object> getTags() {

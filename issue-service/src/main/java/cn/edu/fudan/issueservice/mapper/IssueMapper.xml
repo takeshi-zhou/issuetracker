@@ -13,6 +13,8 @@
         <result property="raw_issue_end" column="raw_issue_end"/>
         <result property="repo_id" column="repo_id"/>
         <result property="target_files" column="target_files"/>
+        <result property="create_time" column="create_time"/>
+        <result property="update_time" column="update_time"/>
     </resultMap>
 
     <resultMap id="issue2" type="Issue">
@@ -25,6 +27,8 @@
         <result property="raw_issue_end" column="raw_issue_end"/>
         <result property="repo_id" column="repo_id"/>
         <result property="target_files" column="target_files"/>
+        <result property="create_time" column="create_time"/>
+        <result property="update_time" column="update_time"/>
         <collection property="issueType" column="type"
                     select="cn.edu.fudan.issueservice.mapper.IssueTypeMapper.getIssueTypeByTypeName"/>
     </resultMap>
@@ -41,7 +45,9 @@
         raw_issue_start,
         raw_issue_end,
         repo_id,
-        target_files
+        target_files,
+        create_time,
+        update_time
         )
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
@@ -54,7 +60,9 @@
             #{item.raw_issue_start},
             #{item.raw_issue_end},
             #{item.repo_id},
-            #{item.target_files}
+            #{item.target_files},
+            #{create_time},
+            #{update_time}
             )
         </foreach>
     </insert>
@@ -168,6 +176,13 @@
                 <foreach collection="list" item="item">
                     <if test="item.target_files != null">
                         when uuid=#{item.uuid} then #{item.target_files}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="update_time = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    <if test="item.update_time != null">
+                        when uuid=#{item.uuid} then #{item.update_time}
                     </if>
                 </foreach>
             </trim>
