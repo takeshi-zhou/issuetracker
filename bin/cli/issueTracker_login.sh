@@ -16,7 +16,7 @@ fi
 option=$1
 case ${option} in
 
-  (sighin)
+  (signin)
     # before sigh in clear data
   	/bin/cp ${baseDir}/.env ${baseDir}/.envCopy
 	sed  '5,$d' ${baseDir}/.envCopy > ${baseDir}/.env
@@ -27,18 +27,18 @@ case ${option} in
 	read -s -p "please enter your password: "	password
 	echo
 	url="http://$IP:$PORT/user/login?username=$username&password=$password"
-	curl $url -s > ${baseDir}/authentication1
+	curl ${url} -s > ${baseDir}/authentication1
 	grep -Po 'msg[":]+\K[^"]+' ${baseDir}/authentication1
 	#grep -Po 'token[":]+\K[^"]+' $baseDir/authentication1 > $baseDir/authentication
 	TOKEN=$(grep -Po 'token[":]+\K[^"]+' ${baseDir}/authentication1)
 	echo "export  TOKEN=\""${TOKEN}"\"" >> ${baseDir}/.env
 	rm -f ${baseDir}/authentication1
 	;;
-  (sighup)
+  (signup)
     # need to be done
 
     ;;
-  (sighout)
+  (signout)
     if [ ! -f   "${baseDir}/.envCopy" ];then
         cp ${baseDir}/.env ${baseDir}/.envCopy
     fi
