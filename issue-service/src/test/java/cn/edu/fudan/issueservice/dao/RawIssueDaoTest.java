@@ -3,6 +3,7 @@ package cn.edu.fudan.issueservice.dao;
 import cn.edu.fudan.issueservice.IssueServiceApplicationTests;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class RawIssueDaoTest extends IssueServiceApplicationTests {
 
     @Autowired

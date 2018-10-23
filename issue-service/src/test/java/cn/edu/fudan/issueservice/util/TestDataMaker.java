@@ -4,7 +4,26 @@ import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.Location;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TestDataMaker {
+
+    private List<Location> locationsMaker1(){
+        List<Location> locations = new ArrayList<>();
+        Location location = locationMaker1();
+        locations.add(location);
+        return locations;
+    }
+
+    private List<Location> locationsMaker2(){
+        List<Location> locations = new ArrayList<>();
+        Location location = locationMaker2();
+        locations.add(location);
+        return locations;
+    }
+
+
     public Issue issueMaker1(){
         Issue issue = new Issue();
         issue.setUuid("iss1");
@@ -40,6 +59,8 @@ public class TestDataMaker {
         rawIssue.setScan_id("scan1");
         rawIssue.setIssue_id("iss1");
         rawIssue.setCommit_id("comm1");
+        rawIssue.setCategory("category");
+        rawIssue.setLocations(locationsMaker1());
         return rawIssue;
     }
 
@@ -52,6 +73,22 @@ public class TestDataMaker {
         rawIssue.setScan_id("scan2");
         rawIssue.setIssue_id("iss2");
         rawIssue.setCommit_id("comm2");
+        rawIssue.setCategory("category");
+        rawIssue.setLocations(locationsMaker2());
+        return rawIssue;
+    }
+
+    public RawIssue rawIssueMaker3(){
+        RawIssue rawIssue = new RawIssue();
+        rawIssue.setUuid("raw3");
+        rawIssue.setType("OBL_UNSATISFIED_OBLIGATION");
+        rawIssue.setDetail("{\"type\":\"OBL_UNSATISFIED_OBLIGATION\",\"priority\":\"2\",\"rank\":\"20\",\"abbrev\":\"OBL\",\"category\":\"EXPERIMENTAL\"}");
+        rawIssue.setFile_name("Tool.java");
+        rawIssue.setScan_id("scan2");
+        rawIssue.setIssue_id("iss2");
+        rawIssue.setCommit_id("comm2");
+        rawIssue.setCategory("category");
+        rawIssue.setLocations(locationsMaker2());
         return rawIssue;
     }
 
@@ -64,7 +101,7 @@ public class TestDataMaker {
         location.setFile_path("github/ccran/WebMagicForBlog/src/main/java/com/ccran/tools/DatabaseTool.java");
         location.setClass_name("com.ccran.tools.DatabaseTool");
         location.setMethod_name("existCnblogAuthorItem");
-        location.setRawIssue_id("ec76e7ff-33c7-46ea-899b-7f24f6b51d3c");
+        location.setRawIssue_id("raw1");
         location.setCode("xxxxxxx");
         return  location;
     }
@@ -78,7 +115,7 @@ public class TestDataMaker {
         location.setFile_path("github/ccran/WebMagicForBlog/src/main/java/com/ccran/tools/DatabaseTool.java");
         location.setClass_name("com.ccran.tools.DatabaseTool");
         location.setMethod_name("existCnblogAuthorItem");
-        location.setRawIssue_id("ec76e7ff-33c7-46ea-899b-7f24f6b51d3c");
+        location.setRawIssue_id("raw2");
         location.setCode("xxxxxxx");
         return  location;
     }
