@@ -7,6 +7,8 @@ public enum EventType {
     MODIFY_BUG("modify a bug"),
     NEW_CLONE_CLASS("add a clone class"),
     NEW_CLONE_INSTANCE("add a clone instance"),
+    MODIFY_CLONE_CLASS("modify a clone class"),
+    MODIFY_CLONE_INSTANCE("modify a clone instance"),
     REMOVE_CLONE_INSTANCE("remove a clone instance"),
     REMOVE_CLONE_CLASS("remove a clone class");
 

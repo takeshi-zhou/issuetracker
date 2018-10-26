@@ -61,8 +61,8 @@
             #{item.raw_issue_end},
             #{item.repo_id},
             #{item.target_files},
-            #{create_time},
-            #{update_time}
+            #{item.create_time},
+            #{item.update_time}
             )
         </foreach>
     </insert>
@@ -136,8 +136,8 @@
         </where>
     </select>
 
-    <select id="getSolvedIssueIds" parameterType="String" resultType="String">
-        select uuid from issue
+    <select id="getSolvedIssues" parameterType="String" resultMap="issue">
+        select * from issue
         where repo_id = #{repo_id} and end_commit = #{commit_id}
     </select>
 

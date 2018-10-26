@@ -547,7 +547,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         PowerMockito.when(rawIssueDao.getRawIssueByCommitIDAndCategory(category,pre_commit_id)).thenReturn(rawIssues1);
         PowerMockito.when(rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id)).thenReturn(rawIssues2);
         PowerMockito.when(issueDao.getIssueByID(rawIssues1.get(0).getIssue_id())).thenReturn(issue1);
-        PowerMockito.when(issueDao.getSolvedIssueIds(repo_id,pre_commit_id)).thenReturn(issueIds);
+        //PowerMockito.when(issueDao.getSolvedIssueIds(repo_id,pre_commit_id)).thenReturn(issueIds);
 
         PowerMockito.when(restTemplate.exchange(eq(innerServicePath + "/inner/scan/commits?repo_id=" + repo_id+"&category="+category), eq(HttpMethod.GET), any(HttpEntity.class),eq(JSONArray.class) )).thenReturn(responseEntity);
         PowerMockito.when(responseEntity.getBody()).thenReturn(commits);
@@ -560,7 +560,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         verify(rawIssueDao,Mockito.times(2)).batchUpdateIssueId(any(List.class));
         verify(issueDao,Mockito.times(1)).batchUpdateIssue(any(List.class));
         verify(issueDao,Mockito.times(2)).insertIssueList(any(List.class));
-        verify(issueDao,Mockito.times(1)).getSolvedIssueIds(repo_id,pre_commit_id);
+        //verify(issueDao,Mockito.times(1)).getSolvedIssueIds(repo_id,pre_commit_id);
 
     }
     @Test

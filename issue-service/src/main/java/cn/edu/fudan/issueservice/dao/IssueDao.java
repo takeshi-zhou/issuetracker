@@ -51,8 +51,8 @@ public class IssueDao {
         return issueMapper.getIssueIdsByRepoId(repo_id);
     }
 
-    public List<String> getSolvedIssueIds(String repo_id, String commit_id) {
-        return issueMapper.getSolvedIssueIds(repo_id, commit_id);
+    public List<Issue> getSolvedIssues(String repo_id, String commit_id) {
+        return issueMapper.getSolvedIssues(repo_id, commit_id);
     }
 
 }

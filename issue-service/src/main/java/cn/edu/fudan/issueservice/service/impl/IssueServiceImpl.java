@@ -1,7 +1,9 @@
 package cn.edu.fudan.issueservice.service.impl;
 
+import cn.edu.fudan.issueservice.component.IssueEventManager;
 import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
+import cn.edu.fudan.issueservice.domain.EventType;
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.IssueCount;
 import cn.edu.fudan.issueservice.domain.RawIssue;
@@ -45,7 +47,12 @@ public class IssueServiceImpl implements IssueService {
     @Value("${inner.service.path}")
     private String innerServicePath;
 
-    private HttpHeaders httpHeaders;
+   private IssueEventManager issueEventManager;
+
+   @Autowired
+    public void setIssueEventManager(IssueEventManager issueEventManager) {
+        this.issueEventManager = issueEventManager;
+    }
 
     private QuartzScheduler quartzScheduler;
 
@@ -53,6 +60,8 @@ public class IssueServiceImpl implements IssueService {
     public void setQuartzScheduler(QuartzScheduler quartzScheduler) {
         this.quartzScheduler = quartzScheduler;
     }
+
+    private HttpHeaders httpHeaders;
 
     @Autowired
     public void setHttpHeaders(HttpHeaders httpHeaders) {
@@ -287,13 +296,14 @@ public class IssueServiceImpl implements IssueService {
         return issueDao.getExistIssueTypes(category);
     }
 
-    private void addSolvedTag(String repo_id, String pre_commit_id) {
-        List<String> issueIds = issueDao.getSolvedIssueIds(repo_id, pre_commit_id);
-        if (issueIds != null && !issueIds.isEmpty()) {
+    private void addSolvedTag(String repo_id, String pre_commit_id,String category,String committer) {
+        List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
+        issueEventManager.sendIssueEvent(EventType.ELIMINATE,issues,category,committer,repo_id);
+        if (issues != null && !issues.isEmpty()) {
             List<JSONObject> taggeds = new ArrayList<>();
-            for (String issueId : issueIds) {
+            for (Issue issue : issues) {
                 JSONObject tagged = new JSONObject();
-                tagged.put("item_id", issueId);
+                tagged.put("item_id", issue.getUuid());
                 tagged.put("tag_id", solvedTagId);
                 taggeds.add(tagged);
             }
@@ -324,6 +334,7 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public void startMapping(String repo_id, String pre_commit_id, String current_commit_id,String category) {
         List<Issue> insertIssueList = new ArrayList<>();
+        String committer="test@Test.com";
         if (pre_commit_id.equals(current_commit_id)) {
             //当前project第一次扫描，所有的rawIssue都是issue
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
@@ -384,6 +395,7 @@ public class IssueServiceImpl implements IssueService {
                 //更新issue
                 logger.info("issue update count: "+issues.size());
                 issueDao.batchUpdateIssue(issues);
+                issueEventManager.sendIssueEvent(EventType.MODIFY,issues,category,committer,repo_id);
             }
             int eliminatedIssueCount = rawIssues1.size() - equalsCount;
             int remainingIssueCount = rawIssues2.size();
@@ -400,10 +412,11 @@ public class IssueServiceImpl implements IssueService {
         //新的issue
         if (!insertIssueList.isEmpty()) {
             issueDao.insertIssueList(insertIssueList);
+            issueEventManager.sendIssueEvent(EventType.NEW,insertIssueList,category,committer,repo_id);
             logger.info("new insert issue count: "+insertIssueList.size());
         }
         if (!pre_commit_id.equals(current_commit_id)) {
-            addSolvedTag(repo_id, pre_commit_id);
+            addSolvedTag(repo_id, pre_commit_id,category,committer);
         }
     }
 

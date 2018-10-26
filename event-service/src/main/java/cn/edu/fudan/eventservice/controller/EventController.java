@@ -1,6 +1,7 @@
 package cn.edu.fudan.eventservice.controller;
 
 import cn.edu.fudan.eventservice.domain.Event;
+import cn.edu.fudan.eventservice.domain.ResponseBean;
 import cn.edu.fudan.eventservice.service.EventService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,8 +24,13 @@ public class EventController {
 
     @PostMapping("/event")
     public Object addEvents(@RequestBody List<Event> events){
-        eventService.addEvents(events);
-        return "success";
+        try {
+            eventService.addEvents(events);
+            return new ResponseBean(200, "event add success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "event add failed!", null);
+        }
     }
 
     @PostMapping("/event/current-events")
