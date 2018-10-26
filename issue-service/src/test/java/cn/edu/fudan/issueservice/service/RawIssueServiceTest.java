@@ -1,98 +1,220 @@
 package cn.edu.fudan.issueservice.service;
 
+
 import cn.edu.fudan.issueservice.IssueServiceApplicationTests;
+import cn.edu.fudan.issueservice.dao.LocationDao;
+import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.domain.Location;
 import cn.edu.fudan.issueservice.domain.RawIssue;
+import cn.edu.fudan.issueservice.service.impl.RawIssueServiceImpl;
+import cn.edu.fudan.issueservice.util.TestDataMaker;
+import com.alibaba.fastjson.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.api.support.membermodification.MemberModifier;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.client.RestTemplate;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.*;
-
+@PrepareForTest({RawIssueService.class, RawIssueServiceImpl.class, RawIssueDao.class, LocationDao.class, RestTemplate.class, ResponseEntity.class})
 public class RawIssueServiceTest extends IssueServiceApplicationTests {
 
-    @Autowired
-    RawIssueService rawIssueService;
+    @Value("${commit.service.path}")
+    private String commitServicePath;
+    @Value("${code.service.path}")
+    private String codeServicePath;
+    @Value("${repoHome}")
+    private String repoHome;
 
+    @Value("${inner.service.path}")
+    private String innerServicePath;
+
+    @Mock
+    private RawIssueDao rawIssueDao;
+    @Mock
+    private LocationDao locationDao;
+    @Mock
+    private RestTemplate restTemplate;
+    @Mock
+    private ResponseEntity repoIdResponseEntity;
+
+    @Autowired
+    @InjectMocks
+    private RawIssueService rawIssueService = new RawIssueServiceImpl();
+
+    List<RawIssue> list;
     RawIssue rawIssue1;
     RawIssue rawIssue2;
-    List<RawIssue> list;
+    RawIssue rawIssue3;
+
+    Location location1;
+
+    private TestDataMaker testDataMaker;
 
     @Before
     public void setup() throws Exception {
-        rawIssue1 = new RawIssue();
-        rawIssue1.setUuid("111");
-        rawIssue1.setType("OBL_UNSATISFIED_OBLIGATION");
-        rawIssue1.setDetail("{\"type\":\"OBL_UNSATISFIED_OBLIGATION\",\"priority\":\"2\",\"rank\":\"20\",\"abbrev\":\"OBL\",\"category\":\"EXPERIMENTAL\"}");
-        rawIssue1.setFile_name("DatabaseTool.java");
-        rawIssue1.setScan_id("f012de17-318e-4bef-9f8c-9a263bbece6b");
-        rawIssue1.setIssue_id("fe491c9a-4fd1-48d8-a577-057ce3c93a34");
-        rawIssue1.setCommit_id("94628087eaf6c81584223617d287c26af2116a96");
 
-        rawIssue2 = new RawIssue();
-        rawIssue2.setUuid("222");
-        rawIssue2.setType("OBL_UNSATISFIED_OBLIGATION");
-        rawIssue2.setDetail("{\"type\":\"OBL_UNSATISFIED_OBLIGATION\",\"priority\":\"2\",\"rank\":\"20\",\"abbrev\":\"OBL\",\"category\":\"EXPERIMENTAL\"}");
-        rawIssue2.setFile_name("DatabaseTool.java");
-        rawIssue2.setScan_id("f012de17-318e-4bef-9f8c-9a263bbece6b");
-        rawIssue2.setIssue_id("fe491c9a-4fd1-48d8-a577-057ce3c93a34");
-        rawIssue2.setCommit_id("94628087eaf6c81584223617d287c26af2116a96");
-
-        list = new ArrayList<RawIssue>();
+        testDataMaker = new TestDataMaker();
+        list = new ArrayList<>();
+        rawIssue1 = testDataMaker.rawIssueMaker1();
+        rawIssue2 = testDataMaker.rawIssueMaker2();
+        rawIssue3 = testDataMaker.rawIssueMaker3();
         list.add(rawIssue1);
         list.add(rawIssue2);
+
+        location1 = testDataMaker.locationMaker1();
+
+        MockitoAnnotations.initMocks(this);
+        ReflectionTestUtils.setField(rawIssueService,"rawIssueDao",rawIssueDao);
+        ReflectionTestUtils.setField(rawIssueService,"locationDao",locationDao);
+        ReflectionTestUtils.setField(rawIssueService,"restTemplate",restTemplate);
+
+        System.out.println("finish mocking");
+
     }
 
-    /*
-        等scan单元测试之后完善
-     */
     @Test
-    @Transactional
     public void insertRawIssueList() {
+        doNothing().when(rawIssueDao).insertRawIssueList(list);
+        doNothing().when(locationDao).insertLocationList(any(List.class));
         rawIssueService.insertRawIssueList(list);
+        verify(rawIssueDao,times(1)).insertRawIssueList(list);
+        verify(locationDao,times(1)).insertLocationList(any(List.class));
     }
 
-    /*
-        等scan单元测试之后完善
-     */
     @Test
-    @Transactional
-    public void deleteRawIssueByProjectId() {
-        rawIssueService.deleteRawIssueByRepoId("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
+    public void deleteRawIssueByRepoId() {
+        String repoId = "repo_id";
+        doNothing().when(rawIssueDao).deleteRawIssueByRepoId(repoId);
+        doNothing().when(locationDao).deleteLocationByRepoId(repoId);
+        rawIssueService.deleteRawIssueByRepoId(repoId);
+        verify(rawIssueDao,times(1)).deleteRawIssueByRepoId(repoId);
+        verify(locationDao,times(1)).deleteLocationByRepoId(repoId);
     }
 
     @Test
     public void batchUpdateIssueId() {
+        doNothing().when(rawIssueDao).batchUpdateIssueId(list);
         rawIssueService.batchUpdateIssueId(list);
+        verify(rawIssueDao,times(1)).batchUpdateIssueId(list);
     }
 
     @Test
-    public void getRawIssueByCommitID() {
-        List<RawIssue> list = rawIssueService.getRawIssueByCommitIDAndCategory("94628087eaf6c81584223617d287c26af2116a96","bug");
-        for (RawIssue rawIssue : list) {
-            System.out.println(rawIssue.getUuid());
+    public void getRawIssueByCommitIDAndCategory() {
+        List<RawIssue> listByCommitIDAndCategory = new ArrayList<>();
+        listByCommitIDAndCategory.add(rawIssue2);
+        listByCommitIDAndCategory.add(rawIssue3);
+        String commit_id = "comm2";
+        String category = "category";
+        Mockito.when(rawIssueDao.getRawIssueByCommitIDAndCategory(commit_id,category)).thenReturn(listByCommitIDAndCategory);
+        List<RawIssue> listResult = rawIssueService.getRawIssueByCommitIDAndCategory(commit_id,category);
+        Assert.assertEquals(listByCommitIDAndCategory.size(), listResult.size());
+        for (int i = 0; i < listResult.size(); ++i) {
+            Assert.assertEquals(listByCommitIDAndCategory.get(i),listResult.get(i));
         }
     }
 
     @Test
     public void getRawIssueByIssueId() {
-        List<RawIssue> list = rawIssueService.getRawIssueByIssueId("fe491c9a-4fd1-48d8-a577-057ce3c93a34");
-        for (RawIssue rawIssue : list) {
-            System.out.println(rawIssue.getUuid());
+        List<RawIssue> listByIssueId = new ArrayList<>();
+        listByIssueId.add(rawIssue2);
+        listByIssueId.add(rawIssue3);
+        String issueId = "iss2";
+        Mockito.when(rawIssueDao.getRawIssueByIssueId(issueId)).thenReturn(listByIssueId);
+        List<RawIssue> listResult = rawIssueService.getRawIssueByIssueId(issueId);
+        Assert.assertEquals(listByIssueId.size(), listResult.size());
+        for (int i = 0; i < listResult.size(); ++i) {
+            Assert.assertEquals(listByIssueId.get(i),listResult.get(i));
+        }
+    }
+
+    @Test
+    public void getCode() {
+        String project_id = "pro1";
+        String commit_id = "comm1";
+        String file_path = "DatabaseTool.java";
+        String repo_id = "repo_id";
+        String status = "Successful";
+        String content = "content";
+
+        JSONObject response = new JSONObject();
+        JSONObject data = new JSONObject();
+        data.put("status",status);
+        response.put("data",data);
+
+        JSONObject codeResponse = new JSONObject();
+        JSONObject codeData = new JSONObject();
+        codeData.put("status",status);
+        codeData.put("content",content);
+        codeResponse.put("data",codeData);
+
+        PowerMockito.when(restTemplate.exchange(eq(innerServicePath + "/inner/project/repo-id?project-id=" + project_id), eq(HttpMethod.GET), any(HttpEntity.class),eq(String.class) )).thenReturn(repoIdResponseEntity);
+        PowerMockito.when(repoIdResponseEntity.getBody()).thenReturn(repo_id);
+        PowerMockito.when(restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class)).thenReturn(response);
+        PowerMockito.when(restTemplate.getForObject(codeServicePath + "?file_path=" + repoHome + file_path, JSONObject.class)).thenReturn(codeResponse);
+
+        /*
+            当数据返回全部成功时
+         */
+        Map result = (Map) rawIssueService.getCode(project_id,commit_id,file_path);
+        Assert.assertEquals(content,result.get("code"));
+
+        /*
+            当checkout 失败时
+         */
+        PowerMockito.when(restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class)).thenReturn(null);
+        try{
+            result = (Map) rawIssueService.getCode(project_id,commit_id,file_path);
+        }catch(RuntimeException e){
+            Assert.assertEquals("check out failed!",e.getMessage());
         }
 
+        /*
+            当获取code 失败时
+         */
+        PowerMockito.when(restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class)).thenReturn(response);
+        PowerMockito.when(restTemplate.getForObject(codeServicePath + "?file_path=" + repoHome + file_path, JSONObject.class)).thenReturn(codeResponse);
+        try{
+            result = (Map) rawIssueService.getCode(project_id,commit_id,file_path);
+        }catch(RuntimeException e){
+            Assert.assertEquals("load file failed!",e.getMessage());
+        }
     }
 
     @Test
     public void getLocationsByRawIssueId() {
-        List<Location> locations = (List<Location>) rawIssueService.getLocationsByRawIssueId("ec76e7ff-33c7-46ea-899b-7f24f6b51d3c");
-        for (Location location : locations) {
-            System.out.println(location.getUuid());
+        String raw_issue_id = "raw1";
+        List<Location> locations = new ArrayList<>();
+        locations.add(location1);
+        Mockito.when(locationDao.getLocations(raw_issue_id)).thenReturn(locations);
+        List<Location> listResult = rawIssueService.getLocationsByRawIssueId(raw_issue_id);
+        Assert.assertEquals(locations.size(), listResult.size());
+        for (int i = 0; i < listResult.size(); ++i) {
+            Assert.assertEquals(locations.get(i),listResult.get(i));
         }
-
     }
+
 }

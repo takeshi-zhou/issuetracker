@@ -33,6 +33,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +44,6 @@ import static org.mockito.Mockito.doNothing;
 
 @PrepareForTest({ProjectController.class, ProjectService.class, ProjectServiceImpl.class, AuthTokenInterceptor.class})
 @WebAppConfiguration
-@Ignore
 public class ProjectControllerTest extends ProjectManagerApplicationTests {
 
     @Autowired
@@ -66,6 +66,7 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
     Project projectUpdate;
     Project projectInitial;
     String token;
+    Map map;
 
     @Before
     public void setupMockMvc() throws Exception {
@@ -86,6 +87,12 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
         MemberModifier.field(ProjectController.class, "projectService").set(controller, service);
 
         token = "password";
+
+        map = new HashMap();
+        map.put("url","url");
+        map.put("isPrivate",false);
+        map.put("name","projectName");
+        map.put("type","bug");
     }
 
     @Test
@@ -108,8 +115,8 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
     @Test
     public void addProjectTest1() throws Exception {
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
-        java.lang.String requestJson = ow.writeValueAsString(project);
-        //doNothing().when(service).addOneProject(eq(token), any(Project.class));
+        java.lang.String requestJson = ow.writeValueAsString(map);
+        doNothing().when(service).addOneProject(eq(token), any(JSONObject.class));
         MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class, "preHandle")).toReturn(true);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/project")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -128,8 +135,8 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
     @Test
     public void addProjectTest2() throws Exception {
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
-        java.lang.String requestJson = ow.writeValueAsString(project);
-        PowerMockito.when(service, "addOneProject", eq(token), any(Project.class)).thenThrow(new RuntimeException());
+        java.lang.String requestJson = ow.writeValueAsString(map);
+        PowerMockito.when(service, "addOneProject", eq(token), any(JSONObject.class)).thenThrow(new RuntimeException());
         MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class, "preHandle")).toReturn(true);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/project")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -191,19 +198,19 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
     /*
             delete方法的测试删除成功
      */
-//    @Test
-//    public void deleteTest1() throws Exception{
-//        String projectId = "pro1";
-//        doNothing().when(service).remove(projectId);
-//        MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class,"preHandle")).toReturn(true);
-//        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.delete("/project/"+projectId)
-//                .contentType(MediaType.APPLICATION_JSON_UTF8)
-//                .header("token",token)
-//                .session(session)
-//        ).andReturn();
-//        Map map = JSON.parseObject(result.getResponse().getContentAsString());
-//        Assert.assertEquals(200,map.get("code"));
-//    }
+    @Test
+    public void deleteTest1() throws Exception{
+        String projectId = "pro1";
+        doNothing().when(service).remove(projectId,"bug",token);
+        MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class,"preHandle")).toReturn(true);
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.delete("/project/"+projectId)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .header("token",token)
+                .session(session)
+        ).andReturn();
+        Map map = JSON.parseObject(result.getResponse().getContentAsString());
+        Assert.assertEquals(200,map.get("code"));
+    }
 
     /*
             delete方法的测试删除失败
@@ -211,7 +218,7 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
     @Test
     public void deleteTest2() throws Exception {
         String projectId = "pro1";
-        PowerMockito.when(service, "remove", projectId).thenThrow(new RuntimeException());
+        PowerMockito.when(service, "remove", projectId,"bug",token).thenThrow(new RuntimeException());
         MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class, "preHandle")).toReturn(true);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.delete("/project/" + projectId)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -229,7 +236,7 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
     public void updateProjectTest1() throws Exception {
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
         java.lang.String requestJson = ow.writeValueAsString(projectUpdate);
-        doNothing().when(service).updateProjectStatus(projectUpdate);
+        doNothing().when(service).updateProjectStatus(any(Project.class));
         MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class, "preHandle")).toReturn(true);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/inner/project")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -278,15 +285,17 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
 
     @Test
     public void getProjectIds() throws Exception {
-        String accoutId = "1";
+        String accountId = "1";
+        String type = "bug";
         String proId1 = "pro1";
         String proId2 = "pro2";
         List<String> projectIds = new ArrayList<String>();
         projectIds.add(proId1);
         projectIds.add(proId2);
-        Mockito.when(service.getProjectByAccountId(accoutId)).thenReturn(projectIds);
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/inner/project/project-id")
-                .param("account_id", accoutId)
+        Mockito.when(service.getRepoIdsByAccountIdAndType(accountId,type)).thenReturn(projectIds);
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/inner/project/repo-ids")
+                .param("account_id", accountId)
+                .param("type", type)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .session(session)
         ).andReturn();
@@ -307,7 +316,25 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .session(session)
         ).andReturn();
-        List<Project> projectsResult  = JSONObject.parseObject(result.getResponse().getContentAsString(), List.class);
+        List<Project> projectsResult  = JSONObject.parseArray(result.getResponse().getContentAsString(), Project.class);
+        Assert.assertEquals(projects.size(), projectsResult.size());
+        for(int i=0;i<projectsResult.size();i++){
+            Assert.assertEquals(projects.get(i).getUuid(), projectsResult.get(i).getUuid());
+        }
+    }
+
+    @Test
+    public void getProjectByAccountId() throws Exception {
+        String account_id = "account_id";
+        List<Project> projects = new ArrayList<Project>();
+        projects.add(project);
+        Mockito.when(service.getProjectByAccountId(account_id)).thenReturn(projects);
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/inner/projects")
+                .param("account_id", account_id)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .session(session)
+        ).andReturn();
+        List<Project> projectsResult  = JSONObject.parseArray(result.getResponse().getContentAsString(), Project.class);
         Assert.assertEquals(projects.size(), projectsResult.size());
         for(int i=0;i<projectsResult.size();i++){
             Assert.assertEquals(projects.get(i).getUuid(), projectsResult.get(i).getUuid());

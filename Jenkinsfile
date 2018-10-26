@@ -36,6 +36,7 @@ pipeline {
             steps {
                 echo 'Deploying....'
                 sh "'${mvnHome}/bin/mvn' -Dmaven.test.skip=true package"
+                // sh 'scp $(find $(pwd) -name *.jar)  root@10.141.221.80:/home && ssh root@10.141.221.80 "/root/jenkinsShellForRestart" '
             }
         }
     }
