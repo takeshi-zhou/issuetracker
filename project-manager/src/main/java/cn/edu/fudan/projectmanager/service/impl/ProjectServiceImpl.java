@@ -206,13 +206,13 @@ public class ProjectServiceImpl implements ProjectService {
         //如果当前repoId和type只有这一个projectId与其对应，那么删除project的同时会删除repo的相关内容
         //否则还有其他project与当前repoId和type对应，该repo的相关内容就不删
         if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId,type)) {
-            JSONObject response = restTemplate.exchange(innerServicePath + "/inner/issue/" + repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
+            JSONObject response = restTemplate.exchange(innerServicePath + "/inner/issue/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
             if (response != null)
                 logger.info(response.toJSONString());
-            response = restTemplate.exchange(innerServicePath + "/inner/raw-issue/" + repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
+            response = restTemplate.exchange(innerServicePath + "/inner/raw-issue/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
             if (response != null)
                 logger.info(response.toJSONString());
-            response = restTemplate.exchange(innerServicePath + "/inner/scan/" + repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
+            response = restTemplate.exchange(innerServicePath + "/inner/scan/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
             if (response != null)
                 logger.info(response.toJSONString());
             //delete info in redis
