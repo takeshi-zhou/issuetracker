@@ -8,7 +8,7 @@ public interface ScanService {
 
     void insertOneScan(Scan scan);
 
-    void deleteScanByRepoId(String repoId);
+    void deleteScanByRepoIdAndCategory(String repoId,String category);
 
     void updateOneScan(Scan scan);
 
