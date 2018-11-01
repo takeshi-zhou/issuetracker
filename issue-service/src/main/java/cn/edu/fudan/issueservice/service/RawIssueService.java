@@ -13,7 +13,7 @@ public interface RawIssueService {
 
     void insertRawIssueList(List<RawIssue> list);
 
-    void deleteRawIssueByRepoId(String repoId);
+    void deleteRawIssueByRepoIdAndCategory(String repoId,String category);
 
     void batchUpdateIssueId(List<RawIssue> list);
 

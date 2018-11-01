@@ -204,7 +204,7 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
         ResponseBean responseBean = new ResponseBean();
         responseBean.setCode(200);
         responseBean.setMsg("issues delete success!");
-        doNothing().when(service).deleteIssueByRepoId(repo);
+        doNothing().when(service).deleteIssueByRepoIdAndCategory(repo,"bug");
         MvcResult resultCorrect = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/issue/"+repo)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .session(session)

@@ -51,9 +51,9 @@
         </foreach>
     </insert>
 
-    <delete id="deleteLocationByRepoId" parameterType="String">
+    <delete id="deleteLocationByRepoIdAndCategory" parameterType="String">
         delete from location where rawIssue_id in (select uuid from rawIssue where scan_id in (select uuid from scan
-        where repo_id=#{repo_id}))
+        where repo_id=#{repo_id} and category = #{category}))
     </delete>
 
     <select id="getLocations" parameterType="Location" resultMap="location">

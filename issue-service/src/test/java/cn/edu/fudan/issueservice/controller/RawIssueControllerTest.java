@@ -175,7 +175,7 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
         ResponseBean responseBean = new ResponseBean();
         responseBean.setCode(200);
         responseBean.setMsg("rawIssue delete success!");
-        doNothing().when(service).deleteRawIssueByRepoId(repo);
+        doNothing().when(service).deleteRawIssueByRepoIdAndCategory(repo,"bug");
         MvcResult resultCorrect = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/raw-issue/"+repo)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .session(session)

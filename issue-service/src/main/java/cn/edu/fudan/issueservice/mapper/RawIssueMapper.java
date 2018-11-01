@@ -12,7 +12,7 @@ public interface RawIssueMapper {
 
     void insertRawIssueList(List<RawIssue> list);
 
-    void deleteRawIssueByRepoId(@Param("repo_id") String repo_id);
+    void deleteRawIssueByRepoIdAndCategory(@Param("repo_id") String repo_id,@Param("category")String category);
 
     void batchUpdateIssueId(List<RawIssue> list);
 
@@ -21,5 +21,7 @@ public interface RawIssueMapper {
     List<RawIssue> getRawIssueByCommitIDAndCategory(@Param("category") String category,@Param("commit_id") String commit_id);
 
     List<RawIssue> getRawIssueByIssueId(@Param("issueId") String issueId);
+
+    List<String> getTypesByCommit(@Param("category")String category,@Param("commit_id")String commit_id);
 
 }

@@ -10,7 +10,7 @@ public interface IssueService {
 
     void insertIssueList(List<Issue> list);
 
-    void deleteIssueByRepoId(String repoId);
+    void deleteIssueByRepoIdAndCategory(String repoId,String category);
 
     void batchUpdateIssue(List<Issue> list);
 

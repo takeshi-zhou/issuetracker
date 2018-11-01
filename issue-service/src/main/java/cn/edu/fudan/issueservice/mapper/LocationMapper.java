@@ -13,7 +13,7 @@ public interface LocationMapper {
 
     void insertLocationList(List<Location> list);
 
-    void deleteLocationByRepoId(@Param("repo_id") String repo_id);
+    void deleteLocationByRepoIdAndCategory(@Param("repo_id") String repo_id, @Param("category")String category);
 
     List<Location> getLocations(@Param("uuid") String rawIssueId);
 

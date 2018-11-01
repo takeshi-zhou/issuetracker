@@ -108,11 +108,11 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
     @Test
     public void deleteRawIssueByRepoId() {
         String repoId = "repo_id";
-        doNothing().when(rawIssueDao).deleteRawIssueByRepoId(repoId);
-        doNothing().when(locationDao).deleteLocationByRepoId(repoId);
-        rawIssueService.deleteRawIssueByRepoId(repoId);
-        verify(rawIssueDao,times(1)).deleteRawIssueByRepoId(repoId);
-        verify(locationDao,times(1)).deleteLocationByRepoId(repoId);
+        doNothing().when(rawIssueDao).deleteRawIssueByRepoIdAndCategory(repoId,"bug");
+        doNothing().when(locationDao).deleteLocationByRepoIdAndCategory(repoId,"bug");
+        rawIssueService.deleteRawIssueByRepoIdAndCategory(repoId,"bug");
+        verify(rawIssueDao,times(1)).deleteRawIssueByRepoIdAndCategory(repoId,"bug");
+        verify(locationDao,times(1)).deleteLocationByRepoIdAndCategory(repoId,"bug");
     }
 
     @Test

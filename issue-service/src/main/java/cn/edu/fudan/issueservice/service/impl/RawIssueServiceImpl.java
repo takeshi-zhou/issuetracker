@@ -89,9 +89,9 @@ public class RawIssueServiceImpl implements RawIssueService {
      */
     @Transactional
     @Override
-    public void deleteRawIssueByRepoId(String repoId) {
-        locationDao.deleteLocationByRepoId(repoId);
-        rawIssueDao.deleteRawIssueByRepoId(repoId);
+    public void deleteRawIssueByRepoIdAndCategory(String repoId,String category) {
+        locationDao.deleteLocationByRepoIdAndCategory(repoId,category);
+        rawIssueDao.deleteRawIssueByRepoIdAndCategory(repoId,category);
     }
 
     @Override

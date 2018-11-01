@@ -60,8 +60,8 @@
         </foreach>
     </insert>
 
-    <delete id="deleteRawIssueByRepoId" parameterType="String">
-        delete from rawIssue where scan_id in (select uuid from scan where repo_id = #{repo_id})
+    <delete id="deleteRawIssueByRepoIdAndCategory" parameterType="String">
+        delete from rawIssue where scan_id in (select uuid from scan where repo_id = #{repo_id} and category = #{category})
     </delete>
 
     <update id="batchUpdateIssueId" parameterType="java.util.List">
@@ -107,15 +107,10 @@
         order by commit_time;
     </select>
 
-
+   <select id="getTypesByCommit" resultType="string">
+       select distinct type as types
+       from rawIssue
+       where category = #{category} and commit_id = #{commit_id}
+       order by types
+   </select>
 </mapper>
-
-        <!--
-                select a.* ,b.commit_time as commit_time
-                from rawIssue as a
-                inner join commit as b
-                on a.commit_id = b.commit_id
-                where a.issue_id=#{issueId}
-                order by commit_time
-
-        -->

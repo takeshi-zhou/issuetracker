@@ -25,8 +25,8 @@ public class RawIssueDao {
         rawIssueMapper.insertRawIssueList(list);
     }
 
-    public void deleteRawIssueByRepoId(String repoId) {
-        rawIssueMapper.deleteRawIssueByRepoId(repoId);
+    public void deleteRawIssueByRepoIdAndCategory(String repoId,String category) {
+        rawIssueMapper.deleteRawIssueByRepoIdAndCategory(repoId,category);
     }
 
     public void batchUpdateIssueId(List<RawIssue> list) {
@@ -43,5 +43,9 @@ public class RawIssueDao {
 
     public List<RawIssue> getRawIssueByIssueId(String issueId) {
         return rawIssueMapper.getRawIssueByIssueId(issueId);
+    }
+
+    public List<String> getTypesByCommit(String category,String commit_id){
+        return rawIssueMapper.getTypesByCommit(category, commit_id);
     }
 }
