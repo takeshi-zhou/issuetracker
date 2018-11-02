@@ -7,7 +7,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 
 @SpringBootApplication
-@PropertySource("classpath:conf.properties")
 @EnableAsync//开启异步调用的支持
 public class CloneServiceApplication {
 
