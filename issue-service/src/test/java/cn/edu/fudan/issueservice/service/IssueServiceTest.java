@@ -486,6 +486,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
 
 
     @Test
+    @Ignore
     public void startMapping() {
         String repo_id = "repo_id";
         String category = "category";
