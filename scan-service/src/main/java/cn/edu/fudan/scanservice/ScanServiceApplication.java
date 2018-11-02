@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @ServletComponentScan//扫描Filter
-@PropertySource("classpath:conf.properties")
 @MapperScan("cn.edu.fudan.scanservice.mapper")
 @EnableTransactionManagement//开启事务支持
 @EnableAsync//开启异步调用的支持

@@ -186,7 +186,7 @@ public class KafkaServiceImpl implements KafkaService {
             if (scanResult.getDescription().equals("Mapping failed")) {
                 //mapping 失败，删除当前repo所扫commit得到的rawIssue和location
                 HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
-                restTemplate.exchange(innerServicePath + "/inner/raw-issue/" + repoId, HttpMethod.DELETE, entity, JSONObject.class);
+                restTemplate.exchange(innerServicePath + "/inner/raw-issue/"+type+"/" + repoId, HttpMethod.DELETE, entity, JSONObject.class);
             }
             projectParam.put("scan_status", scanResult.getDescription());
         }
