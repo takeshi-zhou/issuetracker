@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @ServletComponentScan//扫描Filter
-@PropertySource(value = "classpath:conf.properties")
 @MapperScan("cn.edu.fudan.projectmanager.mapper")
 @EnableTransactionManagement//开启事务支持
 public class ProjectManagerApplication {
