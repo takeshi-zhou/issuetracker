@@ -1,7 +1,6 @@
 package cn.edu.fudan.issueservice.service.impl;
 
 import cn.edu.fudan.issueservice.domain.RawIssue;
-import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -10,7 +9,6 @@ import java.util.stream.Collectors;
  * @author WZY
  * @version 1.0
  **/
-@Service
 public class AnotherCloneMappingServiceImpl extends CloneMappingServiceImpl {
 
     private void updateIssue(Map<String,List<RawIssue>> intersectionGroup){

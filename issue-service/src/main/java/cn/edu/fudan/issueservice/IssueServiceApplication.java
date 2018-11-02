@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
 @SpringBootApplication
-@PropertySource("classpath:conf.properties")
 @MapperScan("cn.edu.fudan.issueservice.mapper")
 @EnableTransactionManagement//开启事务支持
 @EnableScheduling

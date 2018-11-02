@@ -35,6 +35,14 @@ public class IssueServiceImpl implements IssueService {
     @Value("${inner.service.path}")
     private String innerServicePath;
 
+
+    private CloneMappingServiceImpl cloneMappingService;
+
+    @Autowired
+    public void setCloneMappingService(CloneMappingServiceImpl cloneMappingService) {
+        this.cloneMappingService = cloneMappingService;
+    }
+
     private BugMappingServiceImpl bugMappingService;
 
     @Autowired
@@ -283,12 +291,12 @@ public class IssueServiceImpl implements IssueService {
         String committer="";
         JSONObject commitInfo=restTemplate.getForObject(commitServicePath+"/"+current_commit_id,JSONObject.class);
         if(commitInfo!=null){
-            committer=commitInfo.getJSONObject("data").getString("developer");
+            committer=commitInfo.getJSONArray("data").getJSONObject(0).getString("developer");
         }
         if(category.equals("bug")){
             bugMappingService.mapping(repo_id,pre_commit_id,current_commit_id,category,committer);
         }else if(category.equals("clone")){
-            System.out.println("123");
+            cloneMappingService.mapping(repo_id,pre_commit_id,current_commit_id,category,committer);
         }
     }
 
