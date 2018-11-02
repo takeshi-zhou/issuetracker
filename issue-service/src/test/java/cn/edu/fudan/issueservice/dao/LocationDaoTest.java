@@ -61,7 +61,7 @@ public class LocationDaoTest extends IssueServiceApplicationTests {
     @Test
     @Transactional
     public void deleteLocationByProjectId() {
-        locationDao.deleteLocationByRepoId("9151ecba-e749-4a14-b6e3-f3a1388139ec");
+        locationDao.deleteLocationByRepoIdAndCategory("9151ecba-e749-4a14-b6e3-f3a1388139ec","bug");
     }
 
     @Test

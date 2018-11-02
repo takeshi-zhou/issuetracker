@@ -13,7 +13,7 @@ public interface ScanMapper {
 
     void insertOneScan(Scan scan);
 
-    void deleteScanByRepoId(@Param("repo_id") String repo_id);
+    void deleteScanByRepoIdAndCategory(@Param("repo_id") String repo_id,@Param("category")String category);
 
     void updateOneScan(Scan scan);
 

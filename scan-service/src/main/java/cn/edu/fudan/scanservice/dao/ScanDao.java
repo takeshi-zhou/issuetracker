@@ -23,8 +23,8 @@ public class ScanDao {
         scanMapper.insertOneScan(scan);
     }
 
-    public void deleteScanByRepoId(String repoId) {
-        scanMapper.deleteScanByRepoId(repoId);
+    public void deleteScanByRepoIdAndCategory(String repoId,String category) {
+        scanMapper.deleteScanByRepoIdAndCategory(repoId,category);
     }
 
     public void updateOneScan(Scan scan) {

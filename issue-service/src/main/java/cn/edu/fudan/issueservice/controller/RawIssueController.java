@@ -44,10 +44,10 @@ public class RawIssueController {
         }
     }
 
-    @DeleteMapping(value = {"/inner/raw-issue/{repoId}"})
-    public Object deleteRawIssue(@PathVariable("repoId") String repoId) {
+    @DeleteMapping(value = {"/inner/raw-issue/{category}/{repoId}"})
+    public Object deleteRawIssue(@PathVariable("category")String category ,@PathVariable("repoId") String repoId) {
         try {
-            rawIssueService.deleteRawIssueByRepoId(repoId);
+            rawIssueService.deleteRawIssueByRepoIdAndCategory(repoId,category);
             return new ResponseBean(200, "rawIssue delete success!", null);
         } catch (Exception e) {
             e.printStackTrace();

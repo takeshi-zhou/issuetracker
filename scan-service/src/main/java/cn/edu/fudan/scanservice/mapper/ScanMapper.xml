@@ -48,8 +48,8 @@
     </insert>
 
 
-    <delete id="deleteScanByRepoId" parameterType="String">
-        delete from scan where repo_id=#{repo_id}
+    <delete id="deleteScanByRepoIdAndCategory" parameterType="String">
+        delete from scan where repo_id=#{repo_id} and category = #{category}
     </delete>
 
     <update id="updateOneScan" parameterType="Scan">

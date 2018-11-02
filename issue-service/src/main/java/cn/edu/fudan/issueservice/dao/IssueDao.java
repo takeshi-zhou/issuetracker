@@ -23,8 +23,8 @@ public class IssueDao {
         issueMapper.insertIssueList(list);
     }
 
-    public void deleteIssueByRepoId(String repo_id) {
-        issueMapper.deleteIssueByRepoId(repo_id);
+    public void deleteIssueByRepoIdAndCategory(String repo_id,String category) {
+        issueMapper.deleteIssueByRepoIdAndCategory(repo_id,category);
     }
 
     public void batchUpdateIssue(List<Issue> list) {
@@ -47,8 +47,8 @@ public class IssueDao {
         return issueMapper.getExistIssueTypes(category);
     }
 
-    public List<String> getIssueIdsByRepoId(String repo_id) {
-        return issueMapper.getIssueIdsByRepoId(repo_id);
+    public List<String> getIssueIdsByRepoIdAndCategory(String repo_id,String category) {
+        return issueMapper.getIssueIdsByRepoIdAndCategory(repo_id,category);
     }
 
     public List<Issue> getSolvedIssues(String repo_id, String commit_id) {

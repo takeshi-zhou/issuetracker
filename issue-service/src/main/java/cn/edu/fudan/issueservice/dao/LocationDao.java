@@ -25,8 +25,8 @@ public class LocationDao {
         locationMapper.insertLocationList(list);
     }
 
-    public void deleteLocationByRepoId(String repoId) {
-        locationMapper.deleteLocationByRepoId(repoId);
+    public void deleteLocationByRepoIdAndCategory(String repoId,String category) {
+        locationMapper.deleteLocationByRepoIdAndCategory(repoId,category);
     }
 
     public List<Location> getLocations(String rawIssueId) {

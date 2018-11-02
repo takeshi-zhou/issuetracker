@@ -83,9 +83,9 @@ public class ScanServiceTest extends ScanServiceApplicationTests {
     @Test
     public void deleteScanByRepoId() {
         String repoId = "repo1";
-        doNothing().when(scanDao).deleteScanByRepoId(repoId);
-        scanService.deleteScanByRepoId(repoId);
-        verify(scanDao,times(1)).deleteScanByRepoId(repoId);
+        doNothing().when(scanDao).deleteScanByRepoIdAndCategory(repoId,"bug");
+        scanService.deleteScanByRepoIdAndCategory(repoId,"bug");
+        verify(scanDao,times(1)).deleteScanByRepoIdAndCategory(repoId,"bug");
     }
 
     @Test

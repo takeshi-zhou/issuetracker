@@ -57,7 +57,7 @@ public class RawIssueDaoTest extends IssueServiceApplicationTests {
     @Test
     @Transactional
     public void deleteRawIssueByProjectId() {
-        rawIssueDao.deleteRawIssueByRepoId("a585c7d8-e8a9-47c9-878d-761f8bfaaf62");
+        rawIssueDao.deleteRawIssueByRepoIdAndCategory("a585c7d8-e8a9-47c9-878d-761f8bfaaf62","bug");
     }
 
     @Test

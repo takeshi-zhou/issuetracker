@@ -1,20 +1,12 @@
 package cn.edu.fudan.issueservice.service.impl;
 
-import cn.edu.fudan.issueservice.component.IssueEventManager;
 import cn.edu.fudan.issueservice.dao.IssueDao;
-import cn.edu.fudan.issueservice.dao.RawIssueDao;
-import cn.edu.fudan.issueservice.domain.EventType;
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.IssueCount;
-import cn.edu.fudan.issueservice.domain.RawIssue;
 import cn.edu.fudan.issueservice.scheduler.QuartzScheduler;
 import cn.edu.fudan.issueservice.service.IssueService;
-import cn.edu.fudan.issueservice.util.DateTimeUtil;
-import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -25,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
-
 /**
  * @author WZY
  * @version 1.0
@@ -33,13 +24,10 @@ import java.util.*;
 @Service
 public class IssueServiceImpl implements IssueService {
 
-    private Logger logger=LoggerFactory.getLogger(this.getClass());
-
     @Value("${solved.tag_id}")
     private String solvedTagId;
     @Value("${ignore.tag_id}")
     private String ignoreTagId;
-
     @Value("${commit.service.path}")
     private String commitServicePath;
     @Value("${tag.service.path}")
@@ -47,11 +35,11 @@ public class IssueServiceImpl implements IssueService {
     @Value("${inner.service.path}")
     private String innerServicePath;
 
-   private IssueEventManager issueEventManager;
+    private BugMappingServiceImpl bugMappingService;
 
-   @Autowired
-    public void setIssueEventManager(IssueEventManager issueEventManager) {
-        this.issueEventManager = issueEventManager;
+    @Autowired
+    public void setBugMappingService(BugMappingServiceImpl bugMappingService) {
+        this.bugMappingService = bugMappingService;
     }
 
     private QuartzScheduler quartzScheduler;
@@ -82,13 +70,6 @@ public class IssueServiceImpl implements IssueService {
         this.issueDao = issueDao;
     }
 
-    private RawIssueDao rawIssueDao;
-
-    @Autowired
-    public void setRawIssueDao(RawIssueDao rawIssueDao) {
-        this.rawIssueDao = rawIssueDao;
-    }
-
     private RestTemplate restTemplate;
 
     @Autowired
@@ -102,16 +83,16 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public void deleteIssueByRepoId(String repoId) {
+    public void deleteIssueByRepoIdAndCategory(String repoId,String category) {
         //先删除该项目所有issue对应的tag
-        List<String> issueIds = issueDao.getIssueIdsByRepoId(repoId);
+        List<String> issueIds = issueDao.getIssueIdsByRepoIdAndCategory(repoId, category);
         if (issueIds != null && !issueIds.isEmpty()) {
             JSONObject response = restTemplate.postForObject(tagServicePath + "/tagged-delete", issueIds, JSONObject.class);
             if (response == null || response.getIntValue("code") != 200) {
                 throw new RuntimeException("tag item delete failed!");
             }
         }
-        issueDao.deleteIssueByRepoId(repoId);
+        issueDao.deleteIssueByRepoIdAndCategory(repoId,category);
 
     }
 
@@ -296,127 +277,18 @@ public class IssueServiceImpl implements IssueService {
         return issueDao.getExistIssueTypes(category);
     }
 
-    private void addSolvedTag(String repo_id, String pre_commit_id,String category,String committer) {
-        List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
-        issueEventManager.sendIssueEvent(EventType.ELIMINATE,issues,category,committer,repo_id);
-        if (issues != null && !issues.isEmpty()) {
-            List<JSONObject> taggeds = new ArrayList<>();
-            for (Issue issue : issues) {
-                JSONObject tagged = new JSONObject();
-                tagged.put("item_id", issue.getUuid());
-                tagged.put("tag_id", solvedTagId);
-                taggeds.add(tagged);
-            }
-            restTemplate.postForObject(tagServicePath, taggeds, JSONObject.class);
-        }
-    }
-
-    private void dashboardUpdate(String repo_id, int newIssueCount, int remainingIssueCount, int eliminatedIssueCount,String category) {
-        //注意只有remaining是覆盖的，其余是累增的
-        String todayKey = "dashboard:"+category+":day:" + repo_id;
-        String weekKey = "dashboard:"+category+":week:" + repo_id;
-        String monthKey = "dashboard:"+category+":month:" + repo_id;
-        stringRedisTemplate.setEnableTransactionSupport(true);
-        stringRedisTemplate.multi();
-        stringRedisTemplate.opsForHash().increment(todayKey, "new", newIssueCount);
-        stringRedisTemplate.opsForHash().put(todayKey, "remaining", String.valueOf(remainingIssueCount));
-        stringRedisTemplate.opsForHash().increment(todayKey, "eliminated", eliminatedIssueCount);
-        stringRedisTemplate.opsForHash().increment(weekKey, "new", newIssueCount);
-        stringRedisTemplate.opsForHash().put(weekKey, "remaining", String.valueOf(remainingIssueCount));
-        stringRedisTemplate.opsForHash().increment(weekKey, "eliminated", eliminatedIssueCount);
-        stringRedisTemplate.opsForHash().increment(monthKey, "new", newIssueCount);
-        stringRedisTemplate.opsForHash().put(monthKey, "remaining", String.valueOf(remainingIssueCount));
-        stringRedisTemplate.opsForHash().increment(monthKey, "eliminated", eliminatedIssueCount);
-        stringRedisTemplate.exec();
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public void startMapping(String repo_id, String pre_commit_id, String current_commit_id,String category) {
-        List<Issue> insertIssueList = new ArrayList<>();
-        String committer="test@Test.com";
-        if (pre_commit_id.equals(current_commit_id)) {
-            //当前project第一次扫描，所有的rawIssue都是issue
-            List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
-            if (rawIssues == null || rawIssues.isEmpty())
-                return;
-            Date date= DateTimeUtil.getCurrentFormattedDate();
-            for (RawIssue rawIssue : rawIssues) {
-                String new_IssueId = UUID.randomUUID().toString();
-                rawIssue.setIssue_id(new_IssueId);
-                String targetFiles = rawIssue.getFile_name();
-                Issue issue = new Issue(new_IssueId, rawIssue.getType(),category, current_commit_id, current_commit_id, rawIssue.getUuid(), rawIssue.getUuid(), repo_id, targetFiles,date,date);
-                insertIssueList.add(issue);
-            }
-            int newIssueCount = insertIssueList.size();
-            int remainingIssueCount = insertIssueList.size();
-            int eliminatedIssueCount = 0;
-            dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
-            rawIssueDao.batchUpdateIssueId(rawIssues);
-        } else {
-            //不是第一次扫描，需要和前一次的commit进行mapping
-            List<RawIssue> rawIssues1 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,pre_commit_id);
-            List<RawIssue> rawIssues2 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
-            if (rawIssues2 == null || rawIssues1.isEmpty())
-                return;
-            //装需要更新的
-            List<Issue> issues = new ArrayList<>();
-            int equalsCount = 0;
-            for (RawIssue issue_2 : rawIssues2) {
-                boolean mapped = false;
-                for (RawIssue issue_1 : rawIssues1) {
-                    //如果issue_1已经匹配到一个issue_2,内部循环不再继续
-                    if (!issue_1.isMapped()&&!issue_2.isMapped()&&LocationCompare.isUniqueIssue(issue_1, issue_2)) {
-                        issue_1.setMapped(true);
-                        issue_2.setMapped(true);
-                        mapped = true;
-                        equalsCount++;
-                        String pre_issue_id = issue_1.getIssue_id();
-                        //如果匹配到的上个commit的某个rawIssue已经有了issue_id,说明当前commit这个rawIssue也应该对应到这个issue
-                        issue_2.setIssue_id(pre_issue_id);
-                        Issue issue = issueDao.getIssueByID(pre_issue_id);
-                        issue.setEnd_commit(current_commit_id);
-                        issue.setRaw_issue_end(issue_2.getUuid());
-                        issue.setUpdate_time(DateTimeUtil.getCurrentFormattedDate());
-                        issues.add(issue);
-                        break;
-                    }
-                }
-                if (!mapped) {
-                    //如果当前commit的某个rawIssue没有在上个commit的rawissue列表里面找到匹配，将它作为新的issue插入
-                    String new_IssueId = UUID.randomUUID().toString();
-                    issue_2.setIssue_id(new_IssueId);
-                    String targetFiles = issue_2.getFile_name();
-                    Date date= DateTimeUtil.getCurrentFormattedDate();
-                    insertIssueList.add(new Issue(new_IssueId, issue_2.getType(),category, current_commit_id, current_commit_id, issue_2.getUuid(), issue_2.getUuid(), repo_id, targetFiles,date,date));
-                }
-            }
-            if (!issues.isEmpty()) {
-                //更新issue
-                logger.info("issue update count: "+issues.size());
-                issueDao.batchUpdateIssue(issues);
-                issueEventManager.sendIssueEvent(EventType.MODIFY,issues,category,committer,repo_id);
-            }
-            int eliminatedIssueCount = rawIssues1.size() - equalsCount;
-            int remainingIssueCount = rawIssues2.size();
-            int newIssueCount = rawIssues2.size() - equalsCount;
-            logger.info("rawIssue count in previous commit: "+rawIssues1.size());
-            logger.info("rawIssue count in current commit: "+rawIssues2.size());
-            logger.info("equals count: "+equalsCount);
-            logger.info("eliminatedIssueCount: "+eliminatedIssueCount);
-            logger.info("remainingIssueCount: "+remainingIssueCount);
-            logger.info("newIssueCount: "+newIssueCount);
-            dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
-            rawIssueDao.batchUpdateIssueId(rawIssues2);
+        String committer="";
+        JSONObject commitInfo=restTemplate.getForObject(commitServicePath+"/"+current_commit_id,JSONObject.class);
+        if(commitInfo!=null){
+            committer=commitInfo.getJSONObject("data").getString("developer");
         }
-        //新的issue
-        if (!insertIssueList.isEmpty()) {
-            issueDao.insertIssueList(insertIssueList);
-            issueEventManager.sendIssueEvent(EventType.NEW,insertIssueList,category,committer,repo_id);
-            logger.info("new insert issue count: "+insertIssueList.size());
-        }
-        if (!pre_commit_id.equals(current_commit_id)) {
-            addSolvedTag(repo_id, pre_commit_id,category,committer);
+        if(category.equals("bug")){
+            bugMappingService.mapping(repo_id,pre_commit_id,current_commit_id,category,committer);
+        }else if(category.equals("clone")){
+            System.out.println("123");
         }
     }
 

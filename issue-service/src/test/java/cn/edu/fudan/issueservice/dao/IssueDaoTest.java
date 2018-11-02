@@ -68,7 +68,7 @@ public class IssueDaoTest extends IssueServiceApplicationTests {
     @Test
     @Transactional
     public void deleteIssueByProjectId() {
-        issueDao.deleteIssueByRepoId("222");
+        issueDao.deleteIssueByRepoIdAndCategory("222","bug");
     }
 
     @Test

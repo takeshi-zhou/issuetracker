@@ -72,10 +72,10 @@ public class IssueController {
         }
     }
 
-    @DeleteMapping(value = {"/inner/issue/{repoId}"})
-    public Object deleteIssues(@PathVariable("repoId") String repoId) {
+    @DeleteMapping(value = {"/inner/issue/{category}/{repoId}"})
+    public Object deleteIssues(@PathVariable("category")String category,@PathVariable("repoId") String repoId) {
         try {
-            issueService.deleteIssueByRepoId(repoId);
+            issueService.deleteIssueByRepoIdAndCategory(repoId,category);
             return new ResponseBean(200, "issues delete success!", null);
         } catch (Exception e) {
             e.printStackTrace();

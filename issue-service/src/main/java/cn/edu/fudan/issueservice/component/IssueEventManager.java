@@ -2,6 +2,7 @@ package cn.edu.fudan.issueservice.component;
 
 import cn.edu.fudan.issueservice.domain.EventType;
 import cn.edu.fudan.issueservice.domain.Issue;
+import cn.edu.fudan.issueservice.domain.RawIssue;
 import cn.edu.fudan.issueservice.util.DateTimeUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -10,7 +11,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -29,41 +32,39 @@ public class IssueEventManager {
         this.restTemplate = restTemplate;
     }
 
-    public void sendIssueEvent(EventType eventType, List<Issue> newIssues, String category, String committer, String repoId){
-        JSONArray newIssueEvents=new JSONArray();
+    public void sendIssueEvent(EventType eventType, List<Issue> issues,String committer, String repoId){
+        JSONArray issueEvents=new JSONArray();
         String now= DateTimeUtil.format(LocalDateTime.now());
-        for(Issue issue:newIssues){
+        for(Issue issue:issues){
             JSONObject event=new JSONObject();
             event.put("id", UUID.randomUUID());
-            switch (eventType){
-                case NEW:
-                    if(category.equals("bug"))
-                        event.put("eventType","NEW_BUG");
-                    else if (category.equals("clone"))
-                        event.put("eventType","NEW_CLONE_INSTANCE");
-                    break;
-                case MODIFY:
-                    if(category.equals("bug"))
-                        event.put("eventType","MODIFY_BUG");
-                    else if (category.equals("clone"))
-                        event.put("eventType","MODIFY_CLONE_INSTANCE");
-                    break;
-                case ELIMINATE:
-                    if(category.equals("bug"))
-                        event.put("eventType","ELIMINATE_BUG");
-                    else if (category.equals("clone"))
-                        event.put("eventType","REMOVE_CLONE_INSTANCE");
-                    break;
-                    default:break;
-            }
-
             event.put("targetType",issue.getType());
             event.put("targetId",issue.getUuid());
             event.put("targetCommitter",committer);
             event.put("repoId",repoId);
             event.put("createTime",now);
-            newIssueEvents.add(event);
+            event.put("eventType",eventType.toString());
+            issueEvents.add(event);
         }
-        restTemplate.postForObject(eventServicePath,newIssueEvents,JSONObject.class);
+        if(!issueEvents.isEmpty())
+             restTemplate.postForObject(eventServicePath,issueEvents,JSONObject.class);
+    }
+
+    public void sendRawIssueEvent(EventType eventType,List<RawIssue> rawIssues,String committer,String repoId){
+        JSONArray issueEvents=new JSONArray();
+        String now= DateTimeUtil.format(LocalDateTime.now());
+        for(RawIssue rawIssue:rawIssues){
+            JSONObject event=new JSONObject();
+            event.put("id", UUID.randomUUID());
+            event.put("targetType",rawIssue.getType());
+            event.put("targetId",rawIssue.getUuid());
+            event.put("targetCommitter",committer);
+            event.put("repoId",repoId);
+            event.put("createTime",now);
+            event.put("eventType",eventType.toString());
+            issueEvents.add(event);
+        }
+        if(!issueEvents.isEmpty())
+            restTemplate.postForObject(eventServicePath,issueEvents,JSONObject.class);
     }
 }

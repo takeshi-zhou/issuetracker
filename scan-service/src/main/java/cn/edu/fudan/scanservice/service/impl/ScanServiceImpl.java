@@ -54,8 +54,8 @@ public class ScanServiceImpl implements ScanService {
     }
 
     @Override
-    public void deleteScanByRepoId(String repoId) {
-        scanDao.deleteScanByRepoId(repoId);
+    public void deleteScanByRepoIdAndCategory(String repoId,String category) {
+        scanDao.deleteScanByRepoIdAndCategory(repoId,category);
     }
 
     @Override

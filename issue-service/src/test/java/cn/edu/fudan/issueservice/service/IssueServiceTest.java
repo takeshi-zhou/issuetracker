@@ -151,7 +151,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         List<String> stringList = new ArrayList<String>();
         stringList.add("iss1");
         stringList.add("iss2");
-        PowerMockito.when(issueDao.getIssueIdsByRepoId(repo_id)).thenReturn(stringList);
+        PowerMockito.when(issueDao.getIssueIdsByRepoIdAndCategory(repo_id,"bug")).thenReturn(stringList);
         ResponseBean responseBean = new ResponseBean();
         responseBean.setCode(401);
         JSONObject jsonObject = JSONObject.parseObject(JSONObject.toJSON(responseBean).toString());
@@ -160,7 +160,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
          */
         PowerMockito.when(restTemplate.postForObject(tagServicePath+"/tagged-delete",stringList, JSONObject.class)).thenReturn(null);
         try{
-            issueService.deleteIssueByRepoId(repo_id);
+            issueService.deleteIssueByRepoIdAndCategory(repo_id,"bug");
         }catch(RuntimeException e){
             Assert.assertEquals("tag item delete failed!",e.getMessage());
         }
@@ -169,7 +169,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
          */
         PowerMockito.when(restTemplate.postForObject(tagServicePath+"/tagged-delete",stringList, JSONObject.class)).thenReturn(jsonObject);
         try{
-            issueService.deleteIssueByRepoId(repo_id);
+            issueService.deleteIssueByRepoIdAndCategory(repo_id,"bug");
         }catch(RuntimeException e){
             Assert.assertEquals("tag item delete failed!",e.getMessage());
         }
@@ -179,8 +179,8 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         responseBean.setCode(200);
         jsonObject = JSONObject.parseObject(JSONObject.toJSON(responseBean).toString());
         PowerMockito.when(restTemplate.postForObject(tagServicePath+"/tagged-delete",stringList, JSONObject.class)).thenReturn(jsonObject);
-        issueService.deleteIssueByRepoId(repo_id);
-        verify(issueDao,Mockito.atLeastOnce()).deleteIssueByRepoId(repo_id);
+        issueService.deleteIssueByRepoIdAndCategory(repo_id,"bug");
+        verify(issueDao,Mockito.atLeastOnce()).deleteIssueByRepoIdAndCategory(repo_id,"bug");
 
     }
 

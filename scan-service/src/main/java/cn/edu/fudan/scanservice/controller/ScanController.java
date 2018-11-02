@@ -50,10 +50,10 @@ public class ScanController {
 
     //下面都是供其它服务调用的内部接口
 
-    @DeleteMapping(value = {"/inner/scan/{repoId}"})
-    public Object deleteScans(@PathVariable("repoId") String repoId) {
+    @DeleteMapping(value = {"/inner/scan/{category}/{repoId}"})
+    public Object deleteScans(@PathVariable("category")String category,@PathVariable("repoId") String repoId) {
         try {
-            scanService.deleteScanByRepoId(repoId);
+            scanService.deleteScanByRepoIdAndCategory(repoId,category);
             return new ResponseBean(200, "scan delete success!", null);
         } catch (Exception e) {
             e.printStackTrace();

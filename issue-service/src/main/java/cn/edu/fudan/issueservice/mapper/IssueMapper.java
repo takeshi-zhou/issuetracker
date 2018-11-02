@@ -13,7 +13,7 @@ public interface IssueMapper {
 
     void insertIssueList(List<Issue> list);
 
-    void deleteIssueByRepoId(String repo_id);
+    void deleteIssueByRepoIdAndCategory(@Param("repo_id")String repo_id,@Param("category")String category);
 
     void batchUpdateIssue(List<Issue> list);
 
@@ -27,5 +27,5 @@ public interface IssueMapper {
 
     List<String> getExistIssueTypes(@Param("category")String category);
 
-    List<String> getIssueIdsByRepoId(String repo_id);
+    List<String> getIssueIdsByRepoIdAndCategory(@Param("repo_id")String repo_id,@Param("category")String category);
 }

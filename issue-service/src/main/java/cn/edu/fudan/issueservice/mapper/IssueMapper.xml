@@ -194,8 +194,8 @@
         </where>
     </update>
 
-    <delete id="deleteIssueByRepoId" parameterType="String">
-        delete from issue where repo_id = #{repo_id}
+    <delete id="deleteIssueByRepoIdAndCategory" parameterType="String">
+        delete from issue where repo_id = #{repo_id} and category = #{category}
     </delete>
 
     <select id="getExistIssueTypes" resultType="String">
@@ -204,8 +204,8 @@
         where category = #{category} order by types
     </select>
 
-    <select id="getIssueIdsByRepoId" resultType="String" parameterType="String">
-        select uuid from issue where repo_id = #{repo_id}
+    <select id="getIssueIdsByRepoIdAndCategory" resultType="String" parameterType="String">
+        select uuid from issue where repo_id = #{repo_id} and category = #{category}
     </select>
 
 
