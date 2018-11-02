@@ -1,6 +1,7 @@
 package cn.edu.fudan.eventservice.dao;
 
 import cn.edu.fudan.eventservice.domain.Event;
+import cn.edu.fudan.eventservice.domain.EventType;
 import cn.edu.fudan.eventservice.mapper.EventMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -26,7 +27,11 @@ public class EventDao {
         log.info("insert {} events",count);
     }
 
-    public List<Event> getCurrentEvents(List<String> repoIds){
-        return eventMapper.getRecentEvents(repoIds);
+    public void deleteEventByRepoIdAndCategory(List<EventType> list,String repo_id){
+        eventMapper.deleteEventByRepoIdAndCategory(list, repo_id);
+    }
+
+    public List<Event> getRecentEventsByEventType(List<String> repoIds, EventType eventType){
+        return eventMapper.getRecentEventsByEventType(repoIds,eventType);
     }
 }

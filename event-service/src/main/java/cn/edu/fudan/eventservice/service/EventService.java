@@ -12,5 +12,7 @@ public interface EventService {
 
     void addEvents(List<Event> events);
 
-    List<Event> getCurrentEvents(List<String> repoIds);
+    void deleteEvents(String repo_id,String category);
+
+    Object getCurrentEvents(String userToken,String category);
 }

@@ -38,11 +38,21 @@
             )
         </foreach>
     </insert>
+
+    <delete id="deleteEventByRepoIdAndCategory" >
+        delete from event where repo_id = #{repo_id} and event_type in
+        <foreach collection="list" separator="," open="(" close=")" item="event_type">
+            #{event_type}
+        </foreach>
+    </delete>
     
-    <select id="getRecentEvents" parameterType="list" resultMap="event">
+    <select id="getRecentEventsByEventType" parameterType="list" resultMap="event">
         select * from event where repo_id in
         <foreach collection="list" separator="," open="(" close=")" item="repo_id">
             #{repo_id}
         </foreach>
+        and event_type = #{event_type}
+        order by create_time desc
+        limit 100
     </select>
 </mapper>

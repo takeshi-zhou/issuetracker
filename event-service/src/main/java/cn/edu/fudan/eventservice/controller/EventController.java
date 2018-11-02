@@ -3,10 +3,9 @@ package cn.edu.fudan.eventservice.controller;
 import cn.edu.fudan.eventservice.domain.Event;
 import cn.edu.fudan.eventservice.domain.ResponseBean;
 import cn.edu.fudan.eventservice.service.EventService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -33,8 +32,22 @@ public class EventController {
         }
     }
 
-    @PostMapping("/event/current-events")
-    public Object getCurrentEvents(@RequestBody List<String> repoIds){
-        return eventService.getCurrentEvents(repoIds);
+    @GetMapping("/event/current-events")
+    public Object getCurrentEvents(HttpServletRequest request,@RequestParam(name="category",defaultValue = "bug")String category){
+        String token=request.getHeader("token");
+        if(token==null)
+            throw new RuntimeException("need user token!");
+        return eventService.getCurrentEvents(token,category);
+    }
+
+    @DeleteMapping("/inner/event/{category}/{repoId}")
+    public Object deleteEvents(@PathVariable("category")String category,@PathVariable("repoId")String repoId){
+        try {
+            eventService.deleteEvents(repoId,category);
+            return new ResponseBean(200, "event delete success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "event delete failed!", null);
+        }
     }
 }
