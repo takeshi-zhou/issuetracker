@@ -26,7 +26,6 @@ public class HttpConfig {
         headers.add(headerKey, headerValue);
         return headers;
     }
-
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();

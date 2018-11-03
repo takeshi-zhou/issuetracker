@@ -31,7 +31,7 @@ import java.util.concurrent.*;
  * @author WZY
  * @version 1.0
  **/
-@Component
+@Component("cloneScanTask")
 public class CloneScanTask {
 
     private static final Logger logger= LoggerFactory.getLogger(CloneScanTask.class);
