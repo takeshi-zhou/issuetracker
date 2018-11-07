@@ -201,11 +201,12 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
             删除成功
          */
         String repo = "repo";
+        String category = "bug";
         ResponseBean responseBean = new ResponseBean();
         responseBean.setCode(200);
         responseBean.setMsg("issues delete success!");
         doNothing().when(service).deleteIssueByRepoIdAndCategory(repo,"bug");
-        MvcResult resultCorrect = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/issue/"+repo)
+        MvcResult resultCorrect = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/issue/"+category+"/"+repo)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .session(session)
         ).andReturn();
@@ -217,8 +218,8 @@ public class IssueControllerTest extends IssueServiceApplicationTests {
          */
         responseBean.setCode(401);
         responseBean.setMsg("issues delete failed!");
-        PowerMockito.when(service, "deleteIssueByRepoId", eq(repo)).thenThrow(new RuntimeException());
-        MvcResult resultInCorrect = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/issue/"+repo)
+        PowerMockito.when(service, "deleteIssueByRepoIdAndCategory", eq(repo),eq(category)).thenThrow(new RuntimeException());
+        MvcResult resultInCorrect = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/issue/"+category+"/"+repo)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .session(session)
         ).andReturn();

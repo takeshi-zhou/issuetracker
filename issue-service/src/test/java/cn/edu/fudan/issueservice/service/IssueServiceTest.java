@@ -7,6 +7,7 @@ import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.IssueCount;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 import cn.edu.fudan.issueservice.domain.ResponseBean;
+import cn.edu.fudan.issueservice.service.impl.BaseMappingServiceImpl;
 import cn.edu.fudan.issueservice.service.impl.IssueServiceImpl;
 import cn.edu.fudan.issueservice.util.TestDataMaker;
 import com.alibaba.fastjson.JSON;
@@ -39,11 +40,12 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
-@PrepareForTest({IssueService.class, IssueServiceImpl.class, IssueDao.class, RawIssueDao.class,RestTemplate.class, StringRedisTemplate.class,HashOperations.class, ResponseEntity.class, ListOperations.class})
+@PrepareForTest({IssueService.class, IssueServiceImpl.class, IssueDao.class, RawIssueDao.class,RestTemplate.class, StringRedisTemplate.class,HashOperations.class, ResponseEntity.class, ListOperations.class, BaseMappingServiceImpl.class})
 public class IssueServiceTest extends IssueServiceApplicationTests {
 
     @Value("${tag.service.path}")
@@ -58,11 +60,11 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
     private String commitServicePath;
 
 
-    @Mock
-    private IssueDao issueDao;
+    @Autowired
+    private RawIssueDao rawIssueDao;
 
     @Mock
-    private RawIssueDao rawIssueDao;
+    private IssueDao issueDao;
 
     @Mock
     private RestTemplate restTemplate;
@@ -85,6 +87,9 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
     @Mock
     private ResponseEntity repoIdResponseEntity;
 
+    @Mock
+    private BaseMappingServiceImpl baseMappingService;
+
 
     @Autowired
     @InjectMocks
@@ -106,6 +111,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
 
     @Before
     public void setup() throws Exception {
+        rawIssueDao = Mockito.mock(RawIssueDao.class);
         testDataMaker = new TestDataMaker();
 
         issue1 = testDataMaker.issueMaker1();
@@ -122,7 +128,6 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         rawIssues2.add(rawIssue2);
         rawIssues2.add(rawIssue3);
         MemberModifier.field(IssueServiceImpl.class, "issueDao").set(issueService, issueDao);
-        MemberModifier.field(IssueServiceImpl.class, "rawIssueDao").set(issueService, rawIssueDao);
         MemberModifier.field(IssueServiceImpl.class, "restTemplate").set(issueService, restTemplate);
         MemberModifier.field(IssueServiceImpl.class, "stringRedisTemplate").set(issueService, stringRedisTemplate);
         System.out.println("finish mocking");
@@ -484,31 +489,34 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
     }
 
 
-
+    /*
+        只验证了bugmapping
+     */
     @Test
     @Ignore
     public void startMapping() {
         String repo_id = "repo_id";
-        String category = "category";
+        String category = "bug";
         String pre_commit_id ;
         String current_commit_id ;
-        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "dashboardUpdate")).toReturn(Void.TYPE);
+        MemberModifier.stub(MemberMatcher.method(BaseMappingServiceImpl.class, "dashboardUpdate")).toReturn(Void.TYPE);
+        PowerMockito.when(restTemplate.getForObject(anyString(),eq(JSONObject.class))).thenReturn(null);
         List<String> issueIds =new ArrayList<>();
         issueIds.add("iss1");
         issueIds.add("iss2");
 
 
         /*
-            当project第一次扫描，且当前版本没有raw issue
+            当project第一次扫描，且当前版本没有raw issue,且无commitinfo
          */
         pre_commit_id = current_commit_id = "commit_id";
-        PowerMockito.when(rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id)).thenReturn(Collections.emptyList());
+        MemberModifier.stub(MemberMatcher.method(RawIssueDao.class, "getRawIssueByCommitIDAndCategory")).toReturn(Collections.emptyList());
         issueService.startMapping(repo_id,pre_commit_id,current_commit_id,category);
         verify(rawIssueDao,Mockito.never()).batchUpdateIssueId(any(List.class));
         /*
             当project第一次扫描，且当前版本有raw issue
          */
-        PowerMockito.when(rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id)).thenReturn(rawIssues1);
+        MemberModifier.stub(MemberMatcher.method(RawIssueDao.class, "getRawIssueByCommitIDAndCategory")).toReturn(rawIssues1);
         doNothing().when(rawIssueDao).batchUpdateIssueId(rawIssues1);
         doNothing().when(issueDao).insertIssueList(any(List.class));
         issueService.startMapping(repo_id,pre_commit_id,current_commit_id,category);
@@ -519,7 +527,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
          */
         pre_commit_id = "pre_commit_id";
         current_commit_id = "current_commit_id";
-        PowerMockito.when(rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id)).thenReturn(Collections.emptyList());
+        MemberModifier.stub(MemberMatcher.method(RawIssueDao.class, "getRawIssueByCommitIDAndCategory")).toReturn(Collections.emptyList());
         issueService.startMapping(repo_id,pre_commit_id,current_commit_id,category);
         verify(rawIssueDao,Mockito.times(1)).batchUpdateIssueId(any(List.class));
         /*
