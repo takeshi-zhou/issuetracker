@@ -31,8 +31,12 @@ public class CloneScanServiceImpl implements CloneScanService {
     private CloneScanTask cloneScanTask;
 
     @Autowired
-    public CloneScanServiceImpl(KafkaTemplate kafkaTemplate, CloneScanTask cloneScanTask) {
+    public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
+    }
+
+    @Autowired
+    public void setCloneScanTask(CloneScanTask cloneScanTask) {
         this.cloneScanTask = cloneScanTask;
     }
 

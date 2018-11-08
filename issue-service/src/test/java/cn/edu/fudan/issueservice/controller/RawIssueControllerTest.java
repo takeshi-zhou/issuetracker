@@ -172,11 +172,12 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
             删除成功
          */
         String repo = "repo";
+        String category = "bug";
         ResponseBean responseBean = new ResponseBean();
         responseBean.setCode(200);
         responseBean.setMsg("rawIssue delete success!");
-        doNothing().when(service).deleteRawIssueByRepoIdAndCategory(repo,"bug");
-        MvcResult resultCorrect = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/raw-issue/"+repo)
+        doNothing().when(service).deleteRawIssueByRepoIdAndCategory(repo,category);
+        MvcResult resultCorrect = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/raw-issue/"+category+"/"+repo)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .session(session)
         ).andReturn();
@@ -188,8 +189,8 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
          */
         responseBean.setCode(401);
         responseBean.setMsg("rawIssue delete failed!");
-        PowerMockito.when(service, "deleteRawIssueByRepoId", eq(repo)).thenThrow(new RuntimeException());
-        MvcResult resultInCorrect = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/raw-issue/"+repo)
+        PowerMockito.when(service, "deleteRawIssueByRepoIdAndCategory", eq(repo),eq(category)).thenThrow(new RuntimeException());
+        MvcResult resultInCorrect = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/raw-issue/"+category+"/"+repo)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .session(session)
         ).andReturn();

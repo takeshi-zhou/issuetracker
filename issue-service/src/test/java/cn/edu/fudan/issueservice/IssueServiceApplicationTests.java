@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(SpringRunner.class)
 @SpringBootTest(classes = IssueServiceApplication.class)
-@TestPropertySource("classpath:testApplication.properties")
+@TestPropertySource("classpath:application-test.properties")
 @PowerMockIgnore("javax.management.*")
 public class IssueServiceApplicationTests {
 
