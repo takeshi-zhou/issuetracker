@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
+
+    <springProfile name="develop">
+        <!-- 开发环境时激活 -->
+    </springProfile>
+
+    <springProfile name="product">
+        <!-- 生产环境时激活 -->
+    </springProfile>
+
     <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
-    <property name="LOG_HOME" value="E:\clone_service\Log"/>
+    <springProperty name="LOG_HOME" source="log.home"/>
 
     <!--控制台输出-->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
