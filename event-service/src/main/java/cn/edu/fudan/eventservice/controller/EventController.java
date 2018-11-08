@@ -33,6 +33,7 @@ public class EventController {
     }
 
     @GetMapping("/event/current-events")
+    @CrossOrigin
     public Object getCurrentEvents(HttpServletRequest request,@RequestParam(name="category",defaultValue = "bug")String category){
         String token=request.getHeader("token");
         if(token==null)
