@@ -95,15 +95,6 @@ public class ScanServiceImpl implements ScanService {
                     } else {
                         commit.put("isScanned", false);
                     }
-                    /*
-                    if(scannedCommitId.contains(commit_id)){
-                        commit.put("isScanned",true);
-                        if(commit_id.equals(lastScannedCommitId)){
-                            index=i;
-                        }
-                    }else{
-                        commit.put("isScanned",false);
-                    }*/
                 }
             }
             Map<String, Object> result = new HashMap<>();
