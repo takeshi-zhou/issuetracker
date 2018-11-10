@@ -13,6 +13,7 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,6 +32,13 @@ public class FindBugScanOperation extends ScanOperationAdapter {
     private String resultFileHome;
     @Value("${repoHome}")
     private String repoHome;
+
+    private ExcuteShellUtil excuteShellUtil;
+
+    @Autowired
+    public void setExcuteShellUtil(ExcuteShellUtil excuteShellUtil) {
+        this.excuteShellUtil = excuteShellUtil;
+    }
 
     @SuppressWarnings("unchecked")
     private String getJsonString(Element element) {
@@ -51,7 +59,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
     }
 
     private boolean executeAnalyzeTool(String repoPath, String projectName) {
-        return ExcuteShellUtil.excuteAnalyse(repoPath, projectName);
+        return excuteShellUtil.excuteAnalyse(repoPath, projectName);
     }
 
     @SuppressWarnings("unchecked")
@@ -59,7 +67,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         Element sourceLineInClass = bugInstance.element("Class").element("SourceLine");
         String className = sourceLineInClass.attributeValue("classname");
         String fileName = sourceLineInClass.attributeValue("sourcefile");
-        String filePath = ExcuteShellUtil.getFileLocation(repoName, fileName);
+        String filePath = excuteShellUtil.getFileLocation(repoName, fileName);
         if (filePath == null) {
             logger.error(fileName + " 找不到源文件！");
             return null;
@@ -156,7 +164,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
     }
 
     private boolean compile(String repoPath) {
-        return ExcuteShellUtil.excuteMvn(repoPath);
+        return excuteShellUtil.excuteMvn(repoPath);
     }
 
     @Override

@@ -9,6 +9,7 @@ pipeline {
     triggers {
         pollSCM ignorePostCommitHooks: true, scmpoll_spec: '''TZ=Asia/Shanghai
          H 3 * * *'''
+		 H 15 * * *'''
     }
 
     stages {
@@ -29,14 +30,14 @@ pipeline {
         stage('Tests') {
             steps {
                 echo 'Tests'
-                sh "'${mvnHome}/bin/mvn' -Dmaven.test.failure.ignore test"
+                sh "'${mvnHome}/bin/mvn' test"
             }
         }
         stage('Deploy') {
             steps {
                 echo 'Deploying....'
                 sh "'${mvnHome}/bin/mvn' -Dmaven.test.skip=true package"
-                // sh 'scp $(find $(pwd) -name *.jar)  root@10.141.221.80:/home && ssh root@10.141.221.80 "/root/jenkinsShellForRestart" '
+                sh 'scp $(find $(pwd) -name *.jar)  fdse@10.141.221.85:/home/fdse/user/issueTracker/jarFromJenkins && ssh fdse@10.141.221.85 "/home/fdse/user/issueTracker/jenkinsShellForRestart" '
             }
         }
     }

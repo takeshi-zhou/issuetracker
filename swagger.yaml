@@ -328,19 +328,18 @@ paths:
           description: "failed"
           schema:
             $ref: "#/definitions/ResponseBean"
-  /inner/project/repo-path/{project_id}:
     get:
       tags:
       - "project-service"
-      summary: "get Repo Path"
-      description: "get Repo Path by project_id"
-      operationId: "getRepoPath"
+      summary: "get project by  repo_id"
+      description: "get project by  repo_id"
+      operationId: "get project by  repo_id"
       produces:
       - "application/json"
       parameters:
       - in: "path"
-        name: "project_id"
-        description: "project id"
+        name: "repo_id"
+        description: "repo id"
         required: true
         type : "string"
       responses:
@@ -372,7 +371,7 @@ paths:
             type: "string"
         401:
           description: "Invalid ID supplied"
-  /inner/project/{projectId}:
+  /inner/project/{project-id}:
     get:
       tags:
       - "project-service"
@@ -383,7 +382,7 @@ paths:
       - "application/json"
       parameters:
       - in: "path"
-        name: "projectId"
+        name: "project-id"
         description: "project that user want to get"
         required: true
         type : "string"
@@ -394,13 +393,13 @@ paths:
             $ref: "#/definitions/Project"
         401:
           description: "Invalid ID supplied"
-  /inner/project/project-id:
+  /inner/projects:
     get:
       tags:
       - "project-service"
-      summary: "get  projectId List"
+      summary: "get  project object List by account id"
       description: "get  projectId List by account id"
-      operationId: "getProjectIds"
+      operationId: "getProjects"
       produces:
       - "application/json"
       parameters:
@@ -415,7 +414,7 @@ paths:
           schema:
             type: "array"
             items:
-              type: "string"
+              $ref: "#/definitions/Project"
         401:
           description: "Invalid ID supplied"
 
@@ -826,7 +825,7 @@ paths:
             $ref: '#/definitions/ResponseBean'
 
 
-  /inner/issue/{repoId}:
+  /inner/issue/{category}/{repoId}:
     delete:
       tags:
       - "issue-service"
@@ -835,6 +834,11 @@ paths:
       produces:
       - "application/json"
       parameters:
+      - in: "path"
+        name: "category"
+        description: ""
+        required: true
+        type: "string"
       - in: "path"
         name: "repoId"
         description: ""
@@ -981,7 +985,7 @@ paths:
           schema:
             $ref: "#/definitions/ResponseBean"
 
-  /inner/raw-issue/{repoId}:
+  /inner/raw-issue/{category}/{repoId}:
     delete:
       tags:
       - "issue-service"
@@ -990,6 +994,11 @@ paths:
       produces:
       - "application/json"
       parameters:
+      - in: "path"
+        name: "category"
+        description: " "
+        required: true
+        type: "string"
       - in: "path"
         name: "repoId"
         description: " "
@@ -1276,8 +1285,57 @@ paths:
           schema:
             $ref: "#/definitions/ResponseBean"
 
+  /event:
+    post:
+      tags:
+      - event-service
+      summary: "add some events"
+      operationId: "addEvents"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "events"
+        description: "events to add"
+        required: true
+        schema:
+          $ref: "#/definitions/EventList"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              code:
+                type: "string"
+        401:
+          description: "failed operation"
 
-
+  /event/current-events:
+    get:
+      tags:
+      - event-service
+      summary: "query current events list By userToken"
+      operationId: "current-events"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "token"
+        description: "get userToken from Header"
+        required: true
+        type: "string"
+      - in: "query"
+        name: "category"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description : "succsssful"
+          schema:
+            $ref: "#/definitions/EventList"
+        400:
+          description: "failed"
 
 
   /commit:
@@ -1596,10 +1654,33 @@ definitions:
       category:
         type: "string"
 
+  EventObject:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      eventType:
+        type: "string"
+      targetType:
+        type: "string"
+      targetId:
+        type: "string"
+      targetCommitter:
+        type: "string"
+      repoId:
+        type: "string"
+      createTime:
+        type: "string"
+
   RawIssueList:
     type: "array"
     items:
       $ref: "#/definitions/RawIssue"
+
+  EventList:
+    type: "array"
+    items:
+      $ref: "#/definitions/EventObject"
 
 
   LocationList:
