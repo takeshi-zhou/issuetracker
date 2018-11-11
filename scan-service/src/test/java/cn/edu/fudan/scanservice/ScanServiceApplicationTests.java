@@ -1,10 +1,8 @@
 package cn.edu.fudan.scanservice;
 
 import cn.edu.fudan.scanservice.service.impl.ScanOperationAdapter;
-import com.alibaba.fastjson.JSONObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -15,20 +13,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestTemplate;
-
-import javax.annotation.Resource;
 
 
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(SpringRunner.class)
 @SpringBootTest(classes = ScanServiceApplication.class)
-@TestPropertySource("classpath:testApplication.properties")
+@TestPropertySource("classpath:application-test.properties")
 @PowerMockIgnore("javax.management.*")
 public class ScanServiceApplicationTests {
 

@@ -148,8 +148,9 @@ public class ScanControllerTest extends ScanServiceApplicationTests {
             当删除成功时
          */
         String repoId = "repoId";
-        doNothing().when(scanService).deleteScanByRepoIdAndCategory(repoId,"bug");
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/scan/"+repoId)
+        String category = "bug";
+        doNothing().when(scanService).deleteScanByRepoIdAndCategory(repoId,category);
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/scan/"+category+"/"+repoId)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .header("token", token)
                 .session(session)
@@ -159,8 +160,8 @@ public class ScanControllerTest extends ScanServiceApplicationTests {
         /*
             当删除失败时
          */
-        doThrow(new RuntimeException()).when(scanService).deleteScanByRepoIdAndCategory(repoId,"bug");
-        result  = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/scan/"+repoId)
+        doThrow(new RuntimeException()).when(scanService).deleteScanByRepoIdAndCategory(repoId,category);
+        result  = mockMvc.perform(MockMvcRequestBuilders.delete("/inner/scan/"+category+"/"+repoId)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .header("token", token)
                 .session(session)
