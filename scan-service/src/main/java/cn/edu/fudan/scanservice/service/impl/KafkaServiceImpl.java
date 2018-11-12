@@ -127,6 +127,10 @@ public class KafkaServiceImpl implements KafkaService {
         }
         String projectId = requestParam.getString("projectId");
         String commitId = requestParam.getString("commitId");
+        if(projectId==null||projectId.equals(""))
+            throw new IllegalArgumentException("please provide projectId");
+        if(commitId==null||commitId.equals(""))
+            throw new IllegalArgumentException("please provide commitId");
         initialProject(projectId);
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
         String repoId = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + projectId, HttpMethod.GET, entity, String.class).getBody();
