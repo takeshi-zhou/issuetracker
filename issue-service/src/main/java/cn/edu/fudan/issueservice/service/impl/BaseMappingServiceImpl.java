@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,6 +28,8 @@ public class BaseMappingServiceImpl implements MappingService {
     private String solvedTagId;
     @Value("${tag.service.path}")
     private String tagServicePath;
+    @Value("${commit.service.path}")
+    private String commitServicePath;
 
     IssueEventManager issueEventManager;
     IssueDao issueDao;
@@ -58,6 +61,29 @@ public class BaseMappingServiceImpl implements MappingService {
     public void setStringRedisTemplate(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
     }
+
+    Date getCommitDate(String commitId){
+        JSONObject response=restTemplate.getForObject(commitServicePath+"/commit-time?commit_id="+commitId,JSONObject.class);
+        if(response!=null){
+            return response.getJSONObject("data").getDate("commit_time");
+        }
+        return null;
+    }
+
+    void newIssueInfoUpdate(List<Issue> issueList,String category,String repo_id){
+        String todayNewIssueKey="dashboard:"+category+":day:new:" + repo_id;
+        String weekNewIssueKey="dashboard:"+category+":week:new" + repo_id;
+        String monthNewIssueKey="dashboard:"+category+":month:new"+repo_id;
+        stringRedisTemplate.setEnableTransactionSupport(true);
+        stringRedisTemplate.multi();
+        for(Issue issue:issueList){
+            stringRedisTemplate.opsForList().rightPush(todayNewIssueKey,issue.getUuid());
+            stringRedisTemplate.opsForList().rightPush(weekNewIssueKey,issue.getUuid());
+            stringRedisTemplate.opsForList().rightPush(monthNewIssueKey,issue.getUuid());
+        }
+        stringRedisTemplate.exec();
+    }
+
 
     void dashboardUpdate(String repo_id, int newIssueCount, int remainingIssueCount, int eliminatedIssueCount, String category) {
         //注意只有remaining是覆盖的，其余是累增的

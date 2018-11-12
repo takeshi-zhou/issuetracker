@@ -61,7 +61,7 @@ public class AnotherCloneMappingServiceImpl extends CloneMappingServiceImpl {
             if (rawIssues == null || rawIssues.isEmpty())
                 return;
             Map<String,List<RawIssue>> map=rawIssues.stream().collect(Collectors.groupingBy(RawIssue::getType));
-            newCloneInsert(map,map.keySet(),repo_id,current_commit_id,category,committer,date);
+           // newCloneInsert(map,map.keySet(),repo_id,current_commit_id,category,committer,date);
         }else{
             List<RawIssue> rawIssues1 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,pre_commit_id);//旧
             List<RawIssue> rawIssues2 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);//新
@@ -73,7 +73,7 @@ public class AnotherCloneMappingServiceImpl extends CloneMappingServiceImpl {
             Map<String,List<RawIssue>> newGroups=differentSet(map2,intersectionGroup);
             Map<String,List<RawIssue>> removedGroups=differentSet(map1,intersectionGroup);
             updateIssue(intersectionGroup);
-            newCloneInsert(newGroups,newGroups.keySet(),repo_id,current_commit_id,category,committer,date);
+            //newCloneInsert(newGroups,newGroups.keySet(),repo_id,current_commit_id,category,committer,date);
         }
     }
 }

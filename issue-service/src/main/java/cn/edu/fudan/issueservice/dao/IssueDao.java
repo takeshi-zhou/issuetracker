@@ -55,4 +55,12 @@ public class IssueDao {
         return issueMapper.getSolvedIssues(repo_id, commit_id);
     }
 
+
+    public int getSpecificIssueCount(Map<String, Object> map){
+        return issueMapper.getSpecificIssueCount(map);
+    }
+
+    public List<Issue> getSpecificIssues(Map<String, Object> map){
+        return issueMapper.getSpecificIssues(map);
+    }
 }

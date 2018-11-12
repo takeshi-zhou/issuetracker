@@ -1,6 +1,7 @@
 package cn.edu.fudan.issueservice.controller;
 
 import cn.edu.fudan.issueservice.domain.Issue;
+import cn.edu.fudan.issueservice.domain.IssueParam;
 import cn.edu.fudan.issueservice.domain.ResponseBean;
 import cn.edu.fudan.issueservice.service.IssueService;
 import com.alibaba.fastjson.JSONObject;
@@ -57,6 +58,11 @@ public class IssueController {
                                         HttpServletRequest request) {
         String userToken = request.getHeader("token");
         return issueService.getStatisticalResults(month, project_id, userToken,category);
+    }
+
+    @PostMapping("/issue/specific-issues")
+    public Object getSpecificIssues(@RequestBody IssueParam issueParam){
+        return issueService.getSpecificIssues(issueParam);
     }
 
     //下面都是供其他服务调用的内部接口

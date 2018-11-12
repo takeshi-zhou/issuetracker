@@ -80,7 +80,7 @@ public class IssueDaoTest extends IssueServiceApplicationTests {
     @Test
     public void getIssueByID() {
         Issue issue = issueDao.getIssueByID("333");
-        System.out.println(issue.getUuid());
+        System.out.println(issue);
     }
 
     @Test
