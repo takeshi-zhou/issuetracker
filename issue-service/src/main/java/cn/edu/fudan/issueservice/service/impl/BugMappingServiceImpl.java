@@ -27,12 +27,13 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
             if (rawIssues == null || rawIssues.isEmpty())
                 return;
-            Date date= DateTimeUtil.getCurrentFormattedDate();
+            Date commitDate=getCommitDate(current_commit_id);
+            Date date= new Date();
             for (RawIssue rawIssue : rawIssues) {
                 String new_IssueId = UUID.randomUUID().toString();
                 rawIssue.setIssue_id(new_IssueId);
                 String targetFiles = rawIssue.getFile_name();
-                Issue issue = new Issue(new_IssueId, rawIssue.getType(),category, current_commit_id, current_commit_id, rawIssue.getUuid(), rawIssue.getUuid(), repo_id, targetFiles,date,date);
+                Issue issue = new Issue(new_IssueId, rawIssue.getType(),category, current_commit_id,commitDate, current_commit_id,commitDate, rawIssue.getUuid(), rawIssue.getUuid(), repo_id, targetFiles,date,date);
                 insertIssueList.add(issue);
             }
             int newIssueCount = insertIssueList.size();
@@ -46,6 +47,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             List<RawIssue> rawIssues2 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
             if (rawIssues2 == null || rawIssues1.isEmpty())
                 return;
+            Date commitDate = getCommitDate(current_commit_id);
             //装需要更新的
             List<Issue> issues = new ArrayList<>();
             int equalsCount = 0;
@@ -63,6 +65,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                         issue_2.setIssue_id(pre_issue_id);
                         Issue issue = issueDao.getIssueByID(pre_issue_id);
                         issue.setEnd_commit(current_commit_id);
+                        issue.setEnd_commit_date(commitDate);
                         issue.setRaw_issue_end(issue_2.getUuid());
                         issue.setUpdate_time(DateTimeUtil.getCurrentFormattedDate());
                         issues.add(issue);
@@ -75,7 +78,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                     issue_2.setIssue_id(new_IssueId);
                     String targetFiles = issue_2.getFile_name();
                     Date date= DateTimeUtil.getCurrentFormattedDate();
-                    insertIssueList.add(new Issue(new_IssueId, issue_2.getType(),category, current_commit_id, current_commit_id, issue_2.getUuid(), issue_2.getUuid(), repo_id, targetFiles,date,date));
+                    insertIssueList.add(new Issue(new_IssueId, issue_2.getType(),category, current_commit_id, commitDate,current_commit_id,commitDate, issue_2.getUuid(), issue_2.getUuid(), repo_id, targetFiles,date,date));
                 }
             }
             if (!issues.isEmpty()) {
@@ -93,6 +96,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         if (!insertIssueList.isEmpty()) {
             issueDao.insertIssueList(insertIssueList);
             issueEventManager.sendIssueEvent(EventType.NEW_BUG,insertIssueList,committer,repo_id);
+            newIssueInfoUpdate(insertIssueList,category,repo_id);
         }
     }
 }

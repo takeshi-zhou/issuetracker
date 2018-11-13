@@ -3,6 +3,7 @@ package cn.edu.fudan.issueservice.service.impl;
 import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.IssueCount;
+import cn.edu.fudan.issueservice.domain.IssueParam;
 import cn.edu.fudan.issueservice.scheduler.QuartzScheduler;
 import cn.edu.fudan.issueservice.service.IssueService;
 import com.alibaba.fastjson.JSONArray;
@@ -188,6 +189,32 @@ public class IssueServiceImpl implements IssueService {
         return result;
     }
 
+    @Override
+    public Object getSpecificIssues(IssueParam issueParam) {
+        int size=issueParam.getSize();
+        int page=issueParam.getPage();
+        List<String> issueIds=issueParam.getIssueIds();
+        Map<String, Object> result = new HashMap<>();
+        if(issueIds==null||issueIds.isEmpty()){
+            result.put("totalPage", 0);
+            result.put("totalCount", 0);
+            result.put("issueList", Collections.emptyList());
+            return result;
+        }
+
+        Map<String, Object> query = new HashMap<>();
+        query.put("list",issueIds);
+        query.put("category",issueParam.getCategory());
+        int count=issueDao.getSpecificIssueCount(query);
+        query.put("size", size);
+        query.put("start", (page - 1) * size);
+        List<Issue> issues = issueDao.getSpecificIssues(query);
+        result.put("totalPage", count % size == 0 ? count / size : count / size + 1);
+        result.put("totalCount", count);
+        result.put("issueList", issues);
+        return result;
+    }
+
     private String getAccountId(String userToken) {
         HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
         return restTemplate.exchange(innerServicePath + "/user/accountId?userToken=" + userToken, HttpMethod.GET, requestEntity, String.class).getBody();
@@ -210,7 +237,8 @@ public class IssueServiceImpl implements IssueService {
         int remainingCount = remainingObject==null?0:Integer.parseInt((String)remainingObject);
         Object eliminatedObject=stringRedisTemplate.opsForHash().get("dashboard:"+category+":" + duration + ":" + repoId, "eliminated");
         int eliminatedCount = eliminatedObject==null?0:Integer.parseInt((String)eliminatedObject);
-        return new IssueCount(newCount,eliminatedCount,remainingCount);
+        List<String> newIssueIds=stringRedisTemplate.opsForList().range("dashboard:"+category+":"+duration+":new"+ repoId,0,-1);
+        return new IssueCount(newCount,eliminatedCount,remainingCount,newIssueIds);
     }
 
     @Override

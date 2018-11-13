@@ -8,7 +8,9 @@
         <result property="type" column="type"/>
         <result property="category" column="category"/>
         <result property="start_commit" column="start_commit"/>
+        <result property="start_commit_date" column="start_commit_date"/>
         <result property="end_commit" column="end_commit"/>
+        <result property="end_commit_date" column="end_commit_date"/>
         <result property="raw_issue_start" column="raw_issue_start"/>
         <result property="raw_issue_end" column="raw_issue_end"/>
         <result property="repo_id" column="repo_id"/>
@@ -22,7 +24,9 @@
         <result property="type" column="type"/>
         <result property="category" column="category"/>
         <result property="start_commit" column="start_commit"/>
+        <result property="start_commit_date" column="start_commit_date"/>
         <result property="end_commit" column="end_commit"/>
+        <result property="end_commit_date" column="end_commit_date"/>
         <result property="raw_issue_start" column="raw_issue_start"/>
         <result property="raw_issue_end" column="raw_issue_end"/>
         <result property="repo_id" column="repo_id"/>
@@ -41,7 +45,9 @@
         type,
         category,
         start_commit,
+        start_commit_date,
         end_commit,
+        end_commit_date,
         raw_issue_start,
         raw_issue_end,
         repo_id,
@@ -56,7 +62,9 @@
             #{item.type},
             #{item.category},
             #{item.start_commit},
+            #{item.start_commit_date},
             #{item.end_commit},
+            #{item.end_commit_date},
             #{item.raw_issue_start},
             #{item.raw_issue_end},
             #{item.repo_id},
@@ -158,6 +166,13 @@
                     </if>
                 </foreach>
             </trim>
+            <trim prefix="end_commit_date = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    <if test="item.end_commit_date != null">
+                        when uuid=#{item.uuid} then #{item.end_commit_date}
+                    </if>
+                </foreach>
+            </trim>
             <trim prefix="raw_issue_start = case" suffix="end,">
                 <foreach collection="list" item="item">
                     <if test="item.raw_issue_start != null">
@@ -208,5 +223,19 @@
         select uuid from issue where repo_id = #{repo_id} and category = #{category}
     </select>
 
+    <select id="getSpecificIssueCount" resultType="int" parameterType="Map">
+        select count(uuid) from issue where category = #{category} and uuid in
+        <foreach collection="list" separator="," open="(" close=")" item="issue_id">
+            #{issue_id}
+        </foreach>
+    </select>
+
+    <select id="getSpecificIssues" resultMap="issue2" parameterType="Map">
+        select * from issue where category = #{category} and uuid in
+        <foreach collection="list" separator="," open="(" close=")" item="issue_id">
+            #{issue_id}
+        </foreach>
+        limit #{start},#{size}
+    </select>
 
 </mapper>

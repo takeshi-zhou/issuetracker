@@ -331,15 +331,18 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         JSONArray repoIds = JSON.parseArray(JSONObject.toJSON(listRepoIds).toString());
         MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getRepoId")).toReturn(repoId1);
         PowerMockito.when(stringRedisTemplate.opsForHash()).thenReturn(hashOperations);
+        PowerMockito.when(stringRedisTemplate.opsForList()).thenReturn(listOperations);
         Object newIssueCount = "1";
         Object eliminatedIssueCount = "2";
         Object remainingIssueCount = "3";
         PowerMockito.when(hashOperations.get("dashboard:"+category+":"+ duration + ":" + repoId1, "new")).thenReturn(newIssueCount);
         PowerMockito.when(hashOperations.get("dashboard:"+category+":"+ duration + ":" + repoId1, "remaining")).thenReturn(remainingIssueCount);
         PowerMockito.when(hashOperations.get("dashboard:"+category+":"+ duration + ":" + repoId1, "eliminated")).thenReturn(eliminatedIssueCount);
+        PowerMockito.when(listOperations.range("dashboard:"+category+":"+duration+":new"+ repoId1,0,-1)).thenReturn(null);
         PowerMockito.when(hashOperations.get("dashboard:"+category+":"+ duration + ":" + repoId2, "new")).thenReturn(newIssueCount);
         PowerMockito.when(hashOperations.get("dashboard:"+category+":"+ duration + ":" + repoId2, "remaining")).thenReturn(remainingIssueCount);
         PowerMockito.when(hashOperations.get("dashboard:"+category+":"+ duration + ":" + repoId2, "eliminated")).thenReturn(eliminatedIssueCount);
+        PowerMockito.when(listOperations.range("dashboard:"+category+":"+duration+":new"+ repoId2,0,-1)).thenReturn(null);
         /*
             当project_id为null时，且当用户没有添加project时
          */

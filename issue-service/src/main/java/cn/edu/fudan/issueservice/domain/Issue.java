@@ -9,7 +9,9 @@ public class Issue {
     private String type;
     private String category;
     private String start_commit;
+    private Date start_commit_date;
     private String end_commit;
+    private Date end_commit_date;
     private String raw_issue_start;
     private String raw_issue_end;
     private String repo_id;
@@ -30,18 +32,36 @@ public class Issue {
     public Issue() {
     }
 
-    public Issue(String uuid, String type, String category, String start_commit, String end_commit, String raw_issue_start, String raw_issue_end, String repo_id, String target_files, Date create_time, Date update_time) {
+    public Issue(String uuid, String type, String category, String start_commit, Date start_commit_date, String end_commit, Date end_commit_date, String raw_issue_start, String raw_issue_end, String repo_id, String target_files, Date create_time, Date update_time) {
         this.uuid = uuid;
         this.type = type;
         this.category = category;
         this.start_commit = start_commit;
+        this.start_commit_date = start_commit_date;
         this.end_commit = end_commit;
+        this.end_commit_date = end_commit_date;
         this.raw_issue_start = raw_issue_start;
         this.raw_issue_end = raw_issue_end;
         this.repo_id = repo_id;
         this.target_files = target_files;
         this.create_time = create_time;
         this.update_time = update_time;
+    }
+
+    public Date getStart_commit_date() {
+        return start_commit_date;
+    }
+
+    public void setStart_commit_date(Date start_commit_date) {
+        this.start_commit_date = start_commit_date;
+    }
+
+    public Date getEnd_commit_date() {
+        return end_commit_date;
+    }
+
+    public void setEnd_commit_date(Date end_commit_date) {
+        this.end_commit_date = end_commit_date;
     }
 
     public Date getCreate_time() {

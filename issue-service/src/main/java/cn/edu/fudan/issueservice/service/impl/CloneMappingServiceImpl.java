@@ -19,12 +19,13 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
 
 
     //每一次映射完产生的所有的新的clone group
-    void newCloneInsert(Map<String,List<RawIssue>> map,Set<String> groupsNeedInsert,String repo_id,String current_commit_id,String category,String committer,Date date){
+    void newCloneInsert(Map<String,List<RawIssue>> map,Set<String> groupsNeedInsert,String repo_id,String current_commit_id,Date commitDate,String category,String committer,Date date){
         List<Issue> insertIssueList = new ArrayList<>();
+
         for(String group:groupsNeedInsert){
             //所有新的group，每一个都是一个新的issue
             String new_IssueId=UUID.randomUUID().toString();
-            Issue issue = new Issue(new_IssueId, group,category, current_commit_id, current_commit_id, null,null, repo_id, null,date,date);
+            Issue issue = new Issue(new_IssueId, group,category, current_commit_id, commitDate,current_commit_id,commitDate, null,null, repo_id, null,date,date);
             List<RawIssue> rawIssuesInOneGroup=map.get(group);
             for(int i=0;i<rawIssuesInOneGroup.size();i++){
                 RawIssue rawIssue=rawIssuesInOneGroup.get(i);
@@ -40,6 +41,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
         if (!insertIssueList.isEmpty()) {
             issueDao.insertIssueList(insertIssueList);
             issueEventManager.sendIssueEvent(EventType.NEW_CLONE_CLASS,insertIssueList,committer,repo_id);
+            newIssueInfoUpdate(insertIssueList,category,repo_id);
         }
         int newIssueCount = insertIssueList.size();
         int remainingIssueCount = insertIssueList.size();
@@ -50,13 +52,14 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
     @Override
     public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category, String committer) {
         Date date=new Date();
+        Date commitDate = getCommitDate(current_commit_id);
         if (pre_commit_id.equals(current_commit_id)) {
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
             if (rawIssues == null || rawIssues.isEmpty())
                 return;
             Map<String,List<RawIssue>> map=rawIssues.stream().collect(Collectors.groupingBy(RawIssue::getType));
             //对于第一次而言所有的group都是新增的
-            newCloneInsert(map,map.keySet(),repo_id,current_commit_id,category,committer,date);
+            newCloneInsert(map,map.keySet(),repo_id,current_commit_id,commitDate,category,committer,date);
             rawIssueDao.batchUpdateIssueId(rawIssues);
         }else{
             //不是第一次扫描，需要和前一次的commit进行mapping
@@ -85,6 +88,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
                             rawIssue.setIssue_id(issue.getUuid());//当前group的所有rawIssue都对应到匹配到的group的issue
                             if(i==rawIssuesInCurrentGroup.size()-1){
                                 issue.setEnd_commit(current_commit_id);
+                                issue.setEnd_commit_date(commitDate);
                                 issue.setRaw_issue_end(rawIssue.getUuid());
                                 issue.setUpdate_time(date);
                                 issues.add(issue);
@@ -102,7 +106,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
                 }
             }
             //group映射完成
-            newCloneInsert(map2,newGroups,repo_id,current_commit_id,category,committer,date);
+            newCloneInsert(map2,newGroups,repo_id,current_commit_id,commitDate,category,committer,date);
 
             if (!issues.isEmpty()) {
                 //更新issue

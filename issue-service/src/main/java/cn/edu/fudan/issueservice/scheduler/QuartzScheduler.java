@@ -126,6 +126,8 @@ public class QuartzScheduler {
                     String repo_id=project.getString("repo_id");
                     String category=project.getString("type");
                     String dashboardKey = "dashboard:"+category+":"+duration+":"+ repo_id;
+                    String newIssueInfoKey="dashboard:"+category+":"+duration+":new"+ repo_id;
+                    stringRedisTemplate.delete(newIssueInfoKey);
                     Boolean hasKey=stringRedisTemplate.hasKey(dashboardKey);
                     if(hasKey!=null&&hasKey){
                         categories.add(category);

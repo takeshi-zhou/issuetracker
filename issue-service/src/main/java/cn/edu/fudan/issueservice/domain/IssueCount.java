@@ -1,6 +1,7 @@
 package cn.edu.fudan.issueservice.domain;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author WZY
@@ -14,13 +15,20 @@ public class IssueCount implements Serializable {
 
     private int remainingIssueCount;
 
+    private List<String> newIssueIds;
+
     public IssueCount() {
     }
 
     public IssueCount(int newIssueCount, int eliminatedIssueCount, int remainingIssueCount) {
+        this(newIssueCount,eliminatedIssueCount,remainingIssueCount,null);
+    }
+
+    public IssueCount(int newIssueCount, int eliminatedIssueCount, int remainingIssueCount,List<String> newIssueIds) {
         this.newIssueCount = newIssueCount;
         this.eliminatedIssueCount = eliminatedIssueCount;
         this.remainingIssueCount = remainingIssueCount;
+        this.newIssueIds=newIssueIds;
     }
 
     public void issueCountUpdate(int newIssueCount, int eliminatedIssueCount, int remainingIssueCount) {
@@ -57,6 +65,14 @@ public class IssueCount implements Serializable {
 
     public void setRemainingIssueCount(int remainingIssueCount) {
         this.remainingIssueCount = remainingIssueCount;
+    }
+
+    public List<String> getNewIssueIds() {
+        return newIssueIds;
+    }
+
+    public void setNewIssueIds(List<String> newIssueIds) {
+        this.newIssueIds = newIssueIds;
     }
 
     @Override
