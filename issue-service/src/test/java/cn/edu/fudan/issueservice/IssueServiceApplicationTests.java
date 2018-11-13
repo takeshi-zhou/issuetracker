@@ -2,6 +2,7 @@ package cn.edu.fudan.issueservice;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -20,6 +21,11 @@ public class IssueServiceApplicationTests {
     @BeforeClass
     public static void beforeTest() {
         System.out.println("开始测试..................................");
+    }
+
+    @Test
+    public void init() {
+
     }
 
     @AfterClass
