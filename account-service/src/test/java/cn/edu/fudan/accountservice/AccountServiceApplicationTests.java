@@ -2,6 +2,7 @@ package cn.edu.fudan.accountservice;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -22,6 +23,10 @@ public class AccountServiceApplicationTests {
         System.out.println("开始测试..................................");
     }
 
+    @Test
+    public void init() {
+
+    }
 
     @AfterClass
     public static void afterTest() {
