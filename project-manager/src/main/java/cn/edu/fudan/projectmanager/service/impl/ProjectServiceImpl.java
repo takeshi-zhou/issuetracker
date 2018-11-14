@@ -5,7 +5,6 @@ import cn.edu.fudan.projectmanager.dao.*;
 import cn.edu.fudan.projectmanager.domain.NeedDownload;
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.service.ProjectService;
-import cn.edu.fudan.projectmanager.util.DateTimeUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -154,7 +153,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setVcs_type("git");
         project.setAccount_id(account_id);
         project.setDownload_status("Downloading");
-        project.setAdd_time(DateTimeUtil.formatedDate(new Date()));
+        project.setAdd_time(new Date());
         projectDao.addOneProject(project);
         //向RepoManager这个Topic发送消息，请求开始下载
         send(projectId, url,isPrivate,username,password);
@@ -198,8 +197,16 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
 
+    private void updateProjectStatus(String projectId,String status){
+        Project project=new Project();
+        project.setUuid(projectId);
+        project.setScan_status(status);
+        projectDao.updateProjectStatus(project);
+    }
+
     @Override
     public void remove(String projectId, String type,String userToken) {
+        updateProjectStatus(projectId,"deleting");
         HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
         String repoId = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + projectId, HttpMethod.GET, requestEntity, String.class).getBody();
         String account_id = getAccountId(userToken);
