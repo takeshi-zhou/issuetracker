@@ -50,7 +50,7 @@ public class ExcuteShellUtil {
     public  String getFileLocation(String repoPath, String fileName) {
         try {
             Runtime rt = Runtime.getRuntime();
-            Process process = rt.exec(repoHome + repoPath + " -name " + fileName);
+            Process process = rt.exec("find "+repoHome + repoPath + " -name " + fileName);
             process.waitFor();
             BufferedReader bReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 //			StringBuffer sBuffer = new StringBuffer();
