@@ -83,7 +83,12 @@ public class TagServiceImpl implements TagService {
         String oldTagId = tagDao.getUuidByNameAndScope(oldName, scope);
         String newTagId = tagDao.getUuidByNameAndScope(name, scope);
         if (requestBody.getBoolean("isDefault")) {
-            tagDao.modifyOneTagged(oldTagId, newTagId, itemId);
+            if(name.equals("Not Tagged")){
+                //取消某个issue的tag
+               tagDao.deleteOneTagged(oldTagId,itemId);
+            }else{
+                tagDao.modifyOneTagged(oldTagId, newTagId, itemId);
+            }
         } else {
             if (Priority.contains(name))
                 throw new IllegalArgumentException("enter other tag" + name);
