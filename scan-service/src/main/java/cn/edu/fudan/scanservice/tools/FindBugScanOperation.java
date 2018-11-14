@@ -137,8 +137,8 @@ public class FindBugScanOperation extends ScanOperationAdapter {
                 String rawIssueUUID = UUID.randomUUID().toString();
                 //解析当前bugInstance中的location
                 String fileName = analyzeLocations(rawIssueUUID, repoName, bugInstance, locations);
-                if (fileName != null) {
-                    //只有location解析成功才会插入当前rawIssue
+                if (fileName != null&&!locations.isEmpty()) {
+                    //只有location解析成功并且rawIssue有location才会插入当前rawIssue
                     JSONObject rawIssue = new JSONObject();
                     rawIssue.put("type", bugInstance.attributeValue("type"));
                     rawIssue.put("category","bug");
