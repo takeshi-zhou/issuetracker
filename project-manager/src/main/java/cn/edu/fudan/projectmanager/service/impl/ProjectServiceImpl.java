@@ -222,6 +222,9 @@ public class ProjectServiceImpl implements ProjectService {
             response = restTemplate.exchange(innerServicePath + "/inner/scan/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
             if (response != null)
                 logger.info(response.toJSONString());
+            response = restTemplate.exchange(innerServicePath + "/inner/event/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
+            if (response != null)
+                logger.info(response.toJSONString());
             //delete info in redis
             stringRedisTemplate.setEnableTransactionSupport(true);
             stringRedisTemplate.multi();
