@@ -5,6 +5,7 @@ import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 import cn.edu.fudan.issueservice.util.DateTimeUtil;
 import cn.edu.fudan.issueservice.util.LocationCompare;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.UUID;
  * @author WZY
  * @version 1.0
  **/
+@Slf4j
 @Service("bugMapping")
 public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
@@ -27,6 +29,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
             if (rawIssues == null || rawIssues.isEmpty())
                 return;
+            log.info("first scan mapping!");
             Date commitDate=getCommitDate(current_commit_id);
             Date date= new Date();
             for (RawIssue rawIssue : rawIssues) {
@@ -39,14 +42,17 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             int newIssueCount = insertIssueList.size();
             int remainingIssueCount = insertIssueList.size();
             int eliminatedIssueCount = 0;
+            log.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
+            log.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(rawIssues);
         } else {
             //不是第一次扫描，需要和前一次的commit进行mapping
             List<RawIssue> rawIssues1 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,pre_commit_id);
             List<RawIssue> rawIssues2 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
-            if (rawIssues2 == null || rawIssues1.isEmpty())
+            if (rawIssues2 == null || rawIssues2.isEmpty())
                 return;
+            log.info("not first mapping!");
             Date commitDate = getCommitDate(current_commit_id);
             //装需要更新的
             List<Issue> issues = new ArrayList<>();
@@ -67,7 +73,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                         issue.setEnd_commit(current_commit_id);
                         issue.setEnd_commit_date(commitDate);
                         issue.setRaw_issue_end(issue_2.getUuid());
-                        issue.setUpdate_time(DateTimeUtil.getCurrentFormattedDate());
+                        issue.setUpdate_time(new Date());
                         issues.add(issue);
                         break;
                     }
@@ -77,18 +83,21 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                     String new_IssueId = UUID.randomUUID().toString();
                     issue_2.setIssue_id(new_IssueId);
                     String targetFiles = issue_2.getFile_name();
-                    Date date= DateTimeUtil.getCurrentFormattedDate();
+                    Date date= new Date();
                     insertIssueList.add(new Issue(new_IssueId, issue_2.getType(),category, current_commit_id, commitDate,current_commit_id,commitDate, issue_2.getUuid(), issue_2.getUuid(), repo_id, targetFiles,date,date));
                 }
             }
             if (!issues.isEmpty()) {
                 //更新issue
                 issueDao.batchUpdateIssue(issues);
+                log.info("issue update success!");
             }
             int eliminatedIssueCount = rawIssues1.size() - equalsCount;
             int remainingIssueCount = rawIssues2.size();
             int newIssueCount = rawIssues2.size() - equalsCount;
+            log.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
+            log.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(rawIssues2);
             addSolvedTag(repo_id, pre_commit_id,EventType.ELIMINATE_BUG,committer);
         }
@@ -97,6 +106,8 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             issueDao.insertIssueList(insertIssueList);
             issueEventManager.sendIssueEvent(EventType.NEW_BUG,insertIssueList,committer,repo_id);
             newIssueInfoUpdate(insertIssueList,category,repo_id);
+            log.info("new issue insert success!");
         }
+        log.info("mapping finished!");
     }
 }

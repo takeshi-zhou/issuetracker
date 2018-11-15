@@ -51,6 +51,12 @@ public class IssueController {
         return issueService.getDashBoardInfo(duration, project_id, userToken,category);
     }
 
+    @GetMapping(value = {"/issue/project-statistical-info"})
+    public Object getAvgEliminatedTimeAndMaxAliveTime(@RequestParam(name = "project_id") String project_id,
+                                                      @RequestParam(name="category",defaultValue = "bug")String category){
+        return issueService.getAliveAndEliminatedInfo(project_id, category);
+    }
+
     @GetMapping(value = {"/issue/statistical-results"})
     public Object getStatisticalResults(@RequestParam("month") Integer month,
                                         @RequestParam(name = "project_id", required = false) String project_id,

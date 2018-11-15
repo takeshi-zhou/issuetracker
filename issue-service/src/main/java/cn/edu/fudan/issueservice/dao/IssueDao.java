@@ -63,4 +63,12 @@ public class IssueDao {
     public List<Issue> getSpecificIssues(Map<String, Object> map){
         return issueMapper.getSpecificIssues(map);
     }
+
+    public Double getAvgEliminatedTime(List<String> list,String repo_id,String category){
+        return issueMapper.getAvgEliminatedTime(list, repo_id, category);
+    }
+
+    public Long getMaxAliveTime(List<String> list, String repo_id, String category){
+        return issueMapper.getMaxAliveTime(list, repo_id, category);
+    }
 }

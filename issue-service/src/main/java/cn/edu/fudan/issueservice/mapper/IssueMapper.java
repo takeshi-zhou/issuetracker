@@ -32,4 +32,8 @@ public interface IssueMapper {
     List<String> getExistIssueTypes(@Param("category")String category);
 
     List<String> getIssueIdsByRepoIdAndCategory(@Param("repo_id")String repo_id,@Param("category")String category);
+
+    Double getAvgEliminatedTime(@Param("list")List<String> list, @Param("repo_id")String repo_id, @Param("category")String category);
+
+    Long getMaxAliveTime(@Param("list")List<String> list, @Param("repo_id")String repo_id, @Param("category")String category);
 }

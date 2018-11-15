@@ -29,6 +29,8 @@ public interface IssueService {
 
     Object getExistIssueTypes(String category);
 
+    Object getAliveAndEliminatedInfo(String project_id,String category);
+
     void startMapping(String repo_id, String pre_commit_id, String current_commit_id,String category);
 
     void updateIssueCount(String time);

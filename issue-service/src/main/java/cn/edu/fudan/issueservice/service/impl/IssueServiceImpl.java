@@ -4,10 +4,12 @@ import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.IssueCount;
 import cn.edu.fudan.issueservice.domain.IssueParam;
+import cn.edu.fudan.issueservice.domain.IssueStatisticInfo;
 import cn.edu.fudan.issueservice.scheduler.QuartzScheduler;
 import cn.edu.fudan.issueservice.service.IssueService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -22,6 +24,7 @@ import java.util.*;
  * @author WZY
  * @version 1.0
  **/
+@Slf4j
 @Service
 public class IssueServiceImpl implements IssueService {
 
@@ -93,6 +96,7 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public void deleteIssueByRepoIdAndCategory(String repoId,String category) {
+        log.info("start to delete issue -> repoId={} , category={}",repoId,category);
         //先删除该项目所有issue对应的tag
         List<String> issueIds = issueDao.getIssueIdsByRepoIdAndCategory(repoId, category);
         if (issueIds != null && !issueIds.isEmpty()) {
@@ -101,8 +105,9 @@ public class IssueServiceImpl implements IssueService {
                 throw new RuntimeException("tag item delete failed!");
             }
         }
+        log.info("tag delete success!");
         issueDao.deleteIssueByRepoIdAndCategory(repoId,category);
-
+        log.info("issue delete success!");
     }
 
     @Override
@@ -120,6 +125,10 @@ public class IssueServiceImpl implements IssueService {
             JSONArray tags = restTemplate.getForObject(tagServicePath + "?item_id=" + issue.getUuid(), JSONArray.class);
             issue.setTags(tags);
         }
+    }
+
+    private JSONArray getSpecificTaggedIssueIds(String ...tagIds){
+        return restTemplate.postForObject(tagServicePath + "/item-ids", tagIds, JSONArray.class);
     }
 
     @Override
@@ -310,7 +319,29 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public Object getExistIssueTypes(String category) {
-        return issueDao.getExistIssueTypes(category);
+        List<String> types=issueDao.getExistIssueTypes(category);
+        if(category.equals("clone")){
+            types.sort(Comparator.comparingInt(Integer::valueOf));
+        }
+        return types;
+    }
+
+    @Override
+    public Object getAliveAndEliminatedInfo(String project_id, String category) {
+        String repoId=getRepoId(project_id);
+        JSONArray solvedIssueIds=getSpecificTaggedIssueIds(solvedTagId);
+        double avgEliminatedTime=0.00;
+        long maxAliveTime=0;
+        if(solvedIssueIds!=null&&!solvedIssueIds.isEmpty()){
+            List<String> solvedIssueIdList=solvedIssueIds.toJavaList(String.class);
+            Double avgEliminatedTimeObject=issueDao.getAvgEliminatedTime(solvedIssueIdList,repoId,category);
+            avgEliminatedTime=avgEliminatedTimeObject==null?0.00:avgEliminatedTimeObject;
+            maxAliveTime=issueDao.getMaxAliveTime(solvedIssueIdList,repoId,category);
+        }else{
+            //所有issue都是存活的
+            maxAliveTime=issueDao.getMaxAliveTime(null,repoId,category);
+        }
+        return new IssueStatisticInfo(avgEliminatedTime/3600/24,maxAliveTime/3600/24);
     }
 
     @SuppressWarnings("unchecked")
@@ -322,8 +353,10 @@ public class IssueServiceImpl implements IssueService {
             committer=commitInfo.getJSONArray("data").getJSONObject(0).getString("developer");
         }
         if(category.equals("bug")){
+            log.info("start bug mapping -> repo_id={},pre_commit_id={},current_commit_id={}",repo_id,pre_commit_id,current_commit_id);
             bugMappingService.mapping(repo_id,pre_commit_id,current_commit_id,category,committer);
         }else if(category.equals("clone")){
+            log.info("start clone mapping -> repo_id={},pre_commit_id={},current_commit_id={}",repo_id,pre_commit_id,current_commit_id);
             cloneMappingService.mapping(repo_id,pre_commit_id,current_commit_id,category,committer);
         }
     }

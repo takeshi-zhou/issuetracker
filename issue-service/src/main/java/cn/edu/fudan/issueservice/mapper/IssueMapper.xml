@@ -238,4 +238,31 @@
         limit #{start},#{size}
     </select>
 
+    <select id="getAvgEliminatedTime" resultType="double">
+        select
+           avg((UNIX_TIMESTAMP(end_commit_date) - UNIX_TIMESTAMP(start_commit_date)))
+        FROM
+            issue
+        WHERE
+             repo_id = #{repo_id} and category = #{category} and uuid in
+        <foreach collection="list" separator="," open="(" close=")" item="issue_id">
+            #{issue_id}
+        </foreach>
+    </select>
+
+    <select id="getMaxAliveTime" resultType="long">
+        select
+            max((UNIX_TIMESTAMP(end_commit_date) - UNIX_TIMESTAMP(start_commit_date)))
+        FROM
+            issue
+        WHERE
+            repo_id = #{repo_id} and category = #{category}
+        <if test="list != null">
+            and uuid not in
+            <foreach collection="list" separator="," open="(" close=")" item="issue_id">
+                #{issue_id}
+            </foreach>
+        </if>
+    </select>
+
 </mapper>

@@ -38,6 +38,7 @@ public class IssueEventManager {
         for(Issue issue:issues){
             JSONObject event=new JSONObject();
             event.put("id", UUID.randomUUID());
+            event.put("category",issue.getCategory());
             event.put("targetType",issue.getType());
             event.put("targetId",issue.getUuid());
             event.put("targetCommitter",committer);
@@ -56,6 +57,7 @@ public class IssueEventManager {
         for(RawIssue rawIssue:rawIssues){
             JSONObject event=new JSONObject();
             event.put("id", UUID.randomUUID());
+            event.put("category",rawIssue.getCategory());
             event.put("targetType",rawIssue.getType());
             event.put("targetId",rawIssue.getUuid());
             event.put("targetCommitter",committer);
