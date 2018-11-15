@@ -5,6 +5,7 @@
 
     <resultMap id="event" type="Event">
         <id property="id" column="id"/>
+        <result property="category" column="category" />
         <result property="eventType" column="event_type"/>
         <result property="targetType" column="target_type"/>
         <result property="targetId" column="target_id"/>
@@ -18,6 +19,7 @@
         insert into event
               (
                   id,
+                  category,
                   event_type,
                   target_type,
                   target_id,
@@ -29,6 +31,7 @@
         <foreach collection="list" item="item" index="index" separator=",">
             (
                 #{item.id},
+                #{item.category},
                 #{item.eventType},
                 #{item.targetType},
                 #{item.targetId},
@@ -40,10 +43,7 @@
     </insert>
 
     <delete id="deleteEventByRepoIdAndCategory" >
-        delete from event where repo_id = #{repo_id} and event_type in
-        <foreach collection="list" separator="," open="(" close=")" item="event_type">
-            #{event_type}
-        </foreach>
+        delete from event where repo_id = #{repo_id} and category = #{category}
     </delete>
     
     <select id="getRecentEventsByEventType" parameterType="list" resultMap="event">
@@ -53,6 +53,6 @@
         </foreach>
         and event_type = #{event_type}
         order by create_time desc
-        limit 100
+        limit 10
     </select>
 </mapper>

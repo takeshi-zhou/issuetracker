@@ -15,4 +15,6 @@ public interface EventService {
     void deleteEvents(String repo_id,String category);
 
     Object getCurrentEvents(String userToken,String category);
+
+    Object hasNewEvents(String userToken,String category);
 }

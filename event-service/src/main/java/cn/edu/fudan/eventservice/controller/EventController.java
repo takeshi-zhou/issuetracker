@@ -32,6 +32,15 @@ public class EventController {
         }
     }
 
+    @GetMapping("/event/has-new")
+    @CrossOrigin
+    public Object eventHasNew(HttpServletRequest request,@RequestParam(name="category",defaultValue = "bug")String category){
+        String token=request.getHeader("token");
+        if(token==null)
+            throw new RuntimeException("need user token!");
+        return eventService.hasNewEvents(token,category);
+    }
+
     @GetMapping("/event/current-events")
     @CrossOrigin
     public Object getCurrentEvents(HttpServletRequest request,@RequestParam(name="category",defaultValue = "bug")String category){

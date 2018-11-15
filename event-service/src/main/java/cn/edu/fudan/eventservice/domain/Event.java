@@ -9,6 +9,7 @@ import java.util.Date;
 public class Event {
 
     private String id;
+    private String category;
     private EventType eventType;
     private String targetType;
     private String targetId;
@@ -22,6 +23,14 @@ public class Event {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public EventType getEventType() {

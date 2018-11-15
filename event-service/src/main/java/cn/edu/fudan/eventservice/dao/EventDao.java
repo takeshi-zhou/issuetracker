@@ -27,8 +27,8 @@ public class EventDao {
         log.info("insert {} events",count);
     }
 
-    public void deleteEventByRepoIdAndCategory(List<EventType> list,String repo_id){
-        eventMapper.deleteEventByRepoIdAndCategory(list, repo_id);
+    public void deleteEventByRepoIdAndCategory(String category,String repo_id){
+        eventMapper.deleteEventByRepoIdAndCategory(category, repo_id);
     }
 
     public List<Event> getRecentEventsByEventType(List<String> repoIds, EventType eventType){

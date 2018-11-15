@@ -12,7 +12,7 @@ public interface EventMapper {
 
     int insertEvents(List<Event> list);
 
-    void deleteEventByRepoIdAndCategory(@Param("list")List<EventType> list,@Param("repo_id")String repo_id);
+    void deleteEventByRepoIdAndCategory(@Param("category")String category,@Param("repo_id")String repo_id);
 
     List<Event> getRecentEventsByEventType(@Param("list") List<String> list, @Param("event_type")EventType eventType);
 }
