@@ -36,6 +36,9 @@ public class CloneScanTask {
 
     private static final Logger logger= LoggerFactory.getLogger(CloneScanTask.class);
 
+
+    @Value("${workHome}")
+    private String workHome;
     @Value("${resultFileHome}")
     private String resultFileHome;
     @Value("${repoHome}")
@@ -128,7 +131,7 @@ public class CloneScanTask {
     private boolean invokeCloneTool(String repoPath,String repoName){
         String cmd = "java -jar SAGA.jar  " + repoPath + " " + repoName;
         try {
-            Process process = Runtime.getRuntime().exec(cmd,null,new File("E:\\clone_service"));
+            Process process = Runtime.getRuntime().exec(cmd,null,new File(workHome));
             //输出process打印信息
             BufferedInputStream br = new BufferedInputStream(process.getInputStream());
             int ch;
