@@ -18,6 +18,7 @@ import java.util.Map;
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@PowerMockIgnore({"javax.crypto.*","javax.management.*"})
 public class EventServiceApplicationTests {
 
     @Value("${inner.service.path}")
