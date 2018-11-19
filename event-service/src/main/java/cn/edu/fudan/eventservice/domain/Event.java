@@ -17,6 +17,20 @@ public class Event {
     private String repoId;
     private Date createTime;
 
+    public Event() {
+    }
+
+    public Event(String id, String category, EventType eventType, String targetType, String targetId, String targetCommitter, String repoId, Date createTime) {
+        this.id = id;
+        this.category = category;
+        this.eventType = eventType;
+        this.targetType = targetType;
+        this.targetId = targetId;
+        this.targetCommitter = targetCommitter;
+        this.repoId = repoId;
+        this.createTime = createTime;
+    }
+
     public String getId() {
         return id;
     }
