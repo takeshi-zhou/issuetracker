@@ -8,8 +8,8 @@ pipeline {
 
     triggers {
         pollSCM ignorePostCommitHooks: true, scmpoll_spec: '''TZ=Asia/Shanghai
-            H 3 * * *
-			H 15 * * *'''
+            H 3 * * * 
+            H 15 * * * '''
     }
 
     stages {

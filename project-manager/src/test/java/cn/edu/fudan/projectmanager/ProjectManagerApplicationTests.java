@@ -2,6 +2,7 @@ package cn.edu.fudan.projectmanager;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -15,7 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @PowerMockRunnerDelegate(SpringRunner.class)
 @SpringBootTest(classes = ProjectManagerApplication.class)
 @TestPropertySource("classpath:application-test.properties")
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.crypto.*","javax.management.*"})
 public class ProjectManagerApplicationTests {
 
 
@@ -24,14 +25,14 @@ public class ProjectManagerApplicationTests {
         System.out.println("开始测试..................................");
     }
 
-    @AfterClass
-    public static void afterTest() {
-        System.out.println("结束测试..................................");
-    }
-
     @Test
     public void init() {
 
+    }
+
+    @AfterClass
+    public static void afterTest() {
+        System.out.println("结束测试..................................");
     }
 
 }

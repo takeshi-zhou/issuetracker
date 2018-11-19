@@ -22,7 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @PowerMockRunnerDelegate(SpringRunner.class)
 @SpringBootTest(classes = ScanServiceApplication.class)
 @TestPropertySource("classpath:application-test.properties")
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.crypto.*","javax.management.*"})
 public class ScanServiceApplicationTests {
 
     private final static Logger logger = LoggerFactory.getLogger(ScanOperationAdapter.class);
