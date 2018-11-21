@@ -27,7 +27,6 @@ public class EventController {
             eventService.addEvents(events);
             return new ResponseBean(200, "event add success!", null);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseBean(401, "event add failed!", null);
         }
     }
@@ -56,7 +55,6 @@ public class EventController {
             eventService.deleteEvents(repoId,category);
             return new ResponseBean(200, "event delete success!", null);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseBean(401, "event delete failed!", null);
         }
     }
