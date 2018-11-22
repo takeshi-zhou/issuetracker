@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -108,7 +109,8 @@ public class EventServiceImpl implements EventService {
         HttpEntity<String> httpEntity=new HttpEntity<>(httpHeaders);
         Map<String,String> urlParameters=new HashMap<>();
         urlParameters.put("userToken",userToken);
-        String accountId=restTemplate.exchange(innerServicePath+"/user/accountId?userToken={userToken}", HttpMethod.GET,httpEntity,String.class,urlParameters).getBody();
+        ResponseEntity<String> responseEntity=restTemplate.exchange(innerServicePath+"/user/accountId?userToken={userToken}", HttpMethod.GET,httpEntity,String.class,urlParameters);
+        String accountId=responseEntity.getBody();
         urlParameters.put("accountId",accountId);
         urlParameters.put("type",category);
         return restTemplate.exchange(innerServicePath+"/inner/project/repo-ids?account_id={accountId}&type={type}",HttpMethod.GET,httpEntity,JSONArray.class,urlParameters).getBody();
