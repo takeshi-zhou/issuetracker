@@ -3,15 +3,15 @@ package cn.edu.fudan.issueservice.service.impl;
 import cn.edu.fudan.issueservice.domain.EventType;
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.RawIssue;
-import cn.edu.fudan.issueservice.util.DateTimeUtil;
+import cn.edu.fudan.issueservice.domain.RawIssueDetail;
 import cn.edu.fudan.issueservice.util.LocationCompare;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+
 /**
  * @author WZY
  * @version 1.0
@@ -21,9 +21,29 @@ import java.util.UUID;
 public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
 
+    private Map<String,String> tagMapHelper;
+
+    @Autowired
+    public void setTagMapHelper(Map<String, String> tagMapHelper) {
+        this.tagMapHelper = tagMapHelper;
+    }
+
+    private void addTag(List<JSONObject> tags,RawIssue rawIssue,String issueId){
+        RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
+        if(tagMapHelper.containsKey(rawIssueDetail.getPriority())){
+            JSONObject tagged = new JSONObject();
+            tagged.put("item_id", issueId);
+            tagged.put("tag_id", tagMapHelper.get(rawIssueDetail.getPriority()));
+            tags.add(tagged);
+        }
+    }
+
+
+
     @Override
     public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category, String committer) {
         List<Issue> insertIssueList = new ArrayList<>();
+        List<JSONObject> tags = new ArrayList<>();
         if (pre_commit_id.equals(current_commit_id)) {
             //当前project第一次扫描，所有的rawIssue都是issue
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
@@ -38,6 +58,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 String targetFiles = rawIssue.getFile_name();
                 Issue issue = new Issue(new_IssueId, rawIssue.getType(),category, current_commit_id,commitDate, current_commit_id,commitDate, rawIssue.getUuid(), rawIssue.getUuid(), repo_id, targetFiles,date,date);
                 insertIssueList.add(issue);
+                addTag(tags,rawIssue,new_IssueId);
             }
             int newIssueCount = insertIssueList.size();
             int remainingIssueCount = insertIssueList.size();
@@ -85,6 +106,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                     String targetFiles = issue_2.getFile_name();
                     Date date= new Date();
                     insertIssueList.add(new Issue(new_IssueId, issue_2.getType(),category, current_commit_id, commitDate,current_commit_id,commitDate, issue_2.getUuid(), issue_2.getUuid(), repo_id, targetFiles,date,date));
+                    addTag(tags,issue_2,new_IssueId);
                 }
             }
             if (!issues.isEmpty()) {
@@ -107,6 +129,10 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             issueEventManager.sendIssueEvent(EventType.NEW_BUG,insertIssueList,committer,repo_id);
             newIssueInfoUpdate(insertIssueList,category,repo_id);
             log.info("new issue insert success!");
+        }
+        //打tag
+        if(!tags.isEmpty()){
+            restTemplate.postForObject(tagServicePath, tags, JSONObject.class);
         }
         log.info("mapping finished!");
     }

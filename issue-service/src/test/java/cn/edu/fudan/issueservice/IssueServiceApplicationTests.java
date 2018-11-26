@@ -25,7 +25,6 @@ public class IssueServiceApplicationTests {
 
     @Test
     public void init() {
-
     }
 
     @AfterClass

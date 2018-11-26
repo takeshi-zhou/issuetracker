@@ -27,7 +27,7 @@ public class BaseMappingServiceImpl implements MappingService {
     @Value("${solved.tag_id}")
     private String solvedTagId;
     @Value("${tag.service.path}")
-    private String tagServicePath;
+    protected String tagServicePath;
     @Value("${commit.service.path}")
     private String commitServicePath;
 
@@ -35,7 +35,7 @@ public class BaseMappingServiceImpl implements MappingService {
     IssueDao issueDao;
     RawIssueDao rawIssueDao;
     private StringRedisTemplate stringRedisTemplate;
-    private RestTemplate restTemplate;
+    protected RestTemplate restTemplate;
 
     @Autowired
     public void setRestTemplate(RestTemplate restTemplate) {
