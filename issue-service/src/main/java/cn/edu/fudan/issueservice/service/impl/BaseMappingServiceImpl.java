@@ -104,6 +104,21 @@ public class BaseMappingServiceImpl implements MappingService {
         stringRedisTemplate.exec();
     }
 
+    void modifyToSolvedTag(String repo_id, String pre_commit_id,EventType eventType,String committer) {
+        List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
+        issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
+        if (issues != null && !issues.isEmpty()) {
+            List<JSONObject> taggeds = new ArrayList<>();
+            for (Issue issue : issues) {
+                JSONObject tagged = new JSONObject();
+                tagged.put("item_id", issue.getUuid());
+                tagged.put("tag_id", solvedTagId);
+                taggeds.add(tagged);
+            }
+            restTemplate.postForObject(tagServicePath+"/tagged-modify", taggeds, JSONObject.class);
+        }
+    }
+
     void addSolvedTag(String repo_id, String pre_commit_id,EventType eventType,String committer) {
         List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
         issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
@@ -115,7 +130,7 @@ public class BaseMappingServiceImpl implements MappingService {
                 tagged.put("tag_id", solvedTagId);
                 taggeds.add(tagged);
             }
-            restTemplate.postForObject(tagServicePath, taggeds, JSONObject.class);
+            restTemplate.postForObject(tagServicePath,taggeds, JSONObject.class);
         }
     }
 
