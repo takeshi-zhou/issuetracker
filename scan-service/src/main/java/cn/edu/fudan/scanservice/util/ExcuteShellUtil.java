@@ -53,12 +53,13 @@ public class ExcuteShellUtil {
             Process process = rt.exec("find "+repoHome + repoPath + " -name " + fileName);
             process.waitFor();
             BufferedReader bReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//			StringBuffer sBuffer = new StringBuffer();
-//			String line =   bReader.readLine();
-//			while ((line = bReader.readLine())!= null) {
-//				sBuffer.append(line).append("\n");
-//			}
-            return bReader.readLine().replace(repoHome, "");
+            StringBuffer sBuffer = new StringBuffer();
+            String line ;
+            while ((line = bReader.readLine())!= null) {
+                line.replace(repoHome, "");
+                sBuffer.append(line).append("---");
+            }
+            return  sBuffer.toString();
         } catch (Exception e) {
             e.printStackTrace();
         }
