@@ -64,6 +64,11 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    public void modifyMultiTaggedItem(List<TaggedItem> list) {
+        tagDao.modifyMultiTaggedItem(list);
+    }
+
+    @Override
     public void deleteTag(String tagId, String itemId) {
         //tagDao.deleteOneTag(tagId);
         tagDao.deleteOneTagged(tagId, itemId);

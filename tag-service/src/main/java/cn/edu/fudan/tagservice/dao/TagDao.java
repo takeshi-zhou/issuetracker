@@ -58,6 +58,10 @@ public class TagDao {
         tagMapper.modifyOneTagged(oldTagId, newTagId, iteamId);
     }
 
+    public void modifyMultiTaggedItem(List<TaggedItem> list){
+        tagMapper.modifyMultiTaggedItem(list);
+    }
+
     public List<Tag> getTagsByItemId(String item_id) {
         return tagMapper.getTagsByItemId(item_id);
     }

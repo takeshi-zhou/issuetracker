@@ -12,6 +12,8 @@ public interface TagService {
 
     void addMultiTaggedItem(List<TaggedItem> list);
 
+    void modifyMultiTaggedItem(List<TaggedItem> list);
+
     void deleteTag(String tagId, String itemId);
 
     void deleteTaggeds(List<String> itemIds);

@@ -16,6 +16,8 @@ public interface TagMapper {
 
     void addMultiTaggedItem(List<TaggedItem> list);
 
+    void modifyMultiTaggedItem(List<TaggedItem> list);
+
     String getUuidByNameAndScope(@Param("name") String name, @Param("scope") String scope);
 
     void deleteOneTag(@Param("tag_id") String tagId);

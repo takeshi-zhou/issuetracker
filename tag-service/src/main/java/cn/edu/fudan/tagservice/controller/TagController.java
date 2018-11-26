@@ -71,6 +71,16 @@ public class TagController {
         }
     }
 
+    @PostMapping("/inner/tags/tagged-modify")
+    public Object modifyMultiTaggedItem(@RequestBody List<TaggedItem> list) {
+        try {
+            tagService.modifyMultiTaggedItem(list);
+            return new ResponseBean(200, "update success", null);
+        } catch (Exception e) {
+            return new ResponseBean(401, "update failed :" + e.getMessage(), null);
+        }
+    }
+
     @PostMapping("/inner/tags/item-ids")
     public Object getItemIds(@RequestBody List<String> tagIds) {
         return tagService.getItemIdsByTagIds(tagIds);
