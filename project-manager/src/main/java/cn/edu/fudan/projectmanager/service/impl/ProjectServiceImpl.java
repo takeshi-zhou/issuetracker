@@ -209,37 +209,40 @@ public class ProjectServiceImpl implements ProjectService {
         updateProjectStatus(projectId,"deleting");
         HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
         String repoId = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + projectId, HttpMethod.GET, requestEntity, String.class).getBody();
-        String account_id = getAccountId(userToken);
-        //如果当前repoId和type只有这一个projectId与其对应，那么删除project的同时会删除repo的相关内容
-        //否则还有其他project与当前repoId和type对应，该repo的相关内容就不删
-        if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId,type)) {
-            JSONObject response = restTemplate.exchange(innerServicePath + "/inner/issue/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
-            if (response != null)
-                logger.info(response.toJSONString());
-            response = restTemplate.exchange(innerServicePath + "/inner/raw-issue/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
-            if (response != null)
-                logger.info(response.toJSONString());
-            response = restTemplate.exchange(innerServicePath + "/inner/scan/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
-            if (response != null)
-                logger.info(response.toJSONString());
-            response = restTemplate.exchange(innerServicePath + "/inner/event/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
-            if (response != null)
-                logger.info(response.toJSONString());
-            //delete info in redis
-            stringRedisTemplate.setEnableTransactionSupport(true);
-            stringRedisTemplate.multi();
-            stringRedisTemplate.delete("dashboard:"+type+":day:" + repoId);
-            stringRedisTemplate.delete("dashboard:"+type+":week:" + repoId);
-            stringRedisTemplate.delete("dashboard:"+type+":month:" + repoId);
-            stringRedisTemplate.delete("trend:"+type +":day:new:" + account_id + ":" + repoId);
-            stringRedisTemplate.delete("trend:"+type+":day:remaining:" + account_id + ":" + repoId);
-            stringRedisTemplate.delete("trend:"+type+":day:eliminated:" + account_id + ":" + repoId);
-            stringRedisTemplate.delete("trend:"+type+":week:new:" + account_id + ":" + repoId);
-            stringRedisTemplate.delete("trend:"+type+":week:remaining:" + account_id + ":" + repoId);
-            stringRedisTemplate.delete("trend:"+type+":week:eliminated:" + account_id + ":" + repoId);
-            stringRedisTemplate.exec();
+        if(repoId!=null){
+            String account_id = getAccountId(userToken);
+            //如果当前repoId和type只有这一个projectId与其对应，那么删除project的同时会删除repo的相关内容
+            //否则还有其他project与当前repoId和type对应，该repo的相关内容就不删
+            if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId,type)) {
+                JSONObject response = restTemplate.exchange(innerServicePath + "/inner/issue/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
+                if (response != null)
+                    logger.info(response.toJSONString());
+                response = restTemplate.exchange(innerServicePath + "/inner/raw-issue/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
+                if (response != null)
+                    logger.info(response.toJSONString());
+                response = restTemplate.exchange(innerServicePath + "/inner/scan/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
+                if (response != null)
+                    logger.info(response.toJSONString());
+                response = restTemplate.exchange(innerServicePath + "/inner/event/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
+                if (response != null)
+                    logger.info(response.toJSONString());
+                //delete info in redis
+                stringRedisTemplate.setEnableTransactionSupport(true);
+                stringRedisTemplate.multi();
+                stringRedisTemplate.delete("dashboard:"+type+":day:" + repoId);
+                stringRedisTemplate.delete("dashboard:"+type+":week:" + repoId);
+                stringRedisTemplate.delete("dashboard:"+type+":month:" + repoId);
+                stringRedisTemplate.delete("trend:"+type +":day:new:" + account_id + ":" + repoId);
+                stringRedisTemplate.delete("trend:"+type+":day:remaining:" + account_id + ":" + repoId);
+                stringRedisTemplate.delete("trend:"+type+":day:eliminated:" + account_id + ":" + repoId);
+                stringRedisTemplate.delete("trend:"+type+":week:new:" + account_id + ":" + repoId);
+                stringRedisTemplate.delete("trend:"+type+":week:remaining:" + account_id + ":" + repoId);
+                stringRedisTemplate.delete("trend:"+type+":week:eliminated:" + account_id + ":" + repoId);
+                stringRedisTemplate.exec();
+            }
         }
         projectDao.remove(projectId);
+        logger.info("project delete success!");
     }
 
     @Override

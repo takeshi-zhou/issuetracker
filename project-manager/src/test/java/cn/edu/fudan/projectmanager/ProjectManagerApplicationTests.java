@@ -2,7 +2,6 @@ package cn.edu.fudan.projectmanager;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -27,7 +26,6 @@ public class ProjectManagerApplicationTests {
 
     @Test
     public void init() {
-
     }
 
     @AfterClass
