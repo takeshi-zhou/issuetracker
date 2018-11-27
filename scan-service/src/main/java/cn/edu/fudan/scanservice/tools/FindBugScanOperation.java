@@ -16,12 +16,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component("findBug")
 public class FindBugScanOperation extends ScanOperationAdapter {
@@ -67,9 +68,25 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         Element sourceLineInClass = bugInstance.element("Class").element("SourceLine");
         String className = sourceLineInClass.attributeValue("classname");
         String fileName = sourceLineInClass.attributeValue("sourcefile");
-        String filePath = excuteShellUtil.getFileLocation(repoName, fileName);
-        if (filePath == null) {
-            logger.error(fileName + " 找不到源文件！");
+        String sourcePath=sourceLineInClass.attributeValue("sourcepath");
+        String filePath=null;
+        String candidateFilePaths = excuteShellUtil.getFileLocation(repoName, fileName);
+        if (candidateFilePaths == null) {
+            logger.error(sourcePath + " 找不到源文件！");
+            return null;
+        }else{
+            String []candidates=candidateFilePaths.split(":");
+            Pattern pattern= Pattern.compile("[/A-Za-z0-9_\\-]*"+sourcePath);
+            for(String candidate:candidates){
+                Matcher matcher = pattern.matcher(candidate);
+                if(matcher.matches()){
+                    filePath=candidate;
+                    break;
+                }
+            }
+        }
+        if(filePath==null){
+            logger.error(sourcePath + " 找不到源文件！");
             return null;
         }
         //Method节点
