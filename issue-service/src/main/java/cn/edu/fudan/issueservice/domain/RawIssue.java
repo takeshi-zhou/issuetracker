@@ -120,7 +120,11 @@ public class RawIssue {
     }
 
     public void setCommit_time(Date commit_time) {
-        this.commit_time = commit_time;
+        if(commit_time == null){
+            this.commit_time = null;
+        }else {
+            this.commit_time = (Date) commit_time.clone();
+        }
     }
 
     @Override

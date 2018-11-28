@@ -37,15 +37,31 @@ public class Issue {
         this.type = type;
         this.category = category;
         this.start_commit = start_commit;
-        this.start_commit_date = start_commit_date;
+        if(start_commit_date == null){
+            this.start_commit_date = null;
+        }else {
+            this.start_commit_date = (Date) start_commit_date.clone();
+        }
         this.end_commit = end_commit;
-        this.end_commit_date = end_commit_date;
+        if(end_commit_date == null){
+            this.end_commit_date = null;
+        }else {
+            this.end_commit_date = (Date) end_commit_date.clone();
+        }
         this.raw_issue_start = raw_issue_start;
         this.raw_issue_end = raw_issue_end;
         this.repo_id = repo_id;
         this.target_files = target_files;
-        this.create_time = create_time;
-        this.update_time = update_time;
+        if(create_time == null){
+            this.create_time = null;
+        }else {
+            this.create_time = (Date) create_time.clone();
+        }
+        if(update_time == null){
+            this.update_time = null;
+        }else {
+            this.update_time = (Date) update_time.clone();
+        }
     }
 
     public Date getStart_commit_date() {
@@ -72,7 +88,11 @@ public class Issue {
     }
 
     public void setCreate_time(Date create_time) {
-        this.create_time = create_time;
+        if(create_time == null){
+            this.create_time = null;
+        }else {
+            this.create_time = (Date) create_time.clone();
+        }
     }
 
     public Date getUpdate_time() {
@@ -83,7 +103,11 @@ public class Issue {
     }
 
     public void setUpdate_time(Date update_time) {
-        this.update_time = update_time;
+        if(update_time == null){
+            this.update_time = null;
+        }else {
+            this.update_time = (Date) update_time.clone();
+        }
     }
 
     public List<Object> getTags() {
