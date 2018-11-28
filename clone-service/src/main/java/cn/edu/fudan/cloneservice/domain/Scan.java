@@ -40,7 +40,10 @@ public class Scan {
     }
 
     public Date getStart_time() {
-        return start_time;
+        if(start_time == null){
+            return null;
+        }
+        return (Date)start_time.clone();
     }
 
     public void setStart_time(Date start_time) {
