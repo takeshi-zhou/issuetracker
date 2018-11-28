@@ -28,7 +28,10 @@ public class Project {
     }
 
     public Date getAdd_time() {
-        return add_time;
+        if(add_time == null){
+            return null;
+        }
+        return (Date)add_time.clone();
     }
 
     public void setAdd_time(Date add_time) {
@@ -108,7 +111,10 @@ public class Project {
     }
 
     public Date getTill_commit_time() {
-        return till_commit_time;
+        if(till_commit_time == null){
+            return null;
+        }
+        return (Date) till_commit_time.clone();
     }
 
     public void setTill_commit_time(Date till_commit_time) {
@@ -116,7 +122,10 @@ public class Project {
     }
 
     public Date getLast_scan_time() {
-        return last_scan_time;
+        if(last_scan_time == null){
+            return null;
+        }
+        return (Date) last_scan_time.clone();
     }
 
     public void setLast_scan_time(Date last_scan_time) {
