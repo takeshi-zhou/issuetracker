@@ -40,19 +40,33 @@ public class Scan {
     }
 
     public Date getStart_time() {
-        return start_time;
+        if(start_time == null){
+            return null;
+        }
+        return (Date)start_time.clone();
     }
 
     public void setStart_time(Date start_time) {
-        this.start_time = start_time;
+        if(start_time == null){
+            this.start_time = null;
+        }else {
+            this.start_time = (Date) start_time.clone();
+        }
     }
 
     public Date getEnd_time() {
-        return end_time;
+        if(end_time == null){
+            return null;
+        }
+        return (Date)end_time.clone();
     }
 
     public void setEnd_time(Date end_time) {
-        this.end_time = end_time;
+        if(end_time == null){
+            this.end_time = null;
+        }else{
+            this.end_time = (Date) end_time.clone();
+        }
     }
 
     public String getStatus() {
@@ -88,10 +102,17 @@ public class Scan {
     }
 
     public Date getCommit_time() {
-        return commit_time;
+        if(commit_time == null){
+            return null;
+        }
+        return (Date)commit_time.clone();
     }
 
     public void setCommit_time(Date commit_time) {
-        this.commit_time = commit_time;
+        if(commit_time == null){
+            this.commit_time = null;
+        }else {
+            this.commit_time = (Date) commit_time.clone();
+        }
     }
 }

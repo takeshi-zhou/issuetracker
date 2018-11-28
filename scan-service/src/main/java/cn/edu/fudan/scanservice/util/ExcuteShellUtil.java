@@ -56,7 +56,7 @@ public class ExcuteShellUtil {
             StringBuffer sBuffer = new StringBuffer();
             String line ;
             while ((line = bReader.readLine())!= null) {
-                line.replace(repoHome, "");
+                line = line.replace(repoHome, "");
                 sBuffer.append(line).append(":");
             }
             return  sBuffer.toString();
