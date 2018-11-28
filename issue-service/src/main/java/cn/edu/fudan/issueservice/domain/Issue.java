@@ -65,7 +65,10 @@ public class Issue {
     }
 
     public Date getCreate_time() {
-        return create_time;
+        if(create_time == null){
+            return null;
+        }
+        return (Date)create_time.clone();
     }
 
     public void setCreate_time(Date create_time) {
@@ -73,7 +76,10 @@ public class Issue {
     }
 
     public Date getUpdate_time() {
-        return update_time;
+        if(update_time == null){
+            return null;
+        }
+        return (Date)update_time.clone();
     }
 
     public void setUpdate_time(Date update_time) {

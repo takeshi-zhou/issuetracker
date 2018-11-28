@@ -113,7 +113,10 @@ public class RawIssue {
     }
 
     public Date getCommit_time() {
-        return commit_time;
+        if(commit_time == null){
+            return null;
+        }
+        return (Date) commit_time.clone();
     }
 
     public void setCommit_time(Date commit_time) {
