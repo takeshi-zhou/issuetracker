@@ -35,7 +35,11 @@ public class Project {
     }
 
     public void setAdd_time(Date add_time) {
-        this.add_time = add_time;
+        if(add_time == null){
+            this.add_time = null;
+        }else{
+            this.add_time = (Date) add_time.clone();
+        }
     }
 
     public String getRepo_id() {
@@ -118,7 +122,11 @@ public class Project {
     }
 
     public void setTill_commit_time(Date till_commit_time) {
-        this.till_commit_time = till_commit_time;
+        if(till_commit_time == null){
+            this.till_commit_time = null;
+        }else {
+            this.till_commit_time = (Date) till_commit_time.clone();
+        }
     }
 
     public Date getLast_scan_time() {
@@ -129,7 +137,11 @@ public class Project {
     }
 
     public void setLast_scan_time(Date last_scan_time) {
-        this.last_scan_time = last_scan_time;
+        if(last_scan_time == null){
+            this.last_scan_time = null;
+        }else {
+            this.last_scan_time = (Date) last_scan_time.clone();
+        }
     }
 
     public String getDescription() {
