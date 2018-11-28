@@ -40,7 +40,10 @@ public class Scan {
     }
 
     public Date getStart_time() {
-        return start_time;
+        if(start_time == null){
+            return null;
+        }
+        return (Date) start_time.clone();
     }
 
     public void setStart_time(Date start_time) {
@@ -48,7 +51,10 @@ public class Scan {
     }
 
     public Date getEnd_time() {
-        return end_time;
+        if(end_time == null){
+            return null;
+        }
+        return (Date) end_time.clone();
     }
 
     public void setEnd_time(Date end_time) {
@@ -88,7 +94,10 @@ public class Scan {
     }
 
     public Date getCommit_time() {
-        return commit_time;
+        if(commit_time == null){
+            return null;
+        }
+        return (Date)commit_time.clone();
     }
 
     public void setCommit_time(Date commit_time) {
