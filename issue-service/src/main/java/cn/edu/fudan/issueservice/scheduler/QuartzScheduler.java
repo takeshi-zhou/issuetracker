@@ -1,5 +1,6 @@
 package cn.edu.fudan.issueservice.scheduler;
 
+import cn.edu.fudan.issueservice.util.DateTimeUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -67,23 +70,24 @@ public class QuartzScheduler {
             remainingKey = "trend:"+category+":"+ duration + ":remaining:" + account_id + ":" + repo_id;
             eliminatedKey = "trend:"+category+":"+ duration + ":eliminated:" + account_id + ":" + repo_id;
         }
+        String now= DateTimeUtil.y_m_d_format(LocalDateTime.now());
         stringRedisTemplate.setEnableTransactionSupport(true);
         stringRedisTemplate.multi();
-        stringRedisTemplate.opsForList().rightPush(newKey, String.valueOf(newIssueCount));
+        stringRedisTemplate.opsForList().rightPush(newKey, now+":"+String.valueOf(newIssueCount));
         stringRedisTemplate.opsForList().trim(newKey,0,29);
-        stringRedisTemplate.opsForList().rightPush(remainingKey, String.valueOf(remainingIssueCount));
+        stringRedisTemplate.opsForList().rightPush(remainingKey,now+":"+String.valueOf(remainingIssueCount));
         stringRedisTemplate.opsForList().trim(remainingKey,0,29);
-        stringRedisTemplate.opsForList().rightPush(eliminatedKey, String.valueOf(eliminatedIssueCount));
+        stringRedisTemplate.opsForList().rightPush(eliminatedKey, now+":"+String.valueOf(eliminatedIssueCount));
         stringRedisTemplate.opsForList().trim(eliminatedKey,0,29);
         stringRedisTemplate.exec();
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 50 23 * * *")
     public void perDay() {
        durationUpdate("day");
     }
 
-    @Scheduled(cron = "0 5 0 * * Mon")
+    @Scheduled(cron = "0 55 23 * * SUN")
     public void perWeek() {
         durationUpdate("week");
     }

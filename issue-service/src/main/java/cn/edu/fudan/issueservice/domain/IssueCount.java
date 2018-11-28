@@ -9,6 +9,8 @@ import java.util.List;
  **/
 public class IssueCount implements Serializable {
 
+    private String date;
+
     private int newIssueCount;
 
     private int eliminatedIssueCount;
@@ -22,6 +24,13 @@ public class IssueCount implements Serializable {
 
     public IssueCount(int newIssueCount, int eliminatedIssueCount, int remainingIssueCount) {
         this(newIssueCount,eliminatedIssueCount,remainingIssueCount,null);
+    }
+
+    public IssueCount(String date,int newIssueCount, int eliminatedIssueCount, int remainingIssueCount) {
+        this.date=date;
+        this.newIssueCount = newIssueCount;
+        this.eliminatedIssueCount = eliminatedIssueCount;
+        this.remainingIssueCount = remainingIssueCount;
     }
 
     public IssueCount(int newIssueCount, int eliminatedIssueCount, int remainingIssueCount,List<String> newIssueIds) {
@@ -41,6 +50,14 @@ public class IssueCount implements Serializable {
         this.newIssueCount += another.getNewIssueCount();
         this.eliminatedIssueCount += another.getEliminatedIssueCount();
         this.remainingIssueCount += another.getRemainingIssueCount();
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public int getNewIssueCount() {

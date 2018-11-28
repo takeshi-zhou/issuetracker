@@ -14,7 +14,7 @@ import java.util.Date;
  **/
 public class DateTimeUtil {
 
-    private static DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+    private static DateTimeFormatter Y_M_D_H_M_S_formatter = new DateTimeFormatterBuilder()
             .appendValue(ChronoField.YEAR)
             .appendLiteral("-")
             .appendValue(ChronoField.MONTH_OF_YEAR, 2)//第二个参数是宽度，比如2月份，如果宽度定为2，那么格式化后就是02
@@ -28,18 +28,19 @@ public class DateTimeUtil {
             .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
             .toFormatter();
 
+    private static DateTimeFormatter Y_M_D_formatter = new DateTimeFormatterBuilder()
+            .appendValue(ChronoField.YEAR)
+            .appendLiteral("-")
+            .appendValue(ChronoField.MONTH_OF_YEAR, 2)//第二个参数是宽度，比如2月份，如果宽度定为2，那么格式化后就是02
+            .appendLiteral("-")
+            .appendValue(ChronoField.DAY_OF_MONTH, 2)
+            .toFormatter();
+
     public static String format(LocalDateTime dateTime) {
-        return dateTime.format(formatter);
+        return dateTime.format(Y_M_D_H_M_S_formatter);
     }
 
-    private static SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    public static Date getCurrentFormattedDate(){
-        try {
-            return simpleDateFormat.parse(simpleDateFormat.format(new Date()));
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public static String y_m_d_format(LocalDateTime dateTime){
+        return dateTime.format(Y_M_D_formatter);
     }
 }

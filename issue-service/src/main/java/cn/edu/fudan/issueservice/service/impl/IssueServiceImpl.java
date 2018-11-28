@@ -276,7 +276,10 @@ public class IssueServiceImpl implements IssueService {
             return Collections.emptyList();
         List<IssueCount> list = new ArrayList<>();
         for (int i = 0; i < newList.size(); i++) {
-            list.add(new IssueCount(Integer.parseInt(newList.get(i)),Integer.parseInt(eliminatedList.get(i)),Integer.parseInt(remainingList.get(i))));
+            String[] str1=newList.get(i).split(":");
+            String[] str2=eliminatedList.get(i).split(":");
+            String[] str3=remainingList.get(i).split(":");
+            list.add(new IssueCount(str1[0],Integer.parseInt(str1[1]),Integer.parseInt(str2[1]),Integer.parseInt(str3[1])));
         }
         return list;
     }
