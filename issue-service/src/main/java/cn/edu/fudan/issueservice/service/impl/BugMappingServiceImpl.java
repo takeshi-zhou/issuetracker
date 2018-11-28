@@ -1,5 +1,6 @@
 package cn.edu.fudan.issueservice.service.impl;
 
+import cn.edu.fudan.issueservice.component.TagMapHelper;
 import cn.edu.fudan.issueservice.domain.EventType;
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.RawIssue;
@@ -21,19 +22,20 @@ import java.util.*;
 public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
 
-    private Map<String,String> tagMapHelper;
+    private TagMapHelper tagMapHelper;
 
     @Autowired
-    public void setTagMapHelper(Map<String, String> tagMapHelper) {
+    public void setTagMapHelper(TagMapHelper tagMapHelper) {
         this.tagMapHelper = tagMapHelper;
     }
 
     private void addTag(List<JSONObject> tags,RawIssue rawIssue,String issueId){
         RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
-        if(tagMapHelper.containsKey(rawIssueDetail.getPriority())){
+        String tagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
+        if(tagID!=null){
             JSONObject tagged = new JSONObject();
             tagged.put("item_id", issueId);
-            tagged.put("tag_id", tagMapHelper.get(rawIssueDetail.getPriority()));
+            tagged.put("tag_id", tagID);
             tags.add(tagged);
         }
     }

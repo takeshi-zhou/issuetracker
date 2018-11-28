@@ -1,17 +1,12 @@
 package cn.edu.fudan.issueservice.component;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import java.util.HashMap;
-import java.util.Map;
-
+import org.springframework.stereotype.Component;
 /**
  * @author WZY
  * @version 1.0
  **/
-@Configuration
+@Component("tagMapHelper")
 public class TagMapHelper {
 
     @Value("${immediate.tag_id}")
@@ -32,17 +27,30 @@ public class TagMapHelper {
     private String misinformation;
 
 
-    @Bean("tagMap")
-    public Map<String,String> tagMapHelper(){
-        Map<String,String> priorityToTagId=new HashMap<>();
-        priorityToTagId.put("1",immediate);
-        priorityToTagId.put("2",urgent);
-        priorityToTagId.put("3",high);
-        priorityToTagId.put("4",normal);
-        priorityToTagId.put("5",low);
-        priorityToTagId.put("6",ignore);
-        priorityToTagId.put("7",solved);
-        priorityToTagId.put("8",misinformation);
-        return priorityToTagId;
+//    @Bean("tagMap")
+//    public Map<String,String> tagMapHelper(){
+//        Map<String,String> priorityToTagId=new HashMap<>();
+//        priorityToTagId.put("1",immediate);
+//        priorityToTagId.put("2",urgent);
+//        priorityToTagId.put("3",high);
+//        priorityToTagId.put("4",normal);
+//        priorityToTagId.put("5",low);
+//        priorityToTagId.put("6",ignore);
+//        priorityToTagId.put("7",solved);
+//        priorityToTagId.put("8",misinformation);
+//        return priorityToTagId;
+//    }
+
+    public String getTagIdByRank(int rank){
+        if(rank>=1&&rank<=4)
+            return urgent;
+        else if(rank>=5&&rank<=9)
+            return high;
+        else if(rank>=10&&rank<=14)
+            return normal;
+        else if(rank>=15&&rank<=20)
+            return low;
+        else
+            return null;
     }
 }
