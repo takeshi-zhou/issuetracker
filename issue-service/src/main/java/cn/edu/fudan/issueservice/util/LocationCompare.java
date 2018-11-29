@@ -35,7 +35,7 @@ public class LocationCompare {
             }
         }
 
-        return !(count_overlapping / union_locations.size() < threshold_overlapping);
+        return !((double)count_overlapping / union_locations.size() < threshold_overlapping);
 	    /*
 	    if (count_overlapping/union_locations.size()<threshold_overlapping)
 	         return false;
