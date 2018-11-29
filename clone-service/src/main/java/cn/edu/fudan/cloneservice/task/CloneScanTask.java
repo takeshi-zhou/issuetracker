@@ -24,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -130,10 +131,11 @@ public class CloneScanTask {
 
     private boolean invokeCloneTool(String repoPath,String repoName){
         String cmd = "java -jar SAGA.jar  " + repoPath + " " + repoName;
+        BufferedInputStream br = null;
         try {
             Process process = Runtime.getRuntime().exec(cmd,null,new File(workHome));
             //输出process打印信息
-            BufferedInputStream br = new BufferedInputStream(process.getInputStream());
+            br = new BufferedInputStream(process.getInputStream());
             int ch;
             StringBuffer text = new StringBuffer("getInfo: \n");
             while ((ch = br.read()) != -1) {
@@ -145,6 +147,14 @@ public class CloneScanTask {
         }catch (Exception e){
             e.printStackTrace();
             return false;
+        }finally {
+            if(br != null){
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
