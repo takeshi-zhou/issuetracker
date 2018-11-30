@@ -105,6 +105,7 @@ public class DiffService {
 
     public JSONObject diffTwoFile(String dirPath, String repo_id, String commit_id_a, String file_path_a) throws Exception{
         //System.out.println("注意，此处做了修改");
+        //加一个注释
         String commit_id_b = getPreCommitid(repo_id,commit_id_a);
         JSONObject jsonObject1 = generateFile(repo_id,commit_id_a,file_path_a);
         JSONObject jsonObject2 = generateFile(repo_id,commit_id_b,file_path_a);
