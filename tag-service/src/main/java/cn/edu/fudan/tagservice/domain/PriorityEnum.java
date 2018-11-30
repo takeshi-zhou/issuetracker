@@ -3,7 +3,8 @@ package cn.edu.fudan.tagservice.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum Priority {
+//枚举类名带上Enum后缀，枚举成员名称需要全大写，单词间用下划线隔开
+public enum PriorityEnum {
     Immediate("#b52a28",7),
     Urgent("#e36e6c",6),
     High("#eba47c",5),
@@ -15,15 +16,15 @@ public enum Priority {
 
     private String color;
     private int level;
-    private static Map<String, Priority> valueMap = new HashMap<>();
+    private static Map<String, PriorityEnum> valueMap = new HashMap<>();
 
     static {
-        for (Priority priority : Priority.values()) {
+        for (PriorityEnum priority : PriorityEnum.values()) {
             valueMap.put(priority.toString(), priority);
         }
     }
 
-    Priority(String color,int level) {
+    PriorityEnum(String color, int level) {
         this.color = color;
         this.level=level;
     }
@@ -40,8 +41,8 @@ public enum Priority {
         return level;
     }
 
-    public static Priority getByValue(String value) {
-        Priority result = valueMap.get(value);
+    public static PriorityEnum getByValue(String value) {
+        PriorityEnum result = valueMap.get(value);
         if (result == null) {
             throw new IllegalArgumentException("No element matches " + value);
         }

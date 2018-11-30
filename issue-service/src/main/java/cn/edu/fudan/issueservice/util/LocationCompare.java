@@ -9,9 +9,9 @@ import java.util.Stack;
 
 public class LocationCompare {
 
-    private static final double threshold_commonality = 0.95;
-    private static final double threshold_overlapping = 0.9;
-    private static final double threshold_lcs = 0.9;
+    private static final double THRESHOLD_COMMONALITY = 0.95;
+    private static final double THRESHOLD_OVERLAPPING = 0.9;
+    private static final double THRESHOLD_LCS = 0.9;
 
 
     public static boolean isUniqueIssue(RawIssue issue_1, RawIssue issue_2) {
@@ -23,7 +23,7 @@ public class LocationCompare {
         List<Location> union_locations = union(issue_1.getLocations(), issue_2.getLocations());
         double commonality = (double) intersect_locations.size() / union_locations.size();
 
-        if (commonality < threshold_commonality)
+        if (commonality < THRESHOLD_COMMONALITY)
             return false;
 
         int count_overlapping = 0;
@@ -35,7 +35,7 @@ public class LocationCompare {
             }
         }
 
-        return !((double)count_overlapping / union_locations.size() < threshold_overlapping);
+        return !((double)count_overlapping / union_locations.size() < THRESHOLD_OVERLAPPING);
 	    /*
 	    if (count_overlapping/union_locations.size()<threshold_overlapping)
 	         return false;
@@ -69,7 +69,7 @@ public class LocationCompare {
     }
 
     private static boolean theSameItem(String content_1, String content_2) {
-        return ((double) lcs(content_1, content_2)) / (double) Math.max(content_1.length(), content_2.length()) > threshold_lcs;
+        return ((double) lcs(content_1, content_2)) / (double) Math.max(content_1.length(), content_2.length()) > THRESHOLD_LCS;
 		/*
 		   if (lcs(content_1, content_2)/Math.max(content_1.length(), content_2.length())>threshold_lcs)
 		       return true;

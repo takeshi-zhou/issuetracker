@@ -1,7 +1,7 @@
 package cn.edu.fudan.tagservice.service.impl;
 
 import cn.edu.fudan.tagservice.dao.TagDao;
-import cn.edu.fudan.tagservice.domain.Priority;
+import cn.edu.fudan.tagservice.domain.PriorityEnum;
 import cn.edu.fudan.tagservice.domain.Tag;
 import cn.edu.fudan.tagservice.domain.TaggedItem;
 import cn.edu.fudan.tagservice.service.TagService;
@@ -43,14 +43,14 @@ public class TagServiceImpl implements TagService {
             tag_id = tagDao.getUuidByNameAndScope(name, scope);
             if (tag_id == null) {
                 tag_id = UUID.randomUUID().toString();
-                tagDao.addOneTag(new Tag(tag_id, name, scope, Priority.getByValue("name").getColor()));
+                tagDao.addOneTag(new Tag(tag_id, name, scope, PriorityEnum.getByValue("name").getColor()));
             }
             logger.error(tagDao.hasBeenTagged(tag_id, itemId).toString());
             if (tagDao.hasBeenTagged(tag_id, itemId) > 0)
                 throw new RuntimeException("duplicate tag!");
             tagDao.addOneTaggedItem(itemId, tag_id);
         } else {
-            if (Priority.contains(name))
+            if (PriorityEnum.contains(name))
                 throw new IllegalArgumentException("enter other tag" + name);
             tag_id = UUID.randomUUID().toString();
             tagDao.addOneTag(new Tag(tag_id, name, scope, "#ffffff"));
@@ -95,7 +95,7 @@ public class TagServiceImpl implements TagService {
                 tagDao.modifyOneTagged(oldTagId, newTagId, itemId);
             }
         } else {
-            if (Priority.contains(name))
+            if (PriorityEnum.contains(name))
                 throw new IllegalArgumentException("enter other tag" + name);
             tagDao.modifyOneTag(oldTagId, name);
         }
@@ -117,7 +117,7 @@ public class TagServiceImpl implements TagService {
     @Override
     public List<Tag> getAllDefaultTags() {
         List<Tag> tags= tagDao.getAllDefaultTags();
-        tags.sort(Comparator.comparingInt((Tag tag)->Priority.getByValue(tag.getName()).getLevel()));
+        tags.sort(Comparator.comparingInt((Tag tag)-> PriorityEnum.getByValue(tag.getName()).getLevel()));
         return tags;
     }
 
