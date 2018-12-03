@@ -3,8 +3,10 @@ package cn.edu.fudan.issueservice.service.impl;
 import cn.edu.fudan.issueservice.component.IssueEventManager;
 import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
+import cn.edu.fudan.issueservice.dao.ScanResultDao;
 import cn.edu.fudan.issueservice.domain.EventType;
 import cn.edu.fudan.issueservice.domain.Issue;
+import cn.edu.fudan.issueservice.domain.ScanResult;
 import cn.edu.fudan.issueservice.service.MappingService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +36,14 @@ public class BaseMappingServiceImpl implements MappingService {
     IssueEventManager issueEventManager;
     IssueDao issueDao;
     RawIssueDao rawIssueDao;
+    ScanResultDao scanResultDao;
     private StringRedisTemplate stringRedisTemplate;
     protected RestTemplate restTemplate;
+
+    @Autowired
+    public void setScanResultDao(ScanResultDao scanResultDao) {
+        this.scanResultDao = scanResultDao;
+    }
 
     @Autowired
     public void setRestTemplate(RestTemplate restTemplate) {
