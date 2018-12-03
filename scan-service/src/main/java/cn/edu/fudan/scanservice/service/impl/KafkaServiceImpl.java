@@ -157,8 +157,7 @@ public class KafkaServiceImpl implements KafkaService {
         String repoId = scanMessage.getRepoId();
         String commitId = scanMessage.getCommitId();
         String category=scanMessage.getCategory();
-        Future<String> future = findBugScanTask.run(repoId, commitId,category);
-        setTimeOut(future, repoId);
+        findBugScanTask.runSynchronously(repoId, commitId,category);
        //cloneScanTask.run(repoId,commitId,"clone");
     }
 

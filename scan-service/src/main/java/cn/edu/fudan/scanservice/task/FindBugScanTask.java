@@ -96,7 +96,7 @@ public class FindBugScanTask {
         send(repoId, commitId, "success", "all complete");
     }
 
-    @Async
+    @Async("forRequest")
     public Future<String> run(String repoId, String commitId,String category) {
         //获取分布式锁，一个repo同一时间只能有一个线程在扫
         //15min恰好是一个整个Scan操作的超时时间，如果某个线程获得锁之后Scan过程卡死导致锁没有释放
@@ -112,5 +112,9 @@ public class FindBugScanTask {
             }
         }
         return new AsyncResult<>("complete");
+    }
+
+    public void runSynchronously(String repoId,String commitId,String category){
+        scan(repoId, commitId,category);
     }
 }
