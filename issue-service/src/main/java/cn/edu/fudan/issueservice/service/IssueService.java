@@ -34,4 +34,6 @@ public interface IssueService {
     void startMapping(String repo_id, String pre_commit_id, String current_commit_id,String category);
 
     void updateIssueCount(String time);
+
+    Object getNewTrend(Integer month, String project_id, String userToken,String category);
 }
