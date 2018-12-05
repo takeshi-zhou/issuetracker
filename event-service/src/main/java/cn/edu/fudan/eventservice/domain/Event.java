@@ -28,7 +28,11 @@ public class Event {
         this.targetId = targetId;
         this.targetCommitter = targetCommitter;
         this.repoId = repoId;
-        this.createTime = createTime;
+        if(createTime == null){
+            this.createTime = null;
+        }else {
+            this.createTime = (Date) createTime.clone();
+        }
     }
 
     public String getId() {
@@ -88,10 +92,17 @@ public class Event {
     }
 
     public Date getCreateTime() {
-        return createTime;
+        if(createTime == null){
+            return null;
+        }
+        return (Date) createTime.clone();
     }
 
     public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
+        if(createTime == null){
+            this.createTime = null;
+        }else {
+            this.createTime = (Date) createTime.clone();
+        }
     }
 }
