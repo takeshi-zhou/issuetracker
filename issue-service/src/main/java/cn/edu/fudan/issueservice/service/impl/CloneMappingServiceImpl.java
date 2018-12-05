@@ -83,10 +83,12 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             Set<String> currentGroups=map2.keySet();
             Set<String> newGroups=new HashSet<>();
             int equalsCount = 0;
-            for(String currentGroup:currentGroups){
+            for(Map.Entry<String, List<RawIssue>> entryMap2 : map2.entrySet()){
+                String currentGroup = entryMap2.getKey();
+                List<RawIssue> rawIssuesInCurrentGroup = entryMap2.getValue();
                 boolean groupMapped=false;
-                List<RawIssue> rawIssuesInCurrentGroup=map2.get(currentGroup);
-                for(String preGroup:preGroups){
+                for(Map.Entry<String, List<RawIssue>> entryMap1 : map1.entrySet()){
+                    String preGroup = entryMap1.getKey();
                     if(currentGroup.equals(preGroup)){
                         groupMapped=true;
                         equalsCount++;
