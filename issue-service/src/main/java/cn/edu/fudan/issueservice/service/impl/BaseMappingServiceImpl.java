@@ -114,7 +114,10 @@ public class BaseMappingServiceImpl implements MappingService {
 
     void modifyToSolvedTag(String repo_id, String pre_commit_id,EventType eventType,String committer) {
         List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
-        issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
+        if(issues == null){
+            issues = new ArrayList<>();
+            issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
+        }
         if (issues != null && !issues.isEmpty()) {
             List<JSONObject> taggeds = new ArrayList<>();
             for (Issue issue : issues) {
@@ -129,7 +132,10 @@ public class BaseMappingServiceImpl implements MappingService {
 
     void addSolvedTag(String repo_id, String pre_commit_id,EventType eventType,String committer) {
         List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
-        issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
+        if(issues == null){
+            issues = new ArrayList<>();
+            issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
+        }
         if (issues != null && !issues.isEmpty()) {
             List<JSONObject> taggeds = new ArrayList<>();
             for (Issue issue : issues) {
