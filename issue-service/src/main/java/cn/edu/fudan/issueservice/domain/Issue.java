@@ -65,19 +65,33 @@ public class Issue {
     }
 
     public Date getStart_commit_date() {
-        return start_commit_date;
+        if(start_commit_date == null){
+            return null;
+        }
+        return (Date) start_commit_date.clone();
     }
 
     public void setStart_commit_date(Date start_commit_date) {
-        this.start_commit_date = start_commit_date;
+        if(start_commit_date == null){
+            this.start_commit_date = null;
+        }else {
+            this.start_commit_date = (Date) start_commit_date.clone();
+        }
     }
 
     public Date getEnd_commit_date() {
-        return end_commit_date;
+        if(end_commit_date == null){
+            return null;
+        }
+        return (Date) end_commit_date.clone();
     }
 
     public void setEnd_commit_date(Date end_commit_date) {
-        this.end_commit_date = end_commit_date;
+        if(end_commit_date == null){
+            this.end_commit_date = null;
+        }else {
+            this.end_commit_date = (Date) end_commit_date.clone();
+        }
     }
 
     public Date getCreate_time() {
