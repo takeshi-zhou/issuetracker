@@ -5,6 +5,7 @@ import cn.edu.fudan.issueservice.mapper.IssueMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,5 +71,22 @@ public class IssueDao {
 
     public Long getMaxAliveTime(List<String> list, String repo_id, String category){
         return issueMapper.getMaxAliveTime(list, repo_id, category);
+    }
+
+    public void updateOneIssuePriority(String issueId, int priority) {
+        issueMapper.updateOneIssuePriority(issueId,priority);
+    }
+
+    public Map<String, String> getIssueIdAndPriority() {
+        List<Map<String,String>> list = issueMapper.getIssueIdAndPriority();
+
+        Map<String,String> map = new HashMap<>();
+
+        for (Map<String,String> map1: list){
+            map.put(map1.get("uuid"),map1.get("detail"));
+
+        }
+
+        return map;
     }
 }

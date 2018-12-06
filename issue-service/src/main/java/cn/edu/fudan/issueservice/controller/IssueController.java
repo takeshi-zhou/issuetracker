@@ -68,9 +68,9 @@ public class IssueController {
 
     @GetMapping(value = {"/issue/statistical-results-fix"})
     public Object getNewTrend(@RequestParam("month") Integer month,
-                                        @RequestParam(name = "project_id") String project_id,
-                                        @RequestParam(name="category",defaultValue = "bug")String category,
-                                        HttpServletRequest request) {
+                              @RequestParam(name = "project_id") String project_id,
+                              @RequestParam(name="category",defaultValue = "bug")String category,
+                              HttpServletRequest request) {
         String userToken = request.getHeader("token");
         return issueService.getNewTrend(month, project_id, userToken,category);
     }
@@ -80,8 +80,22 @@ public class IssueController {
         return issueService.getSpecificIssues(issueParam);
     }
 
-    //下面都是供其他服务调用的内部接口
+    // 修改 Issue 的 优先级（priority）
+    @PutMapping(value = "/issue/priority/{issue-id}")
+    public Object updatePriority(@PathVariable("issue-id")String issueId, @RequestParam ("priority")String priority) {
+        try {
+            issueService.updatePriority(issueId,priority);
+            return new ResponseBean(200, "issues update priority success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "issues update priority failed!", null);
+        }
+    }
 
+
+    /**
+     * 下面都是供其他服务调用的内部接口
+     * */
     @PostMapping(value = {"/inner/issue"})
     public Object addIssues(@RequestBody List<Issue> issueList) {
         try {

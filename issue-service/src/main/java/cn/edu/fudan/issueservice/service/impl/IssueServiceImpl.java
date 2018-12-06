@@ -426,4 +426,13 @@ public class IssueServiceImpl implements IssueService {
         }
         return result;
     }
+
+    // priority 指的是解析文件中的 detail 的rank
+    @Override
+    public void updatePriority(String issueId, String priority) {
+
+
+        issueDao.updateOneIssuePriority(issueId,Integer.parseInt(priority));
+    }
+
 }

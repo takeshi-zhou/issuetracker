@@ -33,8 +33,14 @@
         <result property="target_files" column="target_files"/>
         <result property="create_time" column="create_time"/>
         <result property="update_time" column="update_time"/>
+        <result property="priority" column="priority"/>
         <collection property="issueType" column="type"
                     select="cn.edu.fudan.issueservice.mapper.IssueTypeMapper.getIssueTypeByTypeName"/>
+    </resultMap>
+
+    <resultMap id="issue3" type="Map">
+        <id property="uuid" column="uuid"/>
+        <result property="detail" column="detail"/>
     </resultMap>
 
 
@@ -53,7 +59,8 @@
         repo_id,
         target_files,
         create_time,
-        update_time
+        update_time,
+        priority
         )
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
@@ -70,7 +77,8 @@
             #{item.repo_id},
             #{item.target_files},
             #{item.create_time},
-            #{item.update_time}
+            #{item.update_time},
+            #{item.priority}
             )
         </foreach>
     </insert>
@@ -103,7 +111,7 @@
                 and category = #{category}
             </if>
         </where>
-        order by end_commit_date desc , start_commit_date desc
+        order by priority , end_commit_date desc , start_commit_date desc
         <if test="start != null  and size != null ">
             limit #{start},#{size}
         </if>
@@ -239,11 +247,11 @@
 
     <select id="getAvgEliminatedTime" resultType="double">
         select
-           avg((UNIX_TIMESTAMP(end_commit_date) - UNIX_TIMESTAMP(start_commit_date)))
+        avg((UNIX_TIMESTAMP(end_commit_date) - UNIX_TIMESTAMP(start_commit_date)))
         FROM
-            issue
+        issue
         WHERE
-             repo_id = #{repo_id} and category = #{category} and uuid in
+        repo_id = #{repo_id} and category = #{category} and uuid in
         <foreach collection="list" separator="," open="(" close=")" item="issue_id">
             #{issue_id}
         </foreach>
@@ -251,17 +259,25 @@
 
     <select id="getMaxAliveTime" resultType="long">
         select
-            max((UNIX_TIMESTAMP(end_commit_date) - UNIX_TIMESTAMP(start_commit_date)))
+        max((UNIX_TIMESTAMP(end_commit_date) - UNIX_TIMESTAMP(start_commit_date)))
         FROM
-            issue
+        issue
         WHERE
-            repo_id = #{repo_id} and category = #{category}
+        repo_id = #{repo_id} and category = #{category}
         <if test="list != null">
             and uuid not in
             <foreach collection="list" separator="," open="(" close=")" item="issue_id">
                 #{issue_id}
             </foreach>
         </if>
+    </select>
+
+    <update id="updateOneIssuePriority" >
+        UPDATE issue SET priority=#{priority} WHERE uuid=#{uuid}
+    </update>
+
+    <select id="getIssueIdAndPriority" resultMap="issue3">
+        SELECT a.uuid ,b.detail FROM issue  as a , rawIssue as b  where a.raw_issue_end = b.uuid and detail is not null
     </select>
 
 </mapper>
