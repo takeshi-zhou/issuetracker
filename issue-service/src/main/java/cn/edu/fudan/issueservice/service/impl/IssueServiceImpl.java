@@ -381,7 +381,7 @@ public class IssueServiceImpl implements IssueService {
         List<IssueCountPo> result=new ArrayList<>();
         String account_id = getAccountId(userToken);
         LocalDate end=LocalDate.now();
-        if(project_id==null||project_id==""){
+        if(project_id==null||project_id.equals("")){
             //需要查询该用户所有项目的扫描情况
             JSONArray repoIds=getRepoIds(account_id,category);
             if(repoIds!=null){
