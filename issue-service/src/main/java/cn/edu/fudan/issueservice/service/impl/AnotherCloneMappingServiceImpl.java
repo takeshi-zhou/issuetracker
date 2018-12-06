@@ -54,7 +54,7 @@ public class AnotherCloneMappingServiceImpl extends CloneMappingServiceImpl {
 
     @Override
     public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category, String committer) {
-        Date date=new Date();
+        //Date date=new Date();
         if (pre_commit_id.equals(current_commit_id)) {
             //第一次所有的group都是新增的Issue
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
@@ -70,8 +70,8 @@ public class AnotherCloneMappingServiceImpl extends CloneMappingServiceImpl {
             Map<String,List<RawIssue>> map1=rawIssues1.stream().collect(Collectors.groupingBy(RawIssue::getType));
             Map<String,List<RawIssue>> map2=rawIssues2.stream().collect(Collectors.groupingBy(RawIssue::getType));
             Map<String,List<RawIssue>> intersectionGroup=intersectionGroup(map1,map2);
-            Map<String,List<RawIssue>> newGroups=differentSet(map2,intersectionGroup);
-            Map<String,List<RawIssue>> removedGroups=differentSet(map1,intersectionGroup);
+        //    Map<String,List<RawIssue>> newGroups=differentSet(map2,intersectionGroup);
+        //    Map<String,List<RawIssue>> removedGroups=differentSet(map1,intersectionGroup);
             updateIssue(intersectionGroup);
             //newCloneInsert(newGroups,newGroups.keySet(),repo_id,current_commit_id,category,committer,date);
         }

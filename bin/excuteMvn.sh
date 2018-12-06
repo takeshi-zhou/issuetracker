@@ -1,18 +1,25 @@
 #!/bin/sh
 
-dir=/home/fdse/issueTracker/repo/${1}
+dir=$(pwd)/repo/${1}
 
-cd ${dir}
+#if [ ! -f pom.xml ];then
+#  exit 1
+#fi
 
-if [ ! -f pom.xml ];then
-  exit 1
-fi
+find ${dir} -name pom.xml  > .pom
 
-result=$(mvn  compile | grep "BUILD FAILURE")
-if  [[ "$result" != ""  ]]
-then
-    exit 1
-fi
+sed -i "s/pom.xml//g" .pom
 
-find ${dir} -name *.jar -exec rm -f {} \;
+for pomDir in `cat .pom`
+do
+	cd ${pomDir}	
+	result=`mvn  compile | grep -E  "BUILD FAILURE|ERROR"`
+	if  [[ "$result" != ""  ]]
+	then
+    		exit 1
+	fi
+done
+
+
+find $dir -name *.jar -exec rm -f {} \;
 exit 0

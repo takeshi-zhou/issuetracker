@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 @Component
@@ -48,11 +49,12 @@ public class ExcuteShellUtil {
 
     //do not include/consider the situation that there are at least files holding the same name in project-home dir
     public  String getFileLocation(String repoPath, String fileName) {
+        BufferedReader bReader = null;
         try {
             Runtime rt = Runtime.getRuntime();
             Process process = rt.exec("find "+repoHome + repoPath + " -name " + fileName);
             process.waitFor();
-            BufferedReader bReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            bReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             StringBuffer sBuffer = new StringBuffer();
             String line ;
             while ((line = bReader.readLine())!= null) {
@@ -62,6 +64,15 @@ public class ExcuteShellUtil {
             return  sBuffer.toString();
         } catch (Exception e) {
             e.printStackTrace();
+        }finally {
+            if(bReader != null){
+                try {
+                    bReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
 
         return null;
