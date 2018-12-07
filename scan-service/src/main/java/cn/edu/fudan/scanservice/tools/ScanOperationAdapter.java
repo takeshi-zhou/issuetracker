@@ -1,4 +1,4 @@
-package cn.edu.fudan.scanservice.service.impl;
+package cn.edu.fudan.scanservice.tools;
 
 import cn.edu.fudan.scanservice.dao.ScanDao;
 import cn.edu.fudan.scanservice.domain.Scan;
@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,7 +22,7 @@ import java.util.Date;
 import java.util.UUID;
 
 
-@Service
+@Component
 public class ScanOperationAdapter implements ScanOperation {
 
     private final static Logger logger = LoggerFactory.getLogger(ScanOperationAdapter.class);
@@ -33,14 +34,14 @@ public class ScanOperationAdapter implements ScanOperation {
     @Value("${inner.service.path}")
     protected String innerServicePath;
 
-    protected HttpHeaders httpHeaders;
+    HttpHeaders httpHeaders;
 
     @Autowired
     public void setHttpHeaders(HttpHeaders httpHeaders) {
         this.httpHeaders = httpHeaders;
     }
 
-    protected RestTemplate restTemplate;
+   RestTemplate restTemplate;
 
     @Autowired
     public void setRestTemplate(RestTemplate restTemplate) {

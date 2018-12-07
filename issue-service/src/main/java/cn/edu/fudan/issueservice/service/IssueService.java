@@ -36,4 +36,6 @@ public interface IssueService {
     void updateIssueCount(String time);
 
     Object getNewTrend(Integer month, String project_id, String userToken,String category);
+
+    void updatePriority(String issueId, String priority);
 }

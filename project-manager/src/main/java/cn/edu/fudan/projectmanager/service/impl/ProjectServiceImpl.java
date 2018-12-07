@@ -19,9 +19,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 @Service
@@ -248,5 +246,12 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public String getRepoId(String projectId) {
         return projectDao.getRepoId(projectId);
+    }
+
+    @Override
+    public Object existProjectWithThisRepoIdAndType(String repoId, String type) {
+        Map<String,Object> result=new HashMap<>();
+        result.put("exist",projectDao.existProjectWithThisRepoIdAndType(repoId, type));
+        return result;
     }
 }

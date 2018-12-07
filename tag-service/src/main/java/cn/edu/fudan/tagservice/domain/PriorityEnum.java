@@ -5,14 +5,14 @@ import java.util.Map;
 
 //枚举类名带上Enum后缀，枚举成员名称需要全大写，单词间用下划线隔开
 public enum PriorityEnum {
-    Immediate("#b52a28",7),
-    Urgent("#e36e6c",6),
-    High("#eba47c",5),
-    Normal("#ebcb8d",4),
-    Low("#a0b08f",3),
-    Ignore("#628e8b",2),
-    Solved("#d3d3d3",1),
-    Misinformation("#5499bd",0);
+    Immediate("#b52a28",0),
+    Urgent("#e36e6c",1),
+    High("#eba47c",2),
+    Normal("#ebcb8d",3),
+    Low("#a0b08f",4),
+    Ignore("#628e8b",5),
+    Solved("#d3d3d3",6),
+    Misinformation("#5499bd",7);
 
     private String color;
     private int level;
