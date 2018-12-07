@@ -370,6 +370,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
     }
 
     @Test
+    @Ignore
     public void getStatisticalResults() {
         /*
             当month为1，且project_id为null
