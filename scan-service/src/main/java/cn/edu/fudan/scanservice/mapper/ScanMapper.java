@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface ScanMapper {
 
-    Integer getScanCountByCommitId(String commit_id);
+    Integer getScanCountByCommitIdAndCategory(@Param("commit_id")String commit_id,@Param("category")String category);
 
     void insertOneScan(Scan scan);
 

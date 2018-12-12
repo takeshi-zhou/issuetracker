@@ -67,8 +67,8 @@
         repo_id = #{repo_id} and category = #{category});
     </select>
 
-    <select id="getScanCountByCommitId" parameterType="String" resultType="Integer">
-        select count(uuid) from scan where commit_id = #{commit_id}
+    <select id="getScanCountByCommitIdAndCategory" parameterType="String" resultType="Integer">
+        select count(uuid) from scan where commit_id = #{commit_id} and category = #{category}
     </select>
 
     <select id="getScannedCommits" parameterType="String" resultMap="scan">

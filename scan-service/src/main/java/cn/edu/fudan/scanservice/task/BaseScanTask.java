@@ -41,7 +41,7 @@ public class BaseScanTask {
     }
 
     void scan(ScanOperation scanOperation, String repoId, String commitId, String category){
-        if (scanOperation.isScanned(commitId)) {
+        if (scanOperation.isScanned(commitId,category)) {
             //如果当前commit已经扫描过，直接结束
             logger.info("this commit has been scanned");
             send(repoId, commitId, category,"success", "scan success!");

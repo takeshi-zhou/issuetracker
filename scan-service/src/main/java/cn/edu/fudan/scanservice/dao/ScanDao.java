@@ -35,8 +35,8 @@ public class ScanDao {
         return scanMapper.getLatestScannedCommitId(repo_id,category);
     }
 
-    public boolean isScanned(String commit_id) {
-        Integer count = scanMapper.getScanCountByCommitId(commit_id);
+    public boolean isScanned(String commit_id,String category) {
+        Integer count = scanMapper.getScanCountByCommitIdAndCategory(commit_id,category);
         return count != null && count > 0;
     }
 
