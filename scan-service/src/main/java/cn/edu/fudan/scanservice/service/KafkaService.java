@@ -9,5 +9,7 @@ public interface KafkaService {
 
     void scanByMQ(ConsumerRecord<String, String> consumerRecord);
 
+    void firstScanByMQ(ConsumerRecord<String, String> consumerRecord);
+
     void updateCommitScanStatus(ConsumerRecord<String, String> consumerRecord);
 }

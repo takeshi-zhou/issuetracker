@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -154,23 +155,31 @@ public class KafkaServiceImpl implements KafkaService {
         int size=commits.size();
         logger.info("received message from topic -> " + consumerRecord.topic() + " : " + size+" commits need to scan!");
         if(!commits.isEmpty()){
-            List<ScanMessageWithTime> filteredCommits=getFilteredList(commits);
-            String repoId=filteredCommits.get(0).getRepoId();
-            //当前repo_id和type的project存在，并且没被自动扫描过
-            if(existProject(repoId,"bug",true)){
-                for(ScanMessageWithTime message:filteredCommits){
-                    String commitId = message.getCommitId();
-                    findBugScanTask.runSynchronously(repoId,commitId,"bug");
-                }
-                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
+            firstAutoScan(commits);
+        }
+    }
+
+    @Async("forRequest")
+    public void firstAutoScan(List<ScanMessageWithTime> commits){
+        List<ScanMessageWithTime> filteredCommits=getFilteredList(commits);
+        String repoId=filteredCommits.get(0).getRepoId();
+        logger.info(filteredCommits.size()+" commits need to scan after filtered!");
+        //当前repo_id和type的project存在，并且没被自动扫描过
+        if(existProject(repoId,"bug",true)){
+            logger.info("start auto scan bug -> {}",repoId);
+            for(ScanMessageWithTime message:filteredCommits){
+                String commitId = message.getCommitId();
+                findBugScanTask.runSynchronously(repoId,commitId,"bug");
             }
-            if(existProject(repoId,"clone",true)){
-                for(ScanMessageWithTime message:filteredCommits){
-                    String commitId = message.getCommitId();
-                    cloneScanTask.runSynchronously(repoId,commitId,"clone");
-                }
-                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
+            restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
+        }
+        if(existProject(repoId,"clone",true)){
+            logger.info("start auto scan clone -> {}",repoId);
+            for(ScanMessageWithTime message:filteredCommits){
+                String commitId = message.getCommitId();
+                cloneScanTask.runSynchronously(repoId,commitId,"clone");
             }
+            restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
         }
     }
 

@@ -58,8 +58,9 @@ public class ScanOperationTest {
     @Test
     public void isScanned() {
         String commitId = "comm";
-        Mockito.when(scanDao.isScanned(commitId)).thenReturn(true);
-        Boolean result = scanOperation.isScanned(commitId);
+        String category= "bug";
+        Mockito.when(scanDao.isScanned(commitId,category)).thenReturn(true);
+        Boolean result = scanOperation.isScanned(commitId,category);
         Assert.assertEquals(true,result);
     }
 
