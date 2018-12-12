@@ -18,7 +18,6 @@ import java.util.*;
 @Service("bugMapping")
 public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
-
     private TagMapHelper tagMapHelper;
 
     @Autowired
@@ -43,7 +42,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
     public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category, String committer) {
         List<Issue> insertIssueList = new ArrayList<>();
         List<JSONObject> tags = new ArrayList<>();
-        Date date= new Date();
+        Date date= new Date();//当前时间
         if (pre_commit_id.equals(current_commit_id)) {
             //当前project第一次扫描，所有的rawIssue都是issue
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
@@ -52,12 +51,9 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             log.info("first scan mapping!");
             Date commitDate=getCommitDate(current_commit_id);
             for (RawIssue rawIssue : rawIssues) {
-                String new_IssueId = UUID.randomUUID().toString();
-                rawIssue.setIssue_id(new_IssueId);
-                String targetFiles = rawIssue.getFile_name();
-                Issue issue = new Issue(new_IssueId, rawIssue.getType(),category, current_commit_id,commitDate, current_commit_id,commitDate, rawIssue.getUuid(), rawIssue.getUuid(), repo_id, targetFiles,date,date);
+                Issue issue=generateOneNewIssue(repo_id,rawIssue,category,current_commit_id,commitDate,date);
                 insertIssueList.add(issue);
-                addTag(tags,rawIssue,new_IssueId);
+                addTag(tags,rawIssue,issue.getUuid());
             }
             int newIssueCount = insertIssueList.size();
             int remainingIssueCount = insertIssueList.size();
@@ -101,11 +97,9 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 }
                 if (!mapped) {
                     //如果当前commit的某个rawIssue没有在上个commit的rawissue列表里面找到匹配，将它作为新的issue插入
-                    String new_IssueId = UUID.randomUUID().toString();
-                    issue_2.setIssue_id(new_IssueId);
-                    String targetFiles = issue_2.getFile_name();
-                    insertIssueList.add(new Issue(new_IssueId, issue_2.getType(),category, current_commit_id, commitDate,current_commit_id,commitDate, issue_2.getUuid(), issue_2.getUuid(), repo_id, targetFiles,date,date));
-                    addTag(tags,issue_2,new_IssueId);
+                    Issue issue=generateOneNewIssue(repo_id,issue_2,category,current_commit_id,commitDate,date);
+                    insertIssueList.add(issue);
+                    addTag(tags,issue_2,issue.getUuid());
                 }
             }
             if (!issues.isEmpty()) {
@@ -132,8 +126,27 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         }
         //打tag
         if(!tags.isEmpty()){
-            restTemplate.postForObject(tagServicePath, tags, JSONObject.class);
+            restInterfaceManager.addTags(tags);
         }
         log.info("mapping finished!");
+    }
+
+    //根据rawIssue产生一个新的Issue对象
+    private Issue generateOneNewIssue(String repo_id,RawIssue rawIssue,String category,String current_commit_id,Date currentCommitDate,Date addTime){
+        String new_IssueId = UUID.randomUUID().toString();
+        rawIssue.setIssue_id(new_IssueId);
+        String targetFiles = rawIssue.getFile_name();
+        if (isDefaultDisplayId){
+             currentDisplayId = (issueDao.getMaxIssueDisplayId(repo_id) == null) ? 0 : issueDao.getMaxIssueDisplayId(repo_id);
+            isDefaultDisplayId = false;
+        }
+        // 映射 （1-4）1 、（5-9）2、（10-14）3 、（15 -20） 4
+        int priority =  Integer.parseInt(JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class).getRank())/5 + 1 ;
+        priority = priority == 5 ? 4 : priority ;
+        Issue issue = new Issue(new_IssueId, rawIssue.getType(),category, current_commit_id,
+                currentCommitDate, current_commit_id,currentCommitDate, rawIssue.getUuid(),
+                rawIssue.getUuid(), repo_id, targetFiles,addTime,addTime,++currentDisplayId);
+        issue.setPriority(priority);
+        return issue;
     }
 }

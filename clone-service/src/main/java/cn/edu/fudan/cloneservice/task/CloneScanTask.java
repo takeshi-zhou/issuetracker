@@ -1,5 +1,6 @@
 package cn.edu.fudan.cloneservice.task;
 
+import cn.edu.fudan.cloneservice.component.RestInterfaceManager;
 import cn.edu.fudan.cloneservice.domain.Scan;
 import cn.edu.fudan.cloneservice.domain.ScanResult;
 import cn.edu.fudan.cloneservice.lock.RedisLuaLock;
@@ -13,14 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -46,30 +43,23 @@ public class CloneScanTask {
     private String repoHome;
     @Value("${shareDir}")
     private String shareDir;
-    @Value("${inner.service.path}")
-    private String innerServicePath;
-    @Value("${commit.service.path}")
-    private String commitServicePath;
+
     private KafkaTemplate kafkaTemplate;
-    private RestTemplate restTemplate;
     private RedisLuaLock redisLock;
-    private HttpHeaders httpHeaders;
+    private RestInterfaceManager restInterfaceManager;
+
+    @Autowired
+    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
+        this.restInterfaceManager = restInterfaceManager;
+    }
 
     @Autowired
     public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
     @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
-    @Autowired
     public void setRedisLock(RedisLuaLock redisLock) {
         this.redisLock = redisLock;
-    }
-    @Autowired
-    public void setHttpHeaders(HttpHeaders httpHeaders) {
-        this.httpHeaders = httpHeaders;
     }
 
     @SuppressWarnings("unchecked")
@@ -118,10 +108,8 @@ public class CloneScanTask {
             }
             if(!cloneRawIssues.isEmpty()){
                 //插入所有的rawIssue
-                HttpEntity<Object> requestEntity = new HttpEntity<>(cloneRawIssues, httpHeaders);
-                restTemplate.exchange(innerServicePath + "/inner/raw-issue", HttpMethod.POST, requestEntity, JSONObject.class);
+                restInterfaceManager.insertRawIssuesWithLocations(cloneRawIssues);
             }
-
             return true;
         }catch (Exception e){
             e.printStackTrace();
@@ -137,7 +125,7 @@ public class CloneScanTask {
             //输出process打印信息
             br = new BufferedInputStream(process.getInputStream());
             int ch;
-            StringBuffer text = new StringBuffer("getInfo: \n");
+            StringBuilder text = new StringBuilder("getInfo: \n");
             while ((ch = br.read()) != -1) {
                 text.append((char) ch);
             }
@@ -159,8 +147,7 @@ public class CloneScanTask {
     }
 
     private boolean mapping(String repo_id,String current_commit_id,String category){
-        HttpEntity<Object> entity=new HttpEntity<>(httpHeaders);
-        String pre_commit_id = restTemplate.exchange( innerServicePath+"/inner/scan/last-commit?repo_id="+repo_id+"&category="+category, HttpMethod.GET, entity, String.class).getBody();
+        String pre_commit_id = restInterfaceManager.getLastScannedCommitId(repo_id,category);
         JSONObject requestParam = new JSONObject();
         requestParam.put("repo_id", repo_id);
         if (pre_commit_id != null)
@@ -170,13 +157,12 @@ public class CloneScanTask {
         requestParam.put("current_commit_id", current_commit_id);
         requestParam.put("category",category);
         logger.info("mapping between " + requestParam.toJSONString());
-        HttpEntity<Object> newEntity = new HttpEntity<>(requestParam, httpHeaders);
-        JSONObject result = restTemplate.exchange(innerServicePath + "/inner/issue/mapping", HttpMethod.POST, newEntity, JSONObject.class).getBody();
+        JSONObject result = restInterfaceManager.mapping(requestParam);
         return result != null && result.getIntValue("code") == 200;
     }
 
     private boolean checkOut(String repoId, String commitId) {
-        JSONObject response = restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repoId + "&commit_id=" + commitId, JSONObject.class);
+        JSONObject response = restInterfaceManager.checkOut(repoId, commitId);
         return response != null && response.getJSONObject("data").getString("status").equals("Successful");
     }
 
@@ -218,8 +204,7 @@ public class CloneScanTask {
         logger.info("start to insert scan.....");
         scan.setStatus("done");//设为结束状态
         scan.setEnd_time(DateTimeUtil.formatedDate(new Date()));
-        HttpEntity<Object> entity=new HttpEntity<>(scan,httpHeaders);
-        JSONObject response =restTemplate.exchange(innerServicePath+"/inner/scan", HttpMethod.POST,entity,JSONObject.class).getBody();
+        JSONObject response =restInterfaceManager.insertScan(scan);
         if(response==null||response.getIntValue("code")!=200){
             send(repoId,commitId,"failed","scan add failed!");
             logger.error("scan add failed!");

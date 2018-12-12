@@ -22,11 +22,13 @@ public interface ProjectMapper {
 
     Project getProjectByID(String uuid);
 
-    Project getProjectByURLTypeAndAccountId(@Param("account_id") String account_id, @Param("url") String url, @Param("type") String type);
+    Project getProjectByURLTypeAndAccountIdBranch(@Param("account_id") String account_id, @Param("url") String url, @Param("type") String type,@Param("branch") String branch) ;
 
-    List<Project> getProjectsByURLAndType(@Param("url") String url, @Param("type") String type);
+    List<Project> getProjectsByURLAndTypeBranch(@Param("url") String url, @Param("type") String type ,@Param("branch") String branch);
 
     void updateProjectStatus(Project project);
+
+    void updateProjectFirstAutoScan(@Param("repo_id") String repo_id,@Param("type") String type);
 
     void remove(@Param("projectId") String projectId);
 
@@ -35,4 +37,6 @@ public interface ProjectMapper {
     List<String> getRepoIdsByAccountIdAndType(@Param("account_id") String account_id,@Param("type") String type);
 
     List<String> getProjectIdsByRepoIdAndType(@Param("repo_id") String repo_id,@Param("type") String type);
+
+    int getProjectCountWithThisRepoIdAndType(@Param("repo_id") String repo_id,@Param("type") String type);
 }

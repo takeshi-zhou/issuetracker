@@ -15,17 +15,6 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class HttpConfig {
 
-    @Value("${inner.header.key}")
-    private String headerKey;
-    @Value("${inner.header.value}")
-    private String headerValue;
-
-    @Bean("httpHeader")
-    public HttpHeaders httpHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(headerKey, headerValue);
-        return headers;
-    }
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();

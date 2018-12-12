@@ -25,13 +25,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @PowerMockIgnore({"javax.crypto.*","javax.management.*"})
 public class ScanServiceApplicationTests {
 
-    private final static Logger logger = LoggerFactory.getLogger(ScanOperationAdapter.class);
-
-    @Autowired
-    private HttpHeaders httpHeaders;
-
-    @Value("${inner.service.path}")
-    private String innerServicePath;
 
     @BeforeClass
     public static void beforeTest() {
@@ -42,23 +35,6 @@ public class ScanServiceApplicationTests {
     public static void afterTest() {
         System.out.println("结束测试..................................");
     }
-
-//    protected RestTemplate restTemplate;
-//
-//    @Autowired
-//    public void setRestTemplate(RestTemplate restTemplate) {
-//        this.restTemplate = restTemplate;
-//    }
-
-//    @Test
-//    @Ignore
-//    public void contextLoads() {
-//        JSONObject requestParam = new JSONObject();
-//        requestParam.put("uuid", "9b60eadb-6738-4d73-acaa-114f4c848759");
-//        requestParam.put("scan_status", "Not Scanned");
-//        HttpEntity<Object> entity = new HttpEntity<>(requestParam, httpHeaders);
-//        restTemplate.exchange(innerServicePath + "/inner/project", HttpMethod.PUT, entity, JSONObject.class);
-//    }
 
     @Test
     public void test(){

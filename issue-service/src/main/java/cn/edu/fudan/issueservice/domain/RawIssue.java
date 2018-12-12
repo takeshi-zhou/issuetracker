@@ -151,4 +151,9 @@ public class RawIssue {
                     rawIssue.detail.equals(detail) &&
                     rawIssue.file_name.equals(file_name);
     }
+
+    @Override
+    public String toString() {
+        return "{uuid="+uuid+",type="+type+",category="+category+",detail="+detail+"}";
+    }
 }

@@ -25,15 +25,14 @@ public class DateTimeUtil {
             .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
             .toFormatter();
 
-    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public static String format(Date date) {
-        return new SimpleDateFormat(DATE_FORMAT).format(date);
+        return simpleDateFormat.format(date);
     }
 
     public static Date formatedDate(Date date) {
         try {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
             return simpleDateFormat.parse(simpleDateFormat.format(date));
         } catch (ParseException e) {
             e.printStackTrace();
@@ -43,7 +42,7 @@ public class DateTimeUtil {
 
     public static Date parse(String str) {
         try {
-            return new SimpleDateFormat(DATE_FORMAT).parse(str);
+            return simpleDateFormat.parse(str);
         } catch (ParseException e) {
             e.printStackTrace();
             return null;

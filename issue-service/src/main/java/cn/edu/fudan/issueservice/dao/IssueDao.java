@@ -86,7 +86,10 @@ public class IssueDao {
             map.put(map1.get("uuid"),map1.get("detail"));
 
         }
-
         return map;
+    }
+
+    public Integer getMaxIssueDisplayId(String repoId) {
+        return issueMapper.getMaxIssueDisplayId(repoId);
     }
 }

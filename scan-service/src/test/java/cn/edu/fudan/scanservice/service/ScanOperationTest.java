@@ -1,6 +1,6 @@
 package cn.edu.fudan.scanservice.service;
 
-import cn.edu.fudan.scanservice.ScanServiceApplicationTests;
+import cn.edu.fudan.scanservice.component.RestInterfaceManager;
 import cn.edu.fudan.scanservice.dao.ScanDao;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.domain.ScanInitialInfo;
@@ -15,34 +15,31 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.Resource;
 import java.util.Date;
 
 @PrepareForTest({ScanOperation.class, ScanOperationAdapter.class, RestTemplate.class, ScanDao.class})
-public class ScanOperationTest extends ScanServiceApplicationTests {
+public class ScanOperationTest {
 
     @Value("${commit.service.path}")
     private String commitServicePath;
     @Value("${repository.service.path}")
     private String repoServicePath;
-    @Value("${inner.service.path}")
-    protected String innerServicePath;
-
-    @Mock
-    @Autowired
-    private RestTemplate restTemplate;
 
     @Mock
     @Autowired
     private ScanDao scanDao;
 
+    @Mock
+    private RestInterfaceManager restInterfaceManager;
 
-    @Resource(name = "findBug")
+
+    @Autowired
     @InjectMocks
     private ScanOperation scanOperation = new ScanOperationAdapter();
 
@@ -52,7 +49,7 @@ public class ScanOperationTest extends ScanServiceApplicationTests {
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
-
+        MemberModifier.field(ScanOperationAdapter.class,"restInterfaceManager").set(scanOperation,restInterfaceManager);
         testDataMaker = new TestDataMaker();
         scan = testDataMaker.scanMakerSc1();
 
@@ -81,14 +78,14 @@ public class ScanOperationTest extends ScanServiceApplicationTests {
         /*
             当commit check out 返回值未null
          */
-        Mockito.when(restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repoId + "&commit_id=" + commitId, JSONObject.class)).thenReturn(null);
+        Mockito.when(restInterfaceManager.checkOut(repoId,commitId)).thenReturn(null);
         Boolean result = scanOperation.checkOut(repoId,commitId);
         Assert.assertEquals(false,result);
 
         /*
             当commit check out 返回值结果为successful
          */
-        Mockito.when(restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repoId + "&commit_id=" + commitId, JSONObject.class)).thenReturn(response);
+        Mockito.when(restInterfaceManager.checkOut(repoId,commitId)).thenReturn(response);
         result = scanOperation.checkOut(repoId,commitId);
         Assert.assertEquals(true,result);
     }
@@ -117,8 +114,8 @@ public class ScanOperationTest extends ScanServiceApplicationTests {
         /*
             mock数据
          */
-        Mockito.when(restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class)).thenReturn(repoResponse);
-        Mockito.when(restTemplate.getForObject(commitServicePath + "/commit-time?commit_id=" + commitId, JSONObject.class)).thenReturn(commitResponse);
+        Mockito.when(restInterfaceManager.getRepoById(repoId)).thenReturn(repoResponse);
+        Mockito.when(restInterfaceManager.getCommitTime(commitId)).thenReturn(commitResponse);
 
         /*
             验证

@@ -1,19 +1,14 @@
 package cn.edu.fudan.eventservice.service.impl;
 
+import cn.edu.fudan.eventservice.component.RestInterfaceManager;
 import cn.edu.fudan.eventservice.dao.EventDao;
 import cn.edu.fudan.eventservice.domain.Event;
 import cn.edu.fudan.eventservice.domain.EventType;
 import cn.edu.fudan.eventservice.service.EventService;
 import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,22 +25,16 @@ public class EventServiceImpl implements EventService {
 
     private static final String EVENT_HAS_NEW_KEY_PREFIX="event:has_new:";
 
-    @Value("${inner.service.path}")
-    private String innerServicePath;
-
     private EventDao eventDao;
-    private RestTemplate restTemplate;
-    private HttpHeaders httpHeaders;
     private StringRedisTemplate stringRedisTemplate;
+    private RestInterfaceManager restInterfaceManager;
 
     public EventServiceImpl(EventDao eventDao,
-                            RestTemplate restTemplate,
-                            HttpHeaders httpHeaders,
-                            StringRedisTemplate stringRedisTemplate) {
+                            StringRedisTemplate stringRedisTemplate,
+                            RestInterfaceManager restInterfaceManager) {
         this.eventDao = eventDao;
-        this.restTemplate=restTemplate;
-        this.httpHeaders=httpHeaders;
         this.stringRedisTemplate=stringRedisTemplate;
+        this.restInterfaceManager=restInterfaceManager;
     }
 
     @Override
@@ -68,7 +57,7 @@ public class EventServiceImpl implements EventService {
     public Object getCurrentEvents(String userToken,String category) {
 
         Map<String,Object> result=new HashMap<>();
-        JSONArray repoIds=getRepoIdsOfAccount(userToken, category);
+        JSONArray repoIds=restInterfaceManager.getRepoIdsOfAccount(userToken, category);
         if(repoIds==null||repoIds.isEmpty()){
             if(category.equals("bug")){
                 result.put("newBug",Collections.emptyList());
@@ -105,21 +94,12 @@ public class EventServiceImpl implements EventService {
         return result;
     }
 
-    private JSONArray getRepoIdsOfAccount(String userToken,String category){
-        HttpEntity<String> httpEntity=new HttpEntity<>(httpHeaders);
-        Map<String,String> urlParameters=new HashMap<>();
-        urlParameters.put("userToken",userToken);
-        ResponseEntity<String> responseEntity=restTemplate.exchange(innerServicePath+"/user/accountId?userToken={userToken}", HttpMethod.GET,httpEntity,String.class,urlParameters);
-        String accountId=responseEntity.getBody();
-        urlParameters.put("accountId",accountId);
-        urlParameters.put("type",category);
-        return restTemplate.exchange(innerServicePath+"/inner/project/repo-ids?account_id={accountId}&type={type}",HttpMethod.GET,httpEntity,JSONArray.class,urlParameters).getBody();
-    }
+
 
     @Override
     public Object hasNewEvents(String userToken, String category) {
         Map<String,Object> result=new HashMap<>();
-        JSONArray repoIDs=getRepoIdsOfAccount(userToken, category);
+        JSONArray repoIDs=restInterfaceManager.getRepoIdsOfAccount(userToken, category);
         boolean hasNew=false;
         //当前用户只要有任意一个repo有更新，则认为有新的通知
         for(int i=0;i<repoIDs.size();i++){

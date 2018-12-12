@@ -44,8 +44,8 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
         if (userToken == null) {
             throw new AuthException("need user token!");
         }
-        JSONObject result = restTemplate.getForObject(accountServicePath + "/auth/" + userToken, JSONObject.class);
-        if (result.getIntValue("code") != 200) {
+        JSONObject result = restTemplate.getForObject(accountServicePath + "/user/auth/" + userToken, JSONObject.class);
+        if (result!=null&&result.getIntValue("code") != 200) {
             throw new AuthException("auth failed!");
         }
         return true;

@@ -50,7 +50,7 @@ public class TagController {
         }
     }
 
-    //JSONObject(tagId,name,isDefault,itemId)
+    //JSONObject(name,isDefault,itemId,scope,oldName)
     @PutMapping("/tags")
     public Object modifyTag(@RequestBody JSONObject requestBody) {
         try {

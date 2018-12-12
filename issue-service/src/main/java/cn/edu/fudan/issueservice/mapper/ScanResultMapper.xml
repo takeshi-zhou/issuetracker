@@ -74,7 +74,7 @@
                 and commit_date &lt;= #{end}
             </if>
             <if test="start != null">
-                and commit_date &gt;= #{start}
+                and commit_date &gt; #{start}
             </if>
         </where>
         GROUP BY `commit_date`
@@ -84,16 +84,16 @@
         SELECT
         `commit_date`,
         sum(new_count) as new_count,
-        sum(remaining_count) as remaining_count,
+        sum(eliminated_count) as eliminated_count,
         SUBSTRING_INDEX(
         GROUP_CONCAT(
-        `eliminated_count`
+        `remaining_count`
         ORDER BY `id` DESC
         SEPARATOR '||'
         ),
         '||',
         1
-        ) eliminated_count
+        ) remaining_count
         FROM
         scan_result
         <where>
@@ -110,7 +110,7 @@
                 and commit_date &lt;= #{end}
             </if>
             <if test="start != null">
-                and commit_date &gt;= #{start}
+                and commit_date &gt; #{start}
             </if>
         </where>
     </select>

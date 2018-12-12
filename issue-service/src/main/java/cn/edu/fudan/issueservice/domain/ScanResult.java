@@ -20,7 +20,7 @@ public class ScanResult {
     public ScanResult() {
     }
 
-    public ScanResult(String category, String repo_id, Date scan_date,Date commit_date, int new_count, int eliminated_count, int remaining_count) {
+    public ScanResult(String category, String repo_id, Date scan_date, Date commit_date, int new_count, int eliminated_count, int remaining_count) {
         this.category = category;
         this.repo_id = repo_id;
         this.scan_date=scan_date;

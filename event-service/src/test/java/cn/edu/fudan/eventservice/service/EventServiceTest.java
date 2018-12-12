@@ -1,6 +1,7 @@
 package cn.edu.fudan.eventservice.service;
 
 import cn.edu.fudan.eventservice.EventServiceApplicationTests;
+import cn.edu.fudan.eventservice.component.RestInterfaceManager;
 import cn.edu.fudan.eventservice.dao.EventDao;
 import cn.edu.fudan.eventservice.domain.Event;
 import cn.edu.fudan.eventservice.domain.EventType;
@@ -33,8 +34,7 @@ public class EventServiceTest extends EventServiceApplicationTests {
 
     private static final String EVENT_HAS_NEW_KEY_PREFIX="event:has_new:";
 
-    @Value("${inner.service.path}")
-    private String innerServicePath;
+    private RestInterfaceManager restInterfaceManager;
 
     @Autowired
     private EventService eventService;
@@ -44,8 +44,6 @@ public class EventServiceTest extends EventServiceApplicationTests {
     private StringRedisTemplate stringRedisTemplate;
 
     private ValueOperations valueOperations;
-
-    private RestTemplate restTemplate;
 
     private List<Event> testEvents;
 
@@ -63,22 +61,16 @@ public class EventServiceTest extends EventServiceApplicationTests {
 
     private List<Event> removeCloneInstanceEvents;
 
-    @Mock
-    private ResponseEntity<String> responseEntity1;
-
-    @Mock
-    private ResponseEntity<JSONArray> responseEntity2;
 
     @Before
     public void setUp() throws IllegalAccessException {
         eventDao= Mockito.mock(EventDao.class);
         stringRedisTemplate=Mockito.mock(StringRedisTemplate.class);
         valueOperations=Mockito.mock(ValueOperations.class);
-        restTemplate=Mockito.mock(RestTemplate.class);
+        restInterfaceManager=Mockito.mock(RestInterfaceManager.class);
         MemberModifier.field(EventServiceImpl.class,"eventDao").set(eventService,eventDao);
         MemberModifier.field(EventServiceImpl.class,"stringRedisTemplate").set(eventService,stringRedisTemplate);
-        MemberModifier.field(EventServiceImpl.class,"restTemplate").set(eventService,restTemplate);
-
+        MemberModifier.field(EventServiceImpl.class,"restInterfaceManager").set(eventService,restInterfaceManager);
         //准备测试数据
         testEvents=new ArrayList<>();
         testEvents.add(new Event("1","bug", EventType.NEW_BUG,"BIG_METHOD","2222","Jack","1",new Date()));
@@ -173,7 +165,7 @@ public class EventServiceTest extends EventServiceApplicationTests {
         expectedResult.put("newBug",newBugEvents);
         expectedResult.put("eliminateBug",eliminatedBugEvents);
 
-        getRepoIdsOfAccountMock(accountId);
+        PowerMockito.when(restInterfaceManager.getRepoIdsOfAccount(userToken,category)).thenReturn(repoIds);
 
         PowerMockito.when(eventDao.getRecentEventsByEventType(repoIds.toJavaList(String.class),EventType.NEW_BUG))
                 .thenReturn(newBugEvents);
@@ -201,7 +193,7 @@ public class EventServiceTest extends EventServiceApplicationTests {
         expectedResult.put("newCloneInstance",newCloneInstanceEvents);
         expectedResult.put("removeCloneInstance",removeCloneInstanceEvents);
 
-        getRepoIdsOfAccountMock(accountId);
+        PowerMockito.when(restInterfaceManager.getRepoIdsOfAccount(userToken,category)).thenReturn(repoIds);
 
         PowerMockito.when(eventDao.getRecentEventsByEventType(repoIds.toJavaList(String.class),EventType.NEW_CLONE_CLASS))
                 .thenReturn(newCloneClassEvents);
@@ -234,26 +226,6 @@ public class EventServiceTest extends EventServiceApplicationTests {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private void getRepoIdsOfAccountMock(String accountId){
-        PowerMockito
-                .when(restTemplate.exchange(ArgumentMatchers.eq(innerServicePath+"/user/accountId?userToken={userToken}"),
-                        ArgumentMatchers.eq(HttpMethod.GET),
-                        ArgumentMatchers.any(HttpEntity.class),
-                        ArgumentMatchers.eq(String.class),
-                        ArgumentMatchers.any(Map.class)))
-                .thenReturn(responseEntity1);
-        PowerMockito.when(responseEntity1.getBody()).thenReturn(accountId);
-        PowerMockito
-                .when(restTemplate.exchange(ArgumentMatchers.eq(innerServicePath+"/inner/project/repo-ids?account_id={accountId}&type={type}"),
-                        ArgumentMatchers.eq(HttpMethod.GET),
-                        ArgumentMatchers.any(HttpEntity.class),
-                        ArgumentMatchers.eq(JSONArray.class),
-                        ArgumentMatchers.any(Map.class)))
-                .thenReturn(responseEntity2);
-        PowerMockito.when(responseEntity2.getBody()).thenReturn(repoIds);
-    }
-
     @Test
     @SuppressWarnings("unchecked")
     public void hasNewEvents() throws Exception {
@@ -263,7 +235,7 @@ public class EventServiceTest extends EventServiceApplicationTests {
         Map<String,Object> expectedResult=new HashMap<>();
         expectedResult.put("hasNew",true);
 
-        getRepoIdsOfAccountMock(accountId);
+        PowerMockito.when(restInterfaceManager.getRepoIdsOfAccount(userToken,category)).thenReturn(repoIds);
 
         PowerMockito.when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
 
@@ -285,7 +257,7 @@ public class EventServiceTest extends EventServiceApplicationTests {
         Map<String,Object> expectedResult=new HashMap<>();
         expectedResult.put("hasNew",false);
 
-        getRepoIdsOfAccountMock(accountId);
+        PowerMockito.when(restInterfaceManager.getRepoIdsOfAccount(userToken,category)).thenReturn(repoIds);
 
         PowerMockito.when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
 

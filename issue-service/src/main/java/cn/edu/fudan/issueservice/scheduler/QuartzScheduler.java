@@ -1,19 +1,13 @@
 package cn.edu.fudan.issueservice.scheduler;
 
+import cn.edu.fudan.issueservice.component.RestInterfaceManager;
 import cn.edu.fudan.issueservice.util.DateTimeUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -22,20 +16,12 @@ import java.util.Set;
 @Component
 public class QuartzScheduler {
 
-    @Value("${inner.service.path}")
-    private String innerServicePath;
-    private RestTemplate restTemplate;
 
-    private HttpHeaders headers;
+    private RestInterfaceManager restInterfaceManager;
 
     @Autowired
-    public void setHeaders(HttpHeaders headers) {
-        this.headers = headers;
-    }
-
-    @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
+        this.restInterfaceManager = restInterfaceManager;
     }
 
     private StringRedisTemplate stringRedisTemplate;
@@ -43,18 +29,6 @@ public class QuartzScheduler {
     @Autowired
     public void setStringRedisTemplate(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
-    }
-
-
-    @SuppressWarnings("unchecked")
-    private List<String> getAccountIds() {
-        HttpEntity<String> requestEntity=new HttpEntity<>(headers);
-        return restTemplate.exchange(innerServicePath + "/user/accountIds", HttpMethod.GET, requestEntity, List.class).getBody();
-    }
-
-    private JSONArray getProjectList(String account_id) {
-        HttpEntity<String> requestEntity=new HttpEntity<>(headers);
-        return restTemplate.exchange(innerServicePath + "/inner/projects?account_id=" + account_id, HttpMethod.GET, requestEntity, JSONArray.class).getBody();
     }
 
     private void updateTrend(String duration, String account_id, String repo_id, String category,int newIssueCount, int remainingIssueCount, int eliminatedIssueCount) {
@@ -94,7 +68,7 @@ public class QuartzScheduler {
 
     @Scheduled(cron = "0 10 0 1 * *")
     public void perMonth() {
-        JSONArray projects = getProjectList(null);//所有用户的所有project
+        JSONArray projects = restInterfaceManager.getProjectList(null);//所有用户的所有project
         if (projects == null||projects.isEmpty()) return;
         for (int i=0;i<projects.size();i++) {
             JSONObject project=projects.getJSONObject(i);
@@ -116,9 +90,9 @@ public class QuartzScheduler {
     }
 
     private void durationUpdate(String duration){
-        List<String> accountIds=getAccountIds();
+        List<String> accountIds=restInterfaceManager.getAccountIds();
         for (String account_id : accountIds) {
-            JSONArray projects = getProjectList(account_id);
+            JSONArray projects = restInterfaceManager.getProjectList(account_id);
             if (projects == null||projects.isEmpty()) continue;
             int newSummary = 0;
             int remainingSummary = 0;

@@ -11,8 +11,6 @@ import org.dom4j.io.SAXReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedInputStream;
@@ -32,10 +30,10 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
 
     private static final Logger logger= LoggerFactory.getLogger(CPUCloneScanOperation.class);
 
-    @Value("${workHome}")
-    private String workHome;
-    @Value("${resultFileHome}")
-    private String resultFileHome;
+    @Value("${clone.workHome}")
+    private String cloneWorkHome;
+    @Value("${clone.resultFileHome}")
+    private String cloneResultFileHome;
     @Value("${repoHome}")
     private String repoHome;
 
@@ -85,8 +83,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
             }
             if(!cloneRawIssues.isEmpty()){
                 //插入所有的rawIssue
-                HttpEntity<Object> requestEntity = new HttpEntity<>(cloneRawIssues, httpHeaders);
-                restTemplate.exchange(innerServicePath + "/inner/raw-issue", HttpMethod.POST, requestEntity, JSONObject.class);
+                restInterfaceManager.insertRawIssuesWithLocations(cloneRawIssues);
             }
 
             return true;
@@ -98,10 +95,12 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
 
 
     private boolean invokeCloneTool(String repoPath,String repoName){
-        String cmd = "java -jar SAGA.jar  " + repoPath + " " + repoName;
+        repoPath = repoPath.substring(repoPath.indexOf("/") + 1);//去除github前缀
+        String cmd = "java -jar CodeLexer.jar  " + repoHome+repoPath + " " + repoName;
+        logger.info("command -> {}",cmd);
         BufferedInputStream br = null;
         try {
-            Process process = Runtime.getRuntime().exec(cmd,null,new File(workHome));
+            Process process = Runtime.getRuntime().exec(cmd,null,new File(cloneWorkHome));
             //输出process打印信息
             br = new BufferedInputStream(process.getInputStream());
             int ch;
@@ -131,7 +130,6 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
         Scan scan = scanInitialInfo.getScan();
         String scanId=scan.getUuid();
         String commitId=scan.getCommit_id();
-        String repoId=scanInitialInfo.getRepoId();
         String repoPath = scanInitialInfo.getRepoPath();
         String repoName = scanInitialInfo.getRepoName();
         logger.info("start to invoke tool to scan......");
@@ -142,7 +140,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
         logger.info("scan complete");
         logger.info("start to analyze resultFile......");
         logger.info("tool invoke complete!");
-        String resultFilePath1=resultFileHome+repoName+"_A.xml";
+        String resultFilePath1=cloneResultFileHome+repoName+"_A.xml";
         if(!analyzeResultFile(scanId,commitId,resultFilePath1)){
             logger.error("Result File Analyze Failed!");
             return new ScanResult("clone","failed", "analyze failed");

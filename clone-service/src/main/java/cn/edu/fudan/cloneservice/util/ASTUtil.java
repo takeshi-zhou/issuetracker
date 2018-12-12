@@ -104,4 +104,7 @@ public class ASTUtil {
         return code.toString();
     }
 
+    public static void main(String[] args) {
+        System.out.println(getCode(5,10,"Z:/test/test.java"));
+    }
 }

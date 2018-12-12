@@ -19,7 +19,7 @@ public class ProjectController {
         this.projectService = projectService;
     }
 
-
+    // url isPrivate username password name type branch
     @PostMapping(value = {"/project"})
     public Object addProject(HttpServletRequest request, @RequestBody JSONObject projectInfo) {
         String userToken = request.getHeader("token");
@@ -100,9 +100,19 @@ public class ProjectController {
     }
 
     @GetMapping(value = "/inner/project/exist")
-    public Object exist(@RequestParam("repo_id") String repo_id,@RequestParam("type")String type){
-        return projectService.existProjectWithThisRepoIdAndType(repo_id, type);
+    public Object exist(@RequestParam("repo_id") String repo_id,@RequestParam("type")String type,@RequestParam("is_first")boolean is_first){
+        return projectService.existProjectWithThisRepoIdAndType(repo_id, type,is_first);
     }
 
+    @PutMapping(value = "/inner/project/first-auto-scan")
+    public Object updateAutoScan(@RequestParam("repo_id") String repo_id,@RequestParam("type")String type){
+        try {
+            projectService.updateProjectFirstAutoScan(repo_id, type);
+            return new ResponseBean(200, "project update success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "project update failed!", null);
+        }
+    }
 
 }

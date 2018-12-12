@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 @Component
@@ -22,22 +21,24 @@ public class ExcuteShellUtil {
             //String findbugs = "findbugs -xml -output  /home/fdse/issueTracker/resultfile/" + projectName
             //		+ ".xml " + repoPath;
             //脚本实现 用来解耦 还需要与tool解耦合
-            Process process = rt.exec(workHome+"excuteTools.sh " + projectName + " " + repoPath);
-            //Process process = rt.exec(findbugs, null, null);
+            String command=workHome+"excuteTools.sh " + projectName + " " + repoPath;
+            System.out.println("command -> "+command);
+            Process process = rt.exec(command);
             int exitValue = process.waitFor();
             if (exitValue == 0)
                 return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return false;
     }
 
     public  boolean excuteMvn(String repoPath) {
         try {
             Runtime rt = Runtime.getRuntime();
-            Process process = rt.exec(workHome+"excuteMvn.sh " + repoPath);
+            String command = workHome+"excuteMvn.sh " + repoPath;
+            System.out.println("command -> "+command);
+            Process process = rt.exec(command);
             int exitValue = process.waitFor();
             if (exitValue == 0)
                 return true;
@@ -49,12 +50,13 @@ public class ExcuteShellUtil {
 
     //do not include/consider the situation that there are at least files holding the same name in project-home dir
     public  String getFileLocation(String repoPath, String fileName) {
-        BufferedReader bReader = null;
         try {
             Runtime rt = Runtime.getRuntime();
-            Process process = rt.exec("find "+repoHome + repoPath + " -name " + fileName);
+            String command = "find "+repoHome + repoPath + " -name " + fileName;
+            System.out.println("command -> "+command);
+            Process process = rt.exec(command);
             process.waitFor();
-            bReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader bReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             StringBuffer sBuffer = new StringBuffer();
             String line ;
             while ((line = bReader.readLine())!= null) {
@@ -64,15 +66,6 @@ public class ExcuteShellUtil {
             return  sBuffer.toString();
         } catch (Exception e) {
             e.printStackTrace();
-        }finally {
-            if(bReader != null){
-                try {
-                    bReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
         }
 
         return null;

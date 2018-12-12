@@ -1,18 +1,14 @@
 package cn.edu.fudan.scanservice.service.impl;
 
 
+import cn.edu.fudan.scanservice.component.RestInterfaceManager;
 import cn.edu.fudan.scanservice.dao.ScanDao;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.service.ScanService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,23 +18,11 @@ import java.util.Map;
 @Service
 public class ScanServiceImpl implements ScanService {
 
-    @Value("${inner.service.path}")
-    private String innerServicePath;
-    @Value("${commit.service.path}")
-    private String commitServicePath;
-
-    private HttpHeaders httpHeaders;
+    private RestInterfaceManager restInterfaceManager;
 
     @Autowired
-    public void setHttpHeaders(HttpHeaders httpHeaders) {
-        this.httpHeaders = httpHeaders;
-    }
-
-    private RestTemplate restTemplate;
-
-    @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
+        this.restInterfaceManager = restInterfaceManager;
     }
 
     private ScanDao scanDao;
@@ -65,9 +49,8 @@ public class ScanServiceImpl implements ScanService {
 
     @Override
     public Object getCommits(String project_id, Integer page, Integer size, Boolean is_whole,String category) {
-        HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
-        String repo_id = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + project_id, HttpMethod.GET, httpEntity, String.class).getBody();
-        JSONObject commitResponse = restTemplate.getForObject(commitServicePath + "?repo_id=" + repo_id + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class);
+        String repo_id = restInterfaceManager.getRepoIdOfProject(project_id);
+        JSONObject commitResponse = restInterfaceManager.getCommitsOfRepo(repo_id,page,size);
         if (commitResponse != null) {
             List<String> scannedCommitId = scanDao.getScannedCommits(repo_id,category);
             JSONArray commitArray = commitResponse.getJSONArray("data");

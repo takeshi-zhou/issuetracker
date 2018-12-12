@@ -1,6 +1,7 @@
 package cn.edu.fudan.issueservice.service;
 
 import cn.edu.fudan.issueservice.IssueServiceApplicationTests;
+import cn.edu.fudan.issueservice.component.RestInterfaceManager;
 import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.domain.Issue;
@@ -54,8 +55,8 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
     private String solvedTagId;
     @Value("${ignore.tag_id}")
     private String ignoreTagId;
-    @Value("${inner.service.path}")
-    private String innerServicePath;
+
+
     @Value("${commit.service.path}")
     private String commitServicePath;
 
@@ -67,7 +68,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
     private IssueDao issueDao;
 
     @Mock
-    private RestTemplate restTemplate;
+    private RestInterfaceManager restInterfaceManager;
 
     @Mock
     private StringRedisTemplate stringRedisTemplate;
@@ -128,7 +129,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         rawIssues2.add(rawIssue2);
         rawIssues2.add(rawIssue3);
         MemberModifier.field(IssueServiceImpl.class, "issueDao").set(issueService, issueDao);
-        MemberModifier.field(IssueServiceImpl.class, "restTemplate").set(issueService, restTemplate);
+        MemberModifier.field(IssueServiceImpl.class, "restInterfaceManager").set(issueService, restInterfaceManager);
         MemberModifier.field(IssueServiceImpl.class, "stringRedisTemplate").set(issueService, stringRedisTemplate);
         System.out.println("finish mocking");
 
@@ -151,28 +152,16 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
     }
 
     @Test
-    public void deleteIssueByProjectId() {
+    public void deleteIssueByProjectId() throws Exception {
         String repo_id = "repo_id";
         List<String> stringList = new ArrayList<String>();
         stringList.add("iss1");
         stringList.add("iss2");
         PowerMockito.when(issueDao.getIssueIdsByRepoIdAndCategory(repo_id,"bug")).thenReturn(stringList);
-        ResponseBean responseBean = new ResponseBean();
-        responseBean.setCode(401);
-        JSONObject jsonObject = JSONObject.parseObject(JSONObject.toJSON(responseBean).toString());
         /*
-            当返回的JSONObject为null
+            删除失败
          */
-        PowerMockito.when(restTemplate.postForObject(tagServicePath+"/tagged-delete",stringList, JSONObject.class)).thenReturn(null);
-        try{
-            issueService.deleteIssueByRepoIdAndCategory(repo_id,"bug");
-        }catch(RuntimeException e){
-            Assert.assertEquals("tag item delete failed!",e.getMessage());
-        }
-        /*
-            当返回的JSONObject的code代码不是200
-         */
-        PowerMockito.when(restTemplate.postForObject(tagServicePath+"/tagged-delete",stringList, JSONObject.class)).thenReturn(jsonObject);
+        PowerMockito.doThrow(new RuntimeException("tag item delete failed!")).when(restInterfaceManager,"deleteTagsOfIssueInOneRepo",stringList);
         try{
             issueService.deleteIssueByRepoIdAndCategory(repo_id,"bug");
         }catch(RuntimeException e){
@@ -181,9 +170,8 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         /*
             当返回的JSONObject的code代码是200
          */
-        responseBean.setCode(200);
-        jsonObject = JSONObject.parseObject(JSONObject.toJSON(responseBean).toString());
-        PowerMockito.when(restTemplate.postForObject(tagServicePath+"/tagged-delete",stringList, JSONObject.class)).thenReturn(jsonObject);
+        PowerMockito.doNothing().when(issueDao,"deleteIssueByRepoIdAndCategory",repo_id,"bug");
+        PowerMockito.doNothing().when(restInterfaceManager,"deleteTagsOfIssueInOneRepo",stringList);
         issueService.deleteIssueByRepoIdAndCategory(repo_id,"bug");
         verify(issueDao,Mockito.atLeastOnce()).deleteIssueByRepoIdAndCategory(repo_id,"bug");
 
@@ -220,15 +208,11 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         List<String> tag_ids = new ArrayList<>();
         tag_ids.add(solvedTagId);
         tag_ids.add(ignoreTagId);
-        JSONArray tags = new JSONArray();
 
-        PowerMockito.when(restTemplate.getForObject(tagServicePath + "?item_id=" + list.get(1).getUuid(), JSONArray.class)).thenReturn(tags);
-        PowerMockito.when(restTemplate.postForObject(tagServicePath+"/item-ids",tag_ids, JSONArray.class)).thenReturn(solved_issue_ids);
-        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getRepoId")).toReturn(repo_id);
+        PowerMockito.when(restInterfaceManager.getRepoIdOfProject(projectId)).thenReturn(repo_id);
+        PowerMockito.when(restInterfaceManager.getSolvedIssueIds(tag_ids)).thenReturn(solved_issue_ids);
         PowerMockito.when(issueDao.getIssueCount(any(Map.class))).thenReturn(count);
         PowerMockito.when(issueDao.getIssueList(any(Map.class))).thenReturn(list);
-        PowerMockito.when(restTemplate.getForObject(tagServicePath + "?item_id=" + list.get(0).getUuid(), JSONArray.class)).thenReturn(tags);
-        PowerMockito.when(restTemplate.getForObject(tagServicePath + "?item_id=" + list.get(1).getUuid(), JSONArray.class)).thenReturn(tags);
 
         Map<String, Object> result = (Map<String, Object>) issueService.getIssueList(projectId, page, size,category);
         Assert.assertEquals(1,result.get("totalPage"));
@@ -252,7 +236,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         requestParam.put("size",size);
         requestParam.put("category",category);
 
-        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getRepoId")).toReturn(repo_id);
+        PowerMockito.when(restInterfaceManager.getRepoIdOfProject(project_id)).thenReturn(repo_id);
 
         String issueId1= "issueId1";
         String issueId2= "issueId2";
@@ -284,7 +268,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         listTagIds.add(tagId2);
         requestParam.put("tags",listTagIds);
         JSONArray tag_ids = JSON.parseArray(JSONObject.toJSON(listTagIds).toString());
-        PowerMockito.when(restTemplate.postForObject(tagServicePath + "/item-ids", tag_ids,JSONArray.class)).thenReturn(null);
+        PowerMockito.when(restInterfaceManager.getSpecificTaggedIssueIds(tag_ids)).thenReturn(null);
         result = (Map<String, Object>)issueService.getFilteredIssueList(requestParam);
         Assert.assertEquals(0,result.get("totalPage"));
         Assert.assertEquals(0,result.get("totalCount"));
@@ -298,11 +282,12 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         listTypes.add(type1);
         listTypes.add(type2);
         requestParam.put("types",listTypes);
-        PowerMockito.when(restTemplate.postForObject(tagServicePath + "/item-ids", tag_ids,JSONArray.class)).thenReturn(IssueIds);
+        PowerMockito.when(restInterfaceManager.getSpecificTaggedIssueIds(tag_ids)).thenReturn(IssueIds);
+
         PowerMockito.when(issueDao.getIssueCount(any(Map.class))).thenReturn(count);
         PowerMockito.when(issueDao.getIssueList(any(Map.class))).thenReturn(list);
-        PowerMockito.when(restTemplate.getForObject(tagServicePath + "?item_id=" + list.get(0).getUuid(), JSONArray.class)).thenReturn(tags);
-        PowerMockito.when(restTemplate.getForObject(tagServicePath + "?item_id=" + list.get(1).getUuid(), JSONArray.class)).thenReturn(tags);
+       // PowerMockito.when(restTemplate.getForObject(tagServicePath + "?item_id=" + list.get(0).getUuid(), JSONArray.class)).thenReturn(tags);
+       // PowerMockito.when(restTemplate.getForObject(tagServicePath + "?item_id=" + list.get(1).getUuid(), JSONArray.class)).thenReturn(tags);
 
         result = (Map<String, Object>)issueService.getFilteredIssueList(requestParam);
         Assert.assertEquals(1,result.get("totalPage"));
@@ -323,13 +308,13 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         String userToken = "token";
         String category = "category";
         String account_id = "acc_id";
-        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getAccountId")).toReturn(account_id);
+        PowerMockito.when(restInterfaceManager.getAccountId(userToken)).thenReturn(account_id);
 
         List<String> listRepoIds = new ArrayList<String>();
         listRepoIds.add(repoId1);
         listRepoIds.add(repoId2);
         JSONArray repoIds = JSON.parseArray(JSONObject.toJSON(listRepoIds).toString());
-        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getRepoId")).toReturn(repoId1);
+
         PowerMockito.when(stringRedisTemplate.opsForHash()).thenReturn(hashOperations);
         PowerMockito.when(stringRedisTemplate.opsForList()).thenReturn(listOperations);
         Object newIssueCount = "1";
@@ -346,7 +331,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         /*
             当project_id为null时，且当用户没有添加project时
          */
-        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getRepoIds")).toReturn(null);
+        PowerMockito.when(restInterfaceManager.getRepoIdsOfAccount(account_id,category)).thenReturn(null);
         IssueCount result = (IssueCount)issueService.getDashBoardInfo(duration,null,userToken,category);
         Assert.assertEquals(0,result.getNewIssueCount());
         Assert.assertEquals(0,result.getEliminatedIssueCount());
@@ -354,7 +339,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         /*
              当project_id为null时，且当用户有添加project时
          */
-        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getRepoIds")).toReturn(repoIds);
+        PowerMockito.when(restInterfaceManager.getRepoIdsOfAccount(account_id,category)).thenReturn(repoIds);
         IssueCount resultAddProject = (IssueCount)issueService.getDashBoardInfo(duration,null,userToken,category);
         Assert.assertEquals(2,resultAddProject.getNewIssueCount());
         Assert.assertEquals(4,resultAddProject.getEliminatedIssueCount());
@@ -362,7 +347,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         /*
              当project_id为null时，且当用户有添加project时
          */
-        MemberModifier.stub(MemberMatcher.method(IssueServiceImpl.class, "getRepoIds")).toReturn(repoIds);
+        PowerMockito.when(restInterfaceManager.getRepoIdOfProject(project_id)).thenReturn(repoId1);
         IssueCount resultProjectIsNull = (IssueCount)issueService.getDashBoardInfo(duration,project_id,userToken,category);
         Assert.assertEquals(1,resultProjectIsNull.getNewIssueCount());
         Assert.assertEquals(2,resultProjectIsNull.getEliminatedIssueCount());
@@ -370,7 +355,6 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
     }
 
     @Test
-    @Ignore
     public void getStatisticalResults() {
         /*
             当month为1，且project_id为null
@@ -395,24 +379,24 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
         Map map = new ListMap();
         map.put("data",issueCounts);
         List<String> newList = new ArrayList<>();
-        newList.add("1");
-        newList.add("2");
-        newList.add("3");
+        newList.add("xxx:1");
+        newList.add("xxx:2");
+        newList.add("xxx:3");
         List<String> remainingList = new ArrayList<>();
-        remainingList.add("3");
-        remainingList.add("2");
-        remainingList.add("1");
+        remainingList.add("xxx:3");
+        remainingList.add("xxx:2");
+        remainingList.add("xxx:1");
         List<String> eliminatedList = new ArrayList<>();
-        eliminatedList.add("2");
-        eliminatedList.add("3");
-        eliminatedList.add("4");
+        eliminatedList.add("xxx:2");
+        eliminatedList.add("xxx:3");
+        eliminatedList.add("xxx:4");
         Integer month = 1;
         String project_id = "project_id";
         String userToken = "userToken";
         String category = "category";
         String account_id = "account_id";
-        PowerMockito.when(restTemplate.exchange(eq(innerServicePath + "/user/accountId?userToken=" + userToken), eq(HttpMethod.GET), any(HttpEntity.class),eq(String.class) )).thenReturn(accountIdResponseEntity);
-        PowerMockito.when(accountIdResponseEntity.getBody()).thenReturn(account_id);
+        PowerMockito.when(restInterfaceManager.getAccountId(userToken)).thenReturn(account_id);
+
         PowerMockito.when(stringRedisTemplate.opsForList()).thenReturn(listOperations);
         PowerMockito.when(listOperations.range("trend:"+category+":day:new:" + account_id, 0, -1)).thenReturn(newList);
         PowerMockito.when(listOperations.range("trend:"+category+":day:remaining:" + account_id, 0, -1)).thenReturn(remainingList);
@@ -446,8 +430,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
          */
         String repoId = "repoId";
         month = 1;
-        PowerMockito.when(restTemplate.exchange(eq(innerServicePath + "/inner/project/repo-id?project-id=" + project_id), eq(HttpMethod.GET), any(HttpEntity.class),eq(String.class) )).thenReturn(repoIdResponseEntity);
-        PowerMockito.when(repoIdResponseEntity.getBody()).thenReturn(repoId);
+        PowerMockito.when(restInterfaceManager.getRepoIdOfProject(project_id)).thenReturn(repoId);
         PowerMockito.when(stringRedisTemplate.opsForList()).thenReturn(listOperations);
         PowerMockito.when(listOperations.range("trend:"+category+":day:new:" + account_id + ":" + repoId, 0, -1)).thenReturn(newList);
         PowerMockito.when(listOperations.range("trend:"+category+":day:remaining:" + account_id + ":" + repoId, 0, -1)).thenReturn(remainingList);
@@ -499,81 +482,6 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
     @Test
     @Ignore
     public void startMapping() {
-        String repo_id = "repo_id";
-        String category = "bug";
-        String pre_commit_id ;
-        String current_commit_id ;
-        MemberModifier.stub(MemberMatcher.method(BaseMappingServiceImpl.class, "dashboardUpdate")).toReturn(Void.TYPE);
-        PowerMockito.when(restTemplate.getForObject(anyString(),eq(JSONObject.class))).thenReturn(null);
-        List<String> issueIds =new ArrayList<>();
-        issueIds.add("iss1");
-        issueIds.add("iss2");
-
-
-        /*
-            当project第一次扫描，且当前版本没有raw issue,且无commitinfo
-         */
-        pre_commit_id = current_commit_id = "commit_id";
-        MemberModifier.stub(MemberMatcher.method(RawIssueDao.class, "getRawIssueByCommitIDAndCategory")).toReturn(Collections.emptyList());
-        issueService.startMapping(repo_id,pre_commit_id,current_commit_id,category);
-        verify(rawIssueDao,Mockito.never()).batchUpdateIssueId(any(List.class));
-        /*
-            当project第一次扫描，且当前版本有raw issue
-         */
-        MemberModifier.stub(MemberMatcher.method(RawIssueDao.class, "getRawIssueByCommitIDAndCategory")).toReturn(rawIssues1);
-        doNothing().when(rawIssueDao).batchUpdateIssueId(rawIssues1);
-        doNothing().when(issueDao).insertIssueList(any(List.class));
-        issueService.startMapping(repo_id,pre_commit_id,current_commit_id,category);
-        verify(rawIssueDao,Mockito.times(1)).batchUpdateIssueId(any(List.class));
-        verify(issueDao,Mockito.times(1)).insertIssueList(any(List.class));
-        /*
-            当project不是第一次扫描，且current commit无raw issue
-         */
-        pre_commit_id = "pre_commit_id";
-        current_commit_id = "current_commit_id";
-        MemberModifier.stub(MemberMatcher.method(RawIssueDao.class, "getRawIssueByCommitIDAndCategory")).toReturn(Collections.emptyList());
-        issueService.startMapping(repo_id,pre_commit_id,current_commit_id,category);
-        verify(rawIssueDao,Mockito.times(1)).batchUpdateIssueId(any(List.class));
-        /*
-            当project不是第一次扫描,且current commit有raw issue
-         */
-        Calendar calendar=Calendar.getInstance();
-        calendar.set(2015, 10, 12,11,32,52);
-        Date start_commit_time=calendar.getTime();
-        JSONObject startCommit = new JSONObject();
-        startCommit.put("commit_time",start_commit_time);
-        calendar.set(2015, 10, 12,12,32,52);
-        Date end_commit_time=calendar.getTime();
-        JSONObject endCommit = new JSONObject();
-        endCommit.put("commit_time",end_commit_time);
-        JSONArray commits = new JSONArray();
-        commits.add(startCommit);
-        commits.add(endCommit);
-
-        calendar.set(2015, 10, 12,10,32,52);
-        Date commit_time=calendar.getTime();
-        JSONObject jsonObject = new JSONObject();
-        JSONObject data = new JSONObject();
-        data.put("commit_time",commit_time);
-        jsonObject.put("data",data);
-
-        PowerMockito.when(rawIssueDao.getRawIssueByCommitIDAndCategory(category,pre_commit_id)).thenReturn(rawIssues1);
-        PowerMockito.when(rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id)).thenReturn(rawIssues2);
-        PowerMockito.when(issueDao.getIssueByID(rawIssues1.get(0).getIssue_id())).thenReturn(issue1);
-        //PowerMockito.when(issueDao.getSolvedIssueIds(repo_id,pre_commit_id)).thenReturn(issueIds);
-
-        PowerMockito.when(restTemplate.exchange(eq(innerServicePath + "/inner/scan/commits?repo_id=" + repo_id+"&category="+category), eq(HttpMethod.GET), any(HttpEntity.class),eq(JSONArray.class) )).thenReturn(responseEntity);
-        PowerMockito.when(responseEntity.getBody()).thenReturn(commits);
-        PowerMockito.when(restTemplate.getForObject(commitServicePath + "/commit-time?commit_id=" + current_commit_id, JSONObject.class)).thenReturn(jsonObject);
-        PowerMockito.when(restTemplate.postForObject(eq(tagServicePath), any(List.class), eq(JSONObject.class))).thenReturn(null);
-
-        issueService.startMapping(repo_id,pre_commit_id,current_commit_id,category);
-
-        verify(issueDao,Mockito.atLeastOnce()).getIssueByID(any(String.class));
-        verify(rawIssueDao,Mockito.times(2)).batchUpdateIssueId(any(List.class));
-        verify(issueDao,Mockito.times(1)).batchUpdateIssue(any(List.class));
-        verify(issueDao,Mockito.times(2)).insertIssueList(any(List.class));
-        //verify(issueDao,Mockito.times(1)).getSolvedIssueIds(repo_id,pre_commit_id);
 
     }
     @Test

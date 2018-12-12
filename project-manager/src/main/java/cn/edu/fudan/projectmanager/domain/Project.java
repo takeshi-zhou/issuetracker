@@ -18,6 +18,7 @@ public class Project {
     private Date last_scan_time;
     private String description;
     private String repo_id;
+    private String branch;
 
     public String getType() {
         return type;
@@ -150,5 +151,13 @@ public class Project {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
     }
 }

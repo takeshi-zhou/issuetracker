@@ -1,6 +1,7 @@
 package cn.edu.fudan.scanservice.service.impl;
 
 
+import cn.edu.fudan.scanservice.component.RestInterfaceManager;
 import cn.edu.fudan.scanservice.domain.ScanMessage;
 import cn.edu.fudan.scanservice.domain.ScanMessageWithTime;
 import cn.edu.fudan.scanservice.domain.ScanResult;
@@ -14,13 +15,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -38,25 +34,18 @@ import java.util.concurrent.TimeoutException;
 public class KafkaServiceImpl implements KafkaService {
 
     private Logger logger = LoggerFactory.getLogger(ScanServiceImpl.class);
-    @Value("${commit.service.path}")
-    private String commitServicePath;
-    @Value("${inner.service.path}")
-    private String innerServicePath;
 
-    private HttpHeaders httpHeaders;
     private FindBugScanTask findBugScanTask;
     private CloneScanTask cloneScanTask;
-    private RestTemplate restTemplate;
+    private RestInterfaceManager restInterfaceManager;
 
     @Autowired
-    public KafkaServiceImpl(HttpHeaders httpHeaders,
-                            FindBugScanTask findBugScanTask,
+    public KafkaServiceImpl(FindBugScanTask findBugScanTask,
                             CloneScanTask cloneScanTask,
-                            RestTemplate restTemplate) {
-        this.httpHeaders = httpHeaders;
+                            RestInterfaceManager restInterfaceManager) {
         this.findBugScanTask = findBugScanTask;
         this.cloneScanTask = cloneScanTask;
-        this.restTemplate = restTemplate;
+        this.restInterfaceManager=restInterfaceManager;
     }
 
     //初始化project的一些状态,表示目前正在scan
@@ -64,22 +53,14 @@ public class KafkaServiceImpl implements KafkaService {
         JSONObject postData = new JSONObject();
         postData.put("uuid", projectId);
         postData.put("scan_status", "Scanning");
-        updateProject(postData);
+        restInterfaceManager.updateProject(postData);
     }
 
-    private void updateProject(JSONObject projectParam) {
-        try {
-            HttpEntity<Object> entity = new HttpEntity<>(projectParam, httpHeaders);
-            restTemplate.exchange(innerServicePath + "/inner/project", HttpMethod.PUT, entity, JSONObject.class);
-        } catch (Exception e) {
-            throw new RuntimeException("project update failed!");
-        }
-    }
+
 
     private void updateProjects(String repo_id, JSONObject projectParam,String expected_type) {
         try {
-            HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
-            JSONArray projects = restTemplate.exchange(innerServicePath + "/inner/project?repo_id=" + repo_id, HttpMethod.GET, entity, JSONArray.class).getBody();
+            JSONArray projects = restInterfaceManager.getProjectsOfRepo(repo_id);
             if (projects != null && !projects.isEmpty()) {
                 for (int i = 0; i < projects.size(); i++) {
                     JSONObject project=projects.getJSONObject(i);
@@ -87,7 +68,7 @@ public class KafkaServiceImpl implements KafkaService {
                     String type=project.getString("type");
                     if(type.equals(expected_type)){
                         projectParam.put("uuid", project_id);
-                        updateProject(projectParam);
+                        restInterfaceManager.updateProject(projectParam);
                     }
                 }
             }
@@ -135,8 +116,7 @@ public class KafkaServiceImpl implements KafkaService {
         if(commitId==null||commitId.equals(""))
             throw new IllegalArgumentException("please provide commitId");
         initialProject(projectId);
-        HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
-        String repoId = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + projectId, HttpMethod.GET, entity, String.class).getBody();
+        String repoId = restInterfaceManager.getRepoIdOfProject(projectId);
         if(category.equals("clone")){
             Future<String> future =cloneScanTask.run(repoId,commitId,category);
             setTimeOut(future, repoId);
@@ -148,7 +128,7 @@ public class KafkaServiceImpl implements KafkaService {
     }
 
     /**
-     * 监听消息队列中project的scan消息触发scan操作,暂时没有用到
+     * 监听消息队列中project的scan消息触发scan操作
      *
      * @author WZY
      */
@@ -161,10 +141,10 @@ public class KafkaServiceImpl implements KafkaService {
         String repoId = scanMessage.getRepoId();
         String commitId = scanMessage.getCommitId();
         //串行扫
-        if(existProject(repoId,"bug"))
-             findBugScanTask.runSynchronously(repoId, commitId,"bug");
-        if(existProject(repoId,"clone"))
-        cloneScanTask.runSynchronously(repoId,commitId,"clone");
+        if(existProject(repoId,"bug",false))
+            findBugScanTask.runSynchronously(repoId, commitId,"bug");
+        if(existProject(repoId,"clone",false))
+            cloneScanTask.runSynchronously(repoId,commitId,"clone");
     }
 
     @KafkaListener(id = "updateCommit", topics = {"UpdateCommit"}, groupId = "updateCommit")
@@ -176,24 +156,26 @@ public class KafkaServiceImpl implements KafkaService {
         if(!commits.isEmpty()){
             List<ScanMessageWithTime> filteredCommits=getFilteredList(commits);
             String repoId=filteredCommits.get(0).getRepoId();
-            if(existProject(repoId,"bug")){
+            //当前repo_id和type的project存在，并且没被自动扫描过
+            if(existProject(repoId,"bug",true)){
                 for(ScanMessageWithTime message:filteredCommits){
                     String commitId = message.getCommitId();
                     findBugScanTask.runSynchronously(repoId,commitId,"bug");
                 }
+                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
             }
-            if(existProject(repoId,"clone")){
+            if(existProject(repoId,"clone",true)){
                 for(ScanMessageWithTime message:filteredCommits){
                     String commitId = message.getCommitId();
                     cloneScanTask.runSynchronously(repoId,commitId,"clone");
                 }
+                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
             }
         }
     }
 
-    private boolean existProject(String repoId,String category){
-        HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
-        JSONObject response=restTemplate.exchange(innerServicePath+"/inner/project/exist?repoId="+repoId+"&type="+category,HttpMethod.GET,entity,JSONObject.class).getBody();
+    private boolean existProject(String repoId,String category,boolean isFirst){
+        JSONObject response=restInterfaceManager.existThisProject(repoId, category,isFirst);
         return response!=null&&response.getBooleanValue("exist");
     }
 
@@ -214,7 +196,6 @@ public class KafkaServiceImpl implements KafkaService {
         return result;
     }
 
-
     /**
      * 根据扫描的结果更新project的状态
      *
@@ -230,7 +211,7 @@ public class KafkaServiceImpl implements KafkaService {
         String repoId = scanResult.getRepoId();
         String commitId = scanResult.getCommitId();
         String type=scanResult.getType();
-        JSONObject commitResponse = restTemplate.getForObject(commitServicePath + "/commit-time?commit_id=" + commitId, JSONObject.class);
+        JSONObject commitResponse = restInterfaceManager.getCommitTime(commitId);
         if (commitResponse != null) {
             String commit_time = commitResponse.getJSONObject("data").getString("commit_time");
             projectParam.put("till_commit_time", commit_time);
@@ -241,8 +222,7 @@ public class KafkaServiceImpl implements KafkaService {
         } else {
             if (scanResult.getDescription().equals("Mapping failed")) {
                 //mapping 失败，删除当前repo所扫commit得到的rawIssue和location
-                HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
-                restTemplate.exchange(innerServicePath + "/inner/raw-issue/"+type+"/" + repoId, HttpMethod.DELETE, entity, JSONObject.class);
+                restInterfaceManager.deleteRawIssueOfRepo(repoId,type);
             }
             projectParam.put("scan_status", scanResult.getDescription());
         }

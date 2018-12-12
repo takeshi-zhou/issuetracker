@@ -18,6 +18,7 @@
         <result property="last_scan_time" column="last_scan_time"/>
         <result property="description" column="description"/>
         <result property="repo_id" column="repo_id"/>
+        <result property="branch" column="branch"/>
     </resultMap>
 
     <insert id="addOneProject" parameterType="Project">
@@ -36,7 +37,8 @@
         till_commit_time,
         last_scan_time,
         description,
-        repo_id
+        repo_id,
+        branch
         )
         VALUES
         (
@@ -53,7 +55,8 @@
         #{till_commit_time},
         #{last_scan_time},
         #{description},
-        #{repo_id}
+        #{repo_id},
+        #{branch}
         )
     </insert>
 
@@ -92,8 +95,8 @@
         select * from project where uuid = #{uuid}
     </select>
 
-    <select id="getProjectByURLTypeAndAccountId" parameterType="String" resultType="project">
-        select * from project where account_id = #{account_id} and url = #{url}and type = #{type}
+    <select id="getProjectByURLTypeAndAccountIdBranch" parameterType="String" resultType="project">
+        select * from project where account_id = #{account_id} and url = #{url} and type = #{type} and branch = #{branch}
     </select>
 
 
@@ -105,8 +108,8 @@
         select uuid from project where repo_id = #{repo_id} and type = #{type}
     </select>
 
-    <select id="getProjectsByURLAndType" parameterType="String" resultMap="project">
-        select * from project where url = #{url}and type = #{type}
+    <select id="getProjectsByURLAndTypeBranch" parameterType="String" resultMap="project">
+        select * from project where url = #{url}and type = #{type} and branch = #{branch}
     </select>
 
     <select id="getRepoIdsByAccountIdAndType" parameterType="String" resultType="String">
@@ -147,4 +150,16 @@
         </set>
         where uuid = #{uuid}
     </update>
+
+    <update id="updateProjectFirstAutoScan" parameterType="String">
+        update project
+        set first_auto_scan = 1
+        where repo_id = #{repo_id} and type = #{type}
+    </update>
+
+    <select id="getProjectCountWithThisRepoIdAndType" parameterType="String" resultType="int">
+        select count(uuid)
+        from project
+        where repo_id = #{repo_id} and type = #{type} and first_auto_scan = 0
+    </select>
 </mapper>

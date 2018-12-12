@@ -40,4 +40,13 @@ public interface IssueMapper {
     void updateOneIssuePriority(@Param("uuid")String issueId, @Param("priority") int priority);
 
     List<Map<String, String>> getIssueIdAndPriority();
+
+    Integer getMaxIssueDisplayId(@Param("repo_id") String repoId);
+
+    // just for update old data
+    void updateIssueDisplayId(@Param("uuid")String uuid, @Param("display_id") int displayId);
+    List<String> getAllRepoId();
+    List<String> getAllIssueIdByRepoId(@Param("repo_id") String repoId);
+
+
 }

@@ -30,7 +30,7 @@ public class ScanResultDao {
         return scanResultMapper.getScanResultsGroupByDay(repoIds, category, start, end);
     }
 
-    public IssueCountPo getMergedScanResult(List<String> repoIds, String category,String start,String end){
+    public IssueCountPo getMergedScanResult(List<String> repoIds, String category, String start, String end){
         return scanResultMapper.getMergedScanResult(repoIds, category, start, end);
     }
 }

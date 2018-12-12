@@ -42,8 +42,8 @@ public class ProjectDao {
         return projectMapper.getProjectByID(projectId);
     }
 
-    public boolean hasBeenAdded(String account_id, String url, String type) {
-        return projectMapper.getProjectByURLTypeAndAccountId(account_id, url, type) != null;
+    public boolean hasBeenAdded(String account_id, String url, String type, String branch) {
+        return projectMapper.getProjectByURLTypeAndAccountIdBranch(account_id, url, type ,branch) != null;
     }
 
     public void updateProjectStatus(Project project) {
@@ -63,15 +63,23 @@ public class ProjectDao {
         return projectMapper.getProjectIdsByRepoIdAndType(repoId,type).size() >= 2;
     }
 
-    public boolean existProjectWithThisRepoIdAndType(String repoId,String type){
-        return !projectMapper.getProjectIdsByRepoIdAndType(repoId,type).isEmpty();
+    public boolean existProjectWithThisRepoIdAndTypeAndNotAutoScanned(String repoId,String type){
+        return projectMapper.getProjectCountWithThisRepoIdAndType(repoId, type)>0;
     }
 
-    public List<Project> getProjectsByURLAndType(String url,String type){
-        return projectMapper.getProjectsByURLAndType(url, type);
+    public boolean existProjectWithThisRepoIdAndType(String repoId,String type){
+        return !projectMapper.getProjectIdsByRepoIdAndType(repoId, type).isEmpty();
+    }
+
+    public List<Project> getProjectsByURLAndTypeBranch(String url,String type, String branch){
+        return projectMapper.getProjectsByURLAndTypeBranch(url, type , branch);
     }
 
     public List<String> getRepoIdsByAccountIdAndType(String account_id,String type){
         return projectMapper.getRepoIdsByAccountIdAndType(account_id,type);
+    }
+
+    public void updateProjectFirstAutoScan( String repo_id, String type){
+        projectMapper.updateProjectFirstAutoScan(repo_id, type);
     }
 }

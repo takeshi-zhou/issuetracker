@@ -20,19 +20,13 @@ public class Issue {
     private Date update_time;
     private IssueType issueType;
     private List<Object> tags;
-
-    public IssueType getIssueType() {
-        return issueType;
-    }
-
-    public void setIssueType(IssueType issueType) {
-        this.issueType = issueType;
-    }
+    private int priority;
+    private int displayId ;
 
     public Issue() {
     }
 
-    public Issue(String uuid, String type, String category, String start_commit, Date start_commit_date, String end_commit, Date end_commit_date, String raw_issue_start, String raw_issue_end, String repo_id, String target_files, Date create_time, Date update_time) {
+    public Issue(String uuid, String type, String category, String start_commit, Date start_commit_date, String end_commit, Date end_commit_date, String raw_issue_start, String raw_issue_end, String repo_id, String target_files, Date create_time, Date update_time ,int displayId) {
         this.uuid = uuid;
         this.type = type;
         this.category = category;
@@ -62,36 +56,39 @@ public class Issue {
         }else {
             this.update_time = (Date) update_time.clone();
         }
+        this.displayId = displayId;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public IssueType getIssueType() {
+        return issueType;
+    }
+
+    public void setIssueType(IssueType issueType) {
+        this.issueType = issueType;
     }
 
     public Date getStart_commit_date() {
-        if(start_commit_date == null){
-            return null;
-        }
-        return (Date) start_commit_date.clone();
+        return start_commit_date;
     }
 
     public void setStart_commit_date(Date start_commit_date) {
-        if(start_commit_date == null){
-            this.start_commit_date = null;
-        }else {
-            this.start_commit_date = (Date) start_commit_date.clone();
-        }
+        this.start_commit_date = start_commit_date;
     }
 
     public Date getEnd_commit_date() {
-        if(end_commit_date == null){
-            return null;
-        }
-        return (Date) end_commit_date.clone();
+        return end_commit_date;
     }
 
     public void setEnd_commit_date(Date end_commit_date) {
-        if(end_commit_date == null){
-            this.end_commit_date = null;
-        }else {
-            this.end_commit_date = (Date) end_commit_date.clone();
-        }
+        this.end_commit_date = end_commit_date;
     }
 
     public Date getCreate_time() {
@@ -203,4 +200,13 @@ public class Issue {
     public void setTarget_files(String target_files) {
         this.target_files = target_files;
     }
+
+    public int getDisplayId() {
+        return displayId;
+    }
+
+    public void setDisplayId(int displayId) {
+        this.displayId = displayId;
+    }
+
 }

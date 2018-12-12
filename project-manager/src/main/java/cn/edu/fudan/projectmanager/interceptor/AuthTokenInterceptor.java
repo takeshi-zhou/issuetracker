@@ -1,15 +1,10 @@
 package cn.edu.fudan.projectmanager.interceptor;
 
+import cn.edu.fudan.projectmanager.component.RestInterfaceManager;
 import cn.edu.fudan.projectmanager.exception.AuthException;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -23,23 +18,12 @@ import javax.servlet.http.HttpServletResponse;
 
 public class AuthTokenInterceptor implements HandlerInterceptor {
 
-    @Value("${inner.service.path}")
-    private String innerServicePath;
-
-    private RestTemplate restTemplate;
-    private HttpHeaders httpHeaders;
+    private RestInterfaceManager restInterfaceManager;
 
     @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
+        this.restInterfaceManager = restInterfaceManager;
     }
-    @Autowired
-    public void setHttpHeaders(HttpHeaders httpHeaders) {
-        this.httpHeaders = httpHeaders;
-    }
-
-
-
 
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object handler) throws Exception {
@@ -55,11 +39,7 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
         if (userToken == null) {
             throw new AuthException("need user token!");
         }
-        HttpEntity<String> requestEntity=new HttpEntity<>(httpHeaders);
-        JSONObject result = restTemplate.exchange(innerServicePath + "/user/auth/" + userToken, HttpMethod.GET, requestEntity, JSONObject.class).getBody();
-        if (result == null || result.getIntValue("code") != 200) {
-            throw new AuthException("auth failed!");
-        }
+        restInterfaceManager.userAuth(userToken);
         return true;
     }
 

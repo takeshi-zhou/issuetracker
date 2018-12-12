@@ -1,6 +1,7 @@
 package cn.edu.fudan.projectmanager.service;
 
 import cn.edu.fudan.projectmanager.ProjectManagerApplicationTests;
+import cn.edu.fudan.projectmanager.component.RestInterfaceManager;
 import cn.edu.fudan.projectmanager.dao.ProjectDao;
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.service.impl.ProjectServiceImpl;
@@ -26,6 +27,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -51,8 +53,9 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
 
     @Value("${github.api.path}")
     private String githubAPIPath;
-    @Value("${inner.service.path}")
-    private String innerServicePath;
+
+    @Mock
+    private RestInterfaceManager restInterfaceManager;
 
     @Mock
     private ProjectDao projectDao;
@@ -63,14 +66,6 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
     @Mock
     private KafkaTemplate kafkaTemplate;
 
-    @Mock
-    private RestTemplate restTemplate;
-
-    @Mock
-    private ResponseEntity responseEntity;
-
-    @Mock
-    private ResponseEntity accountIdResponseEntity;
 
     @Autowired
     @InjectMocks
@@ -86,6 +81,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         projectInitial = testDataMaker.projectMakerPro1();
         projects = new ArrayList<>();
         projects.add(project);
+        MemberModifier.field(ProjectServiceImpl.class,"restInterfaceManager").set(projectService,restInterfaceManager);
         System.out.println("finish mocking");
     }
 
@@ -97,6 +93,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         String password = "password";
         String name = "projectName";
         String type = "bug";
+        String branch="master";
         JSONObject projectInfo = new JSONObject();
         projectInfo.put("url",null);
         projectInfo.put("isPrivate",false);
@@ -123,31 +120,12 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         } catch (RuntimeException e) {
             assertEquals("invalid url!", e.getMessage());
         }
-        /*
-            当传入的project的url地址不是maven项目
-         */
-        projectInfo.put("url",url);
-        JSONObject file1 = new JSONObject();
-        file1.put("name","s.text");
-        JSONArray fileList = new JSONArray();
-        fileList.add(file1);
-        String author_projectName ="/pdtx/WebMagicForBlog";
-        Mockito.when(restTemplate.getForEntity(githubAPIPath + author_projectName + "/contents", JSONArray.class)).thenReturn(responseEntity);
-        Mockito.when(responseEntity.getBody()).thenReturn(fileList);
-        try {
-            projectService.addOneProject(userToken, projectInfo);
-        } catch (RuntimeException e) {
-            assertEquals( "failed,this project is not maven project!",e.getMessage());
-        }
 
         /*
             当是私有库又没有密码时
          */
-        JSONObject file2 = new JSONObject();
-        file2.put("name","pom.xml");
-        fileList.add(file2);
+        projectInfo.put("url",url);
         projectInfo.put("isPrivate",true);
-        Mockito.when(responseEntity.getBody()).thenReturn(fileList);
         try {
             projectService.addOneProject(userToken, projectInfo);
         } catch (RuntimeException e) {
@@ -157,8 +135,8 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
             当传入的project的url地址已存在库内
          */
         projectInfo.put("password",password);
-        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "getAccountId")).toReturn(account_id);
-        PowerMockito.when(projectDao.hasBeenAdded(account_id,url,type)).thenReturn(true);
+        PowerMockito.when(restInterfaceManager.getAccountId(userToken)).thenReturn(account_id);
+        PowerMockito.when(projectDao.hasBeenAdded(account_id,url,type,branch)).thenReturn(true);
         try {
             projectService.addOneProject(userToken, projectInfo);
         } catch (RuntimeException e) {
@@ -167,8 +145,8 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         /*
             添加成功
          */
-        PowerMockito.when(projectDao.hasBeenAdded(account_id,url,type)).thenReturn(false);
-        PowerMockito.when(projectDao.getProjectsByURLAndType(url,type)).thenReturn(projects);
+        PowerMockito.when(projectDao.hasBeenAdded(account_id,url,type,branch)).thenReturn(false);
+        PowerMockito.when(projectDao.getProjectsByURLAndTypeBranch(url,type,branch)).thenReturn(projects);
         doNothing().when(projectDao).addOneProject(any(Project.class));
         PowerMockito.when(kafkaTemplate.send(eq("ProjectManager"), anyString())).thenReturn(null);
         projectService.addOneProject(userToken, projectInfo);
@@ -186,7 +164,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         list.add(project);
         list.add(projectUpdate);
         PowerMockito.when(projectDao.getProjectList(account_id,type)).thenReturn(list);
-        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "getAccountId")).toReturn(account_id);
+        PowerMockito.when(restInterfaceManager.getAccountId(userToken)).thenReturn(account_id);
 
         List<Project> listResult = (List<Project>) projectService.getProjectList(userToken,type);
         Assert.assertEquals(list.size(), listResult.size());
@@ -231,7 +209,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         List<Project> list = new ArrayList<Project>();
         list.add(project);
         list.add(projectInitial);
-        MemberModifier.stub(MemberMatcher.method(ProjectServiceImpl.class, "getAccountId")).toReturn(accountId);
+        PowerMockito.when(restInterfaceManager.getAccountId(token)).thenReturn(accountId);
         PowerMockito.when(projectDao.getProjectByKeyWordAndAccountId(accountId, keyWord,type)).thenReturn(list);
 
         List<Project> projects = (List<Project>) projectService.getProjectListByKeyWord(token, keyWord,type);

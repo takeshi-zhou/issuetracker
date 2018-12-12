@@ -2,6 +2,7 @@ package cn.edu.fudan.issueservice.service;
 
 
 import cn.edu.fudan.issueservice.IssueServiceApplicationTests;
+import cn.edu.fudan.issueservice.component.RestInterfaceManager;
 import cn.edu.fudan.issueservice.dao.LocationDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.domain.Location;
@@ -12,10 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -49,15 +47,13 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
     @Value("${repoHome}")
     private String repoHome;
 
-    @Value("${inner.service.path}")
-    private String innerServicePath;
+    @Mock
+    private RestInterfaceManager restInterfaceManager;
 
     @Mock
     private RawIssueDao rawIssueDao;
     @Mock
     private LocationDao locationDao;
-    @Mock
-    private RestTemplate restTemplate;
     @Mock
     private ResponseEntity repoIdResponseEntity;
 
@@ -90,8 +86,7 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
         MockitoAnnotations.initMocks(this);
         ReflectionTestUtils.setField(rawIssueService,"rawIssueDao",rawIssueDao);
         ReflectionTestUtils.setField(rawIssueService,"locationDao",locationDao);
-        ReflectionTestUtils.setField(rawIssueService,"restTemplate",restTemplate);
-
+        ReflectionTestUtils.setField(rawIssueService,"restInterfaceManager",restInterfaceManager);
         System.out.println("finish mocking");
 
     }
@@ -171,10 +166,9 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
         codeData.put("content",content);
         codeResponse.put("data",codeData);
 
-        PowerMockito.when(restTemplate.exchange(eq(innerServicePath + "/inner/project/repo-id?project-id=" + project_id), eq(HttpMethod.GET), any(HttpEntity.class),eq(String.class) )).thenReturn(repoIdResponseEntity);
-        PowerMockito.when(repoIdResponseEntity.getBody()).thenReturn(repo_id);
-        PowerMockito.when(restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class)).thenReturn(response);
-        PowerMockito.when(restTemplate.getForObject(codeServicePath + "?file_path=" + repoHome + file_path, JSONObject.class)).thenReturn(codeResponse);
+        PowerMockito.when(restInterfaceManager.getRepoIdOfProject(project_id)).thenReturn(repo_id);
+        PowerMockito.when(restInterfaceManager.checkOut(repo_id,commit_id)).thenReturn(response);
+        PowerMockito.when(restInterfaceManager.getCode(ArgumentMatchers.anyString())).thenReturn(codeResponse);
 
         /*
             当数据返回全部成功时
@@ -185,7 +179,7 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
         /*
             当checkout 失败时
          */
-        PowerMockito.when(restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class)).thenReturn(null);
+        PowerMockito.when(restInterfaceManager.checkOut(repo_id,commit_id)).thenReturn(null);
         try{
             result = (Map) rawIssueService.getCode(project_id,commit_id,file_path);
         }catch(RuntimeException e){
@@ -195,8 +189,8 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
         /*
             当获取code 失败时
          */
-        PowerMockito.when(restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class)).thenReturn(response);
-        PowerMockito.when(restTemplate.getForObject(codeServicePath + "?file_path=" + repoHome + file_path, JSONObject.class)).thenReturn(codeResponse);
+        PowerMockito.when(restInterfaceManager.checkOut(repo_id,commit_id)).thenReturn(response);
+        PowerMockito.when(restInterfaceManager.getCode(file_path)).thenReturn(codeResponse);
         try{
             result = (Map) rawIssueService.getCode(project_id,commit_id,file_path);
         }catch(RuntimeException e){

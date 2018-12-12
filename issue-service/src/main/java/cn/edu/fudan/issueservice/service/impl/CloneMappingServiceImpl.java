@@ -25,7 +25,13 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
         for(String group:groupsNeedInsert){
             //所有新的group，每一个都是一个新的issue
             String new_IssueId=UUID.randomUUID().toString();
-            Issue issue = new Issue(new_IssueId, group,category, current_commit_id, commitDate,current_commit_id,commitDate, null,null, repo_id, null,date,date);
+            if (isDefaultDisplayId){
+                currentDisplayId = (issueDao.getMaxIssueDisplayId(repo_id) == null) ? 0 : issueDao.getMaxIssueDisplayId(repo_id);
+                isDefaultDisplayId = false;
+            }
+            Issue issue = new Issue(new_IssueId, group,category, current_commit_id,
+                    commitDate,current_commit_id,commitDate, null,null,
+                    repo_id, null,date,date,++currentDisplayId);
             List<RawIssue> rawIssuesInOneGroup=map.get(group);
             for(int i=0;i<rawIssuesInOneGroup.size();i++){
                 RawIssue rawIssue=rawIssuesInOneGroup.get(i);
@@ -83,12 +89,10 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             Set<String> currentGroups=map2.keySet();
             Set<String> newGroups=new HashSet<>();
             int equalsCount = 0;
-            for(Map.Entry<String, List<RawIssue>> entryMap2 : map2.entrySet()){
-                String currentGroup = entryMap2.getKey();
-                List<RawIssue> rawIssuesInCurrentGroup = entryMap2.getValue();
+            for(String currentGroup:currentGroups){
                 boolean groupMapped=false;
-                for(Map.Entry<String, List<RawIssue>> entryMap1 : map1.entrySet()){
-                    String preGroup = entryMap1.getKey();
+                List<RawIssue> rawIssuesInCurrentGroup=map2.get(currentGroup);
+                for(String preGroup:preGroups){
                     if(currentGroup.equals(preGroup)){
                         groupMapped=true;
                         equalsCount++;

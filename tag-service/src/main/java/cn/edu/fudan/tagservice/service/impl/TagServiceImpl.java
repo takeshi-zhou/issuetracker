@@ -1,6 +1,7 @@
 package cn.edu.fudan.tagservice.service.impl;
 
 import cn.edu.fudan.tagservice.dao.TagDao;
+
 import cn.edu.fudan.tagservice.domain.PriorityEnum;
 import cn.edu.fudan.tagservice.domain.Tag;
 import cn.edu.fudan.tagservice.domain.TaggedItem;
@@ -16,10 +17,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * @author WZY
- * @version 1.0
- **/
 @Service
 public class TagServiceImpl implements TagService {
 
@@ -50,7 +47,7 @@ public class TagServiceImpl implements TagService {
                 throw new RuntimeException("duplicate tag!");
             tagDao.addOneTaggedItem(itemId, tag_id);
         } else {
-            if (PriorityEnum.contains(name))
+            if (PriorityEnum.contains(name.toUpperCase()))
                 throw new IllegalArgumentException("enter other tag" + name);
             tag_id = UUID.randomUUID().toString();
             tagDao.addOneTag(new Tag(tag_id, name, scope, "#ffffff"));
@@ -95,7 +92,7 @@ public class TagServiceImpl implements TagService {
                 tagDao.modifyOneTagged(oldTagId, newTagId, itemId);
             }
         } else {
-            if (PriorityEnum.contains(name))
+            if (PriorityEnum.contains(name.toUpperCase()))
                 throw new IllegalArgumentException("enter other tag" + name);
             tagDao.modifyOneTag(oldTagId, name);
         }
@@ -117,7 +114,7 @@ public class TagServiceImpl implements TagService {
     @Override
     public List<Tag> getAllDefaultTags() {
         List<Tag> tags= tagDao.getAllDefaultTags();
-        tags.sort(Comparator.comparingInt((Tag tag)-> PriorityEnum.getByValue(tag.getName()).getLevel()));
+        tags.sort(Comparator.comparingInt((Tag tag)->PriorityEnum.getByValue(tag.getName()).getLevel()));
         return tags;
     }
 

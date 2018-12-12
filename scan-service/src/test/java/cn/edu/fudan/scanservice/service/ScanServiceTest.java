@@ -1,6 +1,7 @@
 package cn.edu.fudan.scanservice.service;
 
 import cn.edu.fudan.scanservice.ScanServiceApplicationTests;
+import cn.edu.fudan.scanservice.component.RestInterfaceManager;
 import cn.edu.fudan.scanservice.dao.ScanDao;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.service.impl.ScanServiceImpl;
@@ -36,8 +37,7 @@ import static org.mockito.Mockito.verify;
 
 @PrepareForTest({ScanService.class, ScanServiceImpl.class, ScanDao.class, RestTemplate.class, ResponseEntity.class})
 public class ScanServiceTest extends ScanServiceApplicationTests {
-    @Value("${inner.service.path}")
-    private String innerServicePath;
+
     @Value("${commit.service.path}")
     private String commitServicePath;
 
@@ -45,11 +45,7 @@ public class ScanServiceTest extends ScanServiceApplicationTests {
     private ScanDao scanDao;
 
     @Mock
-    private ResponseEntity responseEntity;
-
-
-    @Mock
-    private RestTemplate restTemplate;
+    private RestInterfaceManager restInterfaceManager;
 
     @Autowired
     @InjectMocks
@@ -63,7 +59,7 @@ public class ScanServiceTest extends ScanServiceApplicationTests {
     @Before
     public void setup() throws Exception {
         MemberModifier.field(ScanServiceImpl.class, "scanDao").set(scanService, scanDao);
-        MemberModifier.field(ScanServiceImpl.class, "restTemplate").set(scanService, restTemplate);
+        MemberModifier.field(ScanServiceImpl.class, "restInterfaceManager").set(scanService, restInterfaceManager);
 
         testDataMaker = new TestDataMaker();
         scan = testDataMaker.scanMakerSc1();
@@ -106,8 +102,7 @@ public class ScanServiceTest extends ScanServiceApplicationTests {
         Integer size = 1;
         String category = "category";
         String repo_id = "repoId";
-        Mockito.when(restTemplate.exchange(eq(innerServicePath + "/inner/project/repo-id?project-id=" + project_id), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class))).thenReturn(responseEntity);
-        Mockito.when(responseEntity.getBody()).thenReturn(repo_id);
+        Mockito.when(restInterfaceManager.getRepoIdOfProject(project_id)).thenReturn(repo_id);
 
         List<String> scannedCommitId = new ArrayList<>();
         scannedCommitId.add("comm0");
@@ -126,7 +121,7 @@ public class ScanServiceTest extends ScanServiceApplicationTests {
         /*
             当请求的commit响应为空
          */
-        Mockito.when(restTemplate.getForObject(commitServicePath + "?repo_id=" + repo_id + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class)).thenReturn(null);
+        PowerMockito.when(restInterfaceManager.getCommitsOfRepo(repo_id,page,size)).thenReturn(null);
         try{
             result = (Map)scanService.getCommits(project_id,page,size,true,category);
         }catch(RuntimeException e){
@@ -139,7 +134,7 @@ public class ScanServiceTest extends ScanServiceApplicationTests {
          */
         size = 1;
         page = 1;
-        Mockito.when(restTemplate.getForObject(commitServicePath + "?repo_id=" + repo_id + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class)).thenReturn(commitResponse);
+        PowerMockito.when(restInterfaceManager.getCommitsOfRepo(repo_id,page,size)).thenReturn(commitResponse);
         PowerMockito.when(scanDao.getScannedCommits(repo_id,category)).thenReturn(Collections.emptyList());
         result = (Map)scanService.getCommits(project_id,page,size,true,category);
         Assert.assertEquals(2,result.get("totalCount"));
@@ -153,7 +148,7 @@ public class ScanServiceTest extends ScanServiceApplicationTests {
          */
         size = 3;
         page = 1;
-        Mockito.when(restTemplate.getForObject(commitServicePath + "?repo_id=" + repo_id + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class)).thenReturn(commitResponse);
+        PowerMockito.when(restInterfaceManager.getCommitsOfRepo(repo_id,page,size)).thenReturn(commitResponse);
         PowerMockito.when(scanDao.getScannedCommits(repo_id,category)).thenReturn(Collections.emptyList());
         result = (Map)scanService.getCommits(project_id,page,size,true,category);
         Assert.assertEquals(2,result.get("totalCount"));
@@ -169,7 +164,7 @@ public class ScanServiceTest extends ScanServiceApplicationTests {
          */
         size = 3;
         page = 1;
-        Mockito.when(restTemplate.getForObject(commitServicePath + "?repo_id=" + repo_id + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class)).thenReturn(commitResponse);
+        PowerMockito.when(restInterfaceManager.getCommitsOfRepo(repo_id,page,size)).thenReturn(commitResponse);
         PowerMockito.when(scanDao.getScannedCommits(repo_id,category)).thenReturn(Collections.emptyList());
         result = (Map)scanService.getCommits(project_id,page,size,false,category);
         Assert.assertEquals(2,result.get("totalCount"));
@@ -185,7 +180,7 @@ public class ScanServiceTest extends ScanServiceApplicationTests {
          */
         size = 3;
         page = 1;
-        Mockito.when(restTemplate.getForObject(commitServicePath + "?repo_id=" + repo_id + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class)).thenReturn(commitResponse);
+        PowerMockito.when(restInterfaceManager.getCommitsOfRepo(repo_id,page,size)).thenReturn(commitResponse);
         PowerMockito.when(scanDao.getScannedCommits(repo_id,category)).thenReturn(scannedCommitId);
         result = (Map)scanService.getCommits(project_id,page,size,true,category);
         Assert.assertEquals(2,result.get("totalCount"));
@@ -200,7 +195,7 @@ public class ScanServiceTest extends ScanServiceApplicationTests {
          */
         size = 3;
         page = 1;
-        Mockito.when(restTemplate.getForObject(commitServicePath + "?repo_id=" + repo_id + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class)).thenReturn(commitResponse);
+        PowerMockito.when(restInterfaceManager.getCommitsOfRepo(repo_id,page,size)).thenReturn(commitResponse);
         PowerMockito.when(scanDao.getScannedCommits(repo_id,category)).thenReturn(scannedCommitId);
         result = (Map)scanService.getCommits(project_id,page,size,false,category);
         Assert.assertEquals(1,result.get("totalCount"));

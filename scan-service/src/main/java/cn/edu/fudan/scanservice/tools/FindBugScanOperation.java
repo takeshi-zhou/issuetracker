@@ -14,8 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -63,15 +61,16 @@ public class FindBugScanOperation extends ScanOperationAdapter {
     }
 
     @SuppressWarnings("unchecked")
-    private String analyzeLocations(String rawIssueUUID, String repoName, Element bugInstance, List<JSONObject> locations) {
+    private String analyzeLocations(String rawIssueUUID, String repoPath, Element bugInstance, List<JSONObject> locations) {
         Element sourceLineInClass = bugInstance.element("Class").element("SourceLine");
         String className = sourceLineInClass.attributeValue("classname");
         String fileName = sourceLineInClass.attributeValue("sourcefile");
         String sourcePath=sourceLineInClass.attributeValue("sourcepath");
         String filePath=null;
-        String candidateFilePaths = excuteShellUtil.getFileLocation(repoName, fileName);
+        repoPath = repoPath.substring(repoPath.indexOf("/") + 1);//去除github前缀
+        String candidateFilePaths = excuteShellUtil.getFileLocation(repoPath, fileName);
         if (candidateFilePaths == null) {
-            logger.error(sourcePath + " 找不到源文件！");
+            logger.error(sourcePath + " 找不到源文件！去除前缀后的repoPath-> "+repoPath);
             return null;
         }else{
             String []candidates=candidateFilePaths.split(":");
@@ -120,7 +119,6 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         } else {
             code = ASTUtil.getCode(start, end, repoHome + filePath);
         }
-        filePath = filePath.substring(filePath.indexOf("/") + 1);
         JSONObject location = new JSONObject();
         location.put("uuid", UUID.randomUUID().toString());
         location.put("start_line", start);
@@ -136,7 +134,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
     }
 
     @SuppressWarnings("unchecked")
-    private boolean analyzeXML(Scan scan, String repoName, String xmlPath) {
+    private boolean analyzeXML(Scan scan, String repoPath, String xmlPath) {
         SAXReader reader = new SAXReader();
         try {
             Document doc = reader.read(new File(xmlPath));
@@ -152,7 +150,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
                 List<JSONObject> locations = new ArrayList<>();//每个rawIssue会有多个location
                 String rawIssueUUID = UUID.randomUUID().toString();
                 //解析当前bugInstance中的location
-                String fileName = analyzeLocations(rawIssueUUID, repoName, bugInstance, locations);
+                String fileName = analyzeLocations(rawIssueUUID, repoPath, bugInstance, locations);
                 if (fileName != null&&!locations.isEmpty()) {
                     //只有location解析成功并且rawIssue有location才会插入当前rawIssue
                     JSONObject rawIssue = new JSONObject();
@@ -169,8 +167,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
             }
             if (!rawIssues.isEmpty()) {
                 //插入所有的rawIssue
-                HttpEntity<Object> requestEntity = new HttpEntity<>(rawIssues, httpHeaders);
-                restTemplate.exchange(innerServicePath + "/inner/raw-issue", HttpMethod.POST, requestEntity, JSONObject.class);
+                restInterfaceManager.insertRawIssuesWithLocations(rawIssues);
             }
             return true;
         } catch (Exception e) {

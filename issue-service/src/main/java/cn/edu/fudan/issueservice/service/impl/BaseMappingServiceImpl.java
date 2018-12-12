@@ -1,19 +1,18 @@
 package cn.edu.fudan.issueservice.service.impl;
 
 import cn.edu.fudan.issueservice.component.IssueEventManager;
+import cn.edu.fudan.issueservice.component.RestInterfaceManager;
 import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.dao.ScanResultDao;
 import cn.edu.fudan.issueservice.domain.EventType;
 import cn.edu.fudan.issueservice.domain.Issue;
-import cn.edu.fudan.issueservice.domain.ScanResult;
 import cn.edu.fudan.issueservice.service.MappingService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,17 +27,15 @@ public class BaseMappingServiceImpl implements MappingService {
 
     @Value("${solved.tag_id}")
     private String solvedTagId;
-    @Value("${tag.service.path}")
-    protected String tagServicePath;
-    @Value("${commit.service.path}")
-    private String commitServicePath;
 
     IssueEventManager issueEventManager;
     IssueDao issueDao;
     RawIssueDao rawIssueDao;
     ScanResultDao scanResultDao;
     private StringRedisTemplate stringRedisTemplate;
-    protected RestTemplate restTemplate;
+    RestInterfaceManager restInterfaceManager;
+    protected  int currentDisplayId = 1;
+    protected  boolean  isDefaultDisplayId = true;
 
     @Autowired
     public void setScanResultDao(ScanResultDao scanResultDao) {
@@ -46,8 +43,8 @@ public class BaseMappingServiceImpl implements MappingService {
     }
 
     @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
+        this.restInterfaceManager = restInterfaceManager;
     }
 
     @Autowired
@@ -71,7 +68,7 @@ public class BaseMappingServiceImpl implements MappingService {
     }
 
     Date getCommitDate(String commitId){
-        JSONObject response=restTemplate.getForObject(commitServicePath+"/commit-time?commit_id="+commitId,JSONObject.class);
+        JSONObject response=restInterfaceManager.getCommitTime(commitId);
         if(response!=null){
             return response.getJSONObject("data").getDate("commit_time");
         }
@@ -114,10 +111,7 @@ public class BaseMappingServiceImpl implements MappingService {
 
     void modifyToSolvedTag(String repo_id, String pre_commit_id,EventType eventType,String committer) {
         List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
-        if(issues == null){
-            issues = new ArrayList<>();
-            issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
-        }
+        issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
         if (issues != null && !issues.isEmpty()) {
             List<JSONObject> taggeds = new ArrayList<>();
             for (Issue issue : issues) {
@@ -126,16 +120,13 @@ public class BaseMappingServiceImpl implements MappingService {
                 tagged.put("tag_id", solvedTagId);
                 taggeds.add(tagged);
             }
-            restTemplate.postForObject(tagServicePath+"/tagged-modify", taggeds, JSONObject.class);
+            restInterfaceManager.modifyTags(taggeds);
         }
     }
 
     void addSolvedTag(String repo_id, String pre_commit_id,EventType eventType,String committer) {
         List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
-        if(issues == null){
-            issues = new ArrayList<>();
-            issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
-        }
+        issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
         if (issues != null && !issues.isEmpty()) {
             List<JSONObject> taggeds = new ArrayList<>();
             for (Issue issue : issues) {
@@ -144,7 +135,7 @@ public class BaseMappingServiceImpl implements MappingService {
                 tagged.put("tag_id", solvedTagId);
                 taggeds.add(tagged);
             }
-            restTemplate.postForObject(tagServicePath,taggeds, JSONObject.class);
+            restInterfaceManager.addTags(taggeds);
         }
     }
 

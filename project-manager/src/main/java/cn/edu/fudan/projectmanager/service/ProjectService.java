@@ -28,5 +28,7 @@ public interface ProjectService {
 
     String getRepoId(String projectId);
 
-    Object existProjectWithThisRepoIdAndType(String repoId,String type);
+    Object existProjectWithThisRepoIdAndType(String repoId,String type,boolean isFirst);
+
+    void updateProjectFirstAutoScan(String repoId,String type);
 }

@@ -17,6 +17,8 @@
         <result property="target_files" column="target_files"/>
         <result property="create_time" column="create_time"/>
         <result property="update_time" column="update_time"/>
+        <result property="priority" column="priority"/>
+        <result property="displayId" column="display_id"/>
     </resultMap>
 
     <resultMap id="issue2" type="Issue">
@@ -34,6 +36,7 @@
         <result property="create_time" column="create_time"/>
         <result property="update_time" column="update_time"/>
         <result property="priority" column="priority"/>
+        <result property="displayId" column="display_id"/>
         <collection property="issueType" column="type"
                     select="cn.edu.fudan.issueservice.mapper.IssueTypeMapper.getIssueTypeByTypeName"/>
     </resultMap>
@@ -60,7 +63,8 @@
         target_files,
         create_time,
         update_time,
-        priority
+        priority,
+        display_id
         )
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
@@ -78,7 +82,8 @@
             #{item.target_files},
             #{item.create_time},
             #{item.update_time},
-            #{item.priority}
+            #{item.priority},
+            #{item.displayId}
             )
         </foreach>
     </insert>
@@ -272,12 +277,30 @@
         </if>
     </select>
 
-    <update id="updateOneIssuePriority" >
-        UPDATE issue SET priority=#{priority} WHERE uuid=#{uuid}
+    <update id="updateOneIssuePriority"  >
+        UPDATE issue SET priority = #{priority} WHERE uuid = #{uuid}
     </update>
 
     <select id="getIssueIdAndPriority" resultMap="issue3">
         SELECT a.uuid ,b.detail FROM issue  as a , rawIssue as b  where a.raw_issue_end = b.uuid and detail is not null
+    </select>
+
+    <select id="getMaxIssueDisplayId" parameterType="String" resultType="Integer">
+        select max(display_id) from issue where repo_id = #{repo_id}
+    </select>
+
+    <update id="updateIssueDisplayId"  >
+      UPDATE issue set display_id = #{display_id} where uuid = #{uuid}
+    </update>
+
+
+
+    <select id="getAllRepoId" resultType="String">
+        select distinct(repo_id) from issue
+    </select>
+
+    <select id="getAllIssueIdByRepoId" parameterType="String" resultType="String">
+        select uuid from issue where repo_id = #{repo_id}
     </select>
 
 </mapper>

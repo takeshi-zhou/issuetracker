@@ -1,23 +1,19 @@
 package cn.edu.fudan.projectmanager.service.impl;
 
 
+import cn.edu.fudan.projectmanager.component.RestInterfaceManager;
 import cn.edu.fudan.projectmanager.dao.*;
 import cn.edu.fudan.projectmanager.domain.NeedDownload;
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.service.ProjectService;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -29,8 +25,15 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Value("${github.api.path}")
     private String githubAPIPath;
-    @Value("${inner.service.path}")
-    private String innerServicePath;
+    @Value("${repo.url.pattern}")
+    private String repoUrlPattern;
+
+    private RestInterfaceManager restInterfaceManager;
+
+    @Autowired
+    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
+        this.restInterfaceManager = restInterfaceManager;
+    }
 
     private StringRedisTemplate stringRedisTemplate;
 
@@ -39,25 +42,11 @@ public class ProjectServiceImpl implements ProjectService {
         this.stringRedisTemplate = stringRedisTemplate;
     }
 
-    private HttpHeaders httpHeaders;
-
-    @Autowired
-    public void setHttpHeaders(HttpHeaders httpHeaders) {
-        this.httpHeaders = httpHeaders;
-    }
-
     private KafkaTemplate kafkaTemplate;
 
     @Autowired
     public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
-    }
-
-    private RestTemplate restTemplate;
-
-    @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
     }
 
 
@@ -69,45 +58,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @SuppressWarnings("unchecked")
-    private void send(String projectId, String url,boolean isPrivate,String username,String password) {
-        NeedDownload needDownload = new NeedDownload(projectId, url,isPrivate,username,password);
+    private void send(String projectId, String url,boolean isPrivate,String username,String password, String branch) {
+        NeedDownload needDownload = new NeedDownload(projectId, url,isPrivate,username,password ,branch);
         kafkaTemplate.send("ProjectManager", JSONObject.toJSONString(needDownload));
         logger.info("send message to topic ProjectManage ---> " + JSONObject.toJSONString(needDownload));
-    }
-
-    private String getAccountId(String userToken) {
-        HttpEntity<String> requestEntity = new HttpEntity<>(null, httpHeaders);
-        return restTemplate.exchange(innerServicePath + "/user/accountId?userToken=" + userToken, HttpMethod.GET, requestEntity, String.class).getBody();
-    }
-
-    private void checkProjectURL(String url,boolean isPrivate) {
-        Pattern pattern = Pattern.compile("https://github.com(/[\\w-]+/[\\w-]+)");
-        Matcher matcher = pattern.matcher(url);
-        if (!matcher.matches()) {
-            throw new RuntimeException("invalid url!");
-        }
-        if(!isPrivate){
-            //前面做过一次全匹配，需要把matcher重置一下才能接着从头匹配
-            matcher.reset();
-            boolean isMavenProject = false;
-            while (matcher.find()) {
-                String author_projectName = matcher.group(1);
-                JSONArray fileList = restTemplate.getForEntity(githubAPIPath + author_projectName + "/contents", JSONArray.class).getBody();
-                if (fileList != null) {
-                    for (int i = 0; i < fileList.size(); i++) {
-                        JSONObject file = fileList.getJSONObject(i);
-                        if (file.getString("name").equals("pom.xml")) {
-                            isMavenProject = true;
-                            break;
-                        }
-                    }
-                    if (!isMavenProject)
-                        throw new RuntimeException("failed,this project is not maven project!");
-                } else {
-                    throw new RuntimeException("invalid url!");
-                }
-            }
-        }
     }
 
     @Override
@@ -119,6 +73,8 @@ public class ProjectServiceImpl implements ProjectService {
         url = url.trim();
         boolean isPrivate=projectInfo.getBooleanValue("isPrivate");
         checkProjectURL(url,isPrivate);
+        String accountId = restInterfaceManager.getAccountId(userToken);
+        String branch  =  (projectInfo.getString("branch") == null || projectInfo.getString("branch").equals("")) ? "master" : projectInfo.getString("branch") ;
         String username=projectInfo.getString("username");
         String password=projectInfo.getString("password");
         if(isPrivate){
@@ -129,13 +85,13 @@ public class ProjectServiceImpl implements ProjectService {
         Project project=new Project();
         String name=projectInfo.getString("name");
         String type=projectInfo.getString("type");
-        String account_id = getAccountId(userToken);
-        if (projectDao.hasBeenAdded(account_id, url, type)) {
+
+        if (projectDao.hasBeenAdded(accountId, url, type, branch)) {
             throw new RuntimeException("The project has been added!");
         }
-        List<Project> projects=projectDao.getProjectsByURLAndType(url,type);
+        List<Project> projects = projectDao.getProjectsByURLAndTypeBranch(url,type, branch);
         if(projects!=null&&!projects.isEmpty()){
-            //如果存在其他用户的project和当前添加的URL和type相同，需要将扫描状态同步
+            //如果存在其他用户的project和当前添加的URL和type以及branch相同，需要将扫描状态同步
             Project oneProject=projects.get(0);
             project.setScan_status(oneProject.getScan_status());
             project.setTill_commit_time(oneProject.getTill_commit_time());
@@ -149,17 +105,18 @@ public class ProjectServiceImpl implements ProjectService {
         project.setUrl(url);
         project.setType(type);
         project.setVcs_type("git");
-        project.setAccount_id(account_id);
+        project.setAccount_id(accountId);
         project.setDownload_status("Downloading");
         project.setAdd_time(new Date());
+        project.setBranch(branch);
         projectDao.addOneProject(project);
         //向RepoManager这个Topic发送消息，请求开始下载
-        send(projectId, url,isPrivate,username,password);
+        send(projectId, url,isPrivate,username,password,branch);
     }
 
     @Override
     public Object getProjectList(String userToken,String type) {
-        String account_id = getAccountId(userToken);
+        String account_id = restInterfaceManager.getAccountId(userToken);
         return projectDao.getProjectList(account_id,type);
     }
 
@@ -175,7 +132,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Object getProjectListByKeyWord(String userToken, String keyWord,String type) {
-        String account_id = getAccountId(userToken);
+        String account_id = restInterfaceManager.getAccountId(userToken);
         return projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim(),type);
     }
 
@@ -205,25 +162,16 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void remove(String projectId, String type,String userToken) {
         updateProjectStatus(projectId,"deleting");
-        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
-        String repoId = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + projectId, HttpMethod.GET, requestEntity, String.class).getBody();
+        String repoId = projectDao.getRepoId(projectId);
         if(repoId!=null){
-            String account_id = getAccountId(userToken);
+            String account_id = restInterfaceManager.getAccountId(userToken);
             //如果当前repoId和type只有这一个projectId与其对应，那么删除project的同时会删除repo的相关内容
             //否则还有其他project与当前repoId和type对应，该repo的相关内容就不删
             if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId,type)) {
-                JSONObject response = restTemplate.exchange(innerServicePath + "/inner/issue/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
-                if (response != null)
-                    logger.info(response.toJSONString());
-                response = restTemplate.exchange(innerServicePath + "/inner/raw-issue/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
-                if (response != null)
-                    logger.info(response.toJSONString());
-                response = restTemplate.exchange(innerServicePath + "/inner/scan/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
-                if (response != null)
-                    logger.info(response.toJSONString());
-                response = restTemplate.exchange(innerServicePath + "/inner/event/" +type+"/"+ repoId, HttpMethod.DELETE, requestEntity, JSONObject.class).getBody();
-                if (response != null)
-                    logger.info(response.toJSONString());
+                restInterfaceManager.deleteIssuesOfRepo(repoId,type);
+                restInterfaceManager.deleteRawIssueOfRepo(repoId,type);
+                restInterfaceManager.deleteScanOfRepo(repoId,type);
+                restInterfaceManager.deleteEventOfRepo(repoId,type);
                 //delete info in redis
                 stringRedisTemplate.setEnableTransactionSupport(true);
                 stringRedisTemplate.multi();
@@ -249,9 +197,51 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Object existProjectWithThisRepoIdAndType(String repoId, String type) {
+    public Object existProjectWithThisRepoIdAndType(String repoId, String type,boolean isFirst) {
         Map<String,Object> result=new HashMap<>();
-        result.put("exist",projectDao.existProjectWithThisRepoIdAndType(repoId, type));
+        if(isFirst)
+            //如果项目是第一次添加时判断是否自动扫
+            result.put("exist",projectDao.existProjectWithThisRepoIdAndTypeAndNotAutoScanned(repoId, type));
+        else
+            //后续收到新的commit时判断是否扫
+            result.put("exist",projectDao.existProjectWithThisRepoIdAndType(repoId, type));
         return result;
+    }
+
+    @Override
+    public void updateProjectFirstAutoScan(String repoId, String type) {
+        projectDao.updateProjectFirstAutoScan(repoId, type);
+    }
+
+    private void checkProjectURL( String url,boolean isPrivate) {
+        Pattern pattern = Pattern.compile(repoUrlPattern);
+        Matcher matcher = pattern.matcher(url);
+        if (!matcher.matches()) {
+            throw new RuntimeException("invalid url!");
+        }
+
+
+//        if(!isPrivate){
+//            //前面做过一次全匹配，需要把matcher重置一下才能接着从头匹配
+//            matcher.reset();
+//            boolean isMavenProject = false;
+//            while (matcher.find()) {
+//                String author_projectName = matcher.group(1);
+//                JSONArray fileList = restTemplate.getForEntity(githubAPIPath + author_projectName + "/contents", JSONArray.class).getBody();
+//                if (fileList != null) {
+//                    for (int i = 0; i < fileList.size(); i++) {
+//                        JSONObject file = fileList.getJSONObject(i);
+//                        if (file.getString("name").equals("pom.xml")) {
+//                            isMavenProject = true;
+//                            break;
+//                        }
+//                    }
+//                    if (!isMavenProject)
+//                        throw new RuntimeException("failed,this project is not maven project!");
+//                } else {
+//                    throw new RuntimeException("invalid url!");
+//                }
+//            }
+//        }
     }
 }

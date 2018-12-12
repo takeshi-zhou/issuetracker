@@ -1,5 +1,6 @@
 package cn.edu.fudan.scanservice.tools;
 
+import cn.edu.fudan.scanservice.component.RestInterfaceManager;
 import cn.edu.fudan.scanservice.dao.ScanDao;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.domain.ScanInitialInfo;
@@ -10,42 +11,22 @@ import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
 import java.util.UUID;
 
 
-@Component
+@Service
 public class ScanOperationAdapter implements ScanOperation {
 
     private final static Logger logger = LoggerFactory.getLogger(ScanOperationAdapter.class);
 
-    @Value("${commit.service.path}")
-    private String commitServicePath;
-    @Value("${repository.service.path}")
-    private String repoServicePath;
-    @Value("${inner.service.path}")
-    protected String innerServicePath;
-
-    HttpHeaders httpHeaders;
+    RestInterfaceManager restInterfaceManager;
 
     @Autowired
-    public void setHttpHeaders(HttpHeaders httpHeaders) {
-        this.httpHeaders = httpHeaders;
-    }
-
-   RestTemplate restTemplate;
-
-    @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
+        this.restInterfaceManager = restInterfaceManager;
     }
 
     private ScanDao scanDao;
@@ -62,16 +43,17 @@ public class ScanOperationAdapter implements ScanOperation {
 
     @Override
     public boolean checkOut(String repoId, String commitId) {
-        JSONObject response = restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repoId + "&commit_id=" + commitId, JSONObject.class);
+        JSONObject response = restInterfaceManager.checkOut(repoId, commitId);
         return response != null && response.getJSONObject("data").getString("status").equals("Successful");
     }
 
     @Override
     public ScanInitialInfo initialScan(String repoId, String commitId,String category) {
         Date startTime = new Date();
-        JSONObject currentRepo = restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
+        JSONObject currentRepo = restInterfaceManager.getRepoById(repoId);
         String repoName = currentRepo.getJSONObject("data").getString("repo_name");
         String repoPath = currentRepo.getJSONObject("data").getString("local_addr");
+        logger.info("repo_name ->{} ,repo local address -> {}",repoName,repoPath);
         //新建一个Scan对象
         Scan scan = new Scan();
         scan.setCategory(category);
@@ -84,7 +66,7 @@ public class ScanOperationAdapter implements ScanOperation {
         String uuid = UUID.randomUUID().toString();
         scan.setUuid(uuid);
         //use api provided by commit-service
-        JSONObject jsonObject = restTemplate.getForObject(commitServicePath + "/commit-time?commit_id=" + commitId, JSONObject.class);
+        JSONObject jsonObject = restInterfaceManager.getCommitTime(commitId);
         Date commit_time = jsonObject.getJSONObject("data").getDate("commit_time");
         scan.setCommit_time(DateTimeUtil.formatedDate(commit_time));
         return new ScanInitialInfo(scan, repoName, repoId, repoPath);
@@ -108,8 +90,7 @@ public class ScanOperationAdapter implements ScanOperation {
             requestParam.put("pre_commit_id", commitId);
         requestParam.put("current_commit_id", commitId);
         logger.info("mapping between " + requestParam.toJSONString());
-        HttpEntity<Object> entity = new HttpEntity<>(requestParam, httpHeaders);
-        JSONObject result = restTemplate.exchange(innerServicePath + "/inner/issue/mapping", HttpMethod.POST, entity, JSONObject.class).getBody();
+        JSONObject result = restInterfaceManager.mapping(requestParam);
         return result != null && result.getIntValue("code") == 200;
     }
 

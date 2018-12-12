@@ -1,5 +1,6 @@
 package cn.edu.fudan.issueservice.service.impl;
 
+import cn.edu.fudan.issueservice.component.RestInterfaceManager;
 import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.dao.ScanResultDao;
 import cn.edu.fudan.issueservice.domain.*;
@@ -12,11 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -32,13 +29,13 @@ public class IssueServiceImpl implements IssueService {
     private String solvedTagId;
     @Value("${ignore.tag_id}")
     private String ignoreTagId;
-    @Value("${commit.service.path}")
-    private String commitServicePath;
-    @Value("${tag.service.path}")
-    private String tagServicePath;
-    @Value("${inner.service.path}")
-    private String innerServicePath;
 
+    private RestInterfaceManager restInterfaceManager;
+
+    @Autowired
+    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
+        this.restInterfaceManager = restInterfaceManager;
+    }
 
     private CloneMappingServiceImpl cloneMappingService;
 
@@ -59,13 +56,6 @@ public class IssueServiceImpl implements IssueService {
     @Autowired
     public void setQuartzScheduler(QuartzScheduler quartzScheduler) {
         this.quartzScheduler = quartzScheduler;
-    }
-
-    private HttpHeaders httpHeaders;
-
-    @Autowired
-    public void setHttpHeaders(HttpHeaders httpHeaders) {
-        this.httpHeaders = httpHeaders;
     }
 
     private StringRedisTemplate stringRedisTemplate;
@@ -89,12 +79,6 @@ public class IssueServiceImpl implements IssueService {
         this.scanResultDao = scanResultDao;
     }
 
-    private RestTemplate restTemplate;
-
-    @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
 
     @Override
     public void insertIssueList(List<Issue> list) {
@@ -106,12 +90,7 @@ public class IssueServiceImpl implements IssueService {
         log.info("start to delete issue -> repoId={} , category={}",repoId,category);
         //先删除该项目所有issue对应的tag
         List<String> issueIds = issueDao.getIssueIdsByRepoIdAndCategory(repoId, category);
-        if (issueIds != null && !issueIds.isEmpty()) {
-            JSONObject response = restTemplate.postForObject(tagServicePath + "/tagged-delete", issueIds, JSONObject.class);
-            if (response == null || response.getIntValue("code") != 200) {
-                throw new RuntimeException("tag item delete failed!");
-            }
-        }
+        restInterfaceManager.deleteTagsOfIssueInOneRepo(issueIds);
         log.info("tag delete success!");
         issueDao.deleteIssueByRepoIdAndCategory(repoId,category);
         log.info("issue delete success!");
@@ -129,18 +108,14 @@ public class IssueServiceImpl implements IssueService {
 
     private void addTagInfo(List<Issue> issues) {
         for (Issue issue : issues) {
-            JSONArray tags = restTemplate.getForObject(tagServicePath + "?item_id=" + issue.getUuid(), JSONArray.class);
+            JSONArray tags = restInterfaceManager.getTagsOfIssue(issue.getUuid());
             issue.setTags(tags);
         }
     }
 
-    private JSONArray getSpecificTaggedIssueIds(String ...tagIds){
-        return restTemplate.postForObject(tagServicePath + "/item-ids", tagIds, JSONArray.class);
-    }
-
     @Override
     public Object getIssueList(String project_id, Integer page, Integer size,String category) {
-        String repoId=getRepoId(project_id);
+        String repoId=restInterfaceManager.getRepoIdOfProject(project_id);
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> param = new HashMap<>();
         param.put("repo_id", repoId);
@@ -150,7 +125,7 @@ public class IssueServiceImpl implements IssueService {
         List<String> tag_ids = new ArrayList<>();
         tag_ids.add(solvedTagId);
         tag_ids.add(ignoreTagId);
-        JSONArray solved_issue_ids = restTemplate.postForObject(tagServicePath + "/item-ids", tag_ids, JSONArray.class);
+        JSONArray solved_issue_ids = restInterfaceManager.getSolvedIssueIds(tag_ids);
         if (solved_issue_ids != null && solved_issue_ids.size() > 0) {
             param.put("solved_issue_ids", solved_issue_ids.toJavaList(String.class));
         }
@@ -172,14 +147,14 @@ public class IssueServiceImpl implements IssueService {
         String category=requestParam.getString("category");
         if (project_id == null || size == 0 || page == 0)
             throw new IllegalArgumentException("param lost!");
-        String repoId = getRepoId(project_id);
+        String repoId = restInterfaceManager.getRepoIdOfProject(project_id);
         JSONArray tag_ids = requestParam.getJSONArray("tags");
         JSONArray types = requestParam.getJSONArray("types");
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> query = new HashMap<>();
         if(tag_ids!=null&&!tag_ids.isEmpty()){
             //只有在筛选条件都不为null的条件下才启用过滤
-            JSONArray issue_ids = restTemplate.postForObject(tagServicePath + "/item-ids", tag_ids, JSONArray.class);
+            JSONArray issue_ids = restInterfaceManager.getSpecificTaggedIssueIds(tag_ids);
             if (issue_ids == null || issue_ids.size() == 0) {//没找到打了这些tag的issue
                 result.put("totalPage", 0);
                 result.put("totalCount", 0);
@@ -231,20 +206,8 @@ public class IssueServiceImpl implements IssueService {
         return result;
     }
 
-    private String getAccountId(String userToken) {
-        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
-        return restTemplate.exchange(innerServicePath + "/user/accountId?userToken=" + userToken, HttpMethod.GET, requestEntity, String.class).getBody();
-    }
 
-    private JSONArray getRepoIds(String account_id,String type) {
-        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
-        return restTemplate.exchange(innerServicePath + "/inner/project/repo-ids?account_id=" + account_id+"&type="+type, HttpMethod.GET, requestEntity, JSONArray.class).getBody();
-    }
 
-    private String getRepoId(String projectId) {
-        HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
-        return restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + projectId, HttpMethod.GET, entity, String.class).getBody();
-    }
 
     private IssueCount getOneRepoDashBoardInfo(String duration,String repoId,String category){
         Object newObject=stringRedisTemplate.opsForHash().get("dashboard:"+category+":"+ duration + ":" + repoId, "new");
@@ -260,10 +223,10 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public Object getDashBoardInfo(String duration, String project_id, String userToken,String category) {
         IssueCount result=new IssueCount(0,0,0);
-        String account_id = getAccountId(userToken);
+        String account_id = restInterfaceManager.getAccountId(userToken);
         if (project_id == null) {
             //未选择某一个project,显示该用户所有project的dashboard信息
-            JSONArray repoIds = getRepoIds(account_id,category);
+            JSONArray repoIds = restInterfaceManager.getRepoIdsOfAccount(account_id,category);
             if (repoIds != null&&!repoIds.isEmpty()) {
                 for (int i = 0; i < repoIds.size(); i++) {
                     String currentRepoId = repoIds.getString(i);
@@ -272,7 +235,7 @@ public class IssueServiceImpl implements IssueService {
             }
         } else {
             //只显示当前所选project的相关dashboard信息
-            String currentRepoId = getRepoId(project_id);
+            String currentRepoId = restInterfaceManager.getRepoIdOfProject(project_id);
             result.issueCountUpdate(getOneRepoDashBoardInfo(duration,currentRepoId,category));
         }
         return result;
@@ -294,7 +257,7 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public Object getStatisticalResults(Integer month, String project_id, String userToken,String category) {
         Map<String, Object> result = new HashMap<>();
-        String account_id = getAccountId(userToken);
+        String account_id = restInterfaceManager.getAccountId(userToken);
         String newKey;
         String remainingKey;
         String eliminatedKey;
@@ -309,7 +272,7 @@ public class IssueServiceImpl implements IssueService {
                 eliminatedKey = "trend:"+category+":week:eliminated:" + account_id;
             }
         } else {
-            String repoId = getRepoId(project_id);
+            String repoId = restInterfaceManager.getRepoIdOfProject(project_id);
             if (month == 1) {
                 newKey = "trend:"+category+":day:new:" + account_id + ":" + repoId;
                 remainingKey = "trend:"+category+":day:remaining:" + account_id + ":" + repoId;
@@ -338,8 +301,8 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public Object getAliveAndEliminatedInfo(String project_id, String category) {
-        String repoId=getRepoId(project_id);
-        JSONArray solvedIssueIds=getSpecificTaggedIssueIds(solvedTagId);
+        String repoId=restInterfaceManager.getRepoIdOfProject(project_id);
+        JSONArray solvedIssueIds=restInterfaceManager.getSpecificTaggedIssueIds(solvedTagId);
         double avgEliminatedTime=0.00;
         long maxAliveTime=0;
         if(solvedIssueIds!=null&&!solvedIssueIds.isEmpty()){
@@ -358,7 +321,7 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public void startMapping(String repo_id, String pre_commit_id, String current_commit_id,String category) {
         String committer="";
-        JSONObject commitInfo=restTemplate.getForObject(commitServicePath+"/"+current_commit_id,JSONObject.class);
+        JSONObject commitInfo=restInterfaceManager.getOneCommitByCommitId(current_commit_id);
         if(commitInfo!=null){
             committer=commitInfo.getJSONArray("data").getJSONObject(0).getString("developer");
         }
@@ -379,11 +342,11 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public Object getNewTrend(Integer month, String project_id, String userToken, String category) {
         List<IssueCountPo> result=new ArrayList<>();
-        String account_id = getAccountId(userToken);
+        String account_id = restInterfaceManager.getAccountId(userToken);
         LocalDate end=LocalDate.now();
         if(project_id==null||project_id.equals("")){
             //需要查询该用户所有项目的扫描情况
-            JSONArray repoIds=getRepoIds(account_id,category);
+            JSONArray repoIds=restInterfaceManager.getRepoIdsOfAccount(account_id,category);
             if(repoIds!=null){
                 if(month==1){
                     //过去30天
@@ -405,7 +368,7 @@ public class IssueServiceImpl implements IssueService {
             }
         }else{
             //只需要查询该项目的扫描情况
-            String repoId=getRepoId(project_id);
+            String repoId=restInterfaceManager.getRepoIdOfProject(project_id);
             if(month==1){
                 //过去30天
                 LocalDate start=end.minusMonths(1);
@@ -427,12 +390,8 @@ public class IssueServiceImpl implements IssueService {
         return result;
     }
 
-    // priority 指的是解析文件中的 detail 的rank
     @Override
     public void updatePriority(String issueId, String priority) {
-
-
         issueDao.updateOneIssuePriority(issueId,Integer.parseInt(priority));
     }
-
 }

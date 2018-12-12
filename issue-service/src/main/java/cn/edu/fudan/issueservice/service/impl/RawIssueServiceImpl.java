@@ -1,5 +1,6 @@
 package cn.edu.fudan.issueservice.service.impl;
 
+import cn.edu.fudan.issueservice.component.RestInterfaceManager;
 import cn.edu.fudan.issueservice.dao.LocationDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.domain.Location;
@@ -8,13 +9,8 @@ import cn.edu.fudan.issueservice.service.RawIssueService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,28 +23,14 @@ import java.util.Map;
 @Service
 public class RawIssueServiceImpl implements RawIssueService {
 
-    @Value("${commit.service.path}")
-    private String commitServicePath;
-    @Value("${code.service.path}")
-    private String codeServicePath;
     @Value("${repoHome}")
     private String repoHome;
 
-    @Value("${inner.service.path}")
-    private String innerServicePath;
-
-    private HttpHeaders httpHeaders;
+    private RestInterfaceManager restInterfaceManager;
 
     @Autowired
-    public void setHttpHeaders(HttpHeaders httpHeaders) {
-        this.httpHeaders = httpHeaders;
-    }
-
-    private RestTemplate restTemplate;
-
-    @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
+        this.restInterfaceManager = restInterfaceManager;
     }
 
     private RawIssueDao rawIssueDao;
@@ -113,11 +95,10 @@ public class RawIssueServiceImpl implements RawIssueService {
     public Object getCode(String project_id, String commit_id, String file_path) {
         file_path=file_path.replaceAll("\\\\","/");
         Map<String, Object> result = new HashMap<>();
-        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
-        String repo_id = restTemplate.exchange(innerServicePath + "/inner/project/repo-id?project-id=" + project_id, HttpMethod.GET, requestEntity, String.class).getBody();
-        JSONObject response = restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class);
+        String repo_id =restInterfaceManager.getRepoIdOfProject(project_id) ;
+        JSONObject response = restInterfaceManager.checkOut(repo_id,commit_id);
         if (response != null && response.getJSONObject("data").getString("status").equals("Successful")) {
-            JSONObject codeResponse = restTemplate.getForObject(codeServicePath + "?file_path=" + repoHome + file_path, JSONObject.class);
+            JSONObject codeResponse = restInterfaceManager.getCode(repoHome+file_path);
             if (codeResponse != null && codeResponse.getJSONObject("data").getString("status").equals("Successful")) {
                 result.put("code", codeResponse.getJSONObject("data").getString("content"));
             } else {

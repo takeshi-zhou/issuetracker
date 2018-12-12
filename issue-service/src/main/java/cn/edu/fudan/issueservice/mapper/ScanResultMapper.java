@@ -12,7 +12,7 @@ public interface ScanResultMapper {
 
     void addOneScanResult(ScanResult scanResult);
 
-    List<IssueCountPo> getScanResultsGroupByDay(@Param("list")List<String> repoIds, @Param("category")String category, @Param("start")String start, @Param("end")String end);
+    List<IssueCountPo> getScanResultsGroupByDay(@Param("list") List<String> repoIds, @Param("category") String category, @Param("start") String start, @Param("end") String end);
 
-    IssueCountPo getMergedScanResult(@Param("list")List<String> repoIds, @Param("category")String category, @Param("start")String start, @Param("end")String end);
+    IssueCountPo getMergedScanResult(@Param("list") List<String> repoIds, @Param("category") String category, @Param("start") String start, @Param("end") String end);
 }
