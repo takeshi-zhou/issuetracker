@@ -42,6 +42,7 @@ public enum PriorityEnum {
     }
 
     public static PriorityEnum getByValue(String value) {
+        value=value.toUpperCase();
         PriorityEnum result = valueMap.get(value);
         if (result == null) {
             throw new IllegalArgumentException("No element matches " + value);
