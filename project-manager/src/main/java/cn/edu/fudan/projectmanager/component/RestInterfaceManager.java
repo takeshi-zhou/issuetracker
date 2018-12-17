@@ -24,6 +24,8 @@ public class RestInterfaceManager {
     private String scanServicePath;
     @Value("${event.service.path}")
     private String eventServicePath;
+    @Value("${repository.service.path}")
+    private String repoServicePath;
 
     private RestTemplate restTemplate;
 
@@ -63,6 +65,11 @@ public class RestInterfaceManager {
     //-----------------------------event service---------------------------------------------------------------
     public void deleteEventOfRepo(String repoId,String category){
         restTemplate.delete(eventServicePath+"/inner/event/" +category+"/"+ repoId);
+    }
+
+    //-----------------------------------repo service--------------------------------------------------------
+    public JSONObject getRepoById(String repoId){
+        return restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
     }
 
 }

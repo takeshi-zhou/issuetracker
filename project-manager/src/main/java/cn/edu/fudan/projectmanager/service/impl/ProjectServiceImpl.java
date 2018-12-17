@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +28,8 @@ public class ProjectServiceImpl implements ProjectService {
     private String githubAPIPath;
     @Value("${repo.url.pattern}")
     private String repoUrlPattern;
+    @Value("${clone.result.pre.home}")
+    private String cloneResPreHome;
 
     private RestInterfaceManager restInterfaceManager;
 
@@ -172,6 +175,10 @@ public class ProjectServiceImpl implements ProjectService {
                 restInterfaceManager.deleteRawIssueOfRepo(repoId,type);
                 restInterfaceManager.deleteScanOfRepo(repoId,type);
                 restInterfaceManager.deleteEventOfRepo(repoId,type);
+                if(type.equals("clone")){
+                    //对于clone的CPU版本，删除时需要删除前一次commit扫描的结果文件
+                    deleteCloneResPreFile(repoId);
+                }
                 //delete info in redis
                 stringRedisTemplate.setEnableTransactionSupport(true);
                 stringRedisTemplate.multi();
@@ -189,6 +196,20 @@ public class ProjectServiceImpl implements ProjectService {
         }
         projectDao.remove(projectId);
         logger.info("project delete success!");
+    }
+
+    private void deleteCloneResPreFile(String repoId) {
+        JSONObject currentRepo = restInterfaceManager.getRepoById(repoId);
+        String repoName = currentRepo.getJSONObject("data").getString("repo_name");
+        String filePath=cloneResPreHome+repoName+"_A.csv";
+        File file=new File(filePath);
+        if(file.exists()){
+            if(file.delete()){
+                logger.info("clone pre file delete success!");
+            }
+        }else {
+            logger.info("clone pre file not exist!");
+        }
     }
 
     @Override

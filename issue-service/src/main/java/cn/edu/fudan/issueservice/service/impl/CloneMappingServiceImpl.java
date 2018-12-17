@@ -3,6 +3,7 @@ package cn.edu.fudan.issueservice.service.impl;
 import cn.edu.fudan.issueservice.domain.EventType;
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.RawIssue;
+import cn.edu.fudan.issueservice.domain.ScanResult;
 import cn.edu.fudan.issueservice.util.LocationCompare;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             int eliminatedIssueCount = 0;
             log.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
+            scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
             log.info("dashboard info update success!");
         }
     }
@@ -132,6 +134,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             int newIssueCount = currentGroups.size() - equalsCount;
             log.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
+            scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
             log.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(rawIssues2);
             addSolvedTag(repo_id, pre_commit_id,EventType.REMOVE_CLONE_CLASS,committer);

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -98,30 +97,14 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
         repoPath = repoPath.substring(repoPath.indexOf("/") + 1);//去除github前缀
         String cmd = "java -jar CodeLexer.jar  " + repoHome+repoPath + " " + repoName;
         logger.info("command -> {}",cmd);
-        BufferedInputStream br = null;
         try {
             Process process = Runtime.getRuntime().exec(cmd,null,new File(cloneWorkHome));
             //输出process打印信息
-            br = new BufferedInputStream(process.getInputStream());
-            int ch;
-            StringBuilder text = new StringBuilder("getInfo: \n");
-            while ((ch = br.read()) != -1) {
-                text.append((char) ch);
-            }
-            logger.info(text.toString());
             process.waitFor();
             return process.exitValue()==0;
         }catch (Exception e){
             e.printStackTrace();
             return false;
-        }finally {
-            if(br != null){
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
