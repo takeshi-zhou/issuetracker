@@ -104,7 +104,7 @@
         inner join commit as b
         on a.commit_id = b.commit_id
         where a.issue_id=#{issueId}
-        order by commit_time;
+        order by commit_time desc ;
     </select>
 
    <select id="getTypesByCommit" resultType="string">
