@@ -19,6 +19,7 @@
         <result property="description" column="description"/>
         <result property="repo_id" column="repo_id"/>
         <result property="branch" column="branch"/>
+        <result property="first_auto_scan" column="first_auto_scan"/>
     </resultMap>
 
     <insert id="addOneProject" parameterType="Project">

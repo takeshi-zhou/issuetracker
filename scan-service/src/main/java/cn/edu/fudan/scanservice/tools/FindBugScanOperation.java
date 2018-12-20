@@ -70,16 +70,18 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         repoPath = repoPath.substring(repoPath.indexOf("/") + 1);//去除github前缀
         String candidateFilePaths = excuteShellUtil.getFileLocation(repoPath, fileName);
         if (candidateFilePaths == null) {
-            logger.error(sourcePath + " 找不到源文件！去除前缀后的repoPath-> "+repoPath);
+            logger.error(sourcePath + "find 命令 找不到源文件！");
             return null;
         }else{
             String []candidates=candidateFilePaths.split(":");
-            Pattern pattern= Pattern.compile("[/A-Za-z0-9_\\-]*"+sourcePath);
+            Pattern pattern= Pattern.compile("[/A-Za-z0-9_\\-.*]*"+sourcePath);
             for(String candidate:candidates){
                 Matcher matcher = pattern.matcher(candidate);
                 if(matcher.matches()){
                     filePath=candidate;
                     break;
+                }else{
+                    logger.error("pattern not right -> realPath= "+candidate);
                 }
             }
         }

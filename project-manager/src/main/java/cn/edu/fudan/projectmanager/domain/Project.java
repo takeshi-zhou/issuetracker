@@ -19,6 +19,7 @@ public class Project {
     private String description;
     private String repo_id;
     private String branch;
+    private int first_auto_scan;
 
     public String getType() {
         return type;
@@ -159,5 +160,13 @@ public class Project {
 
     public void setBranch(String branch) {
         this.branch = branch;
+    }
+
+    public int getFirst_auto_scan() {
+        return first_auto_scan;
+    }
+
+    public void setFirst_auto_scan(int first_auto_scan) {
+        this.first_auto_scan = first_auto_scan;
     }
 }
