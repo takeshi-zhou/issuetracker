@@ -185,6 +185,12 @@ public class ProjectServiceImpl implements ProjectService {
                 stringRedisTemplate.delete("dashboard:"+type+":day:" + repoId);
                 stringRedisTemplate.delete("dashboard:"+type+":week:" + repoId);
                 stringRedisTemplate.delete("dashboard:"+type+":month:" + repoId);
+                stringRedisTemplate.delete("dashboard:"+type+":day:new:"+ repoId);
+                stringRedisTemplate.delete("dashboard:"+type+":week:new:"+ repoId);
+                stringRedisTemplate.delete("dashboard:"+type+":month:new:"+ repoId);
+                stringRedisTemplate.delete("dashboard:"+type+":day:eliminated:"+ repoId);
+                stringRedisTemplate.delete("dashboard:"+type+":week:eliminated:"+ repoId);
+                stringRedisTemplate.delete("dashboard:"+type+":month:eliminated:"+ repoId);
                 stringRedisTemplate.delete("trend:"+type +":day:new:" + account_id + ":" + repoId);
                 stringRedisTemplate.delete("trend:"+type+":day:remaining:" + account_id + ":" + repoId);
                 stringRedisTemplate.delete("trend:"+type+":day:eliminated:" + account_id + ":" + repoId);
