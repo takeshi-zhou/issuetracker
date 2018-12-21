@@ -114,7 +114,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
             log.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(rawIssues2);
-            modifyToSolvedTag(repo_id, pre_commit_id,EventType.ELIMINATE_BUG,committer);
+            modifyToSolvedTag(repo_id, category,pre_commit_id,EventType.ELIMINATE_BUG,committer);
             scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
         }
         //新的issue

@@ -19,11 +19,13 @@ public class IssueCount implements Serializable {
 
     private List<String> newIssueIds;
 
+    private List<String> eliminatedIssueIds;
+
     public IssueCount() {
     }
 
     public IssueCount(int newIssueCount, int eliminatedIssueCount, int remainingIssueCount) {
-        this(newIssueCount,eliminatedIssueCount,remainingIssueCount,null);
+        this(newIssueCount,eliminatedIssueCount,remainingIssueCount,null,null);
     }
 
     public IssueCount(String date,int newIssueCount, int eliminatedIssueCount, int remainingIssueCount) {
@@ -33,11 +35,12 @@ public class IssueCount implements Serializable {
         this.remainingIssueCount = remainingIssueCount;
     }
 
-    public IssueCount(int newIssueCount, int eliminatedIssueCount, int remainingIssueCount,List<String> newIssueIds) {
+    public IssueCount(int newIssueCount, int eliminatedIssueCount, int remainingIssueCount,List<String> newIssueIds,List<String> eliminatedIssueIds) {
         this.newIssueCount = newIssueCount;
         this.eliminatedIssueCount = eliminatedIssueCount;
         this.remainingIssueCount = remainingIssueCount;
         this.newIssueIds=newIssueIds;
+        this.eliminatedIssueIds=eliminatedIssueIds;
     }
 
     public void issueCountUpdate(int newIssueCount, int eliminatedIssueCount, int remainingIssueCount) {
@@ -50,6 +53,16 @@ public class IssueCount implements Serializable {
         this.newIssueCount += another.getNewIssueCount();
         this.eliminatedIssueCount += another.getEliminatedIssueCount();
         this.remainingIssueCount += another.getRemainingIssueCount();
+        if(this.newIssueIds==null)
+            this.newIssueIds = another.newIssueIds;
+        else{
+            this.newIssueIds.addAll(another.newIssueIds);
+        }
+        if(this.eliminatedIssueIds==null)
+            this.eliminatedIssueIds=another.eliminatedIssueIds;
+        else{
+            this.eliminatedIssueIds.addAll(another.eliminatedIssueIds);
+        }
     }
 
     public String getDate() {

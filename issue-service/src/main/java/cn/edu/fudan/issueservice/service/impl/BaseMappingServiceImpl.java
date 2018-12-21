@@ -77,14 +77,28 @@ public class BaseMappingServiceImpl implements MappingService {
 
     void newIssueInfoUpdate(List<Issue> issueList,String category,String repo_id){
         String todayNewIssueKey="dashboard:"+category+":day:new:" + repo_id;
-        String weekNewIssueKey="dashboard:"+category+":week:new" + repo_id;
-        String monthNewIssueKey="dashboard:"+category+":month:new"+repo_id;
+        String weekNewIssueKey="dashboard:"+category+":week:new:" + repo_id;
+        String monthNewIssueKey="dashboard:"+category+":month:new:"+repo_id;
         stringRedisTemplate.setEnableTransactionSupport(true);
         stringRedisTemplate.multi();
         for(Issue issue:issueList){
             stringRedisTemplate.opsForList().rightPush(todayNewIssueKey,issue.getUuid());
             stringRedisTemplate.opsForList().rightPush(weekNewIssueKey,issue.getUuid());
             stringRedisTemplate.opsForList().rightPush(monthNewIssueKey,issue.getUuid());
+        }
+        stringRedisTemplate.exec();
+    }
+
+   private void eliminatedInfoUpdate(List<Issue> issueList,String category,String repo_id){
+        String todayEliminatedIssueKey="dashboard:"+category+":day:eliminated:" + repo_id;
+        String weekEliminatedIssueKey="dashboard:"+category+":week:eliminated:" + repo_id;
+        String monthEliminatedIssueKey="dashboard:"+category+":month:eliminated:"+repo_id;
+        stringRedisTemplate.setEnableTransactionSupport(true);
+        stringRedisTemplate.multi();
+        for(Issue issue:issueList){
+            stringRedisTemplate.opsForList().rightPush(todayEliminatedIssueKey,issue.getUuid());
+            stringRedisTemplate.opsForList().rightPush(weekEliminatedIssueKey,issue.getUuid());
+            stringRedisTemplate.opsForList().rightPush(monthEliminatedIssueKey,issue.getUuid());
         }
         stringRedisTemplate.exec();
     }
@@ -109,10 +123,11 @@ public class BaseMappingServiceImpl implements MappingService {
         stringRedisTemplate.exec();
     }
 
-    void modifyToSolvedTag(String repo_id, String pre_commit_id,EventType eventType,String committer) {
+    void modifyToSolvedTag(String repo_id,String category, String pre_commit_id,EventType eventType,String committer) {
         List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
         issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
         if (issues != null && !issues.isEmpty()) {
+            eliminatedInfoUpdate(issues,category,repo_id);
             List<JSONObject> taggeds = new ArrayList<>();
             for (Issue issue : issues) {
                 JSONObject tagged = new JSONObject();
@@ -124,10 +139,11 @@ public class BaseMappingServiceImpl implements MappingService {
         }
     }
 
-    void addSolvedTag(String repo_id, String pre_commit_id,EventType eventType,String committer) {
+    void addSolvedTag(String repo_id, String category,String pre_commit_id,EventType eventType,String committer) {
         List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
         issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
         if (issues != null && !issues.isEmpty()) {
+            eliminatedInfoUpdate(issues,category,repo_id);
             List<JSONObject> taggeds = new ArrayList<>();
             for (Issue issue : issues) {
                 JSONObject tagged = new JSONObject();

@@ -200,6 +200,7 @@ public class IssueServiceImpl implements IssueService {
         query.put("size", size);
         query.put("start", (page - 1) * size);
         List<Issue> issues = issueDao.getSpecificIssues(query);
+        addTagInfo(issues);
         result.put("totalPage", count % size == 0 ? count / size : count / size + 1);
         result.put("totalCount", count);
         result.put("issueList", issues);
@@ -216,15 +217,16 @@ public class IssueServiceImpl implements IssueService {
         int remainingCount = remainingObject==null?0:Integer.parseInt((String)remainingObject);
         Object eliminatedObject=stringRedisTemplate.opsForHash().get("dashboard:"+category+":" + duration + ":" + repoId, "eliminated");
         int eliminatedCount = eliminatedObject==null?0:Integer.parseInt((String)eliminatedObject);
-        List<String> newIssueIds=stringRedisTemplate.opsForList().range("dashboard:"+category+":"+duration+":new"+ repoId,0,-1);
-        return new IssueCount(newCount,eliminatedCount,remainingCount,newIssueIds);
+        List<String> newIssueIds=stringRedisTemplate.opsForList().range("dashboard:"+category+":"+duration+":new:"+ repoId,0,-1);
+        List<String> eliminatedIssueIds=stringRedisTemplate.opsForList().range("dashboard:"+category+":"+duration+":eliminated:"+ repoId,0,-1);
+        return new IssueCount(newCount,eliminatedCount,remainingCount,newIssueIds,eliminatedIssueIds);
     }
 
     @Override
     public Object getDashBoardInfo(String duration, String project_id, String userToken,String category) {
         IssueCount result=new IssueCount(0,0,0);
         String account_id = restInterfaceManager.getAccountId(userToken);
-        if (project_id == null) {
+        if (project_id == null||project_id.equals("")) {
             //未选择某一个project,显示该用户所有project的dashboard信息
             JSONArray repoIds = restInterfaceManager.getRepoIdsOfAccount(account_id,category);
             if (repoIds != null&&!repoIds.isEmpty()) {
@@ -236,7 +238,7 @@ public class IssueServiceImpl implements IssueService {
         } else {
             //只显示当前所选project的相关dashboard信息
             String currentRepoId = restInterfaceManager.getRepoIdOfProject(project_id);
-            result.issueCountUpdate(getOneRepoDashBoardInfo(duration,currentRepoId,category));
+            return getOneRepoDashBoardInfo(duration,currentRepoId,category);
         }
         return result;
     }

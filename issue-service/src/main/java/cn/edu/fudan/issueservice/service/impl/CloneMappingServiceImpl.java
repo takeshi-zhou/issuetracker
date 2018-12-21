@@ -137,7 +137,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
             log.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(rawIssues2);
-            addSolvedTag(repo_id, pre_commit_id,EventType.REMOVE_CLONE_CLASS,committer);
+            addSolvedTag(repo_id,category, pre_commit_id,EventType.REMOVE_CLONE_CLASS,committer);
         }
         log.info("mapping finished!");
     }
