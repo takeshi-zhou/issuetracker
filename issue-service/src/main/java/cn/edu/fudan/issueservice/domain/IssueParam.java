@@ -12,6 +12,8 @@ public class IssueParam {
     private int page;
     private int size;
     private List<String> issueIds;
+    private List<String> types;
+    private List<String> tags;
 
     public String getCategory() {
         return category;
@@ -43,5 +45,21 @@ public class IssueParam {
 
     public void setIssueIds(List<String> issueIds) {
         this.issueIds = issueIds;
+    }
+
+    public List<String> getTypes() {
+        return types;
+    }
+
+    public void setTypes(List<String> types) {
+        this.types = types;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 }

@@ -236,17 +236,31 @@
     </select>
 
     <select id="getSpecificIssueCount" resultType="int" parameterType="Map">
-        select count(uuid) from issue where category = #{category} and uuid in
-        <foreach collection="list" separator="," open="(" close=")" item="issue_id">
-            #{issue_id}
-        </foreach>
+        select count(uuid) from issue
+        <include refid="whereSpecificIssues" />
     </select>
 
+    <sql id="whereSpecificIssues" >
+        <where>
+            category = #{category}
+            <if test="types != null">
+                and type in
+                <foreach collection="types" separator="," open="(" close=")" item="type">
+                    #{type}
+                </foreach>
+            </if>
+            <if test="list != null">
+                and uuid in
+                <foreach collection="list" separator="," open="(" close=")" item="issue_id">
+                    #{issue_id}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
     <select id="getSpecificIssues" resultMap="issue2" parameterType="Map">
-        select * from issue where category = #{category} and uuid in
-        <foreach collection="list" separator="," open="(" close=")" item="issue_id">
-            #{issue_id}
-        </foreach>
+        select * from issue
+        <include refid="whereSpecificIssues" />
         order by create_time desc , priority
         limit #{start},#{size}
     </select>

@@ -180,21 +180,46 @@ public class IssueServiceImpl implements IssueService {
         return result;
     }
 
+    private final static Map<String,Object> empty=new HashMap<>();
+
+    static {
+        empty.put("totalPage", 0);
+        empty.put("totalCount", 0);
+        empty.put("issueList", Collections.emptyList());
+    }
+
     @Override
     public Object getSpecificIssues(IssueParam issueParam) {
         int size=issueParam.getSize();
         int page=issueParam.getPage();
         List<String> issueIds=issueParam.getIssueIds();
+        List<String> types=issueParam.getTypes();
+        List<String> tags=issueParam.getTags();
         Map<String, Object> result = new HashMap<>();
         if(issueIds==null||issueIds.isEmpty()){
-            result.put("totalPage", 0);
-            result.put("totalCount", 0);
-            result.put("issueList", Collections.emptyList());
-            return result;
+            return empty;
         }
-
         Map<String, Object> query = new HashMap<>();
-        query.put("list",issueIds);
+        if(types!=null&&!types.isEmpty()){
+            query.put("types",types);
+        }
+        if(tags!=null&&!tags.isEmpty()){
+            //特定tag的issue ids
+            JSONArray specificTaggedIssueIds = restInterfaceManager.getSpecificTaggedIssueIds(tags);
+            if(specificTaggedIssueIds==null||specificTaggedIssueIds.isEmpty()){
+                return empty;
+            }
+            List<String> issueIdsAfterFilter=new ArrayList<>();
+            for(String issueId:issueIds){
+                //筛选掉那些不是特定tag的issue id
+                if(specificTaggedIssueIds.contains(issueId)){
+                    issueIdsAfterFilter.add(issueId);
+                }
+            }
+            query.put("list",issueIdsAfterFilter);
+        }else
+            //不根据tag来筛选
+            query.put("list",issueIds);
         query.put("category",issueParam.getCategory());
         int count=issueDao.getSpecificIssueCount(query);
         query.put("size", size);

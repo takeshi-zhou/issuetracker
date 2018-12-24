@@ -78,6 +78,9 @@ public class RestInterfaceManager {
     public JSONArray getSpecificTaggedIssueIds(JSONArray tagIds){
         return restTemplate.postForObject(tagServicePath + "/item-ids", tagIds, JSONArray.class);
     }
+    public JSONArray getSpecificTaggedIssueIds(List<String> tagIds){
+        return restTemplate.postForObject(tagServicePath + "/item-ids", tagIds, JSONArray.class);
+    }
 
     public JSONArray getSolvedIssueIds(List<String> tag_ids){
         return restTemplate.postForObject(tagServicePath + "/item-ids", tag_ids, JSONArray.class);
