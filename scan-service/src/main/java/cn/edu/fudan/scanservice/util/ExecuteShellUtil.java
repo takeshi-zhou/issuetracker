@@ -7,7 +7,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 @Component
-public class ExcuteShellUtil {
+public class ExecuteShellUtil {
 
     @Value("${workHome}")
     private String workHome;
@@ -15,13 +15,13 @@ public class ExcuteShellUtil {
     @Value("${repoHome}")
     private String repoHome;
 
-    public  boolean excuteAnalyse(String repoPath, String projectName) {
+    public  boolean executeAnalyse(String repoPath, String projectName) {
         try {
             Runtime rt = Runtime.getRuntime();
             //String findbugs = "findbugs -xml -output  /home/fdse/issueTracker/resultfile/" + projectName
             //		+ ".xml " + repoPath;
             //脚本实现 用来解耦 还需要与tool解耦合
-            String command=workHome+"excuteTools.sh " + projectName + " " + repoPath;
+            String command=workHome+"executeTools.sh " + projectName + " " + repoPath;
             System.out.println("command -> "+command);
             Process process = rt.exec(command);
             int exitValue = process.waitFor();
@@ -33,10 +33,10 @@ public class ExcuteShellUtil {
         return false;
     }
 
-    public  boolean excuteMvn(String repoPath) {
+    public  boolean executeMvn(String repoPath) {
         try {
             Runtime rt = Runtime.getRuntime();
-            String command = workHome+"excuteMvn.sh " + repoPath;
+            String command = workHome+"executeMvn.sh " + repoPath;
             System.out.println("command -> "+command);
             Process process = rt.exec(command);
             int exitValue = process.waitFor();

@@ -4,7 +4,7 @@ import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.domain.ScanInitialInfo;
 import cn.edu.fudan.scanservice.domain.ScanResult;
 import cn.edu.fudan.scanservice.util.ASTUtil;
-import cn.edu.fudan.scanservice.util.ExcuteShellUtil;
+import cn.edu.fudan.scanservice.util.ExecuteShellUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
@@ -31,11 +31,11 @@ public class FindBugScanOperation extends ScanOperationAdapter {
     @Value("${repoHome}")
     private String repoHome;
 
-    private ExcuteShellUtil excuteShellUtil;
+    private ExecuteShellUtil executeShellUtil;
 
     @Autowired
-    public void setExcuteShellUtil(ExcuteShellUtil excuteShellUtil) {
-        this.excuteShellUtil = excuteShellUtil;
+    public void setExecuteShellUtil(ExecuteShellUtil executeShellUtil) {
+        this.executeShellUtil = executeShellUtil;
     }
 
     @SuppressWarnings("unchecked")
@@ -57,7 +57,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
     }
 
     private boolean executeAnalyzeTool(String repoPath, String projectName) {
-        return excuteShellUtil.excuteAnalyse(repoPath, projectName);
+        return executeShellUtil.executeAnalyse(repoPath, projectName);
     }
 
     @SuppressWarnings("unchecked")
@@ -68,7 +68,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         String sourcePath=sourceLineInClass.attributeValue("sourcepath");
         String filePath=null;
         repoPath = repoPath.substring(repoPath.indexOf("/") + 1);//去除github前缀
-        String candidateFilePaths = excuteShellUtil.getFileLocation(repoPath, fileName);
+        String candidateFilePaths = executeShellUtil.getFileLocation(repoPath, fileName);
         if (candidateFilePaths == null) {
             logger.error(sourcePath + "find 命令 找不到源文件！");
             return null;
@@ -179,7 +179,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
     }
 
     private boolean compile(String repoPath) {
-        return excuteShellUtil.excuteMvn(repoPath);
+        return executeShellUtil.executeMvn(repoPath);
     }
 
     @Override
