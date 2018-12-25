@@ -76,8 +76,9 @@ public class IssueController {
     }
 
     @PostMapping("/issue/specific-issues")
-    public Object getSpecificIssues(@RequestBody IssueParam issueParam){
-        return issueService.getSpecificIssues(issueParam);
+    public Object getSpecificIssues(@RequestBody IssueParam issueParam,HttpServletRequest request){
+        String userToken = request.getHeader("token");
+        return issueService.getSpecificIssues(issueParam,userToken);
     }
 
     // 修改 Issue 的 优先级（priority）

@@ -189,20 +189,55 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public Object getSpecificIssues(IssueParam issueParam) {
+    public Object getSpecificIssues(IssueParam issueParam,String userToken) {
+        Map<String, Object> result = new HashMap<>();
+
+        //必须的几个参数
+        String duration=issueParam.getDuration();
         int size=issueParam.getSize();
         int page=issueParam.getPage();
-        List<String> issueIds=issueParam.getIssueIds();
+        String category=issueParam.getCategory();
+        boolean onlyNew=issueParam.isOnlyNew();
+        boolean onlyEliminated=issueParam.isOnlyEliminated();
+
+        //可有可无的几个参数
+        String projectId=issueParam.getProjectId();
         List<String> types=issueParam.getTypes();
         List<String> tags=issueParam.getTags();
-        Map<String, Object> result = new HashMap<>();
-        if(issueIds==null||issueIds.isEmpty()){
-            return empty;
-        }
+
+
         Map<String, Object> query = new HashMap<>();
-        if(types!=null&&!types.isEmpty()){
-            query.put("types",types);
+        List<String> issueIds=new ArrayList<>();
+        if(onlyNew||onlyEliminated){
+            //是通过dashboard点击查询的
+            if(projectId!=null&&!projectId.equals("")){
+                //查询单个项目
+                String repoId = restInterfaceManager.getRepoIdOfProject(projectId);
+                query.put("repo_id",repoId);
+                addSpecificIssueIdsForRepo(onlyNew,onlyEliminated,repoId,duration,category,issueIds);
+            }else{
+                //查询该用户的所有项目
+                String account_id = restInterfaceManager.getAccountId(userToken);
+                JSONArray repoIds = restInterfaceManager.getRepoIdsOfAccount(account_id,category);
+                if (repoIds != null&&!repoIds.isEmpty()) {
+                    for (int i = 0; i < repoIds.size(); i++) {
+                        String currentRepoId = repoIds.getString(i);
+                        addSpecificIssueIdsForRepo(onlyNew,onlyEliminated,currentRepoId,duration,category,issueIds);
+                    }
+                }else{
+                    //当前用户没有项目
+                    return empty;
+                }
+            }
+            //如果从dashboard过来只查新增和干掉的，但redis并没有相应的issue id,返回empty
+            if(issueIds.isEmpty())
+                return empty;
+        }else{
+            //点击项目列表查询的，必定是单个项目
+            String repoId = restInterfaceManager.getRepoIdOfProject(projectId);
+            query.put("repo_id",repoId);
         }
+        //根据tag来筛选
         if(tags!=null&&!tags.isEmpty()){
             //特定tag的issue ids
             JSONArray specificTaggedIssueIds = restInterfaceManager.getSpecificTaggedIssueIds(tags);
@@ -216,10 +251,30 @@ public class IssueServiceImpl implements IssueService {
                     issueIdsAfterFilter.add(issueId);
                 }
             }
-            query.put("list",issueIdsAfterFilter);
-        }else
-            //不根据tag来筛选
-            query.put("list",issueIds);
+            if(!issueIdsAfterFilter.isEmpty())
+                query.put("list",issueIdsAfterFilter);
+            else{
+                if(!specificTaggedIssueIds.isEmpty())
+                    query.put("list",specificTaggedIssueIds.toJavaList(String.class));
+            }
+        }else{
+            //不根据tag来筛选时需要自动过滤solved的和ignore的issue_ids
+            if(!issueIds.isEmpty())
+                query.put("list",issueIds);
+
+            List<String> tag_ids = new ArrayList<>();
+            tag_ids.add(solvedTagId);
+            tag_ids.add(ignoreTagId);
+            JSONArray solved_issue_ids = restInterfaceManager.getSolvedIssueIds(tag_ids);
+            if (solved_issue_ids != null && solved_issue_ids.size() > 0) {
+                query.put("solved_issue_ids", solved_issue_ids.toJavaList(String.class));
+            }
+        }
+        //根据类型来筛选
+        if(types!=null&&!types.isEmpty()){
+            query.put("types",types);
+        }
+
         query.put("category",issueParam.getCategory());
         int count=issueDao.getSpecificIssueCount(query);
         query.put("size", size);
@@ -232,7 +287,17 @@ public class IssueServiceImpl implements IssueService {
         return result;
     }
 
-
+    private void addSpecificIssueIdsForRepo(boolean onlyNew,boolean onlyEliminated,String repoId,String duration,String category,List<String> issueIds){
+        if(onlyNew){
+            List<String> newIssueIds=stringRedisTemplate.opsForList().range("dashboard:"+category+":"+duration+":new:"+ repoId,0,-1);
+            if(newIssueIds!=null&&!newIssueIds.isEmpty())
+                issueIds.addAll(newIssueIds);
+        }else if(onlyEliminated){
+            List<String> eliminatedIssueIds=stringRedisTemplate.opsForList().range("dashboard:"+category+":"+duration+":eliminated:"+ repoId,0,-1);
+            if(eliminatedIssueIds!=null&&!eliminatedIssueIds.isEmpty())
+                issueIds.addAll(eliminatedIssueIds);
+        }
+    }
 
 
     private IssueCount getOneRepoDashBoardInfo(String duration,String repoId,String category){

@@ -21,7 +21,7 @@ public interface IssueService {
 
     Object getFilteredIssueList(JSONObject requestParam);
 
-    Object getSpecificIssues(IssueParam issueParam);
+    Object getSpecificIssues(IssueParam issueParam,String userToken);
 
     Object getDashBoardInfo(String duration, String project_id, String userToken, String category);
 

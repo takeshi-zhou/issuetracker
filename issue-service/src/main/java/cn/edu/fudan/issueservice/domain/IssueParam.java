@@ -8,12 +8,47 @@ import java.util.List;
  **/
 public class IssueParam {
 
+    private String projectId;
     private String category;
+    private String duration;
     private int page;
     private int size;
-    private List<String> issueIds;
+    private boolean onlyNew;
+    private boolean onlyEliminated;
     private List<String> types;
     private List<String> tags;
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public boolean isOnlyNew() {
+        return onlyNew;
+    }
+
+    public void setOnlyNew(boolean onlyNew) {
+        this.onlyNew = onlyNew;
+    }
+
+    public boolean isOnlyEliminated() {
+        return onlyEliminated;
+    }
+
+    public void setOnlyEliminated(boolean onlyEliminated) {
+        this.onlyEliminated = onlyEliminated;
+    }
 
     public String getCategory() {
         return category;
@@ -37,14 +72,6 @@ public class IssueParam {
 
     public void setSize(int size) {
         this.size = size;
-    }
-
-    public List<String> getIssueIds() {
-        return issueIds;
-    }
-
-    public void setIssueIds(List<String> issueIds) {
-        this.issueIds = issueIds;
     }
 
     public List<String> getTypes() {
