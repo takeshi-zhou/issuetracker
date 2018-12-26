@@ -94,6 +94,8 @@ public class IssueServiceImpl implements IssueService {
         log.info("tag delete success!");
         issueDao.deleteIssueByRepoIdAndCategory(repoId,category);
         log.info("issue delete success!");
+        scanResultDao.deleteScanResultsByRepoIdAndCategory(repoId, category);
+        log.info("scan result delete success!");
     }
 
     @Override
@@ -439,7 +441,7 @@ public class IssueServiceImpl implements IssueService {
         if(project_id==null||project_id.equals("")){
             //需要查询该用户所有项目的扫描情况
             JSONArray repoIds=restInterfaceManager.getRepoIdsOfAccount(account_id,category);
-            if(repoIds!=null){
+            if(repoIds!=null&&!repoIds.isEmpty()){
                 if(month==1){
                     //过去30天
                     LocalDate start=end.minusMonths(1);
@@ -461,6 +463,8 @@ public class IssueServiceImpl implements IssueService {
         }else{
             //只需要查询该项目的扫描情况
             String repoId=restInterfaceManager.getRepoIdOfProject(project_id);
+            if(repoId==null)
+                throw new IllegalArgumentException("this project id not exist!");
             if(month==1){
                 //过去30天
                 LocalDate start=end.minusMonths(1);

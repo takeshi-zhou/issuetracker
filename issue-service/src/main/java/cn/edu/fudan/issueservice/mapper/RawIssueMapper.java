@@ -20,6 +20,8 @@ public interface RawIssueMapper {
 
     List<RawIssue> getRawIssueByCommitIDAndCategory(@Param("category") String category,@Param("commit_id") String commit_id);
 
+    List<RawIssue> getRawIssueByCommitIDAndFile(@Param("commit_id")String commit_id,@Param("category") String category,@Param("file")String file);
+
     List<RawIssue> getRawIssueByIssueId(@Param("issueId") String issueId);
 
     List<String> getTypesByCommit(@Param("category")String category,@Param("commit_id")String commit_id);

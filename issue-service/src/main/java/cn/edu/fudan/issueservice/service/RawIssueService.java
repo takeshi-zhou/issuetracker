@@ -24,4 +24,6 @@ public interface RawIssueService {
     Object getCode(String project_id, String commit_id, String file_path);
 
     List<Location> getLocationsByRawIssueId(String raw_issue_id);
+
+    List<RawIssue> getRawIssueByCommitAndFile(String commit_id,String category,String filePath);
 }

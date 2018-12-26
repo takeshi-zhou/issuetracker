@@ -98,6 +98,10 @@
         select * from rawIssue where commit_id = #{commit_id} and category = #{category}
     </select>
 
+    <select id="getRawIssueByCommitIDAndFile" resultMap="rawIssue2">
+        select * from rawIssue where commit_id = #{commit_id} and category = #{category} and file_name like CONCAT('%',#{file},'%')
+    </select>
+
     <select id="getRawIssueByIssueId" parameterType="String" resultMap="rawIssue">
         select distinct a.* ,b.commit_time as commit_time , b.developer_email as developer_email
         from rawIssue as a
