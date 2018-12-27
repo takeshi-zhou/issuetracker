@@ -12,6 +12,8 @@ public interface ScanResultMapper {
 
     void addOneScanResult(ScanResult scanResult);
 
+    void deleteScanResultsByRepoIdAndCategory(@Param("repo_id")String repo_id,@Param("category") String category);
+
     List<IssueCountPo> getScanResultsGroupByDay(@Param("list") List<String> repoIds, @Param("category") String category, @Param("start") String start, @Param("end") String end);
 
     IssueCountPo getMergedScanResult(@Param("list") List<String> repoIds, @Param("category") String category, @Param("start") String start, @Param("end") String end);

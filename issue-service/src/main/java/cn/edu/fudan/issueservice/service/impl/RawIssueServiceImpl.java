@@ -114,4 +114,10 @@ public class RawIssueServiceImpl implements RawIssueService {
     public List<Location> getLocationsByRawIssueId(String raw_issue_id) {
         return locationDao.getLocations(raw_issue_id);
     }
+
+    @Override
+    public List<RawIssue> getRawIssueByCommitAndFile(String commit_id, String category, String filePath) {
+
+        return rawIssueDao.getRawIssueByCommitIDAndFile(commit_id, category, filePath);
+    }
 }

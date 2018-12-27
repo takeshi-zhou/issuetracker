@@ -48,4 +48,8 @@ public class RawIssueDao {
     public List<String> getTypesByCommit(String category,String commit_id){
         return rawIssueMapper.getTypesByCommit(category, commit_id);
     }
+
+    public List<RawIssue> getRawIssueByCommitIDAndFile(String commit_id,String category,String file){
+        return rawIssueMapper.getRawIssueByCommitIDAndFile(commit_id, category, file);
+    }
 }
