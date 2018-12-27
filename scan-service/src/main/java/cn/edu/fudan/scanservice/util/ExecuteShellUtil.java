@@ -52,8 +52,8 @@ public class ExecuteShellUtil {
     public  String getFileLocation(String repoPath, String fileName) {
         try {
             Runtime rt = Runtime.getRuntime();
-            //String command = "find "+repoHome + repoPath + " -name " + fileName;
-            String command =  binHome + "findOneFile.sh " + repoHome + repoPath + " "+ fileName;
+            String command = "find "+repoHome + repoPath + " -name " + fileName;
+            //String command =  binHome + "findOneFile.sh " + repoHome + repoPath + " "+ fileName;
             System.out.println("command -> "+command);
             Process process = rt.exec(command);
             process.waitFor();
