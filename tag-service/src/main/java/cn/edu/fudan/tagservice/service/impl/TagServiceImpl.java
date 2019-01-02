@@ -1,7 +1,9 @@
 package cn.edu.fudan.tagservice.service.impl;
 
+import cn.edu.fudan.tagservice.component.RestInterfaceManager;
 import cn.edu.fudan.tagservice.dao.TagDao;
 
+import cn.edu.fudan.tagservice.domain.IgnoreLevelEnum;
 import cn.edu.fudan.tagservice.domain.PriorityEnum;
 import cn.edu.fudan.tagservice.domain.Tag;
 import cn.edu.fudan.tagservice.domain.TaggedItem;
@@ -24,9 +26,16 @@ public class TagServiceImpl implements TagService {
 
     private TagDao tagDao;
 
+    private RestInterfaceManager restInterfaceManager;
+
     @Autowired
     public void setTagDao(TagDao tagDao) {
         this.tagDao = tagDao;
+    }
+
+    @Autowired
+    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
+        this.restInterfaceManager = restInterfaceManager;
     }
 
     @Transactional
@@ -121,5 +130,31 @@ public class TagServiceImpl implements TagService {
     @Override
     public void deleteTagByProjectId(String projectId) {
         tagDao.deleteTagByProjectId(projectId);
+    }
+
+    @Override
+    public void ignoreOneTag(JSONObject requestBody) throws Exception{
+        String userId = restInterfaceManager.getUserId(requestBody.getString("token"));
+        IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
+        // before ignore tag query the type is ignored or not
+        if (ignored(ignoreLevel.value())) {
+            throw new Exception("ignored");
+        }
+
+        // insert ignore relation table
+
+        //return;
+    }
+
+    @Override
+    public void cancelIgnoreRecord(JSONObject requestBody) {
+
+    }
+
+    /**
+     *  根据ignore 的level 级别返回对应的结果
+     * */
+    private boolean ignored(int level) {
+        return true;
     }
 }

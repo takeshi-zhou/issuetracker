@@ -27,4 +27,8 @@ public interface TagService {
     List<Tag> getAllDefaultTags();
 
     void deleteTagByProjectId(String projectId);
+
+    void ignoreOneTag(JSONObject requestBody)  throws Exception;
+
+    void cancelIgnoreRecord(JSONObject requestBody);
 }

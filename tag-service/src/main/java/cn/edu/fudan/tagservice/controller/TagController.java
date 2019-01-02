@@ -61,6 +61,38 @@ public class TagController {
         }
     }
 
+    /**
+     *  ignore a kind of tag
+     *  userToken project-id ignore-level tag-id
+     */
+    @PostMapping("/tags/ignore")
+    public Object ignoreOneTag(@RequestBody JSONObject requestBody){
+        try {
+            tagService.ignoreOneTag(requestBody);
+            return new ResponseBean(200, "modify success", null);
+        } catch (Exception e) {
+            return new ResponseBean(401, "modify failed :" + e.getMessage(), null);
+        }
+    }
+
+    /**
+     *  cancel one ignored tag
+     *  userToken project-id ignore-level tag-id
+     */
+    @DeleteMapping("/tags/ignore")
+    public Object cancelIgnoreRecord(@RequestBody JSONObject requestBody) {
+        try {
+            tagService.cancelIgnoreRecord(requestBody);
+            return new ResponseBean(200, "modify success", null);
+        } catch (Exception e) {
+            return new ResponseBean(401, "modify failed :" + e.getMessage(), null);
+        }
+    }
+
+
+    /**
+     *  以下为内部服务调用
+     * */
     @PostMapping("/inner/tags")
     public Object addMultiTaggedItem(@RequestBody List<TaggedItem> list) {
         try {

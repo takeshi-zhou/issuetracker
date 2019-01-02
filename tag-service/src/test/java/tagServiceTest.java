@@ -1,3 +1,4 @@
+import cn.edu.fudan.tagservice.domain.IgnoreLevelEnum;
 import cn.edu.fudan.tagservice.domain.PriorityEnum;
 import org.junit.Test;
 
@@ -13,5 +14,8 @@ public class tagServiceTest {
         System.out.println(priority.getColor());
 
         System.out.println(UUID.randomUUID().toString());
+
+        int i = IgnoreLevelEnum.valueOf("USER").value();
+        System.out.println(i);
     }
 }
