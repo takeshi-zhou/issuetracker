@@ -28,7 +28,7 @@ public interface TagService {
 
     void deleteTagByProjectId(String projectId);
 
-    void ignoreOneTag(JSONObject requestBody)  throws Exception;
+    void ignoreOneType(JSONObject requestBody)  throws Exception;
 
-    void cancelIgnoreRecord(JSONObject requestBody);
+    void cancelOneIgnoreRecord(JSONObject requestBody);
 }
