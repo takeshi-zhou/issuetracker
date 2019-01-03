@@ -63,12 +63,12 @@ public class TagController {
 
     /**
      *  ignore a kind of tag
-     *  userToken project-id ignore-level tag-id
+     *  userToken project-id ignore-level type
      */
     @PostMapping("/tags/ignore")
-    public Object ignoreOneTag(@RequestBody JSONObject requestBody){
+    public Object ignoreOneType(@RequestBody JSONObject requestBody){
         try {
-            tagService.ignoreOneTag(requestBody);
+            tagService.ignoreOneType(requestBody);
             return new ResponseBean(200, "modify success", null);
         } catch (Exception e) {
             return new ResponseBean(401, "modify failed :" + e.getMessage(), null);
@@ -82,7 +82,7 @@ public class TagController {
     @DeleteMapping("/tags/ignore")
     public Object cancelIgnoreRecord(@RequestBody JSONObject requestBody) {
         try {
-            tagService.cancelIgnoreRecord(requestBody);
+            tagService.cancelOneIgnoreRecord(requestBody);
             return new ResponseBean(200, "modify success", null);
         } catch (Exception e) {
             return new ResponseBean(401, "modify failed :" + e.getMessage(), null);

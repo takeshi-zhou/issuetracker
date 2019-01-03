@@ -1,6 +1,7 @@
 package cn.edu.fudan.tagservice.service.impl;
 
 import cn.edu.fudan.tagservice.component.RestInterfaceManager;
+import cn.edu.fudan.tagservice.dao.IgnoreRecodeDao;
 import cn.edu.fudan.tagservice.dao.TagDao;
 
 import cn.edu.fudan.tagservice.domain.IgnoreLevelEnum;
@@ -26,11 +27,18 @@ public class TagServiceImpl implements TagService {
 
     private TagDao tagDao;
 
+    private IgnoreRecodeDao ignoreDao;
+
     private RestInterfaceManager restInterfaceManager;
 
     @Autowired
     public void setTagDao(TagDao tagDao) {
         this.tagDao = tagDao;
+    }
+
+    @Autowired
+    public void setIgnoreDao() {
+
     }
 
     @Autowired
@@ -133,28 +141,42 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public void ignoreOneTag(JSONObject requestBody) throws Exception{
+    public void ignoreOneType(JSONObject requestBody) throws Exception{
         String userId = restInterfaceManager.getUserId(requestBody.getString("token"));
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
+        String type = requestBody.getString("type");
         // before ignore tag query the type is ignored or not
-        if (ignored(ignoreLevel.value())) {
-            throw new Exception("ignored");
+        if (ignored(userId, ignoreLevel.value(), type)) {
+            throw new Exception("this type has been ignored");
         }
 
+        String repoId = requestBody.getString("repo-id");
         // insert ignore relation table
-
-        //return;
+        ignoreDao.insertOneRecord(UUID.randomUUID().toString(), userId, ignoreLevel.value(), type, repoId);
     }
 
     @Override
-    public void cancelIgnoreRecord(JSONObject requestBody) {
-
+    public void cancelOneIgnoreRecord(JSONObject requestBody) {
+        String userId = restInterfaceManager.getUserId(requestBody.getString("token"));
+        IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
+        String type = requestBody.getString("type");
+        String repoId = requestBody.getString("repo-id");
+        ignoreDao.cancelOneIgnoreRecord(userId, ignoreLevel.value(), type, repoId);
     }
 
     /**
      *  根据ignore 的level 级别返回对应的结果
      * */
-    private boolean ignored(int level) {
-        return true;
+    private boolean ignored(String userId, int level, String type) {
+        Integer recordLevel = ignoreDao.queryMinIgnoreLevelByUserId(userId, type);
+        // user 1 repo 2 project 3
+        if ((recordLevel == IgnoreLevelEnum.USER.value()) )
+            return true;
+
+        if (level == IgnoreLevelEnum.USER.value()) {
+            ignoreDao.cancelInvalidRecord(userId, type);
+        }
+
+        return false;
     }
 }
