@@ -69,9 +69,9 @@ public class TagController {
     public Object ignoreOneType(@RequestBody JSONObject requestBody){
         try {
             tagService.ignoreOneType(requestBody);
-            return new ResponseBean(200, "modify success", null);
+            return new ResponseBean(200, "ignore success", null);
         } catch (Exception e) {
-            return new ResponseBean(401, "modify failed :" + e.getMessage(), null);
+            return new ResponseBean(401, "ignore failed !" + e.getMessage(), null);
         }
     }
 

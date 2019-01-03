@@ -4,10 +4,7 @@ import cn.edu.fudan.tagservice.component.RestInterfaceManager;
 import cn.edu.fudan.tagservice.dao.IgnoreRecodeDao;
 import cn.edu.fudan.tagservice.dao.TagDao;
 
-import cn.edu.fudan.tagservice.domain.IgnoreLevelEnum;
-import cn.edu.fudan.tagservice.domain.PriorityEnum;
-import cn.edu.fudan.tagservice.domain.Tag;
-import cn.edu.fudan.tagservice.domain.TaggedItem;
+import cn.edu.fudan.tagservice.domain.*;
 import cn.edu.fudan.tagservice.service.TagService;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -27,7 +24,7 @@ public class TagServiceImpl implements TagService {
 
     private TagDao tagDao;
 
-    private IgnoreRecodeDao ignoreDao;
+    private IgnoreRecodeDao ignoreRecodeDao;
 
     private RestInterfaceManager restInterfaceManager;
 
@@ -37,8 +34,8 @@ public class TagServiceImpl implements TagService {
     }
 
     @Autowired
-    public void setIgnoreDao() {
-
+    public void setIgnoreRecodeDao(IgnoreRecodeDao ignoreRecodeDao) {
+        this.ignoreRecodeDao = ignoreRecodeDao;
     }
 
     @Autowired
@@ -141,18 +138,18 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public void ignoreOneType(JSONObject requestBody) throws Exception{
+    public void ignoreOneType(JSONObject requestBody) {
         String userId = restInterfaceManager.getUserId(requestBody.getString("token"));
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
         String type = requestBody.getString("type");
         // before ignore tag query the type is ignored or not
         if (ignored(userId, ignoreLevel.value(), type)) {
-            throw new Exception("this type has been ignored");
+            throw new RuntimeException("this type has been ignored");
         }
 
         String repoId = requestBody.getString("repo-id");
         // insert ignore relation table
-        ignoreDao.insertOneRecord(UUID.randomUUID().toString(), userId, ignoreLevel.value(), type, repoId);
+        ignoreRecodeDao.insertOneRecord( new IgnoreRecord(UUID.randomUUID().toString(), userId, ignoreLevel.value(), type, repoId) );
     }
 
     @Override
@@ -161,20 +158,28 @@ public class TagServiceImpl implements TagService {
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
         String type = requestBody.getString("type");
         String repoId = requestBody.getString("repo-id");
-        ignoreDao.cancelOneIgnoreRecord(userId, ignoreLevel.value(), type, repoId);
+        //
+        if (ignoreLevel == IgnoreLevelEnum.USER) {
+            ignoreRecodeDao.cancelInvalidRecord(userId, type);
+            return;
+        }
+        ignoreRecodeDao.cancelOneIgnoreRecord(userId, ignoreLevel.value(), type, repoId);
     }
 
     /**
      *  根据ignore 的level 级别返回对应的结果
      * */
     private boolean ignored(String userId, int level, String type) {
-        Integer recordLevel = ignoreDao.queryMinIgnoreLevelByUserId(userId, type);
+        Integer recordLevel = ignoreRecodeDao.queryMinIgnoreLevelByUserId(userId, type);
+        if (recordLevel == null)
+            return false;
+
         // user 1 repo 2 project 3
-        if ((recordLevel == IgnoreLevelEnum.USER.value()) )
+        if (recordLevel == IgnoreLevelEnum.USER.value() )
             return true;
 
         if (level == IgnoreLevelEnum.USER.value()) {
-            ignoreDao.cancelInvalidRecord(userId, type);
+            ignoreRecodeDao.cancelInvalidRecord(userId, type);
         }
 
         return false;

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.fudan.tagservice.mapper.IgnoreRecodeMapper">
+
+    <resultMap id="ignoreRecord" type="IgnoreRecord">
+        <id property="uuid" column="uuid"/>
+        <result property="userId" column="user_id"/>
+        <result property="level" column="level"/>
+        <result property="type" column="type"/>
+        <result property="repoId" column="repo_id"/>
+    </resultMap>
+
+    <insert id="insertOneRecord" parameterType="ignoreRecord">
+        insert into ignore_record
+        (
+        uuid,
+        user_id,
+        level,
+        type,
+        repo_id
+        )
+        values
+        (
+        #{uuid},
+        #{userId},
+        #{level},
+        #{type},
+        #{repoId}
+        )
+    </insert>
+
+    <delete id="cancelOneIgnoreRecord"  >
+        delete from ignore_record where user_id = #{user_id} and level = #{level} and type = #{type}
+        <if test="repo_id != null">
+            and
+            repo_id = #{repo_id}
+        </if>
+
+    </delete>
+
+    <select id="queryMinIgnoreLevelByUserId" parameterType="String" resultType="Integer">
+        select min(level) from ignore_record where user_id = #{user_id} and type = #{type}
+    </select>
+
+    <delete id="cancelInvalidRecord" parameterType="String">
+        delete from ignore_record where user_id = #{user_id} and type = #{type}
+    </delete>
+
+
+</mapper>
