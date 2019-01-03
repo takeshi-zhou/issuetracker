@@ -57,6 +57,10 @@ public class RestInterfaceManager {
         restTemplate.delete(issueServicePath + "/inner/raw-issue/" +category+"/"+ repoId);
     }
 
+    public void deleteScanResultOfRepo(String repoId,String category){
+        restTemplate.delete(issueServicePath + "/inner/issue/scan-results/" +category+"/"+ repoId);
+    }
+
     //-------------------------------scan service--------------------------------------------------------------
     public void deleteScanOfRepo(String repoId,String category){
         restTemplate.delete(scanServicePath+"/inner/scan/" +category+"/"+ repoId);

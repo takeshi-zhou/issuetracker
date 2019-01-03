@@ -41,14 +41,14 @@ public class BaseScanTask {
     }
 
     void scan(ScanOperation scanOperation, String repoId, String commitId, String category){
-        if (scanOperation.isScanned(commitId,category)) {
+        if (scanOperation.isScanned(repoId,commitId,category)) {
             //如果当前commit已经扫描过，直接结束
             logger.info("this commit has been scanned");
             send(repoId, commitId, category,"success", "scan success!");
             logger.info("Scan Success!");
             return;
         }
-        logger.info("this commit has not been scanned");
+        logger.info("this commit has not been scanned,start to scan...");
         logger.info("start to checkout -> " + commitId);
         //checkout,如果失败发送错误消息，直接返回
         if (!scanOperation.checkOut(repoId, commitId)) {

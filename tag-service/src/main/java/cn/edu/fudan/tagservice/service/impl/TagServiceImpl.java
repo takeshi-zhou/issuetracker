@@ -54,7 +54,7 @@ public class TagServiceImpl implements TagService {
             tag_id = tagDao.getUuidByNameAndScope(name, scope);
             if (tag_id == null) {
                 tag_id = UUID.randomUUID().toString();
-                tagDao.addOneTag(new Tag(tag_id, name, scope, PriorityEnum.getByValue("name").getColor()));
+                tagDao.addOneTag(new Tag(tag_id, name, scope, PriorityEnum.getByValue(name).getColor()));
             }
             logger.error(tagDao.hasBeenTagged(tag_id, itemId).toString());
             if (tagDao.hasBeenTagged(tag_id, itemId) > 0)

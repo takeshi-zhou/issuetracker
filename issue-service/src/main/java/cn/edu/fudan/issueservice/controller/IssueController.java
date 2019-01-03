@@ -156,4 +156,15 @@ public class IssueController {
         }
     }
 
+    @DeleteMapping(value = "/inner/issue/scan-results/{category}/{repo-id}")
+    public Object deleteScanResults(@PathVariable("repo-id")String repoId,@PathVariable("category")String category){
+        try {
+            issueService.deleteScanResultsByRepoIdAndCategory(repoId, category);
+            return new ResponseBean(200, "delete success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, " delete failed!", null);
+        }
+    }
+
 }

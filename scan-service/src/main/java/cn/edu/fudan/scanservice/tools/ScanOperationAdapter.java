@@ -37,8 +37,8 @@ public class ScanOperationAdapter implements ScanOperation {
     }
 
     @Override
-    public boolean isScanned(String commitId,String category) {
-        return scanDao.isScanned(commitId,category);
+    public boolean isScanned(String repoId,String commitId,String category) {
+        return scanDao.isScanned(repoId,commitId,category);
     }
 
     @Override
