@@ -27,6 +27,8 @@ public class DateTimeUtil {
 
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
     public static String format(Date date) {
         return simpleDateFormat.format(date);
     }
@@ -42,6 +44,7 @@ public class DateTimeUtil {
 
     public static Date parse(String str) {
         try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
             return simpleDateFormat.parse(str);
         } catch (ParseException e) {
             e.printStackTrace();
