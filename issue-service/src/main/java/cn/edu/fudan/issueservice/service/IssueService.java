@@ -13,6 +13,8 @@ public interface IssueService {
 
     void deleteIssueByRepoIdAndCategory(String repoId, String category);
 
+    void deleteScanResultsByRepoIdAndCategory(String repo_id, String category);
+
     void batchUpdateIssue(List<Issue> list);
 
     Issue getIssueByID(String uuid);

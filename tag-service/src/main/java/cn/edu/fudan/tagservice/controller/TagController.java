@@ -44,9 +44,9 @@ public class TagController {
     public Object deleteTag(@PathVariable("tag-id") String tagId, @RequestParam("item-id") String itemId) {
         try {
             tagService.deleteTag(tagId, itemId);
-            return new ResponseBean(200, "add success", null);
+            return new ResponseBean(200, "delete success", null);
         } catch (Exception e) {
-            return new ResponseBean(401, "add failed :" + e.getMessage(), null);
+            return new ResponseBean(401, "delete failed :" + e.getMessage(), null);
         }
     }
 

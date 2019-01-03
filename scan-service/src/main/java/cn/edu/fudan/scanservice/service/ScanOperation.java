@@ -5,7 +5,7 @@ import cn.edu.fudan.scanservice.domain.ScanResult;
 
 public interface ScanOperation {
 
-    boolean isScanned(String commitId,String category);
+    boolean isScanned(String repoId,String commitId,String category);
 
     boolean checkOut(String repoId, String commitId);
 

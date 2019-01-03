@@ -99,6 +99,11 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
+    public void deleteScanResultsByRepoIdAndCategory(String repo_id, String category) {
+        scanResultDao.deleteScanResultsByRepoIdAndCategory(repo_id, category);
+    }
+
+    @Override
     public void batchUpdateIssue(List<Issue> list) {
         issueDao.batchUpdateIssue(list);
     }
