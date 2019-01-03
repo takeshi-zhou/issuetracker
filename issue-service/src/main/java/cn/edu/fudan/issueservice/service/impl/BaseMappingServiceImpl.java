@@ -125,18 +125,21 @@ public class BaseMappingServiceImpl implements MappingService {
 
     void modifyToSolvedTag(String repo_id,String category, String pre_commit_id,EventType eventType,String committer) {
         List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
-        issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
-        if (issues != null && !issues.isEmpty()) {
-            eliminatedInfoUpdate(issues,category,repo_id);
-            List<JSONObject> taggeds = new ArrayList<>();
-            for (Issue issue : issues) {
-                JSONObject tagged = new JSONObject();
-                tagged.put("item_id", issue.getUuid());
-                tagged.put("tag_id", solvedTagId);
-                taggeds.add(tagged);
+        if(issues != null){
+            issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
+            if (!issues.isEmpty()) {
+                eliminatedInfoUpdate(issues,category,repo_id);
+                List<JSONObject> taggeds = new ArrayList<>();
+                for (Issue issue : issues) {
+                    JSONObject tagged = new JSONObject();
+                    tagged.put("item_id", issue.getUuid());
+                    tagged.put("tag_id", solvedTagId);
+                    taggeds.add(tagged);
+                }
+                restInterfaceManager.modifyTags(taggeds);
             }
-            restInterfaceManager.modifyTags(taggeds);
         }
+        
     }
 
     void addSolvedTag(String repo_id, String category,String pre_commit_id,EventType eventType,String committer) {
