@@ -14,4 +14,6 @@ public interface IgnoreRecodeMapper {
     Integer queryMinIgnoreLevelByUserId(@Param("user_id")String userId,@Param("type") String type);
 
     void cancelInvalidRecord(@Param("user_id") String userId,@Param("type") String type);
+
+    IgnoreRecord queryOneRecord(@Param("user_id")String userId,@Param("level") int level,@Param("type") String type,@Param("repo_id") String repoId);
 }

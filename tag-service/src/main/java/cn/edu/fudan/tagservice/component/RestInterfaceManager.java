@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Component
 public class RestInterfaceManager {
 
@@ -24,8 +27,17 @@ public class RestInterfaceManager {
     /**
      * account service
      * */
-    public String getUserId(String token) {
-        return "userId";
+    public String getUserId(String userToken) {
+        Map<String,String> urlParameters = new HashMap<>();
+        urlParameters.put("userToken",userToken);
+        return restTemplate.getForObject(accountServicePath+"/user/accountId?userToken={userToken}",String.class,urlParameters);
     }
 
+
+    /**
+     * fundamental service
+     * */
+    public String getGitRepoId(String repoId) {
+        return "repoId";
+    }
 }

@@ -137,28 +137,38 @@ public class TagServiceImpl implements TagService {
         tagDao.deleteTagByProjectId(projectId);
     }
 
+
+    /**
+     * Two scenarios ：USER ,PROJECT
+     * */
     @Override
     public void ignoreOneType(JSONObject requestBody) {
-        String userId = restInterfaceManager.getUserId(requestBody.getString("token"));
+        String userId = restInterfaceManager.getUserId(requestBody.getString("userToken"));
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
         String type = requestBody.getString("type");
+        String repoId = requestBody.getString("repo-id");
         // before ignore tag query the type is ignored or not
-        if (ignored(userId, ignoreLevel.value(), type)) {
+        if (isIgnored(userId, ignoreLevel.value(), type, repoId)) {
             throw new RuntimeException("this type has been ignored");
         }
 
-        String repoId = requestBody.getString("repo-id");
-        // insert ignore relation table
+        /*
+        if (ignoreLevel == IgnoreLevelEnum.REPOTORY) {
+            repoId = restInterfaceManager.getGitRepoId(repoId);
+        }
+        */
+
+        // insert ignore relation
         ignoreRecodeDao.insertOneRecord( new IgnoreRecord(UUID.randomUUID().toString(), userId, ignoreLevel.value(), type, repoId) );
     }
 
     @Override
     public void cancelOneIgnoreRecord(JSONObject requestBody) {
-        String userId = restInterfaceManager.getUserId(requestBody.getString("token"));
+        String userId = restInterfaceManager.getUserId(requestBody.getString("userToken"));
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
         String type = requestBody.getString("type");
         String repoId = requestBody.getString("repo-id");
-        //
+
         if (ignoreLevel == IgnoreLevelEnum.USER) {
             ignoreRecodeDao.cancelInvalidRecord(userId, type);
             return;
@@ -169,19 +179,22 @@ public class TagServiceImpl implements TagService {
     /**
      *  根据ignore 的level 级别返回对应的结果
      * */
-    private boolean ignored(String userId, int level, String type) {
+    private boolean isIgnored(String userId, int level, String type, String repoId) {
         Integer recordLevel = ignoreRecodeDao.queryMinIgnoreLevelByUserId(userId, type);
         if (recordLevel == null)
             return false;
 
         // user 1 repo 2 project 3
-        if (recordLevel == IgnoreLevelEnum.USER.value() )
+        if (recordLevel == IgnoreLevelEnum.USER.value() ) {
             return true;
+        }
 
         if (level == IgnoreLevelEnum.USER.value()) {
             ignoreRecodeDao.cancelInvalidRecord(userId, type);
+            return false;
         }
 
-        return false;
+        IgnoreRecord ignoreRecord = ignoreRecodeDao.queryOneRecord(userId, level, type, repoId);
+        return ignoreRecord != null;
     }
 }
