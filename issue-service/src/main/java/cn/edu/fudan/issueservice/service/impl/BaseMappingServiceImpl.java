@@ -2,11 +2,14 @@ package cn.edu.fudan.issueservice.service.impl;
 
 import cn.edu.fudan.issueservice.component.IssueEventManager;
 import cn.edu.fudan.issueservice.component.RestInterfaceManager;
+import cn.edu.fudan.issueservice.component.TagMapHelper;
 import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.dao.ScanResultDao;
 import cn.edu.fudan.issueservice.domain.EventType;
 import cn.edu.fudan.issueservice.domain.Issue;
+import cn.edu.fudan.issueservice.domain.RawIssue;
+import cn.edu.fudan.issueservice.domain.RawIssueDetail;
 import cn.edu.fudan.issueservice.service.MappingService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +37,26 @@ public class BaseMappingServiceImpl implements MappingService {
     ScanResultDao scanResultDao;
     private StringRedisTemplate stringRedisTemplate;
     RestInterfaceManager restInterfaceManager;
-    protected  int currentDisplayId = 1;
-    protected  boolean  isDefaultDisplayId = true;
+    int currentDisplayId = 1;
+    boolean  isDefaultDisplayId = true;
+
+    private TagMapHelper tagMapHelper;
+
+    @Autowired
+    public void setTagMapHelper(TagMapHelper tagMapHelper) {
+        this.tagMapHelper = tagMapHelper;
+    }
+
+     void addTag(List<JSONObject> tags, RawIssue rawIssue, String issueId){
+        RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
+        String tagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
+        if(tagID!=null){
+            JSONObject tagged = new JSONObject();
+            tagged.put("item_id", issueId);
+            tagged.put("tag_id", tagID);
+            tags.add(tagged);
+        }
+    }
 
     @Autowired
     public void setScanResultDao(ScanResultDao scanResultDao) {
