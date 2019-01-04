@@ -46,5 +46,12 @@
         select * from ignore_record where user_id = #{user_id} and level = #{level} and type = #{type} and repo_id = #{repo_id}
     </select>
 
+    <select id="getIgnoreRecordList" resultMap="ignoreRecord">
+        select * from ignore_record where user_id = #{user_id}
+    </select>
+
+    <select id="getIgnoreTypeListByRepoId" resultType="String">
+        select type from ignore_record where repo_id = #{repo_id}
+    </select>
 
 </mapper>

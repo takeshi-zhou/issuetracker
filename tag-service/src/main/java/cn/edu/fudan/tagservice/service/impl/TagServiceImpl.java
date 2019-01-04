@@ -142,8 +142,8 @@ public class TagServiceImpl implements TagService {
      * Two scenarios ：USER ,PROJECT
      * */
     @Override
-    public void ignoreOneType(JSONObject requestBody) {
-        String userId = restInterfaceManager.getUserId(requestBody.getString("userToken"));
+    public void ignoreOneType(JSONObject requestBody,String token) {
+        String userId = restInterfaceManager.getUserId(token);
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
         String type = requestBody.getString("type");
         String repoId = requestBody.getString("repo-id");
@@ -163,8 +163,8 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public void cancelOneIgnoreRecord(JSONObject requestBody) {
-        String userId = restInterfaceManager.getUserId(requestBody.getString("userToken"));
+    public void cancelOneIgnoreRecord(JSONObject requestBody,String token) {
+        String userId = restInterfaceManager.getUserId(token);
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
         String type = requestBody.getString("type");
         String repoId = requestBody.getString("repo-id");
@@ -174,6 +174,17 @@ public class TagServiceImpl implements TagService {
             return;
         }
         ignoreRecodeDao.cancelOneIgnoreRecord(userId, ignoreLevel.value(), type, repoId);
+    }
+
+    @Override
+    public Object getIgnoreRecordList(String token) {
+        String userId = restInterfaceManager.getUserId(token);
+        return ignoreRecodeDao.getIgnoreRecordList(userId);
+    }
+
+    @Override
+    public List<String> getIgnoreTypeListByRepoId(String repoId) {
+        return ignoreRecodeDao.getIgnoreTypeListByRepoId(repoId);
     }
 
     /**

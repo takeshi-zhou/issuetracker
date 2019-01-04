@@ -10,6 +10,8 @@ import cn.edu.fudan.tagservice.mapper.IgnoreRecodeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class IgnoreRecodeDao {
 
@@ -39,5 +41,13 @@ public class IgnoreRecodeDao {
 
     public IgnoreRecord queryOneRecord(String userId, int level, String type, String repoId) {
         return ignoreRecodeMapper.queryOneRecord(userId, level, type, repoId);
+    }
+
+    public List<IgnoreRecord> getIgnoreRecordList(String userId) {
+        return ignoreRecodeMapper.getIgnoreRecordList(userId);
+    }
+
+    public List<String> getIgnoreTypeListByRepoId(String repoId) {
+        return ignoreRecodeMapper.getIgnoreTypeListByRepoId(repoId);
     }
 }
