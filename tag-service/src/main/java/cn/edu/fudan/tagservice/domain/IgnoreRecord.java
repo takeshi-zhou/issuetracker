@@ -12,13 +12,15 @@ public class IgnoreRecord {
     private int level;
     private String type;
     private String repoId;
+    private String repoName;
 
-    public IgnoreRecord(String uuid, String userId, int level, String type, String repoId) {
+    public IgnoreRecord(String uuid, String userId, int level, String type, String repoId, String repoName) {
         this.uuid = uuid;
         this.userId = userId;
         this.level = level;
         this.type = type;
         this.repoId = repoId;
+        this.repoName = repoName;
     }
 
 
@@ -62,5 +64,11 @@ public class IgnoreRecord {
         this.repoId = repoId;
     }
 
+    public String getRepoName() {
+        return repoName;
+    }
 
+    public void setRepoName(String repoName) {
+        this.repoName = repoName;
+    }
 }

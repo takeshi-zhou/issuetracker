@@ -9,6 +9,7 @@
         <result property="level" column="level"/>
         <result property="type" column="type"/>
         <result property="repoId" column="repo_id"/>
+        <result property="repoName" column="repo_name"/>
     </resultMap>
 
     <insert id="insertOneRecord" parameterType="ignoreRecord">
@@ -18,7 +19,8 @@
         user_id,
         level,
         type,
-        repo_id
+        repo_id,
+        repo_name
         )
         values
         (
@@ -26,7 +28,8 @@
         #{userId},
         #{level},
         #{type},
-        #{repoId}
+        #{repoId},
+        #{repoName}
         )
     </insert>
 

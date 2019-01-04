@@ -2,7 +2,7 @@ package cn.edu.fudan.tagservice.domain;
 
 public enum IgnoreLevelEnum {
     USER(1, "user"),
-    REPOTORY(2, "repository"),
+    REPOSITORY(2, "repository"),
     PROJECT(3, "project");
 
     private final int value;
