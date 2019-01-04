@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -36,6 +35,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
     @Value("${repoHome}")
     private String repoHome;
 
+
     @SuppressWarnings("unchecked")
     private boolean analyzeResultFile(String scanId,String commitId,String resultFilePath){
         SAXReader reader = new SAXReader();
@@ -53,12 +53,13 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
                     List<JSONObject> cloneLocations=new ArrayList<>();
                     Element cloneInstance=cloneInstances.next();
                     String filePath=cloneInstance.attributeValue("path");
+                    String rank=cloneInstance.attributeValue("rank");
                     String cloneRawIssueId= UUID.randomUUID().toString();
                     JSONObject cloneRawIssue=new JSONObject();
                     cloneRawIssue.put("uuid",cloneRawIssueId);
                     cloneRawIssue.put("type",group_id);
                     cloneRawIssue.put("category","clone");
-                    cloneRawIssue.put("detail",null);
+                    cloneRawIssue.put("detail","{\"rank\":"+rank+"}");
                     cloneRawIssue.put("file_name",filePath);
                     cloneRawIssue.put("scan_id",scanId);
                     cloneRawIssue.put("commit_id",commitId);
@@ -69,8 +70,8 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
                     int endLine=Integer.parseInt(cloneInstance.attributeValue("endLine"));
                     cloneLocation.put("start_line",startLine);
                     cloneLocation.put("end_line",endLine);
-                    cloneLocation.put("start_token",Integer.parseInt(cloneInstance.attributeValue("startToken")));
-                    cloneLocation.put("end_token",Integer.parseInt(cloneInstance.attributeValue("endToken")));
+                    cloneLocation.put("start_token",null);
+                    cloneLocation.put("end_token",null);
                     cloneLocation.put("file_path",filePath);
                     cloneLocation.put("rawIssue_id",cloneRawIssueId);
                     cloneLocation.put("code", ASTUtil.getCode(startLine,endLine,repoHome+filePath));

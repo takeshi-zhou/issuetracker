@@ -1,10 +1,8 @@
 package cn.edu.fudan.issueservice.service.impl;
 
-import cn.edu.fudan.issueservice.domain.EventType;
-import cn.edu.fudan.issueservice.domain.Issue;
-import cn.edu.fudan.issueservice.domain.RawIssue;
-import cn.edu.fudan.issueservice.domain.ScanResult;
+import cn.edu.fudan.issueservice.domain.*;
 import cn.edu.fudan.issueservice.util.LocationCompare;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +21,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
     //每一次映射完产生的所有的新的clone group
     private void newCloneInsert(boolean isFirst,Map<String,List<RawIssue>> map,Set<String> groupsNeedInsert,String repo_id,String current_commit_id,Date commitDate,String category,String committer,Date date){
         List<Issue> insertIssueList = new ArrayList<>();
+        List<JSONObject> tags = new ArrayList<>();
         for(String group:groupsNeedInsert){
             //所有新的group，每一个都是一个新的issue
             String new_IssueId=UUID.randomUUID().toString();
@@ -36,8 +35,13 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             List<RawIssue> rawIssuesInOneGroup=map.get(group);
             for(int i=0;i<rawIssuesInOneGroup.size();i++){
                 RawIssue rawIssue=rawIssuesInOneGroup.get(i);
-                if(i==0)
+                if(i==0){
+                    int priority =  Integer.parseInt(JSONObject.parseObject(rawIssue.getDetail(), RawIssueDetail.class).getRank())/5 + 1 ;
+                    priority = priority == 5 ? 4 : priority ;
+                    issue.setPriority(priority);
                     issue.setRaw_issue_start(rawIssue.getUuid());
+                    addTag(tags,rawIssue,new_IssueId);
+                }
                 if(i==rawIssuesInOneGroup.size()-1)
                     issue.setRaw_issue_end(rawIssue.getUuid());
                 rawIssue.setIssue_id(new_IssueId);
@@ -51,6 +55,10 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             issueEventManager.sendIssueEvent(EventType.NEW_CLONE_CLASS,insertIssueList,committer,repo_id);
             newIssueInfoUpdate(insertIssueList,category,repo_id);
             log.info("new issues id saved into redis!");
+        }
+        //打tag
+        if(!tags.isEmpty()){
+            restInterfaceManager.addTags(tags);
         }
         if(isFirst){
             int newIssueCount = insertIssueList.size();

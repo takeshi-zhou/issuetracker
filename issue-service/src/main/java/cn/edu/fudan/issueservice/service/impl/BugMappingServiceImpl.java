@@ -1,11 +1,9 @@
 package cn.edu.fudan.issueservice.service.impl;
 
-import cn.edu.fudan.issueservice.component.TagMapHelper;
 import cn.edu.fudan.issueservice.domain.*;
 import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -17,26 +15,6 @@ import java.util.*;
 @Slf4j
 @Service("bugMapping")
 public class BugMappingServiceImpl extends BaseMappingServiceImpl {
-
-    private TagMapHelper tagMapHelper;
-
-    @Autowired
-    public void setTagMapHelper(TagMapHelper tagMapHelper) {
-        this.tagMapHelper = tagMapHelper;
-    }
-
-    private void addTag(List<JSONObject> tags,RawIssue rawIssue,String issueId){
-        RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
-        String tagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
-        if(tagID!=null){
-            JSONObject tagged = new JSONObject();
-            tagged.put("item_id", issueId);
-            tagged.put("tag_id", tagID);
-            tags.add(tagged);
-        }
-    }
-
-
 
     @Override
     public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category, String committer) {
