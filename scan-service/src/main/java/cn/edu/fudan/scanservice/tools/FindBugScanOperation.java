@@ -80,13 +80,11 @@ public class FindBugScanOperation extends ScanOperationAdapter {
                 if(matcher.matches()){
                     filePath=candidate;
                     break;
-                }else{
-                    logger.error("pattern not right -> realPath= "+candidate);
                 }
             }
         }
         if(filePath==null){
-            logger.error(sourcePath + " 找不到源文件！");
+            logger.error(sourcePath + " 找不到匹配源文件！");
             return null;
         }
         //Method节点
