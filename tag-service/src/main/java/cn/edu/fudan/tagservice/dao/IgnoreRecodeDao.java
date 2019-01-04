@@ -36,4 +36,8 @@ public class IgnoreRecodeDao {
     public void cancelInvalidRecord(String userId, String type) {
         ignoreRecodeMapper.cancelInvalidRecord(userId, type);
     }
+
+    public IgnoreRecord queryOneRecord(String userId, int level, String type, String repoId) {
+        return ignoreRecodeMapper.queryOneRecord(userId, level, type, repoId);
+    }
 }
