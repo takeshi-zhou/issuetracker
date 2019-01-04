@@ -1,5 +1,6 @@
 package cn.edu.fudan.scanservice.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -7,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+@Slf4j
 @Component
 public class ExecuteShellUtil {
 
@@ -23,7 +25,7 @@ public class ExecuteShellUtil {
             //		+ ".xml " + repoPath;
             //脚本实现 用来解耦 还需要与tool解耦合
             String command = binHome + "executeTools.sh " + projectName + " " + repoPath;
-            System.out.println("command -> "+command);
+           log.info("command -> {}",command);
             Process process = rt.exec(command);
             int exitValue = process.waitFor();
             if (exitValue == 0)
@@ -38,7 +40,7 @@ public class ExecuteShellUtil {
         try {
             Runtime rt = Runtime.getRuntime();
             String command = binHome + "executeMvn.sh " + repoPath;
-            System.out.println("command -> "+command);
+            log.info("command -> {}",command);
             Process process = rt.exec(command);
             int exitValue = process.waitFor();
             if (exitValue == 0)
@@ -54,7 +56,6 @@ public class ExecuteShellUtil {
             Runtime rt = Runtime.getRuntime();
             String command = "find "+repoHome + repoPath + " -name " + fileName;
             //String command =  binHome + "findOneFile.sh " + repoHome + repoPath + " "+ fileName;
-            System.out.println("command -> "+command);
             Process process = rt.exec(command);
             process.waitFor();
             BufferedReader bReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
