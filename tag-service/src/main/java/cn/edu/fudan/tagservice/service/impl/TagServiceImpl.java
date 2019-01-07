@@ -140,6 +140,7 @@ public class TagServiceImpl implements TagService {
      * Two scenarios ：USER ,PROJECT
      * */
     @Override
+    @Transactional
     public void ignoreOneType(JSONObject requestBody,String token) {
         String userId = restInterfaceManager.getUserId(token);
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());

@@ -116,7 +116,7 @@
                 and category = #{category}
             </if>
         </where>
-        order by priority , end_commit_date desc , start_commit_date desc
+        order by priority , end_commit_date desc , start_commit_date desc , display_id
         <if test="start != null  and size != null ">
             limit #{start},#{size}
         </if>
