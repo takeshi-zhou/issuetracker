@@ -13,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class TagServiceImpl implements TagService {
@@ -142,8 +140,8 @@ public class TagServiceImpl implements TagService {
      * Two scenarios ：USER ,PROJECT
      * */
     @Override
-    public void ignoreOneType(JSONObject requestBody) {
-        String userId = restInterfaceManager.getUserId(requestBody.getString("userToken"));
+    public void ignoreOneType(JSONObject requestBody,String token) {
+        String userId = restInterfaceManager.getUserId(token);
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
         String type = requestBody.getString("type");
         String repoId = requestBody.getString("repo-id");
@@ -153,18 +151,23 @@ public class TagServiceImpl implements TagService {
         }
 
         /*
-        if (ignoreLevel == IgnoreLevelEnum.REPOTORY) {
+        if (ignoreLevel == IgnoreLevelEnum.REPOSITORY) {
             repoId = restInterfaceManager.getGitRepoId(repoId);
         }
         */
-
+        String repoName = null;
+        if (ignoreLevel == IgnoreLevelEnum.USER) {
+            repoId = null;
+        }else {
+            repoName = restInterfaceManager.getProjectNameByRepoId(repoId);
+        }
         // insert ignore relation
-        ignoreRecodeDao.insertOneRecord( new IgnoreRecord(UUID.randomUUID().toString(), userId, ignoreLevel.value(), type, repoId) );
+        ignoreRecodeDao.insertOneRecord( new IgnoreRecord(UUID.randomUUID().toString(), userId, ignoreLevel.value(), type, repoId, repoName) );
     }
 
     @Override
-    public void cancelOneIgnoreRecord(JSONObject requestBody) {
-        String userId = restInterfaceManager.getUserId(requestBody.getString("userToken"));
+    public void cancelOneIgnoreRecord(JSONObject requestBody,String token) {
+        String userId = restInterfaceManager.getUserId(token);
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
         String type = requestBody.getString("type");
         String repoId = requestBody.getString("repo-id");
@@ -174,6 +177,17 @@ public class TagServiceImpl implements TagService {
             return;
         }
         ignoreRecodeDao.cancelOneIgnoreRecord(userId, ignoreLevel.value(), type, repoId);
+    }
+
+    @Override
+    public Object getIgnoreRecordList(String token) {
+        String userId = restInterfaceManager.getUserId(token);
+        return ignoreRecodeDao.getIgnoreRecordList(userId);
+    }
+
+    @Override
+    public List<String> getIgnoreTypeListByRepoId(String repoId) {
+        return ignoreRecodeDao.getIgnoreTypeListByRepoId(repoId);
     }
 
     /**

@@ -28,7 +28,15 @@ public interface TagService {
 
     void deleteTagByProjectId(String projectId);
 
-    void ignoreOneType(JSONObject requestBody);
+    /**
+     * 以下是ignoreRecord 相关的service
+     * */
 
-    void cancelOneIgnoreRecord(JSONObject requestBody);
+    void ignoreOneType(JSONObject requestBody, String token);
+
+    void cancelOneIgnoreRecord(JSONObject requestBody, String token);
+
+    Object getIgnoreRecordList(String token);
+
+    List<String> getIgnoreTypeListByRepoId(String repoId);
 }

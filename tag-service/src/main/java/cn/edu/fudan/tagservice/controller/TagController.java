@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -63,12 +64,12 @@ public class TagController {
 
     /**
      *  ignore a kind of tag
-     *  userToken project-id ignore-level type
+     *   project-id ignore-level type
      */
     @PostMapping("/tags/ignore")
-    public Object ignoreOneType(@RequestBody JSONObject requestBody){
+    public Object ignoreOneType(@RequestBody JSONObject requestBody, HttpServletRequest request){
         try {
-            tagService.ignoreOneType(requestBody);
+            tagService.ignoreOneType(requestBody, request.getHeader("token"));
             return new ResponseBean(200, "ignore success", null);
         } catch (Exception e) {
             return new ResponseBean(401, "ignore failed !" + e.getMessage(), null);
@@ -77,17 +78,23 @@ public class TagController {
 
     /**
      *  cancel one ignored tag
-     *  userToken project-id ignore-level tag-id
+     *  project-id ignore-level tag-id
      */
     @DeleteMapping("/tags/ignore")
-    public Object cancelIgnoreRecord(@RequestBody JSONObject requestBody) {
+    public Object cancelIgnoreRecord(@RequestBody JSONObject requestBody, HttpServletRequest request) {
         try {
-            tagService.cancelOneIgnoreRecord(requestBody);
+            tagService.cancelOneIgnoreRecord(requestBody, request.getHeader("token"));
             return new ResponseBean(200, "modify success", null);
         } catch (Exception e) {
             return new ResponseBean(401, "modify failed :" + e.getMessage(), null);
         }
     }
+
+    @GetMapping("/tags/ignore")
+    public Object getIgnoreRecordList(HttpServletRequest request) {
+            return tagService.getIgnoreRecordList(request.getHeader("token"));
+    }
+
 
 
     /**
@@ -141,5 +148,10 @@ public class TagController {
         } catch (Exception e) {
             return new ResponseBean(401, "delete failed :" + e.getMessage(), null);
         }
+    }
+
+    @GetMapping("/inner/tags/ignore/types")
+    public Object getIgnoreTypeListByRepoId(@RequestParam("repo-id") String repoId) {
+        return tagService.getIgnoreTypeListByRepoId(repoId);
     }
 }

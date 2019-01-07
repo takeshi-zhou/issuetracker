@@ -9,6 +9,7 @@
         <result property="level" column="level"/>
         <result property="type" column="type"/>
         <result property="repoId" column="repo_id"/>
+        <result property="repoName" column="repo_name"/>
     </resultMap>
 
     <insert id="insertOneRecord" parameterType="ignoreRecord">
@@ -18,7 +19,8 @@
         user_id,
         level,
         type,
-        repo_id
+        repo_id,
+        repo_name
         )
         values
         (
@@ -26,7 +28,8 @@
         #{userId},
         #{level},
         #{type},
-        #{repoId}
+        #{repoId},
+        #{repoName}
         )
     </insert>
 
@@ -46,5 +49,12 @@
         select * from ignore_record where user_id = #{user_id} and level = #{level} and type = #{type} and repo_id = #{repo_id}
     </select>
 
+    <select id="getIgnoreRecordList" resultMap="ignoreRecord">
+        select * from ignore_record where user_id = #{user_id}
+    </select>
+
+    <select id="getIgnoreTypeListByRepoId" resultType="String">
+        select type from ignore_record where repo_id = #{repo_id}
+    </select>
 
 </mapper>
