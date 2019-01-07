@@ -94,6 +94,10 @@ public class RestInterfaceManager {
         restTemplate.postForObject(tagServicePath,tags, JSONObject.class);
     }
 
+    public JSONArray  getIgnoreTypesOfRepo(String repoId){
+        return restTemplate.getForObject(tagServicePath + "/ignore/types?repo-id=" + repoId, JSONArray.class);
+    }
+
 
     //----------------------------------------------------end--------------------------------------------------------
 

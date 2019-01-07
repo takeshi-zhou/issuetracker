@@ -2,6 +2,7 @@ package cn.edu.fudan.issueservice.service.impl;
 
 import cn.edu.fudan.issueservice.domain.*;
 import cn.edu.fudan.issueservice.util.LocationCompare;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         List<Issue> insertIssueList = new ArrayList<>();
         List<JSONObject> tags = new ArrayList<>();
         Date date= new Date();//当前时间
+        JSONArray ignoreTypes=restInterfaceManager.getIgnoreTypesOfRepo(repo_id);//获取该项目ignore的issue类型
         if (pre_commit_id.equals(current_commit_id)) {
             //当前project第一次扫描，所有的rawIssue都是issue
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
@@ -31,7 +33,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             for (RawIssue rawIssue : rawIssues) {
                 Issue issue=generateOneNewIssue(repo_id,rawIssue,category,current_commit_id,commitDate,date);
                 insertIssueList.add(issue);
-                addTag(tags,rawIssue,issue.getUuid());
+                addTag(tags,ignoreTypes,rawIssue,issue.getUuid());
             }
             int newIssueCount = insertIssueList.size();
             int remainingIssueCount = insertIssueList.size();
@@ -77,7 +79,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                     //如果当前commit的某个rawIssue没有在上个commit的rawissue列表里面找到匹配，将它作为新的issue插入
                     Issue issue=generateOneNewIssue(repo_id,issue_2,category,current_commit_id,commitDate,date);
                     insertIssueList.add(issue);
-                    addTag(tags,issue_2,issue.getUuid());
+                    addTag(tags,ignoreTypes,issue_2,issue.getUuid());
                 }
             }
             if (!issues.isEmpty()) {
