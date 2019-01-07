@@ -2,6 +2,7 @@ package cn.edu.fudan.issueservice.service.impl;
 
 import cn.edu.fudan.issueservice.domain.*;
 import cn.edu.fudan.issueservice.util.LocationCompare;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
     private void newCloneInsert(boolean isFirst,Map<String,List<RawIssue>> map,Set<String> groupsNeedInsert,String repo_id,String current_commit_id,Date commitDate,String category,String committer,Date date){
         List<Issue> insertIssueList = new ArrayList<>();
         List<JSONObject> tags = new ArrayList<>();
+        JSONArray ignoreTypes=restInterfaceManager.getIgnoreTypesOfRepo(repo_id);//获取该项目ignore的issue类型
         for(String group:groupsNeedInsert){
             //所有新的group，每一个都是一个新的issue
             String new_IssueId=UUID.randomUUID().toString();
@@ -40,7 +42,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
                     priority = priority == 5 ? 4 : priority ;
                     issue.setPriority(priority);
                     issue.setRaw_issue_start(rawIssue.getUuid());
-                    addTag(tags,rawIssue,new_IssueId);
+                    addTag(tags,ignoreTypes,rawIssue,new_IssueId);
                 }
                 if(i==rawIssuesInOneGroup.size()-1)
                     issue.setRaw_issue_end(rawIssue.getUuid());
@@ -145,7 +147,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
             log.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(rawIssues2);
-            addSolvedTag(repo_id,category, pre_commit_id,EventType.REMOVE_CLONE_CLASS,committer);
+            modifyToSolvedTag(repo_id,category, pre_commit_id,EventType.REMOVE_CLONE_CLASS,committer);
         }
         log.info("mapping finished!");
     }

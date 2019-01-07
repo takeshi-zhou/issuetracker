@@ -11,6 +11,7 @@ import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 import cn.edu.fudan.issueservice.domain.RawIssueDetail;
 import cn.edu.fudan.issueservice.service.MappingService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,8 @@ public class BaseMappingServiceImpl implements MappingService {
 
     @Value("${solved.tag_id}")
     private String solvedTagId;
+    @Value("${ignore.tag_id}")
+    private String ignoreTagId;
 
     IssueEventManager issueEventManager;
     IssueDao issueDao;
@@ -47,9 +50,15 @@ public class BaseMappingServiceImpl implements MappingService {
         this.tagMapHelper = tagMapHelper;
     }
 
-     void addTag(List<JSONObject> tags, RawIssue rawIssue, String issueId){
-        RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
-        String tagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
+     void addTag(List<JSONObject> tags, JSONArray ignoreTypes, RawIssue rawIssue, String issueId){
+         String tagID;
+         if(ignoreTypes!=null&&!ignoreTypes.isEmpty()&&ignoreTypes.contains(rawIssue.getType())){
+             //如果新增的issue的类型包含在ignore的类型之中，打ignore的tag
+              tagID=ignoreTagId;
+         }else{
+             RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
+             tagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
+         }
         if(tagID!=null){
             JSONObject tagged = new JSONObject();
             tagged.put("item_id", issueId);
@@ -161,24 +170,6 @@ public class BaseMappingServiceImpl implements MappingService {
             }
         }
 
-    }
-
-    void addSolvedTag(String repo_id, String category,String pre_commit_id,EventType eventType,String committer) {
-        List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
-        if(issues != null) {
-            issueEventManager.sendIssueEvent(eventType, issues, committer, repo_id);
-            if (!issues.isEmpty()) {
-                eliminatedInfoUpdate(issues, category, repo_id);
-                List<JSONObject> taggeds = new ArrayList<>();
-                for (Issue issue : issues) {
-                    JSONObject tagged = new JSONObject();
-                    tagged.put("item_id", issue.getUuid());
-                    tagged.put("tag_id", solvedTagId);
-                    taggeds.add(tagged);
-                }
-                restInterfaceManager.addTags(taggeds);
-            }
-        }
     }
 
     @Override
