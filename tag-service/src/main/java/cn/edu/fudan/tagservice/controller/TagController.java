@@ -64,7 +64,7 @@ public class TagController {
 
     /**
      *  ignore a kind of tag
-     *   project-id ignore-level type
+     *   repo-id ignore-level type
      */
     @PostMapping("/tags/ignore")
     public Object ignoreOneType(@RequestBody JSONObject requestBody, HttpServletRequest request){
@@ -78,7 +78,7 @@ public class TagController {
 
     /**
      *  cancel one ignored tag
-     *  project-id ignore-level tag-id
+     *  repo-id ignore-level tag-id
      */
     @DeleteMapping("/tags/ignore")
     public Object cancelIgnoreRecord(@RequestBody JSONObject requestBody, HttpServletRequest request) {
