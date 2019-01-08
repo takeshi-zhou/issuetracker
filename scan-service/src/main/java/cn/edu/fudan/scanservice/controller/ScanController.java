@@ -48,6 +48,17 @@ public class ScanController {
         return scanService.getCommits(project_id, page, size, is_whole,category);
     }
 
+    @GetMapping(value = {"/scan/next-scanned-commits"})
+    public Object getNextScannedCommit(@RequestParam("repo_id") String repo_id,
+                                       @RequestParam("category")String category,
+                                       @RequestParam("commit_id")String commit_id){
+        try{
+            return new ResponseBean(200,"success",scanService.getNextScannedCommitID(repo_id, category, commit_id));
+        }catch (Exception e){
+            return new ResponseBean(500,e.getMessage(),null);
+        }
+    }
+
     //下面都是供其它服务调用的内部接口
 
     @DeleteMapping(value = {"/inner/scan/{category}/{repoId}"})
