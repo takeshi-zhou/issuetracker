@@ -135,6 +135,14 @@ public class TagServiceImpl implements TagService {
         tagDao.deleteTagByProjectId(projectId);
     }
 
+    @Override
+    public boolean isSolved(String itemId) {
+        List<Tag> tags=tagDao.getTagsByItemId(itemId);
+        if(tags==null||tags.isEmpty())
+            return false;
+        return tags.get(0).getName().equals("Solved");
+    }
+
 
     /**
      * Two scenarios ：USER ,PROJECT
