@@ -70,7 +70,7 @@ public class RestInterfaceManager {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("list",ignoreUuidList);
         jsonObject.put("priority",priority);
-        Object o = restTemplate.patchForObject(issueServicePath + "/inner/issue/priority" ,jsonObject , Object.class);
+        Object o = restTemplate.postForObject(issueServicePath + "/inner/issue/priority" ,jsonObject , Object.class);
         if (o == null || o.toString().contains("failed")) {
             throw new RuntimeException("Batch Update Issue List Priority ERROR!");
         }
