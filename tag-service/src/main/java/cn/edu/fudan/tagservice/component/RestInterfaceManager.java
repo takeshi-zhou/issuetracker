@@ -5,15 +5,10 @@
  **/
 package cn.edu.fudan.tagservice.component;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import reactor.util.annotation.Nullable;
-
-import javax.validation.constraints.Null;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,8 +67,11 @@ public class RestInterfaceManager {
     }
 
     public void batchUpdateIssueListPriority(List<String> ignoreUuidList, int priority) {
-        Object o = restTemplate.patchForObject(issueServicePath + "/inner/issue/priority" + priority,ignoreUuidList , Object.class);
-        if (o == null || o.toString().contains("failure")) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("list",ignoreUuidList);
+        jsonObject.put("priority",priority);
+        Object o = restTemplate.patchForObject(issueServicePath + "/inner/issue/priority" ,jsonObject , Object.class);
+        if (o == null || o.toString().contains("failed")) {
             throw new RuntimeException("Batch Update Issue List Priority ERROR!");
         }
     }

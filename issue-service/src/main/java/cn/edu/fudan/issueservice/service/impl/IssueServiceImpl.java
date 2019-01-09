@@ -495,4 +495,14 @@ public class IssueServiceImpl implements IssueService {
     public void updatePriority(String issueId, String priority) {
         issueDao.updateOneIssuePriority(issueId,Integer.parseInt(priority));
     }
+
+    @Override
+    public void batchUpdateIssueListPriority(List<String> issueUuid, Integer priority) {
+        issueDao.batchUpdateIssueListPriority(issueUuid, priority.intValue());
+    }
+
+    @Override
+    public List<String> getIssueListByTypeAndRepoId(String repoId, String type) {
+        return issueDao.getIssueIdListByTypeAndRepoId(repoId, type);
+    }
 }

@@ -92,4 +92,12 @@ public class IssueDao {
     public Integer getMaxIssueDisplayId(String repoId) {
         return issueMapper.getMaxIssueDisplayId(repoId);
     }
+
+    public List<String> getIssueIdListByTypeAndRepoId(String repoId, String type) {
+        return issueMapper.getIssueIdListByTypeAndRepoId(repoId, type);
+    }
+
+    public void batchUpdateIssueListPriority(List issueUuid, int priority) {
+        issueMapper.batchUpdateIssueListPriority(issueUuid, priority);
+    }
 }

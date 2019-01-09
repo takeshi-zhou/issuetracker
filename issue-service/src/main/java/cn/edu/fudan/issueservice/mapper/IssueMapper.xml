@@ -327,4 +327,18 @@
         select uuid from issue where repo_id = #{repo_id}
     </select>
 
+    <select id="getIssueIdListByTypeAndRepoId" parameterType="String" resultType="String">
+        select uuid from issue where repo_id = #{repo_id} and type = #{type}
+    </select>
+
+    <update id="batchUpdateIssueListPriority" >
+        update issue set priority = #{priority}
+        <if test="list != null">
+            where uuid in
+            <foreach collection="list" separator="," open="(" close=")" item="issue_id">
+                #{issue_id}
+            </foreach>
+        </if>
+    </update>
+
 </mapper>

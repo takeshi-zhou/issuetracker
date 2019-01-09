@@ -40,4 +40,8 @@ public interface IssueService {
     Object getNewTrend(Integer month, String project_id, String userToken, String category);
 
     void updatePriority(String issueId, String priority);
+
+    void batchUpdateIssueListPriority(List<String> issueUuid, Integer priority);
+
+    List<String> getIssueListByTypeAndRepoId(String repoId, String type);
 }
