@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,8 @@ import java.util.*;
 public class TagServiceImpl implements TagService {
 
     private Logger logger = LoggerFactory.getLogger(TagServiceImpl.class);
+    @Value("${ignore.tag_id}")
+    private String ignoreTagId ;
 
     private TagDao tagDao;
 
@@ -48,7 +51,8 @@ public class TagServiceImpl implements TagService {
         String scope = requestBody.getString("scope");
         String itemId = requestBody.getString("itemId");
         String tag_id;
-        if (requestBody.getBoolean("isDefault")) {   // 默认的tag，不是自定义的
+        // 默认的tag，不是自定义的
+        if (requestBody.getBoolean("isDefault")) {
             tag_id = tagDao.getUuidByNameAndScope(name, scope);
             if (tag_id == null) {
                 tag_id = UUID.randomUUID().toString();
@@ -146,24 +150,23 @@ public class TagServiceImpl implements TagService {
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
         String type = requestBody.getString("type");
         String repoId = requestBody.getString("repo-id");
+
         // before ignore tag query the type is ignored or not
         if (isIgnored(userId, ignoreLevel.value(), type, repoId)) {
             throw new RuntimeException("this type has been ignored");
         }
-
-        /*
-        if (ignoreLevel == IgnoreLevelEnum.REPOSITORY) {
-            repoId = restInterfaceManager.getGitRepoId(repoId);
-        }
-        */
-        String repoName = null;
-        if (ignoreLevel == IgnoreLevelEnum.USER) {
-            repoId = null;
-        }else {
-            repoName = restInterfaceManager.getProjectNameByRepoId(repoId);
-        }
+        String repoName = restInterfaceManager.getProjectNameByRepoId(repoId);
         // insert ignore relation
         ignoreRecodeDao.insertOneRecord( new IgnoreRecord(UUID.randomUUID().toString(), userId, ignoreLevel.value(), type, repoId, repoName) );
+        // modify issue list priority
+        List<String> ignoreUuidList = restInterfaceManager.getIssueListByTypeAndRepoId(repoId,type);
+        restInterfaceManager.batchUpdateIssueListPriority(ignoreUuidList, PriorityEnum.IGNORE.getLevel());
+
+        List<TaggedItem> ignoreList = new ArrayList<>();
+        for (String uuid : ignoreUuidList) {
+            ignoreList.add(new TaggedItem(uuid, ignoreTagId));
+        }
+        tagDao.addMultiTaggedItem(ignoreList);
     }
 
     @Override
