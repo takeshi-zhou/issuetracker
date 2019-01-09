@@ -4,6 +4,7 @@ import cn.edu.fudan.scanservice.domain.Scan;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -18,6 +19,8 @@ public interface ScanMapper {
     void updateOneScan(Scan scan);
 
     String getLatestScannedCommitId(@Param("repo_id") String repo_id,@Param("category")String category);
+
+    Date getLastScannedCommitTime(@Param("repo_id") String repo_id,@Param("category")String category);
 
     List<Scan> getScannedCommits(@Param("repo_id") String repo_id,@Param("category")String category);
 }

@@ -50,23 +50,6 @@ public class BaseMappingServiceImpl implements MappingService {
         this.tagMapHelper = tagMapHelper;
     }
 
-     void addTag(List<JSONObject> tags, JSONArray ignoreTypes, RawIssue rawIssue, String issueId){
-         String tagID;
-         if(ignoreTypes!=null&&!ignoreTypes.isEmpty()&&ignoreTypes.contains(rawIssue.getType())){
-             //如果新增的issue的类型包含在ignore的类型之中，打ignore的tag
-              tagID=ignoreTagId;
-         }else{
-             RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
-             tagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
-         }
-        if(tagID!=null){
-            JSONObject tagged = new JSONObject();
-            tagged.put("item_id", issueId);
-            tagged.put("tag_id", tagID);
-            tags.add(tagged);
-        }
-    }
-
     @Autowired
     public void setScanResultDao(ScanResultDao scanResultDao) {
         this.scanResultDao = scanResultDao;
@@ -95,14 +78,6 @@ public class BaseMappingServiceImpl implements MappingService {
     @Autowired
     public void setStringRedisTemplate(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
-    }
-
-    Date getCommitDate(String commitId){
-        JSONObject response=restInterfaceManager.getCommitTime(commitId);
-        if(response!=null){
-            return response.getJSONObject("data").getDate("commit_time");
-        }
-        return null;
     }
 
     void newIssueInfoUpdate(List<Issue> issueList,String category,String repo_id){
@@ -153,6 +128,39 @@ public class BaseMappingServiceImpl implements MappingService {
         stringRedisTemplate.exec();
     }
 
+    Date getCommitDate(String commitId){
+        JSONObject response=restInterfaceManager.getCommitTime(commitId);
+        if(response!=null){
+            return response.getJSONObject("data").getDate("commit_time");
+        }
+        return null;
+    }
+
+    @Override
+    public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category,String committer) {
+        throw new UnsupportedOperationException();
+    }
+
+    int addTag(List<JSONObject> tags, JSONArray ignoreTypes, RawIssue rawIssue, String issueId){
+        int result=0;
+        String tagID;
+        if(ignoreTypes!=null&&!ignoreTypes.isEmpty()&&ignoreTypes.contains(rawIssue.getType())){
+            //如果新增的issue的类型包含在ignore的类型之中，打ignore的tag
+            tagID=ignoreTagId;
+            result=1;
+        }else{
+            RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
+            tagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
+        }
+        if(tagID!=null){
+            JSONObject tagged = new JSONObject();
+            tagged.put("item_id", issueId);
+            tagged.put("tag_id", tagID);
+            tags.add(tagged);
+        }
+        return result;
+    }
+
     void modifyToSolvedTag(String repo_id,String category, String pre_commit_id,EventType eventType,String committer) {
         List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
         if(issues != null){
@@ -172,8 +180,4 @@ public class BaseMappingServiceImpl implements MappingService {
 
     }
 
-    @Override
-    public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category,String committer) {
-        throw new UnsupportedOperationException();
-    }
 }

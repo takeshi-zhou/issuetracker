@@ -7,6 +7,8 @@ public interface ScanOperation {
 
     boolean isScanned(String repoId,String commitId,String category);
 
+    boolean checkCommit(String repoId,String commitId,String category);
+
     boolean checkOut(String repoId, String commitId);
 
     ScanInitialInfo initialScan(String repoId, String commitId,String category);

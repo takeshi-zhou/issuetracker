@@ -48,7 +48,12 @@ public class BaseScanTask {
             logger.info("Scan Success!");
             return;
         }
-        logger.info("this commit has not been scanned,start to scan...");
+        logger.info("this commit has not been scanned,start to check commit time");
+        if(!scanOperation.checkCommit(repoId, commitId, category)){
+            send(repoId, commitId, category,"failed", "commit too old");
+            logger.error("Current commit time is before last scanned commit!");
+            return;
+        }
         logger.info("start to checkout -> " + commitId);
         //checkout,如果失败发送错误消息，直接返回
         if (!scanOperation.checkOut(repoId, commitId)) {

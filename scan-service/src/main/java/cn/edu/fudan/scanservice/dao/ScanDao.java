@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -33,6 +34,10 @@ public class ScanDao {
 
     public String getLatestScannedCommitId(String repo_id,String category) {
         return scanMapper.getLatestScannedCommitId(repo_id,category);
+    }
+
+    public Date getLastScannedCommitTime(String repo_id, String category){
+        return scanMapper.getLastScannedCommitTime(repo_id, category);
     }
 
     public boolean isScanned(String repoId,String commit_id,String category) {

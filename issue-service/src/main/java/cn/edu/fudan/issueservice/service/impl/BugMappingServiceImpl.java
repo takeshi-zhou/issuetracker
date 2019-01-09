@@ -19,7 +19,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
     @Override
     public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category, String committer) {
-        List<Issue> insertIssueList = new ArrayList<>();
+        List<Issue> insertIssueList = new ArrayList<>();//存当前扫描后需要插入的新的issue
         List<JSONObject> tags = new ArrayList<>();
         Date date= new Date();//当前时间
         JSONArray ignoreTypes=restInterfaceManager.getIgnoreTypesOfRepo(repo_id);//获取该项目ignore的issue类型
@@ -54,6 +54,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             //装需要更新的
             List<Issue> issues = new ArrayList<>();
             int equalsCount = 0;
+            int ignoreCountInNewIssues=0;
             for (RawIssue issue_2 : rawIssues2) {
                 boolean mapped = false;
                 for (RawIssue issue_1 : rawIssues1) {
@@ -79,7 +80,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                     //如果当前commit的某个rawIssue没有在上个commit的rawissue列表里面找到匹配，将它作为新的issue插入
                     Issue issue=generateOneNewIssue(repo_id,issue_2,category,current_commit_id,commitDate,date);
                     insertIssueList.add(issue);
-                    addTag(tags,ignoreTypes,issue_2,issue.getUuid());
+                    ignoreCountInNewIssues+=addTag(tags,ignoreTypes,issue_2,issue.getUuid());
                 }
             }
             if (!issues.isEmpty()) {
@@ -87,9 +88,9 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 issueDao.batchUpdateIssue(issues);
                 log.info("issue update success!");
             }
-            int eliminatedIssueCount = rawIssues1.size() - equalsCount;
-            int remainingIssueCount = rawIssues2.size();
-            int newIssueCount = rawIssues2.size() - equalsCount;
+            int eliminatedIssueCount = rawIssues1.size() - equalsCount+ignoreCountInNewIssues;
+            int remainingIssueCount = rawIssues2.size()-ignoreCountInNewIssues;
+            int newIssueCount = rawIssues2.size() - equalsCount-ignoreCountInNewIssues;
             log.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
             log.info("dashboard info updated!");
