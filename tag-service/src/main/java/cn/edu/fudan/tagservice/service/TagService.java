@@ -28,6 +28,8 @@ public interface TagService {
 
     void deleteTagByProjectId(String projectId);
 
+    boolean isSolved(String itemId);
+
     /**
      * 以下是ignoreRecord 相关的service
      * */

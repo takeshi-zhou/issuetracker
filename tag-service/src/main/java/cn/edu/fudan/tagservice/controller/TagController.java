@@ -95,8 +95,14 @@ public class TagController {
             return tagService.getIgnoreRecordList(request.getHeader("token"));
     }
 
-
-
+    @GetMapping("/tags/isSolved")
+    public Object isSolved(@RequestParam("issueId")String issueId){
+        try{
+            return new ResponseBean(200,"success",tagService.isSolved(issueId));
+        }catch (Exception e){
+            return new ResponseBean(500,e.getMessage(),null);
+        }
+    }
     /**
      *  以下为内部服务调用
      * */
