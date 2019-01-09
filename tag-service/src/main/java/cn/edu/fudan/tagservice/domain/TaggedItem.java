@@ -9,6 +9,11 @@ public class TaggedItem {
     private String item_id;
     private String tag_id;
 
+    public TaggedItem(String item_id, String tag_id) {
+        this.item_id = item_id;
+        this.tag_id = tag_id;
+    }
+
     public String getItem_id() {
         return item_id;
     }

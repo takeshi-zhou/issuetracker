@@ -167,4 +167,23 @@ public class IssueController {
         }
     }
 
+    @PostMapping(value = "/inner/issue/priority")
+    @SuppressWarnings("unchecked")
+    public Object batchUpdateIssueListPriority(@RequestBody JSONObject requestParam) {
+        try {
+            List<String> issueUuid = requestParam.getObject( "list",List.class);
+            issueService.batchUpdateIssueListPriority(issueUuid, requestParam.getInteger("priority"));
+            return new ResponseBean(200, "success!", null);
+        }catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "failed!", null);
+        }
+    }
+
+    @GetMapping(value = "/inner/issue/uuid")
+    public List<String> getIssueListByTypeAndRepoId(@RequestParam("repo-id") String repoId,@RequestParam("type") String type) {
+        return issueService.getIssueListByTypeAndRepoId(repoId, type);
+    }
+
+
 }

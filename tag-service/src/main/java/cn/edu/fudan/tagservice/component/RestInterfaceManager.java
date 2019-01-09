@@ -5,15 +5,12 @@
  **/
 package cn.edu.fudan.tagservice.component;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import reactor.util.annotation.Nullable;
-
-import javax.validation.constraints.Null;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -27,6 +24,9 @@ public class RestInterfaceManager {
 
     @Value("${repository.service.path}")
     private String repoServicePath;
+
+    @Value("${issue.service.path}")
+    private String issueServicePath;
 
     private RestTemplate restTemplate;
 
@@ -46,10 +46,6 @@ public class RestInterfaceManager {
     /**
      * project service
      * */
-    public String getProjectNameByProjectId(String projectId) {
-        String name = restTemplate.getForObject(projectServicePath + "/inner/project?repo_id=" + projectId, JSONObject.class).getString("name");
-        return name;
-    }
     public String getProjectNameByRepoId(String repoId) {
         JSONObject currentRepo = restTemplate.getForObject(repoServicePath + "/repository/" + repoId, JSONObject.class);
         return currentRepo.getJSONObject("data").getString("repo_name");
@@ -62,5 +58,21 @@ public class RestInterfaceManager {
         return "repoId";
     }
 
+    /**
+     * issue service
+     * */
+    @SuppressWarnings("unchecked")
+    public List<String> getIssueListByTypeAndRepoId(String repoId, String type) {
+        return restTemplate.getForObject(issueServicePath + "/inner/issue/uuid?repo-id=" + repoId + "&type=" + type, List.class);
+    }
 
+    public void batchUpdateIssueListPriority(List<String> ignoreUuidList, int priority) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("list",ignoreUuidList);
+        jsonObject.put("priority",priority);
+        Object o = restTemplate.patchForObject(issueServicePath + "/inner/issue/priority" ,jsonObject , Object.class);
+        if (o == null || o.toString().contains("failed")) {
+            throw new RuntimeException("Batch Update Issue List Priority ERROR!");
+        }
+    }
 }
