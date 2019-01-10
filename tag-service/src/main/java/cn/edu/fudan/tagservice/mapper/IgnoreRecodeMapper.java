@@ -22,4 +22,6 @@ public interface IgnoreRecodeMapper {
     List<IgnoreRecord> getIgnoreRecordList(@Param("user_id")String userId);
 
     List<String> getIgnoreTypeListByRepoId(@Param("repo_id")String repoId);
+
+    void deleteIgnoreRecordWhenRepoRemove(@Param("repo-id") String repoId, @Param("user_id") String accountId);
 }

@@ -50,4 +50,8 @@ public class IgnoreRecodeDao {
     public List<String> getIgnoreTypeListByRepoId(String repoId) {
         return ignoreRecodeMapper.getIgnoreTypeListByRepoId(repoId);
     }
+
+    public void deleteIgnoreRecordWhenRepoRemove(String repoId, String accountId) {
+        ignoreRecodeMapper.deleteIgnoreRecordWhenRepoRemove(repoId, accountId);
+    }
 }

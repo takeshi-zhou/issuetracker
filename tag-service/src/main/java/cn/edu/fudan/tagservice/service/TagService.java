@@ -41,4 +41,6 @@ public interface TagService {
     Object getIgnoreRecordList(String token);
 
     List<String> getIgnoreTypeListByRepoId(String repoId);
+
+    void deleteIgnoreRecordWhenRepoRemove(String repoId, String accountId);
 }

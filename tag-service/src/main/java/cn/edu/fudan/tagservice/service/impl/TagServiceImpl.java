@@ -202,6 +202,11 @@ public class TagServiceImpl implements TagService {
         return ignoreRecodeDao.getIgnoreTypeListByRepoId(repoId);
     }
 
+    @Override
+    public void deleteIgnoreRecordWhenRepoRemove(String repoId, String accountId) {
+        ignoreRecodeDao.deleteIgnoreRecordWhenRepoRemove(repoId, accountId);
+    }
+
     /**
      *  根据ignore 的level 级别返回对应的结果
      * */

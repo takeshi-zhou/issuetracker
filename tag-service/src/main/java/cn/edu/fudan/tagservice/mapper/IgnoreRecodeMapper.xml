@@ -57,4 +57,7 @@
         select type from ignore_record where repo_id = #{repo_id}
     </select>
 
+    <delete id="deleteIgnoreRecordWhenRepoRemove" parameterType="String">
+        delete from ignore_record where repo_id = #{repo_id} and user_id = #{user_id}
+    </delete>
 </mapper>
