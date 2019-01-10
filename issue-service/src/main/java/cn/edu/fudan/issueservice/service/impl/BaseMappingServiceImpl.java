@@ -32,7 +32,7 @@ public class BaseMappingServiceImpl implements MappingService {
     @Value("${solved.tag_id}")
     private String solvedTagId;
     @Value("${ignore.tag_id}")
-    private String ignoreTagId;
+    String ignoreTagId;
 
     IssueEventManager issueEventManager;
     IssueDao issueDao;

@@ -56,6 +56,9 @@ public class IssueDao {
         return issueMapper.getSolvedIssues(repo_id, commit_id);
     }
 
+    public int getIgnoredCountInMappedIssues(String ignoreId, List<String> list){
+        return issueMapper.getIgnoredCountInMappedIssues(ignoreId, list);
+    }
 
     public int getSpecificIssueCount(Map<String, Object> map){
         return issueMapper.getSpecificIssueCount(map);

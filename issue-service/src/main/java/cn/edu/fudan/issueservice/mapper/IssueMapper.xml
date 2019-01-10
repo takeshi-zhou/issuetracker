@@ -341,4 +341,14 @@
         </if>
     </update>
 
+    <select id="getIgnoredCountInMappedIssues" resultType="int">
+        select count(uuid) from issue
+        inner join tagged on uuid = item_id
+        where uuid in
+        <foreach collection="list" separator="," open="(" close=")" item="issue_id">
+            #{issue_id}
+        </foreach>
+        and tag_id = #{ignoreId}
+    </select>
+
 </mapper>

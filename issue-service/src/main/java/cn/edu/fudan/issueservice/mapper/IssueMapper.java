@@ -43,6 +43,8 @@ public interface IssueMapper {
 
     Integer getMaxIssueDisplayId(@Param("repo_id") String repoId);
 
+    int getIgnoredCountInMappedIssues(@Param("ignoreId")String ignoreId, @Param("list")List<String> list);
+
     // just for update old data
     void updateIssueDisplayId(@Param("uuid")String uuid, @Param("display_id") int displayId);
     List<String> getAllRepoId();
