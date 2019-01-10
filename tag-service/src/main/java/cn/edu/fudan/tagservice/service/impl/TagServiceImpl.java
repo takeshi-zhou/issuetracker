@@ -1,7 +1,7 @@
 package cn.edu.fudan.tagservice.service.impl;
 
 import cn.edu.fudan.tagservice.component.RestInterfaceManager;
-import cn.edu.fudan.tagservice.dao.IgnoreRecodeDao;
+import cn.edu.fudan.tagservice.dao.IgnoreRecordDao;
 import cn.edu.fudan.tagservice.dao.TagDao;
 
 import cn.edu.fudan.tagservice.domain.*;
@@ -25,7 +25,7 @@ public class TagServiceImpl implements TagService {
 
     private TagDao tagDao;
 
-    private IgnoreRecodeDao ignoreRecodeDao;
+    private IgnoreRecordDao ignoreRecordDao;
 
     private RestInterfaceManager restInterfaceManager;
 
@@ -35,8 +35,8 @@ public class TagServiceImpl implements TagService {
     }
 
     @Autowired
-    public void setIgnoreRecodeDao(IgnoreRecodeDao ignoreRecodeDao) {
-        this.ignoreRecodeDao = ignoreRecodeDao;
+    public void setIgnoreRecordDao(IgnoreRecordDao ignoreRecordDao) {
+        this.ignoreRecordDao = ignoreRecordDao;
     }
 
     @Autowired
@@ -165,7 +165,7 @@ public class TagServiceImpl implements TagService {
         }
         String repoName = restInterfaceManager.getProjectNameByRepoId(repoId);
         // insert ignore relation
-        ignoreRecodeDao.insertOneRecord( new IgnoreRecord(UUID.randomUUID().toString(), userId, ignoreLevel.value(), type, repoId, repoName) );
+        ignoreRecordDao.insertOneRecord( new IgnoreRecord(UUID.randomUUID().toString(), userId, ignoreLevel.value(), type, repoId, repoName) );
         // modify issue list priority
         List<String> ignoreUuidList = restInterfaceManager.getIssueListByTypeAndRepoId(repoId,type);
         restInterfaceManager.batchUpdateIssueListPriority(ignoreUuidList, PriorityEnum.IGNORE.getLevel());
@@ -185,33 +185,33 @@ public class TagServiceImpl implements TagService {
         String repoId = requestBody.getString("repoId");
 
         if (ignoreLevel == IgnoreLevelEnum.USER) {
-            ignoreRecodeDao.cancelInvalidRecord(userId, type);
+            ignoreRecordDao.cancelInvalidRecord(userId, type);
             return;
         }
-        ignoreRecodeDao.cancelOneIgnoreRecord(userId, ignoreLevel.value(), type, repoId);
+        ignoreRecordDao.cancelOneIgnoreRecord(userId, ignoreLevel.value(), type, repoId);
     }
 
     @Override
     public Object getIgnoreRecordList(String token) {
         String userId = restInterfaceManager.getUserId(token);
-        return ignoreRecodeDao.getIgnoreRecordList(userId);
+        return ignoreRecordDao.getIgnoreRecordList(userId);
     }
 
     @Override
     public List<String> getIgnoreTypeListByRepoId(String repoId) {
-        return ignoreRecodeDao.getIgnoreTypeListByRepoId(repoId);
+        return ignoreRecordDao.getIgnoreTypeListByRepoId(repoId);
     }
 
     @Override
     public void deleteIgnoreRecordWhenRepoRemove(String repoId, String accountId) {
-        ignoreRecodeDao.deleteIgnoreRecordWhenRepoRemove(repoId, accountId);
+        ignoreRecordDao.deleteIgnoreRecordWhenRepoRemove(repoId, accountId);
     }
 
     /**
      *  根据ignore 的level 级别返回对应的结果
      * */
     private boolean isIgnored(String userId, int level, String type, String repoId) {
-        Integer recordLevel = ignoreRecodeDao.queryMinIgnoreLevelByUserId(userId, type);
+        Integer recordLevel = ignoreRecordDao.queryMinIgnoreLevelByUserId(userId, type);
         if (recordLevel == null)
             return false;
 
@@ -221,11 +221,11 @@ public class TagServiceImpl implements TagService {
         }
 
         if (level == IgnoreLevelEnum.USER.value()) {
-            ignoreRecodeDao.cancelInvalidRecord(userId, type);
+            ignoreRecordDao.cancelInvalidRecord(userId, type);
             return false;
         }
 
-        IgnoreRecord ignoreRecord = ignoreRecodeDao.queryOneRecord(userId, level, type, repoId);
+        IgnoreRecord ignoreRecord = ignoreRecordDao.queryOneRecord(userId, level, type, repoId);
         return ignoreRecord != null;
     }
 }

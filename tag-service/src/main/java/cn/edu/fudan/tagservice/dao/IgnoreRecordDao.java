@@ -6,52 +6,52 @@
 package cn.edu.fudan.tagservice.dao;
 
 import cn.edu.fudan.tagservice.domain.IgnoreRecord;
-import cn.edu.fudan.tagservice.mapper.IgnoreRecodeMapper;
+import cn.edu.fudan.tagservice.mapper.IgnoreRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class IgnoreRecodeDao {
+public class IgnoreRecordDao {
 
-    private IgnoreRecodeMapper ignoreRecodeMapper;
+    private IgnoreRecordMapper ignoreRecordMapper;
 
     @Autowired
-    public void setIgnoreRecodeMapper(IgnoreRecodeMapper ignoreRecodeMapper) {
-        this.ignoreRecodeMapper = ignoreRecodeMapper;
+    public void setIgnoreRecordMapper(IgnoreRecordMapper ignoreRecordMapper) {
+        this.ignoreRecordMapper = ignoreRecordMapper;
     }
 
 
     public void insertOneRecord(IgnoreRecord ignoreRecord) {
-        ignoreRecodeMapper.insertOneRecord(ignoreRecord);
+        ignoreRecordMapper.insertOneRecord(ignoreRecord);
     }
 
     public void cancelOneIgnoreRecord(String userId, int level, String type, String repoId) {
-        ignoreRecodeMapper.cancelOneIgnoreRecord(userId, level, type, repoId);
+        ignoreRecordMapper.cancelOneIgnoreRecord(userId, level, type, repoId);
     }
 
     public Integer queryMinIgnoreLevelByUserId(String userId, String type) {
-        return ignoreRecodeMapper.queryMinIgnoreLevelByUserId(userId, type);
+        return ignoreRecordMapper.queryMinIgnoreLevelByUserId(userId, type);
     }
 
     public void cancelInvalidRecord(String userId, String type) {
-        ignoreRecodeMapper.cancelInvalidRecord(userId, type);
+        ignoreRecordMapper.cancelInvalidRecord(userId, type);
     }
 
     public IgnoreRecord queryOneRecord(String userId, int level, String type, String repoId) {
-        return ignoreRecodeMapper.queryOneRecord(userId, level, type, repoId);
+        return ignoreRecordMapper.queryOneRecord(userId, level, type, repoId);
     }
 
     public List<IgnoreRecord> getIgnoreRecordList(String userId) {
-        return ignoreRecodeMapper.getIgnoreRecordList(userId);
+        return ignoreRecordMapper.getIgnoreRecordList(userId);
     }
 
     public List<String> getIgnoreTypeListByRepoId(String repoId) {
-        return ignoreRecodeMapper.getIgnoreTypeListByRepoId(repoId);
+        return ignoreRecordMapper.getIgnoreTypeListByRepoId(repoId);
     }
 
     public void deleteIgnoreRecordWhenRepoRemove(String repoId, String accountId) {
-        ignoreRecodeMapper.deleteIgnoreRecordWhenRepoRemove(repoId, accountId);
+        ignoreRecordMapper.deleteIgnoreRecordWhenRepoRemove(repoId, accountId);
     }
 }
