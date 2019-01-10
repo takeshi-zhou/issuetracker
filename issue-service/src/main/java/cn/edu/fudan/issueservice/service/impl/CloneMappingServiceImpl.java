@@ -97,6 +97,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             log.info("not first mapping!");
             //装需要更新的Issue
             List<Issue> issues = new ArrayList<>();
+            List<String> mappedIssueIds=new ArrayList<>();
             Map<String,List<RawIssue>> map1=rawIssues1.stream().collect(Collectors.groupingBy(RawIssue::getType));
             Map<String,List<RawIssue>> map2=rawIssues2.stream().collect(Collectors.groupingBy(RawIssue::getType));
             Set<String> preGroups=map1.keySet();
@@ -111,6 +112,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
                         groupMapped=true;
                         equalsCount++;
                         Issue issue=issueDao.getIssueByID(map1.get(preGroup).get(0).getIssue_id());
+                        mappedIssueIds.add(issue.getUuid());
                         for(int i=0;i<rawIssuesInCurrentGroup.size();i++){
                             RawIssue rawIssue=rawIssuesInCurrentGroup.get(i);
                             rawIssue.setIssue_id(issue.getUuid());//当前group的所有rawIssue都对应到匹配到的group的issue
@@ -141,8 +143,10 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
                 issueDao.batchUpdateIssue(issues);
                 log.info("issues update success!");
             }
-            int eliminatedIssueCount = rawIssues1.size() - equalsCount+ignoreCountInNewIssues;
-            int remainingIssueCount = rawIssues2.size()-ignoreCountInNewIssues;
+            //在匹配的issue中上次commit被ignore的个数
+            int ignoredCountInMappedIssues=mappedIssueIds.isEmpty()?0:issueDao.getIgnoredCountInMappedIssues(ignoreTagId,mappedIssueIds);
+            int eliminatedIssueCount = rawIssues1.size() - equalsCount+ignoreCountInNewIssues+ignoredCountInMappedIssues;
+            int remainingIssueCount = rawIssues2.size()-ignoreCountInNewIssues-ignoredCountInMappedIssues;
             int newIssueCount = rawIssues2.size() - equalsCount-ignoreCountInNewIssues;
             log.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);

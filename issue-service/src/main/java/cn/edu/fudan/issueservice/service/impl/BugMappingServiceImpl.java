@@ -53,6 +53,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             Date commitDate = getCommitDate(current_commit_id);
             //装需要更新的
             List<Issue> issues = new ArrayList<>();
+            List<String> mappedIssueIds=new ArrayList<>();
             int equalsCount = 0;
             int ignoreCountInNewIssues=0;
             for (RawIssue issue_2 : rawIssues2) {
@@ -73,6 +74,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                         issue.setRaw_issue_end(issue_2.getUuid());
                         issue.setUpdate_time(new Date());
                         issues.add(issue);
+                        mappedIssueIds.add(pre_issue_id);
                         break;
                     }
                 }
@@ -88,8 +90,10 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 issueDao.batchUpdateIssue(issues);
                 log.info("issue update success!");
             }
-            int eliminatedIssueCount = rawIssues1.size() - equalsCount+ignoreCountInNewIssues;
-            int remainingIssueCount = rawIssues2.size()-ignoreCountInNewIssues;
+            //在匹配的issue中上次commit被ignore的个数
+            int ignoredCountInMappedIssues=mappedIssueIds.isEmpty()?0:issueDao.getIgnoredCountInMappedIssues(ignoreTagId,mappedIssueIds);
+            int eliminatedIssueCount = rawIssues1.size() - equalsCount+ignoreCountInNewIssues+ignoredCountInMappedIssues;
+            int remainingIssueCount = rawIssues2.size()-ignoreCountInNewIssues-ignoredCountInMappedIssues;
             int newIssueCount = rawIssues2.size() - equalsCount-ignoreCountInNewIssues;
             log.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
