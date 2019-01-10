@@ -180,9 +180,9 @@ public class TagServiceImpl implements TagService {
     @Override
     public void cancelOneIgnoreRecord(JSONObject requestBody,String token) {
         String userId = restInterfaceManager.getUserId(token);
-        IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
+        IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("level").toUpperCase());
         String type = requestBody.getString("type");
-        String repoId = requestBody.getString("repo-id");
+        String repoId = requestBody.getString("repoId");
 
         if (ignoreLevel == IgnoreLevelEnum.USER) {
             ignoreRecodeDao.cancelInvalidRecord(userId, type);
