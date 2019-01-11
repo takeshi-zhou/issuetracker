@@ -145,9 +145,11 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             }
             //在匹配的issue中上次commit被ignore的个数
             int ignoredCountInMappedIssues=mappedIssueIds.isEmpty()?0:issueDao.getIgnoredCountInMappedIssues(ignoreTagId,mappedIssueIds);
-            int eliminatedIssueCount = rawIssues1.size() - equalsCount+ignoreCountInNewIssues+ignoredCountInMappedIssues;
-            int remainingIssueCount = rawIssues2.size()-ignoreCountInNewIssues-ignoredCountInMappedIssues;
-            int newIssueCount = rawIssues2.size() - equalsCount-ignoreCountInNewIssues;
+            log.info("ignoreCountInNewIssues -> {}",ignoreCountInNewIssues);
+            log.info("ignoredCountInMappedIssues -> {}",ignoredCountInMappedIssues);
+            int eliminatedIssueCount = preGroups.size() - equalsCount+ignoreCountInNewIssues+ignoredCountInMappedIssues;
+            int remainingIssueCount = currentGroups.size()-ignoreCountInNewIssues-ignoredCountInMappedIssues;
+            int newIssueCount = currentGroups.size() - equalsCount-ignoreCountInNewIssues;
             log.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
             scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));

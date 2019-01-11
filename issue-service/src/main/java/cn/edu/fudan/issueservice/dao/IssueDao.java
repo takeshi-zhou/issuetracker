@@ -52,8 +52,8 @@ public class IssueDao {
         return issueMapper.getIssueIdsByRepoIdAndCategory(repo_id,category);
     }
 
-    public List<Issue> getSolvedIssues(String repo_id, String commit_id) {
-        return issueMapper.getSolvedIssues(repo_id, commit_id);
+    public List<Issue> getSolvedIssues(String repo_id,String category, String commit_id) {
+        return issueMapper.getSolvedIssues(repo_id,category,commit_id);
     }
 
     public int getIgnoredCountInMappedIssues(String ignoreId, List<String> list){

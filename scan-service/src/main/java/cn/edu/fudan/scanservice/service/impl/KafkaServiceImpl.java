@@ -163,6 +163,7 @@ public class KafkaServiceImpl implements KafkaService {
     public void firstAutoScan(List<ScanMessageWithTime> commits){
         List<ScanMessageWithTime> filteredCommits=getFilteredList(commits);
         String repoId=filteredCommits.get(0).getRepoId();
+        logger.info("{} need to auto scan!",repoId);
         logger.info(filteredCommits.size()+" commits need to scan after filtered!");
         //当前repo_id和type的project存在，并且没被自动扫描过
         if(existProject(repoId,"bug",true)){
@@ -172,6 +173,8 @@ public class KafkaServiceImpl implements KafkaService {
                 findBugScanTask.runSynchronously(repoId,commitId,"bug");
             }
             restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
+        }else{
+            logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
         if(existProject(repoId,"clone",true)){
             logger.info("start auto scan clone -> {}",repoId);
@@ -180,6 +183,8 @@ public class KafkaServiceImpl implements KafkaService {
                 cloneScanTask.runSynchronously(repoId,commitId,"clone");
             }
             restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
+        }else{
+            logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
     }
 

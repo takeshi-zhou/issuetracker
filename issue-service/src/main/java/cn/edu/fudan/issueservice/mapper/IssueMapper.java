@@ -25,7 +25,7 @@ public interface IssueMapper {
 
     Integer getIssueCount(Map<String, Object> map);
 
-    List<Issue> getSolvedIssues(@Param("repo_id") String repo_id, @Param("commit_id") String commit_id);
+    List<Issue> getSolvedIssues(@Param("repo_id") String repo_id, @Param("category")String category,@Param("commit_id") String commit_id);
 
     List<Issue> getIssueList(Map<String, Object> map);
 

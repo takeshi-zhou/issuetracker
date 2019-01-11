@@ -72,7 +72,11 @@ public class IssueController {
                               @RequestParam(name="category",defaultValue = "bug")String category,
                               HttpServletRequest request) {
         String userToken = request.getHeader("token");
-        return issueService.getNewTrend(month, project_id, userToken,category);
+        try{
+             return issueService.getNewTrend(month, project_id, userToken,category);
+        }catch (Exception e){
+            return new ResponseBean(500,e.getMessage(),null);
+        }
     }
 
     @PostMapping("/issue/specific-issues")

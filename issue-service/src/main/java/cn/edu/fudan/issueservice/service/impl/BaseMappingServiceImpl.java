@@ -162,7 +162,7 @@ public class BaseMappingServiceImpl implements MappingService {
     }
 
     void modifyToSolvedTag(String repo_id,String category, String pre_commit_id,EventType eventType,String committer) {
-        List<Issue> issues=issueDao.getSolvedIssues(repo_id, pre_commit_id);
+        List<Issue> issues=issueDao.getSolvedIssues(repo_id,category,pre_commit_id);
         if(issues != null){
             issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
             if (!issues.isEmpty()) {
