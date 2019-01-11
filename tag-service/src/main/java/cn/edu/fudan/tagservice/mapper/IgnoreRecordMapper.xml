@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.edu.fudan.tagservice.mapper.IgnoreRecodeMapper">
+<mapper namespace="cn.edu.fudan.tagservice.mapper.IgnoreRecordMapper">
 
     <resultMap id="ignoreRecord" type="IgnoreRecord">
         <id property="uuid" column="uuid"/>
@@ -57,4 +57,7 @@
         select type from ignore_record where repo_id = #{repo_id}
     </select>
 
+    <delete id="deleteIgnoreRecordWhenRepoRemove" parameterType="String">
+        delete from ignore_record where repo_id = #{repo_id} and user_id = #{user_id}
+    </delete>
 </mapper>

@@ -26,6 +26,8 @@ public class RestInterfaceManager {
     private String eventServicePath;
     @Value("${repository.service.path}")
     private String repoServicePath;
+    @Value("${tag.service.path}")
+    private String tagServicePath;
 
     private RestTemplate restTemplate;
 
@@ -76,4 +78,7 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
     }
 
+    public void deleteIgnoreRecord(String account_id, String repoId) {
+        restTemplate.delete(tagServicePath + "/inner/tags/ignore?repo-id=" + repoId + "&account-id=" + account_id);
+    }
 }

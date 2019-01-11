@@ -160,4 +160,14 @@ public class TagController {
     public Object getIgnoreTypeListByRepoId(@RequestParam("repo-id") String repoId) {
         return tagService.getIgnoreTypeListByRepoId(repoId);
     }
+
+    @DeleteMapping("/inner/tags/ignore")
+    public Object deleteIgnoreRecordWhenRepoRemove(@RequestParam("repo-id")String repoId,@RequestParam("account-id") String accountId) {
+        try {
+            tagService.deleteIgnoreRecordWhenRepoRemove(repoId, accountId);
+            return new ResponseBean(200, "delete success", null);
+        } catch (Exception e) {
+            return new ResponseBean(401, "delete failed :" + e.getMessage(), null);
+        }
+    }
 }

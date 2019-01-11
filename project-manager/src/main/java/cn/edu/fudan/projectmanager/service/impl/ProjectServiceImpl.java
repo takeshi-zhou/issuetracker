@@ -170,12 +170,13 @@ public class ProjectServiceImpl implements ProjectService {
             String account_id = restInterfaceManager.getAccountId(userToken);
             //如果当前repoId和type只有这一个projectId与其对应，那么删除project的同时会删除repo的相关内容
             //否则还有其他project与当前repoId和type对应，该repo的相关内容就不删
-            if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId,type)) {
-                restInterfaceManager.deleteIssuesOfRepo(repoId,type);
-                restInterfaceManager.deleteRawIssueOfRepo(repoId,type);
-                restInterfaceManager.deleteScanOfRepo(repoId,type);
-                restInterfaceManager.deleteEventOfRepo(repoId,type);
-                restInterfaceManager.deleteScanResultOfRepo(repoId,type);
+            if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type)) {
+                restInterfaceManager.deleteIssuesOfRepo(repoId, type);
+                restInterfaceManager.deleteRawIssueOfRepo(repoId, type);
+                restInterfaceManager.deleteScanOfRepo(repoId, type);
+                restInterfaceManager.deleteEventOfRepo(repoId, type);
+                restInterfaceManager.deleteScanResultOfRepo(repoId, type);
+                restInterfaceManager.deleteIgnoreRecord(account_id, repoId);
                 if(type.equals("clone")){
                     //对于clone的CPU版本，删除时需要删除前一次commit扫描的结果文件
                     deleteCloneResPreFile(repoId);
@@ -183,21 +184,21 @@ public class ProjectServiceImpl implements ProjectService {
                 //delete info in redis
                 stringRedisTemplate.setEnableTransactionSupport(true);
                 stringRedisTemplate.multi();
-                stringRedisTemplate.delete("dashboard:"+type+":day:" + repoId);
-                stringRedisTemplate.delete("dashboard:"+type+":week:" + repoId);
-                stringRedisTemplate.delete("dashboard:"+type+":month:" + repoId);
-                stringRedisTemplate.delete("dashboard:"+type+":day:new:"+ repoId);
-                stringRedisTemplate.delete("dashboard:"+type+":week:new:"+ repoId);
-                stringRedisTemplate.delete("dashboard:"+type+":month:new:"+ repoId);
-                stringRedisTemplate.delete("dashboard:"+type+":day:eliminated:"+ repoId);
-                stringRedisTemplate.delete("dashboard:"+type+":week:eliminated:"+ repoId);
-                stringRedisTemplate.delete("dashboard:"+type+":month:eliminated:"+ repoId);
-                stringRedisTemplate.delete("trend:"+type +":day:new:" + account_id + ":" + repoId);
-                stringRedisTemplate.delete("trend:"+type+":day:remaining:" + account_id + ":" + repoId);
-                stringRedisTemplate.delete("trend:"+type+":day:eliminated:" + account_id + ":" + repoId);
-                stringRedisTemplate.delete("trend:"+type+":week:new:" + account_id + ":" + repoId);
-                stringRedisTemplate.delete("trend:"+type+":week:remaining:" + account_id + ":" + repoId);
-                stringRedisTemplate.delete("trend:"+type+":week:eliminated:" + account_id + ":" + repoId);
+                stringRedisTemplate.delete("dashboard:" + type + ":day:" + repoId);
+                stringRedisTemplate.delete("dashboard:" + type + ":week:" + repoId);
+                stringRedisTemplate.delete("dashboard:" + type + ":month:" + repoId);
+                stringRedisTemplate.delete("dashboard:" + type + ":day:new:" + repoId);
+                stringRedisTemplate.delete("dashboard:" + type + ":week:new:" + repoId);
+                stringRedisTemplate.delete("dashboard:" + type + ":month:new:" + repoId);
+                stringRedisTemplate.delete("dashboard:" + type + ":day:eliminated:" + repoId);
+                stringRedisTemplate.delete("dashboard:" + type + ":week:eliminated:" + repoId);
+                stringRedisTemplate.delete("dashboard:" + type + ":month:eliminated:" + repoId);
+                stringRedisTemplate.delete("trend:" + type + ":day:new:" + account_id + ":" + repoId);
+                stringRedisTemplate.delete("trend:" + type + ":day:remaining:" + account_id + ":" + repoId);
+                stringRedisTemplate.delete("trend:" + type + ":day:eliminated:" + account_id + ":" + repoId);
+                stringRedisTemplate.delete("trend:" + type + ":week:new:" + account_id + ":" + repoId);
+                stringRedisTemplate.delete("trend:" + type + ":week:remaining:" + account_id + ":" + repoId);
+                stringRedisTemplate.delete("trend:" + type + ":week:eliminated:" + account_id + ":" + repoId);
                 stringRedisTemplate.exec();
             }
         }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface IgnoreRecodeMapper {
+public interface IgnoreRecordMapper {
 
     void insertOneRecord(IgnoreRecord ignoreRecord);
 
@@ -22,4 +22,6 @@ public interface IgnoreRecodeMapper {
     List<IgnoreRecord> getIgnoreRecordList(@Param("user_id")String userId);
 
     List<String> getIgnoreTypeListByRepoId(@Param("repo_id")String repoId);
+
+    void deleteIgnoreRecordWhenRepoRemove(@Param("repo_id") String repoId, @Param("user_id") String accountId);
 }
