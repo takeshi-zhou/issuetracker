@@ -33,7 +33,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             for (RawIssue rawIssue : rawIssues) {
                 Issue issue=generateOneNewIssue(repo_id,rawIssue,category,current_commit_id,commitDate,date);
                 insertIssueList.add(issue);
-                addTag(tags,ignoreTypes,rawIssue,issue.getUuid());
+                addTag(tags,ignoreTypes,rawIssue,issue);
             }
             int newIssueCount = insertIssueList.size();
             int remainingIssueCount = insertIssueList.size();
@@ -82,7 +82,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                     //如果当前commit的某个rawIssue没有在上个commit的rawissue列表里面找到匹配，将它作为新的issue插入
                     Issue issue=generateOneNewIssue(repo_id,issue_2,category,current_commit_id,commitDate,date);
                     insertIssueList.add(issue);
-                    ignoreCountInNewIssues+=addTag(tags,ignoreTypes,issue_2,issue.getUuid());
+                    ignoreCountInNewIssues+=addTag(tags,ignoreTypes,issue_2,issue);
                 }
             }
             if (!issues.isEmpty()) {

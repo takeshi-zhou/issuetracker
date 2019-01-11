@@ -43,7 +43,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
                     priority = priority == 5 ? 4 : priority ;
                     issue.setPriority(priority);
                     issue.setRaw_issue_start(rawIssue.getUuid());
-                    ignoreCountInNewIssues+=addTag(tags,ignoreTypes,rawIssue,new_IssueId);
+                    ignoreCountInNewIssues+=addTag(tags,ignoreTypes,rawIssue,issue);
                 }
                 if(i==rawIssuesInOneGroup.size()-1)
                     issue.setRaw_issue_end(rawIssue.getUuid());

@@ -141,12 +141,13 @@ public class BaseMappingServiceImpl implements MappingService {
         throw new UnsupportedOperationException();
     }
 
-    int addTag(List<JSONObject> tags, JSONArray ignoreTypes, RawIssue rawIssue, String issueId){
+    int addTag(List<JSONObject> tags, JSONArray ignoreTypes, RawIssue rawIssue, Issue issue){
         int result=0;
         String tagID;
         if(ignoreTypes!=null&&!ignoreTypes.isEmpty()&&ignoreTypes.contains(rawIssue.getType())){
             //如果新增的issue的类型包含在ignore的类型之中，打ignore的tag
             tagID=ignoreTagId;
+            issue.setPriority(5);
             result=1;
         }else{
             RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
@@ -154,7 +155,7 @@ public class BaseMappingServiceImpl implements MappingService {
         }
         if(tagID!=null){
             JSONObject tagged = new JSONObject();
-            tagged.put("item_id", issueId);
+            tagged.put("item_id", issue.getUuid());
             tagged.put("tag_id", tagID);
             tags.add(tagged);
         }
@@ -163,21 +164,21 @@ public class BaseMappingServiceImpl implements MappingService {
 
     void modifyToSolvedTag(String repo_id,String category, String pre_commit_id,EventType eventType,String committer) {
         List<Issue> issues=issueDao.getSolvedIssues(repo_id,category,pre_commit_id);
-        if(issues != null){
-            issueEventManager.sendIssueEvent(eventType,issues,committer,repo_id);
+        if(issues != null) {
+            issueEventManager.sendIssueEvent(eventType, issues, committer, repo_id);
             if (!issues.isEmpty()) {
-                eliminatedInfoUpdate(issues,category,repo_id);
+                eliminatedInfoUpdate(issues, category, repo_id);
                 List<JSONObject> taggeds = new ArrayList<>();
                 for (Issue issue : issues) {
                     JSONObject tagged = new JSONObject();
                     tagged.put("item_id", issue.getUuid());
                     tagged.put("tag_id", solvedTagId);
                     taggeds.add(tagged);
+                    issueDao.updateOneIssuePriority(issue.getUuid(),6);
                 }
                 restInterfaceManager.modifyTags(taggeds);
             }
         }
-
     }
 
 }
