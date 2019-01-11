@@ -174,7 +174,8 @@ public class TagServiceImpl implements TagService {
         for (String uuid : ignoreUuidList) {
             ignoreList.add(new TaggedItem(uuid, ignoreTagId));
         }
-        tagDao.addMultiTaggedItem(ignoreList);
+        tagDao.modifyMultiTaggedItem(ignoreList);
+        //tagDao.addMultiTaggedItem(ignoreList);
     }
 
     @Override
