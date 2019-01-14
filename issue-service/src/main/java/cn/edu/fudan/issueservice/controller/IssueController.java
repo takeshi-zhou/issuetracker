@@ -186,7 +186,7 @@ public class IssueController {
 
     @GetMapping(value = "/inner/issue/uuid")
     public List<String> getIssueListByTypeAndRepoId(@RequestParam("repo-id") String repoId,@RequestParam("type") String type) {
-        return issueService.getIssueListByTypeAndRepoId(repoId, type);
+        return issueService.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
     }
 
 

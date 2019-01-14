@@ -43,5 +43,5 @@ public interface IssueService {
 
     void batchUpdateIssueListPriority(List<String> issueUuid, Integer priority);
 
-    List<String> getIssueListByTypeAndRepoId(String repoId, String type);
+    List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type);
 }
