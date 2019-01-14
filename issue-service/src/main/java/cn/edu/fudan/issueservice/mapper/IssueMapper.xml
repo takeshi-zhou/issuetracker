@@ -156,7 +156,7 @@
         </where>
     </select>
 
-    <select id="getSolvedIssues" parameterType="String" resultMap="issue">
+    <select id="getIssuesByEndCommit" parameterType="String" resultMap="issue">
         select * from issue
         where repo_id = #{repo_id} and end_commit = #{commit_id} and category = #{category}
     </select>

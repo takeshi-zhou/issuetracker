@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author WZY
@@ -45,44 +46,53 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
         } else {
             //不是第一次扫描，需要和前一次的commit进行mapping
-            List<RawIssue> rawIssues1 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,pre_commit_id);
-            List<RawIssue> rawIssues2 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
-            if (rawIssues2 == null || rawIssues2.isEmpty())
+            List<RawIssue> preRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,pre_commit_id);
+            List<RawIssue> currentRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
+            if (currentRawIssues == null || currentRawIssues.isEmpty())
                 return;
             log.info("not first mapping!");
+            //mapping开始之前end commit是上一个commit的表示是上个commit存活的issue
+            Set<String> existsIssueIds=issueDao.getIssuesByEndCommit(repo_id,category,pre_commit_id).stream().map(Issue::getUuid).collect(Collectors.toSet());
             Date commitDate = getCommitDate(current_commit_id);
             //装需要更新的
             List<Issue> issues = new ArrayList<>();
             List<String> mappedIssueIds=new ArrayList<>();
             int equalsCount = 0;
             int ignoreCountInNewIssues=0;
-            for (RawIssue issue_2 : rawIssues2) {
+            for (RawIssue currentRawIssue : currentRawIssues) {
                 boolean mapped = false;
-                for (RawIssue issue_1 : rawIssues1) {
-                    //如果issue_1已经匹配到一个issue_2,内部循环不再继续
-                    if (!issue_1.isMapped()&&!issue_2.isMapped()&& LocationCompare.isUniqueIssue(issue_1, issue_2)) {
-                        issue_1.setMapped(true);
-                        issue_2.setMapped(true);
+                boolean mappedButSolved=false;
+                for (RawIssue preRawIssue : preRawIssues) {
+                    //如果已经匹配到一个,内部循环不再继续
+                    if (!preRawIssue.isMapped()&&!currentRawIssue.isMapped()&& LocationCompare.isUniqueIssue(preRawIssue, currentRawIssue)) {
+                        preRawIssue.setMapped(true);
+                        currentRawIssue.setMapped(true);
                         mapped = true;
-                        equalsCount++;
-                        String pre_issue_id = issue_1.getIssue_id();
-                        //如果匹配到的上个commit的某个rawIssue已经有了issue_id,说明当前commit这个rawIssue也应该对应到这个issue
-                        issue_2.setIssue_id(pre_issue_id);
-                        Issue issue = issueDao.getIssueByID(pre_issue_id);
-                        issue.setEnd_commit(current_commit_id);
-                        issue.setEnd_commit_date(commitDate);
-                        issue.setRaw_issue_end(issue_2.getUuid());
-                        issue.setUpdate_time(new Date());
-                        issues.add(issue);
-                        mappedIssueIds.add(pre_issue_id);
+                        String pre_issue_id = preRawIssue.getIssue_id();
+                        //只有和上个commit存活的issue匹配上才算真正匹配上
+                        if(existsIssueIds.contains(pre_issue_id)){
+                            equalsCount++;
+                            currentRawIssue.setIssue_id(pre_issue_id);
+                            Issue issue = issueDao.getIssueByID(pre_issue_id);
+                            issue.setEnd_commit(current_commit_id);
+                            issue.setEnd_commit_date(commitDate);
+                            issue.setRaw_issue_end(currentRawIssue.getUuid());
+                            issue.setUpdate_time(new Date());
+                            issues.add(issue);
+                            mappedIssueIds.add(pre_issue_id);
+                        }else{
+                            //匹配到上一个commit的一个rawIssue，但是这个rawIssue对应的issue已经被solved
+                            mappedButSolved=true;
+                        }
                         break;
                     }
                 }
-                if (!mapped) {
-                    //如果当前commit的某个rawIssue没有在上个commit的rawissue列表里面找到匹配，将它作为新的issue插入
-                    Issue issue=generateOneNewIssue(repo_id,issue_2,category,current_commit_id,commitDate,date);
+                //如果当前commit的某个rawIssue没有在上个commit的rawIssue列表里面找到匹配，将它作为新的issue插入
+                //如果匹配上，但是匹配到的是已经solved的，此时也应该作为新的issue插入
+                if (!mapped||mappedButSolved) {
+                    Issue issue=generateOneNewIssue(repo_id,currentRawIssue,category,current_commit_id,commitDate,date);
                     insertIssueList.add(issue);
-                    ignoreCountInNewIssues+=addTag(tags,ignoreTypes,issue_2,issue);
+                    ignoreCountInNewIssues+=addTag(tags,ignoreTypes,currentRawIssue,issue);
                 }
             }
             if (!issues.isEmpty()) {
@@ -92,13 +102,13 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             }
             //在匹配的issue中上次commit被ignore的个数
             int ignoredCountInMappedIssues=mappedIssueIds.isEmpty()?0:issueDao.getIgnoredCountInMappedIssues(ignoreTagId,mappedIssueIds);
-            int eliminatedIssueCount = rawIssues1.size() - equalsCount+ignoreCountInNewIssues+ignoredCountInMappedIssues;
-            int remainingIssueCount = rawIssues2.size()-ignoreCountInNewIssues-ignoredCountInMappedIssues;
-            int newIssueCount = rawIssues2.size() - equalsCount-ignoreCountInNewIssues;
+            int eliminatedIssueCount = preRawIssues.size() - equalsCount+ignoreCountInNewIssues+ignoredCountInMappedIssues;
+            int remainingIssueCount = currentRawIssues.size()-ignoreCountInNewIssues-ignoredCountInMappedIssues;
+            int newIssueCount = currentRawIssues.size() - equalsCount-ignoreCountInNewIssues;
             log.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
             log.info("dashboard info updated!");
-            rawIssueDao.batchUpdateIssueId(rawIssues2);
+            rawIssueDao.batchUpdateIssueId(currentRawIssues);
             modifyToSolvedTag(repo_id, category,pre_commit_id,EventType.ELIMINATE_BUG,committer);
             scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
         }
