@@ -10,7 +10,7 @@ public class ScanMessageWithTime {
 
     private String repoId;
     private String commitId;
-    private Date commitTime;
+    private String commitTime;
 
     public ScanMessageWithTime() {
     }
@@ -36,11 +36,11 @@ public class ScanMessageWithTime {
         this.commitId = commitId;
     }
 
-    public Date getCommitTime() {
+    public String getCommitTime() {
         return commitTime;
     }
 
-    public void setCommitTime(Date commitTime) {
+    public void setCommitTime(String commitTime) {
         this.commitTime = commitTime;
     }
 

@@ -19,13 +19,13 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 /**
  * @author WZY
@@ -155,24 +155,31 @@ public class KafkaServiceImpl implements KafkaService {
         int size=commits.size();
         logger.info("received message from topic -> " + consumerRecord.topic() + " : " + size+" commits need to scan!");
         if(!commits.isEmpty()){
-            firstAutoScan(commits);
+            Map<LocalDate,List<ScanMessageWithTime>> map=commits.stream().collect(Collectors.groupingBy((ScanMessageWithTime scanMessageWithTime)->{
+                String dateStr=scanMessageWithTime.getCommitTime().split(" ")[0];
+                return LocalDate.parse(dateStr,DateTimeUtil.Y_M_D_formatter);
+            }));
+            List<LocalDate> dates=new ArrayList<>(map.keySet());
+            dates.sort(((o1, o2) -> {
+                if(o1.equals(o2))
+                    return 0;
+                return o1.isBefore(o2)?-1:1;
+            }));
+            firstAutoScan(map,dates);
         }
     }
 
     @Async("forRequest")
-    public void firstAutoScan(List<ScanMessageWithTime> commits){
-        List<ScanMessageWithTime> filteredCommits=getFilteredList(commits);
+    public void firstAutoScan(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
+        List<ScanMessageWithTime> filteredCommits=getFilteredList(map,dates);
         String repoId=filteredCommits.get(0).getRepoId();
         logger.info("{} need to auto scan!",repoId);
         logger.info(filteredCommits.size()+" commits need to scan after filtered!");
         //当前repo_id和type的project存在，并且没被自动扫描过
         if(existProject(repoId,"bug",true)){
             logger.info("start auto scan bug -> {}",repoId);
-            JSONObject projectParam = new JSONObject();
             for(ScanMessageWithTime message:filteredCommits){
                 String commitId = message.getCommitId();
-                projectParam.put("scan_status", "Scanning");
-                updateProjects(repoId,projectParam,"bug");
                 findBugScanTask.runSynchronously(repoId,commitId,"bug");
             }
             restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
@@ -181,11 +188,8 @@ public class KafkaServiceImpl implements KafkaService {
         }
         if(existProject(repoId,"clone",true)){
             logger.info("start auto scan clone -> {}",repoId);
-            JSONObject projectParam = new JSONObject();
             for(ScanMessageWithTime message:filteredCommits){
                 String commitId = message.getCommitId();
-                projectParam.put("scan_status", "Scanning");
-                updateProjects(repoId,projectParam,"clone");
                 cloneScanTask.runSynchronously(repoId,commitId,"clone");
             }
             restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
@@ -196,21 +200,26 @@ public class KafkaServiceImpl implements KafkaService {
 
     private boolean existProject(String repoId,String category,boolean isFirst){
         JSONObject response=restInterfaceManager.existThisProject(repoId, category,isFirst);
-        return response!=null&&response.getBooleanValue("exist");
+        if(response!=null){
+            logger.info(response.toJSONString());
+            return response.getBooleanValue("exist");
+        }else{
+            logger.info("response is null");
+            return false;
+        }
     }
 
-    private List<ScanMessageWithTime> getFilteredList(List<ScanMessageWithTime> sourceList){
-        int sourceSize=sourceList.size();
-        if(sourceSize<=10)
-            return sourceList;
-
+    private List<ScanMessageWithTime> getFilteredList(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
+        int sourceSize=dates.size();
+        LocalDate twoWeekBefore=LocalDate.now().minusWeeks(2);
         LinkedList<ScanMessageWithTime> result=new LinkedList<>();
         int i=0,step=1;
         while(i<sourceSize){
-            if(i>10){
-                step+=10;
+            LocalDate date=dates.get(sourceSize-1-i);
+            if(i>10&&date.isBefore(twoWeekBefore)){
+                step+=2;
             }
-            result.addFirst(sourceList.get(sourceSize-1-i));
+            result.addFirst(map.get(date).get(0));
             i+=step;
         }
         return result;
