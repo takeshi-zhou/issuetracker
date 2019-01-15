@@ -96,8 +96,8 @@ public class IssueDao {
         return issueMapper.getMaxIssueDisplayId(repoId);
     }
 
-    public List<String> getIssueIdListByTypeAndRepoId(String repoId, String type) {
-        return issueMapper.getIssueIdListByTypeAndRepoId(repoId, type);
+    public List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type) {
+        return issueMapper.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
     }
 
     public void batchUpdateIssueListPriority(List issueUuid, int priority) {

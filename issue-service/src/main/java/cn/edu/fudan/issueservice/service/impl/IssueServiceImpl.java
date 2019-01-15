@@ -502,7 +502,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public List<String> getIssueListByTypeAndRepoId(String repoId, String type) {
-        return issueDao.getIssueIdListByTypeAndRepoId(repoId, type);
+    public List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type) {
+        return issueDao.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
     }
 }
