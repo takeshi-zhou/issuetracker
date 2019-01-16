@@ -78,12 +78,13 @@ public class TagController {
 
     /**
      *  cancel one ignored tag
-     *  repo-id ignore-level tag-id
+     *  type repo-id level (new)
      */
     @DeleteMapping("/tags/ignore")
-    public Object cancelIgnoreRecord(@RequestBody JSONObject requestBody, HttpServletRequest request) {
+    public Object cancelIgnoreRecord(@RequestParam("repo-id") String repoId,@RequestParam("level") String level,
+                                     @RequestParam("type") String type, HttpServletRequest request) {
         try {
-            tagService.cancelOneIgnoreRecord(requestBody, request.getHeader("token"));
+            tagService.cancelOneIgnoreRecord(repoId, level, type, request.getHeader("token"));
             return new ResponseBean(200, "modify success", null);
         } catch (Exception e) {
             return new ResponseBean(401, "modify failed :" + e.getMessage(), null);

@@ -55,8 +55,7 @@ start(){
             exit 1
         fi
     done
-
-	jobs -l | awk '{printf $2 "\n" }' > .pid
+     ps -ef | grep /home/fdse/user/issueTracker/config/application- | awk '{if($3==1)printf $2 "\n" }' > .pid
 }
 
 case ${option} in
