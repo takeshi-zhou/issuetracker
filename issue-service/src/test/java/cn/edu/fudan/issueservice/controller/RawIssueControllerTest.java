@@ -235,9 +235,10 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
      */
     @Test
     public void getRawIssues() throws Exception {
+        String repo_id="repo1";
         String commit_id = "cmm1";
         String category = "category";
-        PowerMockito.when(service.getRawIssueByCommitIDAndCategory(commit_id,category)).thenReturn(list);
+        PowerMockito.when(service.getRawIssueByCommitIDAndCategory(repo_id,commit_id,category)).thenReturn(list);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/inner/raw-issue/list-by-commit")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .param("commit_id", commit_id)

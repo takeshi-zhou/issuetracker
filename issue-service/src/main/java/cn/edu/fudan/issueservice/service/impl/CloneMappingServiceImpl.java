@@ -80,7 +80,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
         Date date=new Date();
         Date commitDate = getCommitDate(current_commit_id);
         if (pre_commit_id.equals(current_commit_id)) {
-            List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
+            List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,current_commit_id);
             if (rawIssues == null || rawIssues.isEmpty())
                 return;
             log.info("first scan mapping!");
@@ -90,8 +90,8 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             rawIssueDao.batchUpdateIssueId(rawIssues);
         }else{
             //不是第一次扫描，需要和前一次的commit进行mapping
-            List<RawIssue> rawIssues1 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,pre_commit_id);
-            List<RawIssue> rawIssues2 = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
+            List<RawIssue> rawIssues1 = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,pre_commit_id);
+            List<RawIssue> rawIssues2 = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,current_commit_id);
             if (rawIssues2 == null || rawIssues2.isEmpty())
                 return;
             log.info("not first mapping!");

@@ -17,7 +17,7 @@ public interface RawIssueService {
 
     void batchUpdateIssueId(List<RawIssue> list);
 
-    List<RawIssue> getRawIssueByCommitIDAndCategory(String commit_id,String category);
+    List<RawIssue> getRawIssueByCommitIDAndCategory(String repo_id,String commit_id,String category);
 
     List<RawIssue> getRawIssueByIssueId(String issueId);
 
@@ -25,5 +25,5 @@ public interface RawIssueService {
 
     List<Location> getLocationsByRawIssueId(String raw_issue_id);
 
-    List<RawIssue> getRawIssueByCommitAndFile(String commit_id,String category,String filePath);
+    List<RawIssue> getRawIssueByCommitAndFile(String repo_id,String commit_id,String category,String filePath);
 }

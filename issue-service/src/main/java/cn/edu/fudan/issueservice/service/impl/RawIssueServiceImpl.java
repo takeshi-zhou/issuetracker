@@ -82,8 +82,8 @@ public class RawIssueServiceImpl implements RawIssueService {
     }
 
     @Override
-    public List<RawIssue> getRawIssueByCommitIDAndCategory(String commit_id,String category) {
-        return rawIssueDao.getRawIssueByCommitIDAndCategory(commit_id,category);
+    public List<RawIssue> getRawIssueByCommitIDAndCategory(String repo_id,String commit_id,String category) {
+        return rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,commit_id,category);
     }
 
     @Override
@@ -116,8 +116,8 @@ public class RawIssueServiceImpl implements RawIssueService {
     }
 
     @Override
-    public List<RawIssue> getRawIssueByCommitAndFile(String commit_id, String category, String filePath) {
+    public List<RawIssue> getRawIssueByCommitAndFile(String repo_id,String commit_id, String category, String filePath) {
 
-        return rawIssueDao.getRawIssueByCommitIDAndFile(commit_id, category, filePath);
+        return rawIssueDao.getRawIssueByCommitIDAndFile(repo_id,commit_id, category, filePath);
     }
 }

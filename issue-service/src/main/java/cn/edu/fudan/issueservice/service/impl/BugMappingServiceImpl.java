@@ -26,7 +26,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         JSONArray ignoreTypes=restInterfaceManager.getIgnoreTypesOfRepo(repo_id);//获取该项目ignore的issue类型
         if (pre_commit_id.equals(current_commit_id)) {
             //当前project第一次扫描，所有的rawIssue都是issue
-            List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
+            List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,current_commit_id);
             if (rawIssues == null || rawIssues.isEmpty())
                 return;
             log.info("first scan mapping!");
@@ -46,8 +46,8 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
         } else {
             //不是第一次扫描，需要和前一次的commit进行mapping
-            List<RawIssue> preRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,pre_commit_id);
-            List<RawIssue> currentRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(category,current_commit_id);
+            List<RawIssue> preRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,pre_commit_id);
+            List<RawIssue> currentRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,current_commit_id);
             if (currentRawIssues == null || currentRawIssues.isEmpty())
                 return;
             log.info("not first mapping!");

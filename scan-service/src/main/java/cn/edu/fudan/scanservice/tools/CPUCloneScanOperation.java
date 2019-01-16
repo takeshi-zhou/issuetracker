@@ -37,7 +37,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
 
 
     @SuppressWarnings("unchecked")
-    private boolean analyzeResultFile(String scanId,String commitId,String resultFilePath){
+    private boolean analyzeResultFile(String repo_id,String scanId,String commitId,String resultFilePath){
         SAXReader reader = new SAXReader();
         try{
             Document doc = reader.read(new File(resultFilePath));
@@ -63,6 +63,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
                     cloneRawIssue.put("file_name",filePath);
                     cloneRawIssue.put("scan_id",scanId);
                     cloneRawIssue.put("commit_id",commitId);
+                    cloneRawIssue.put("repo_id",repo_id);
 
                     JSONObject cloneLocation=new JSONObject();
                     cloneLocation.put("uuid",UUID.randomUUID().toString());
@@ -113,6 +114,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
     public ScanResult doScan(ScanInitialInfo scanInitialInfo) {
         Scan scan = scanInitialInfo.getScan();
         String scanId=scan.getUuid();
+        String repoId=scan.getRepo_id();
         String commitId=scan.getCommit_id();
         String repoPath = scanInitialInfo.getRepoPath();
         String repoName = scanInitialInfo.getRepoName();
@@ -125,7 +127,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
         logger.info("start to analyze resultFile......");
         logger.info("tool invoke complete!");
         String resultFilePath1=cloneResultFileHome+repoName+"_A.xml";
-        if(!analyzeResultFile(scanId,commitId,resultFilePath1)){
+        if(!analyzeResultFile(repoId,scanId,commitId,resultFilePath1)){
             logger.error("Result File Analyze Failed!");
             return new ScanResult("clone","failed", "analyze failed");
         }

@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -119,10 +118,10 @@ public class KafkaServiceImpl implements KafkaService {
         initialProject(projectId);
         String repoId = restInterfaceManager.getRepoIdOfProject(projectId);
         if(category.equals("clone")){
-            Future<String> future =cloneScanTask.run(repoId,commitId,category);
+            Future<String> future =cloneScanTask.runAsync(repoId,commitId,category);
             setTimeOut(future, repoId);
         }else{
-            Future<String> future = findBugScanTask.run(repoId, commitId,category);
+            Future<String> future = findBugScanTask.runAsync(repoId, commitId,category);
             //开一个工作者线程来管理异步任务的超时
             setTimeOut(future, repoId);
         }
@@ -169,8 +168,7 @@ public class KafkaServiceImpl implements KafkaService {
         }
     }
 
-    @Async("forRequest")
-    public void firstAutoScan(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
+    private void firstAutoScan(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
         List<ScanMessageWithTime> filteredCommits=getFilteredList(map,dates);
         String repoId=filteredCommits.get(0).getRepoId();
         logger.info("{} need to auto scan!",repoId);

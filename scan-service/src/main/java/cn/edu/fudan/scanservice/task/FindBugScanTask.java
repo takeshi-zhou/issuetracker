@@ -33,8 +33,8 @@ public class FindBugScanTask extends BaseScanTask{
     private ScanOperation scanOperation;
 
 
-    @Async("forRequest")
-    public Future<String> run(String repoId, String commitId,String category) {
+
+    private void run(String repoId, String commitId,String category) {
         //获取分布式锁，一个repo同一时间只能有一个线程在扫
         //15min恰好是一个整个Scan操作的超时时间，如果某个线程获得锁之后Scan过程卡死导致锁没有释放
         //如果那个锁成功设置了过期时间，那么key过期后，其他线程自然可以获取到锁
@@ -48,10 +48,15 @@ public class FindBugScanTask extends BaseScanTask{
                 logger.error("repo->" + repoId + " release lock failed!");
             }
         }
+
+    }
+    @Async("forRequest")
+    public Future<String> runAsync(String repoId,String commitId,String category){
+        run(repoId,commitId,category);
         return new AsyncResult<>("complete");
     }
 
     public void runSynchronously(String repoId,String commitId,String category){
-        scan(scanOperation,repoId, commitId,category);
+        run(repoId,commitId,category);
     }
 }
