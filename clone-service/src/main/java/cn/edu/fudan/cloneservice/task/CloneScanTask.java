@@ -63,7 +63,7 @@ public class CloneScanTask {
     }
 
     @SuppressWarnings("unchecked")
-    private boolean analyzeResultFile(String scanId,String commitId,String resultFilePath){
+    private boolean analyzeResultFile(String repoId,String scanId,String commitId,String resultFilePath){
         SAXReader reader = new SAXReader();
         try{
             Document doc = reader.read(new File(resultFilePath));
@@ -88,6 +88,7 @@ public class CloneScanTask {
                     cloneRawIssue.put("file_name",filePath);
                     cloneRawIssue.put("scan_id",scanId);
                     cloneRawIssue.put("commit_id",commitId);
+                    cloneRawIssue.put("repo_id",repoId);
 
                     JSONObject cloneLocation=new JSONObject();
                     cloneLocation.put("uuid",UUID.randomUUID().toString());
@@ -188,7 +189,7 @@ public class CloneScanTask {
         logger.info("start to analyze result file");
         String resultFilePath1=resultFileHome+repoName+"_filtedA_type12.csv.xml";
         String resultFilePath2=resultFileHome+repoName+"_filtedB_merge.csv.xml";
-        if(!analyzeResultFile(scanId,commitId,resultFilePath1)||!analyzeResultFile(scanId,commitId,resultFilePath2)){
+        if(!analyzeResultFile(repoId,scanId,commitId,resultFilePath1)||!analyzeResultFile(repoId,scanId,commitId,resultFilePath2)){
             send(repoId,commitId,"failed","file analyze failed!");
             logger.error("file analyze failed!");
             return;

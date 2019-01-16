@@ -69,13 +69,18 @@ public class RawIssueController {
     }
 
     @GetMapping(value = {"/inner/raw-issue/list-by-commit"})
-    public Object getRawIssues(@RequestParam("commit_id") String commit_id,@RequestParam("category")String category) {
-        return rawIssueService.getRawIssueByCommitIDAndCategory(commit_id,category);
+    public Object getRawIssues(@RequestParam("repo_id")String repo_id,
+                               @RequestParam("commit_id") String commit_id,
+                               @RequestParam("category")String category) {
+        return rawIssueService.getRawIssueByCommitIDAndCategory(repo_id,commit_id,category);
     }
 
     @GetMapping(value = "/inner/raw-issue/locations")
     @CrossOrigin
-    public Object getRawIssueByCommitAndFile(@RequestParam("commit_id") String commit_id,@RequestParam("category")String category,@RequestParam("file_path")String file_path){
-        return rawIssueService.getRawIssueByCommitAndFile(commit_id, category, file_path);
+    public Object getRawIssueByCommitAndFile(@RequestParam("repo_id")String repo_id,
+                                             @RequestParam("commit_id") String commit_id,
+                                             @RequestParam("category")String category,
+                                             @RequestParam("file_path")String file_path){
+        return rawIssueService.getRawIssueByCommitAndFile(repo_id,commit_id, category, file_path);
     }
 }

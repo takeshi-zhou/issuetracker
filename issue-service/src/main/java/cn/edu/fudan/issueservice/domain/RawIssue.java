@@ -13,6 +13,7 @@ public class RawIssue {
     private String scan_id;
     private String issue_id;
     private String commit_id;
+    private String repo_id;
     private List<Location> locations;
     private Date commit_time;
     private String developer_email;
@@ -98,6 +99,14 @@ public class RawIssue {
 
     public void setCommit_id(String commit_id) {
         this.commit_id = commit_id;
+    }
+
+    public String getRepo_id() {
+        return repo_id;
+    }
+
+    public void setRepo_id(String repo_id) {
+        this.repo_id = repo_id;
     }
 
     public Location firstLocation() {

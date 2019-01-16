@@ -37,8 +37,8 @@ public class RawIssueDao {
         return rawIssueMapper.getIssueCountBeforeSpecificTime(account_id, specificTime);
     }
 
-    public List<RawIssue> getRawIssueByCommitIDAndCategory(String category,String commit_id) {
-        return rawIssueMapper.getRawIssueByCommitIDAndCategory(category, commit_id);
+    public List<RawIssue> getRawIssueByCommitIDAndCategory(String repo_id,String category,String commit_id) {
+        return rawIssueMapper.getRawIssueByCommitIDAndCategory(repo_id,category, commit_id);
     }
 
     public List<RawIssue> getRawIssueByIssueId(String issueId) {
@@ -49,7 +49,7 @@ public class RawIssueDao {
         return rawIssueMapper.getTypesByCommit(category, commit_id);
     }
 
-    public List<RawIssue> getRawIssueByCommitIDAndFile(String commit_id,String category,String file){
-        return rawIssueMapper.getRawIssueByCommitIDAndFile(commit_id, category, file);
+    public List<RawIssue> getRawIssueByCommitIDAndFile(String repo_id,String commit_id,String category,String file){
+        return rawIssueMapper.getRawIssueByCommitIDAndFile(repo_id,commit_id, category, file);
     }
 }

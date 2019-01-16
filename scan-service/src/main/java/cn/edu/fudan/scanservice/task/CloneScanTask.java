@@ -29,8 +29,7 @@ public class CloneScanTask extends BaseScanTask{
     private ScanOperation scanOperation;
 
 
-    @Async("forRequest")
-    public Future<String> run(String repoId, String commitId, String category) {
+    private void run(String repoId, String commitId, String category) {
         String identifier = redisLock.acquireLockWithTimeOut(repoId, 15, 15, TimeUnit.MINUTES);
         try {
             scan(scanOperation,repoId, commitId,category);
@@ -39,11 +38,16 @@ public class CloneScanTask extends BaseScanTask{
                 logger.error("repo->" + repoId + " release lock failed!");
             }
         }
+    }
+
+    @Async("forRequest")
+    public Future<String> runAsync(String repoId, String commitId, String category){
+        run(repoId, commitId, category);
         return new AsyncResult<>("complete");
     }
 
     public void runSynchronously(String repoId,String commitId,String category){
-        scan(scanOperation,repoId, commitId,category);
+        run(repoId, commitId, category);
     }
 
 }

@@ -12,6 +12,7 @@
         <result property="scan_id" column="scan_id"/>
         <result property="issue_id" column="issue_id"/>
         <result property="commit_id" column="commit_id"/>
+        <result property="repo_id" column="repo_id"/>
         <result property="commit_time" column="commit_time"/>
         <result property="developer_email" column="developer_email"/>
         <collection property="locations" column="uuid"
@@ -27,6 +28,7 @@
         <result property="scan_id" column="scan_id"/>
         <result property="issue_id" column="issue_id"/>
         <result property="commit_id" column="commit_id"/>
+        <result property="repo_id" column="repo_id"/>
         <collection property="locations" column="uuid"
                     select="cn.edu.fudan.issueservice.mapper.LocationMapper.getLocations"/>
     </resultMap>
@@ -42,7 +44,8 @@
         file_name,
         scan_id,
         issue_id,
-        commit_id
+        commit_id,
+        repo_id
         )
         VALUES
         <foreach collection="list" item="item" index="index"
@@ -55,7 +58,8 @@
             #{item.file_name},
             #{item.scan_id},
             #{item.issue_id},
-            #{item.commit_id}
+            #{item.commit_id},
+            #{item.repo_id}
             )
         </foreach>
     </insert>
@@ -95,11 +99,11 @@
 
 
     <select id="getRawIssueByCommitIDAndCategory" parameterType="String" resultMap="rawIssue2">
-        select * from rawIssue where commit_id = #{commit_id} and category = #{category}
+        select * from rawIssue where repo_id = #{repo_id} and category = #{category} and commit_id = #{commit_id}
     </select>
 
     <select id="getRawIssueByCommitIDAndFile" resultMap="rawIssue2">
-        select * from rawIssue where commit_id = #{commit_id} and category = #{category} and file_name like CONCAT('%',#{file},'%')
+        select * from rawIssue where repo_id = #{repo_id} and commit_id = #{commit_id} and category = #{category} and file_name like CONCAT('%',#{file},'%')
     </select>
 
     <select id="getRawIssueByIssueId" parameterType="String" resultMap="rawIssue">

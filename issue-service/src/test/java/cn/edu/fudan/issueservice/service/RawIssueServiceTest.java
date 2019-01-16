@@ -122,10 +122,11 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
         List<RawIssue> listByCommitIDAndCategory = new ArrayList<>();
         listByCommitIDAndCategory.add(rawIssue2);
         listByCommitIDAndCategory.add(rawIssue3);
+        String repo_id="repo1";
         String commit_id = "comm2";
         String category = "category";
-        Mockito.when(rawIssueDao.getRawIssueByCommitIDAndCategory(commit_id,category)).thenReturn(listByCommitIDAndCategory);
-        List<RawIssue> listResult = rawIssueService.getRawIssueByCommitIDAndCategory(commit_id,category);
+        Mockito.when(rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,commit_id,category)).thenReturn(listByCommitIDAndCategory);
+        List<RawIssue> listResult = rawIssueService.getRawIssueByCommitIDAndCategory(repo_id,commit_id,category);
         Assert.assertEquals(listByCommitIDAndCategory.size(), listResult.size());
         for (int i = 0; i < listResult.size(); ++i) {
             Assert.assertEquals(listByCommitIDAndCategory.get(i),listResult.get(i));

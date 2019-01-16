@@ -160,6 +160,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
                     rawIssue.put("file_name", fileName);
                     rawIssue.put("scan_id", scan.getUuid());
                     rawIssue.put("commit_id", scan.getCommit_id());
+                    rawIssue.put("repo_id",scan.getRepo_id());
                     rawIssue.put("uuid", rawIssueUUID);
                     rawIssue.put("locations", locations);
                     rawIssues.add(rawIssue);
