@@ -148,7 +148,7 @@ public class KafkaServiceImpl implements KafkaService {
     }
 
     @KafkaListener(id = "updateCommit", topics = {"UpdateCommit"}, groupId = "updateCommit")
-    public void firstScanByMQ(ConsumerRecord<String, String> consumerRecord){
+    public void firstScanByMQ(ConsumerRecord<String, String> consumerRecord) {
         String msg = consumerRecord.value();
         List<ScanMessageWithTime> commits=JSONArray.parseArray(msg,ScanMessageWithTime.class);
         int size=commits.size();
@@ -169,12 +169,21 @@ public class KafkaServiceImpl implements KafkaService {
     }
 
     private void firstAutoScan(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         List<ScanMessageWithTime> filteredCommits=getFilteredList(map,dates);
         String repoId=filteredCommits.get(0).getRepoId();
         logger.info("{} need to auto scan!",repoId);
         logger.info(filteredCommits.size()+" commits need to scan after filtered!");
         //当前repo_id和type的project存在，并且没被自动扫描过
-        if(existProject(repoId,"bug",true)){
+        boolean existBugProject=existProject(repoId,"bug",true);
+        logger.info("existBugProject -> {}",existBugProject);
+        boolean existCloneProject=existProject(repoId,"clone",true);
+        logger.info("existCloneProject -> {}",existCloneProject);
+        if(existBugProject){
             logger.info("start auto scan bug -> {}",repoId);
             for(ScanMessageWithTime message:filteredCommits){
                 String commitId = message.getCommitId();
@@ -184,7 +193,7 @@ public class KafkaServiceImpl implements KafkaService {
         }else{
             logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
-        if(existProject(repoId,"clone",true)){
+        if(existCloneProject){
             logger.info("start auto scan clone -> {}",repoId);
             for(ScanMessageWithTime message:filteredCommits){
                 String commitId = message.getCommitId();
@@ -217,7 +226,8 @@ public class KafkaServiceImpl implements KafkaService {
             if(i>10&&date.isBefore(twoWeekBefore)){
                 step+=2;
             }
-            result.addFirst(map.get(date).get(0));
+            List<ScanMessageWithTime> list=map.get(date);
+            result.addFirst(list.get(list.size()-1));
             i+=step;
         }
         return result;
