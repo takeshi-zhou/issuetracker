@@ -33,6 +33,22 @@
                     select="cn.edu.fudan.issueservice.mapper.LocationMapper.getLocations"/>
     </resultMap>
 
+    <resultMap id="rawIssue3" type="RawIssue">
+        <id property="uuid" column="uuid"/>
+        <result property="type" column="type"/>
+        <result property="category" column="category"/>
+        <result property="detail" column="detail"/>
+        <result property="file_name" column="file_name"/>
+        <result property="scan_id" column="scan_id"/>
+        <result property="issue_id" column="issue_id"/>
+        <result property="commit_id" column="commit_id"/>
+        <result property="repo_id" column="repo_id"/>
+        <association property="issue" column="issue_id"
+                     select="cn.edu.fudan.issueservice.mapper.IssueMapper.getIssueByID"/>
+        <collection property="locations" column="uuid"
+                    select="cn.edu.fudan.issueservice.mapper.LocationMapper.getLocations"/>
+    </resultMap>
+
 
     <insert id="insertRawIssueList" parameterType="List">
         insert into rawIssue
@@ -102,7 +118,7 @@
         select * from rawIssue where repo_id = #{repo_id} and category = #{category} and commit_id = #{commit_id}
     </select>
 
-    <select id="getRawIssueByCommitIDAndFile" resultMap="rawIssue2">
+    <select id="getRawIssueByCommitIDAndFile" resultMap="rawIssue3">
         select * from rawIssue where repo_id = #{repo_id} and commit_id = #{commit_id} and category = #{category} and file_name like CONCAT('%',#{file},'%')
     </select>
 

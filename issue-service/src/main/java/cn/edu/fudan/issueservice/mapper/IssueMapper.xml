@@ -122,7 +122,7 @@
         </if>
     </select>
 
-    <select id="getIssueByID" parameterType="String" resultMap="issue">
+    <select id="getIssueByID" parameterType="String" resultMap="issue2">
         select * from issue where uuid = #{uuid}
     </select>
 
