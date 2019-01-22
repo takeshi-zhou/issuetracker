@@ -33,32 +33,10 @@ public class DateTimeUtil {
             .appendValue(ChronoField.DAY_OF_MONTH, 2)
             .toFormatter();
 
-    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     public static String format(Date date) {
-        return simpleDateFormat.format(date);
+        return new SimpleDateFormat(DATE_FORMAT).format(date);
     }
 
-    public static Date formatedDate(Date date) {
-        try {
-            //cause DateFormats are inherently unsafe for multithreaded use.
-            // So it would be better not use a call to an instance of DateFormat that has been obtained via a static field.
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
-            return simpleDateFormat.parse(simpleDateFormat.format(date));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return date;
-    }
-
-    public static Date parse(String str) {
-        try {
-            return simpleDateFormat.parse(str);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }
