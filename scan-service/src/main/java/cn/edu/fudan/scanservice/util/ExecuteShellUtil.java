@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component
@@ -58,7 +59,7 @@ public class ExecuteShellUtil {
             //String command =  binHome + "findOneFile.sh " + repoHome + repoPath + " "+ fileName;
             Process process = rt.exec(command);
             process.waitFor();
-            BufferedReader bReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader bReader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
             StringBuffer sBuffer = new StringBuffer();
             String line ;
             while ((line = bReader.readLine())!= null) {
