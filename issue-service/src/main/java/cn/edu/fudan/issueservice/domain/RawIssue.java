@@ -17,6 +17,7 @@ public class RawIssue {
     private List<Location> locations;
     private Date commit_time;
     private String developer_email;
+    private Issue issue;
 
     private boolean mapped=false;
 
@@ -134,6 +135,14 @@ public class RawIssue {
         }else {
             this.commit_time = (Date) commit_time.clone();
         }
+    }
+
+    public Issue getIssue() {
+        return issue;
+    }
+
+    public void setIssue(Issue issue) {
+        this.issue = issue;
     }
 
     @Override
