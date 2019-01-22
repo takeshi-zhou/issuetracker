@@ -6,7 +6,6 @@ import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.domain.ScanInitialInfo;
 import cn.edu.fudan.scanservice.domain.ScanResult;
 import cn.edu.fudan.scanservice.service.ScanOperation;
-import cn.edu.fudan.scanservice.util.DateTimeUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +67,7 @@ public class ScanOperationAdapter implements ScanOperation {
         Scan scan = new Scan();
         scan.setCategory(category);
         scan.setName(repoName + "-" + startTime.getTime());
-        scan.setStart_time(DateTimeUtil.formatedDate(startTime));
+        scan.setStart_time(startTime);
         scan.setStatus("doing...");
         scan.setRepo_id(repoId);
         scan.setCommit_id(commitId);
@@ -78,7 +77,7 @@ public class ScanOperationAdapter implements ScanOperation {
         //use api provided by commit-service
         JSONObject jsonObject = restInterfaceManager.getCommitTime(commitId);
         Date commit_time = jsonObject.getJSONObject("data").getDate("commit_time");
-        scan.setCommit_time(DateTimeUtil.formatedDate(commit_time));
+        scan.setCommit_time(commit_time);
         return new ScanInitialInfo(scan, repoName, repoId, repoPath);
     }
 
@@ -109,7 +108,7 @@ public class ScanOperationAdapter implements ScanOperation {
         Scan scan = scanInitialInfo.getScan();
         //更新当前Scan的状态
         scan.setStatus("done");//设为结束状态
-        scan.setEnd_time(DateTimeUtil.formatedDate(new Date()));
+        scan.setEnd_time(new Date());
         scanDao.insertOneScan(scan);
         return true;
     }
