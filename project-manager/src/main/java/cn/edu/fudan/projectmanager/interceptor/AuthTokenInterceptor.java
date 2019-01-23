@@ -11,6 +11,7 @@ import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author WZY
@@ -31,7 +32,9 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
         httpServletResponse.setHeader("Access-Control-Allow-Origin", "*");
         httpServletResponse.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS,DELETE");
         String requestHeaders = httpServletRequest.getHeader("Access-Control-Request-Headers");
-        requestHeaders = HtmlUtils.htmlEscape(requestHeaders);
+        if (requestHeaders != null) {
+            requestHeaders = HtmlUtils.htmlEscape(requestHeaders, "UTF-8");
+        }
         httpServletResponse.setHeader("Access-Control-Allow-Headers", requestHeaders);
         // 跨域时会首先发送一个option请求，该请求不会携带header 这里我们给option请求直接返回正常状态
         if (httpServletRequest.getMethod().equals(RequestMethod.OPTIONS.name())) {
