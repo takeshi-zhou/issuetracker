@@ -59,6 +59,17 @@ public class ScanController {
         }
     }
 
+    @GetMapping(value = {"/scan/pre-scanned-commits"})
+    public Object getPreScannedCommit(@RequestParam("repo_id") String repo_id,
+                                       @RequestParam("category")String category,
+                                       @RequestParam("commit_id")String commit_id){
+        try{
+            return new ResponseBean(200,"success",scanService.getPreviousScannedCommitID(repo_id, category, commit_id));
+        }catch (Exception e){
+            return new ResponseBean(500,e.getMessage(),null);
+        }
+    }
+
     //下面都是供其它服务调用的内部接口
 
     @DeleteMapping(value = {"/inner/scan/{category}/{repoId}"})
