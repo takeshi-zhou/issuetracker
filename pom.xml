@@ -20,6 +20,7 @@
         <module>issue-service</module>
         <module>tag-service</module>
         <module>event-service</module>
+        <module>measure-service</module>
     </modules>
 
     <parent>
