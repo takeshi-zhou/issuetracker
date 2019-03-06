@@ -21,7 +21,7 @@ public class JavaNCSSResultHandler implements ResultHandler{
     private String resultFileHome;
 
     @Override
-    public Measure handle(String resultFileName) {
+    public Measure handle(String resultFileName,String level) {
         Measure measure=new Measure();
         Total total=new Total();
         SAXReader reader=new SAXReader();
@@ -29,6 +29,9 @@ public class JavaNCSSResultHandler implements ResultHandler{
             Document doc=reader.read(new File(resultFileHome+resultFileName));
             Element root=doc.getRootElement();
             measure.setPackages(analyzePackages(root.element("packages"),total));
+            if(level.equals("file")){
+                measure.getPackages().setPackages(null);
+            }
             measure.setTotal(total);
             measure.setObjects(analyzeObjects(root.element("objects")));
             measure.setFunctions(analyzeFunctions(root.element("functions")));

@@ -20,9 +20,9 @@ public class MeasureController {
     }
 
     @GetMapping("/measure")
-    public ResponseBean getMeasureData(@RequestParam("path")String path){
+    public ResponseBean getMeasureData(@RequestParam("path")String path,@RequestParam("level")String level){
         try{
-            return new ResponseBean(200,"success",measureAnalyzer.analyze(path,resultHandler));
+            return new ResponseBean(200,"success",measureAnalyzer.analyze(path,level,resultHandler));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",null);

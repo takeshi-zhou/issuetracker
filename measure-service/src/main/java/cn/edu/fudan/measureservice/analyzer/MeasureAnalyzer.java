@@ -5,5 +5,5 @@ import cn.edu.fudan.measureservice.handler.ResultHandler;
 
 public interface MeasureAnalyzer {
 
-    Measure analyze(String targetPath, ResultHandler resultHandler);
+    Measure analyze(String targetPath, String level,ResultHandler resultHandler);
 }

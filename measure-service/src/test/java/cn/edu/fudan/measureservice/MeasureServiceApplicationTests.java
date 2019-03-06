@@ -17,7 +17,7 @@ public class MeasureServiceApplicationTests {
 
     @Test
     public void contextLoads() {
-        Measure measure=handler.handle("directory.xml");
+        Measure measure=handler.handle("directory.xml","directory");
         System.out.println(measure);
     }
 

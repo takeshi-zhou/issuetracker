@@ -18,7 +18,7 @@ public class JavaNCSSAnalyzer implements MeasureAnalyzer {
 
 
     @Override
-    public Measure analyze(String targetPath, ResultHandler resultHandler) {
+    public Measure analyze(String targetPath, String level,ResultHandler resultHandler) {
         File file=new File(targetPath);
         String name;
         if(file.isDirectory()){
@@ -33,7 +33,7 @@ public class JavaNCSSAnalyzer implements MeasureAnalyzer {
         try{
             Process process = runtime.exec(command);
             process.waitFor();
-            return resultHandler.handle(resultFileName);
+            return resultHandler.handle(resultFileName,level);
         }catch (Exception e){
             e.printStackTrace();
         }
