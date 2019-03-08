@@ -9,9 +9,10 @@
         <result property="eventType" column="event_type"/>
         <result property="targetType" column="target_type"/>
         <result property="targetId" column="target_id"/>
+        <result property="targetDisplayId" column="target_display_id"/>
         <result property="targetCommitter" column="target_committer"/>
         <result property="repoId" column="repo_id"/>
-        <result property="createTime" column="create_time"/>
+        <result property="commitTime" column="commit_time"/>
     </resultMap>
 
 
@@ -23,9 +24,10 @@
                   event_type,
                   target_type,
                   target_id,
+                  target_display_id,
                   target_committer,
                   repo_id,
-                  create_time
+                  commit_time
               )
         values
         <foreach collection="list" item="item" index="index" separator=",">
@@ -35,9 +37,10 @@
                 #{item.eventType},
                 #{item.targetType},
                 #{item.targetId},
+                #{item.targetDisplayId},
                 #{item.targetCommitter},
                 #{item.repoId},
-                #{item.createTime}
+                #{item.commitTime}
             )
         </foreach>
     </insert>
@@ -52,7 +55,7 @@
             #{repo_id}
         </foreach>
         and event_type = #{event_type}
-        order by create_time desc
+        order by commit_time desc
         limit 10
     </select>
 </mapper>

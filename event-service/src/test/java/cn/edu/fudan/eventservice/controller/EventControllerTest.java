@@ -65,16 +65,16 @@ public class EventControllerTest extends EventServiceApplicationTests {
 
         //准备测试数据
         testEvents=new ArrayList<>();
-        testEvents.add(new Event("1","bug", EventType.NEW_BUG,"BIG_METHOD","2222","Jack","1",new Date()));
-        testEvents.add(new Event("2","bug", EventType.ELIMINATE_BUG,"11","2222","Smith","1",new Date()));
+        testEvents.add(new Event("1","bug", EventType.NEW_BUG,"BIG_METHOD","2222","22","Jack","1",new Date()));
+        testEvents.add(new Event("2","bug", EventType.ELIMINATE_BUG,"11","2222","22","Smith","1",new Date()));
 
         newBugEvents=new ArrayList<>();
-        newBugEvents.add(new Event("3","bug", EventType.NEW_BUG,"BIG_METHOD","2222","Jack","1",new Date()));
-        newBugEvents.add(new Event("4","bug", EventType.NEW_BUG,"BIG_METHOD","2222","Jack","1",new Date()));
+        newBugEvents.add(new Event("3","bug", EventType.NEW_BUG,"BIG_METHOD","2222","22","Jack","1",new Date()));
+        newBugEvents.add(new Event("4","bug", EventType.NEW_BUG,"BIG_METHOD","2222","22","Jack","1",new Date()));
 
         eliminatedBugEvents=new ArrayList<>();
-        eliminatedBugEvents.add(new Event("5","bug", EventType.ELIMINATE_BUG,"BIG_METHOD","2222","Jack","1",new Date()));
-        eliminatedBugEvents.add(new Event("6","bug", EventType.ELIMINATE_BUG,"BIG_METHOD","2222","Jack","1",new Date()));
+        eliminatedBugEvents.add(new Event("5","bug", EventType.ELIMINATE_BUG,"BIG_METHOD","2222","22","Jack","1",new Date()));
+        eliminatedBugEvents.add(new Event("6","bug", EventType.ELIMINATE_BUG,"BIG_METHOD","2222","22","Jack","1",new Date()));
 
     }
 

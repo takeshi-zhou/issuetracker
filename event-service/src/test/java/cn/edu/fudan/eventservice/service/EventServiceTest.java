@@ -73,8 +73,8 @@ public class EventServiceTest extends EventServiceApplicationTests {
         MemberModifier.field(EventServiceImpl.class,"restInterfaceManager").set(eventService,restInterfaceManager);
         //准备测试数据
         testEvents=new ArrayList<>();
-        testEvents.add(new Event("1","bug", EventType.NEW_BUG,"BIG_METHOD","2222","Jack","1",new Date()));
-        testEvents.add(new Event("2","bug", EventType.ELIMINATE_BUG,"11","2222","Smith","1",new Date()));
+        testEvents.add(new Event("1","bug", EventType.NEW_BUG,"BIG_METHOD","2222","22","Jack","1",new Date()));
+        testEvents.add(new Event("2","bug", EventType.ELIMINATE_BUG,"11","2222","22","Smith","1",new Date()));
 
         repoIds=new JSONArray();
         repoIds.add("111111111111111111111111111");
@@ -82,28 +82,28 @@ public class EventServiceTest extends EventServiceApplicationTests {
         repoIds.add("333333333333333333333333333");
 
         newBugEvents=new ArrayList<>();
-        newBugEvents.add(new Event("3","bug", EventType.NEW_BUG,"BIG_METHOD","2222","Jack","1",new Date()));
-        newBugEvents.add(new Event("4","bug", EventType.NEW_BUG,"BIG_METHOD","2222","Jack","1",new Date()));
+        newBugEvents.add(new Event("3","bug", EventType.NEW_BUG,"BIG_METHOD","2222","22","Jack","1",new Date()));
+        newBugEvents.add(new Event("4","bug", EventType.NEW_BUG,"BIG_METHOD","2222","22","Jack","1",new Date()));
 
         eliminatedBugEvents=new ArrayList<>();
-        eliminatedBugEvents.add(new Event("5","bug", EventType.ELIMINATE_BUG,"BIG_METHOD","2222","Jack","1",new Date()));
-        eliminatedBugEvents.add(new Event("6","bug", EventType.ELIMINATE_BUG,"BIG_METHOD","2222","Jack","1",new Date()));
+        eliminatedBugEvents.add(new Event("5","bug", EventType.ELIMINATE_BUG,"BIG_METHOD","2222","22","Jack","1",new Date()));
+        eliminatedBugEvents.add(new Event("6","bug", EventType.ELIMINATE_BUG,"BIG_METHOD","2222","22","Jack","1",new Date()));
 
         newCloneClassEvents=new ArrayList<>();
-        newCloneClassEvents.add(new Event("7","clone", EventType.NEW_CLONE_CLASS,"BIG_METHOD","2222","Jack","1",new Date()));
-        newCloneClassEvents.add(new Event("8","clone", EventType.NEW_CLONE_CLASS,"BIG_METHOD","2222","Jack","1",new Date()));
+        newCloneClassEvents.add(new Event("7","clone", EventType.NEW_CLONE_CLASS,"BIG_METHOD","2222","22","Jack","1",new Date()));
+        newCloneClassEvents.add(new Event("8","clone", EventType.NEW_CLONE_CLASS,"BIG_METHOD","2222","22","Jack","1",new Date()));
 
         removeCloneClassEvents=new ArrayList<>();
-        removeCloneClassEvents.add(new Event("9","clone", EventType.REMOVE_CLONE_CLASS,"BIG_METHOD","2222","Jack","1",new Date()));
-        removeCloneClassEvents.add(new Event("10","clone", EventType.REMOVE_CLONE_CLASS,"BIG_METHOD","2222","Jack","1",new Date()));
+        removeCloneClassEvents.add(new Event("9","clone", EventType.REMOVE_CLONE_CLASS,"BIG_METHOD","2222","22","Jack","1",new Date()));
+        removeCloneClassEvents.add(new Event("10","clone", EventType.REMOVE_CLONE_CLASS,"BIG_METHOD","2222","22","Jack","1",new Date()));
 
         newCloneInstanceEvents=new ArrayList<>();
-        newCloneInstanceEvents.add(new Event("11","clone", EventType.NEW_CLONE_INSTANCE,"BIG_METHOD","2222","Jack","1",new Date()));
-        newCloneInstanceEvents.add(new Event("12","clone", EventType.NEW_CLONE_INSTANCE,"BIG_METHOD","2222","Jack","1",new Date()));
+        newCloneInstanceEvents.add(new Event("11","clone", EventType.NEW_CLONE_INSTANCE,"BIG_METHOD","2222","22","Jack","1",new Date()));
+        newCloneInstanceEvents.add(new Event("12","clone", EventType.NEW_CLONE_INSTANCE,"BIG_METHOD","2222","22","Jack","1",new Date()));
 
         removeCloneInstanceEvents=new ArrayList<>();
-        removeCloneInstanceEvents.add(new Event("13","clone", EventType.REMOVE_CLONE_INSTANCE,"BIG_METHOD","2222","Jack","1",new Date()));
-        removeCloneInstanceEvents.add(new Event("14","clone", EventType.REMOVE_CLONE_INSTANCE,"BIG_METHOD","2222","Jack","1",new Date()));
+        removeCloneInstanceEvents.add(new Event("13","clone", EventType.REMOVE_CLONE_INSTANCE,"BIG_METHOD","2222","22","Jack","1",new Date()));
+        removeCloneInstanceEvents.add(new Event("14","clone", EventType.REMOVE_CLONE_INSTANCE,"BIG_METHOD","2222","22","Jack","1",new Date()));
     }
 
     @Test

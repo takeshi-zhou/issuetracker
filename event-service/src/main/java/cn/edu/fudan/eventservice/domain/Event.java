@@ -13,22 +13,32 @@ public class Event {
     private EventType eventType;
     private String targetType;
     private String targetId;
+    private String targetDisplayId;
     private String targetCommitter;
     private String repoId;
-    private Date createTime;
+    private Date commitTime;
 
     public Event() {
     }
 
-    public Event(String id, String category, EventType eventType, String targetType, String targetId, String targetCommitter, String repoId, Date createTime) {
+    public Event(String id, String category, EventType eventType, String targetType, String targetId, String targetDisplayId, String targetCommitter, String repoId, Date commitTime) {
         this.id = id;
         this.category = category;
         this.eventType = eventType;
         this.targetType = targetType;
         this.targetId = targetId;
+        this.targetDisplayId = targetDisplayId;
         this.targetCommitter = targetCommitter;
         this.repoId = repoId;
-        this.createTime = createTime;
+        this.commitTime = commitTime;
+    }
+
+    public String getTargetDisplayId() {
+        return targetDisplayId;
+    }
+
+    public void setTargetDisplayId(String targetDisplayId) {
+        this.targetDisplayId = targetDisplayId;
     }
 
     public String getId() {
@@ -87,11 +97,13 @@ public class Event {
         this.repoId = repoId;
     }
 
-    public Date getCreateTime() {
-        return createTime;
+    public Date getCommitTime() {
+        return commitTime;
     }
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
+    public void setCommitTime(Date commitTime) {
+        this.commitTime = commitTime;
     }
 }
+
+
