@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.model.IssueList;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -13,7 +14,7 @@ import javax.validation.constraints.*;
  * InlineResponse200
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-10-09T08:48:10.049Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-03-04T08:22:59.607Z")
 
 public class InlineResponse200   {
   @JsonProperty("totalPage")
@@ -21,6 +22,9 @@ public class InlineResponse200   {
 
   @JsonProperty("totalCount")
   private Integer totalCount = null;
+
+  @JsonProperty("issueList")
+  private IssueList issueList = null;
 
   public InlineResponse200 totalPage(Integer totalPage) {
     this.totalPage = totalPage;
@@ -62,6 +66,27 @@ public class InlineResponse200   {
     this.totalCount = totalCount;
   }
 
+  public InlineResponse200 issueList(IssueList issueList) {
+    this.issueList = issueList;
+    return this;
+  }
+
+  /**
+   * Get issueList
+   * @return issueList
+  **/
+  @ApiModelProperty(value = "")
+
+  @Valid
+
+  public IssueList getIssueList() {
+    return issueList;
+  }
+
+  public void setIssueList(IssueList issueList) {
+    this.issueList = issueList;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -73,12 +98,13 @@ public class InlineResponse200   {
     }
     InlineResponse200 inlineResponse200 = (InlineResponse200) o;
     return Objects.equals(this.totalPage, inlineResponse200.totalPage) &&
-        Objects.equals(this.totalCount, inlineResponse200.totalCount);
+        Objects.equals(this.totalCount, inlineResponse200.totalCount) &&
+        Objects.equals(this.issueList, inlineResponse200.issueList);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(totalPage, totalCount);
+    return Objects.hash(totalPage, totalCount, issueList);
   }
 
   @Override
@@ -88,6 +114,7 @@ public class InlineResponse200   {
     
     sb.append("    totalPage: ").append(toIndentedString(totalPage)).append("\n");
     sb.append("    totalCount: ").append(toIndentedString(totalCount)).append("\n");
+    sb.append("    issueList: ").append(toIndentedString(issueList)).append("\n");
     sb.append("}");
     return sb.toString();
   }

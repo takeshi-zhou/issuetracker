@@ -10,62 +10,42 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * AddProjectJson
+ * IgnoreTagRequestBody
  */
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-03-04T08:22:59.607Z")
 
-public class AddProjectJson   {
-  @JsonProperty("url")
-  private String url = null;
-
-  @JsonProperty("name")
-  private String name = null;
+public class IgnoreTagRequestBody   {
+  @JsonProperty("ignore-level")
+  private String ignoreLevel = null;
 
   @JsonProperty("type")
   private String type = null;
 
-  public AddProjectJson url(String url) {
-    this.url = url;
+  @JsonProperty("repo-id")
+  private String repoId = null;
+
+  public IgnoreTagRequestBody ignoreLevel(String ignoreLevel) {
+    this.ignoreLevel = ignoreLevel;
     return this;
   }
 
   /**
-   * Get url
-   * @return url
+   * Get ignoreLevel
+   * @return ignoreLevel
   **/
   @ApiModelProperty(value = "")
 
 
-  public String getUrl() {
-    return url;
+  public String getIgnoreLevel() {
+    return ignoreLevel;
   }
 
-  public void setUrl(String url) {
-    this.url = url;
+  public void setIgnoreLevel(String ignoreLevel) {
+    this.ignoreLevel = ignoreLevel;
   }
 
-  public AddProjectJson name(String name) {
-    this.name = name;
-    return this;
-  }
-
-  /**
-   * Get name
-   * @return name
-  **/
-  @ApiModelProperty(value = "")
-
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public AddProjectJson type(String type) {
+  public IgnoreTagRequestBody type(String type) {
     this.type = type;
     return this;
   }
@@ -85,6 +65,26 @@ public class AddProjectJson   {
     this.type = type;
   }
 
+  public IgnoreTagRequestBody repoId(String repoId) {
+    this.repoId = repoId;
+    return this;
+  }
+
+  /**
+   * Get repoId
+   * @return repoId
+  **/
+  @ApiModelProperty(value = "")
+
+
+  public String getRepoId() {
+    return repoId;
+  }
+
+  public void setRepoId(String repoId) {
+    this.repoId = repoId;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -94,25 +94,25 @@ public class AddProjectJson   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    AddProjectJson addProjectJson = (AddProjectJson) o;
-    return Objects.equals(this.url, addProjectJson.url) &&
-        Objects.equals(this.name, addProjectJson.name) &&
-        Objects.equals(this.type, addProjectJson.type);
+    IgnoreTagRequestBody ignoreTagRequestBody = (IgnoreTagRequestBody) o;
+    return Objects.equals(this.ignoreLevel, ignoreTagRequestBody.ignoreLevel) &&
+        Objects.equals(this.type, ignoreTagRequestBody.type) &&
+        Objects.equals(this.repoId, ignoreTagRequestBody.repoId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(url, name, type);
+    return Objects.hash(ignoreLevel, type, repoId);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class AddProjectJson {\n");
+    sb.append("class IgnoreTagRequestBody {\n");
     
-    sb.append("    url: ").append(toIndentedString(url)).append("\n");
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    ignoreLevel: ").append(toIndentedString(ignoreLevel)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    repoId: ").append(toIndentedString(repoId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

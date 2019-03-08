@@ -10,48 +10,25 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * Tag
+ * AddTagRequestBody
  */
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-03-04T08:22:59.607Z")
 
-public class Tag   {
-  @JsonProperty("uuid")
-  private String uuid = null;
-
+public class AddTagRequestBody   {
   @JsonProperty("name")
   private String name = null;
 
   @JsonProperty("scope")
   private String scope = null;
 
-  @JsonProperty("color")
-  private String color = null;
+  @JsonProperty("itemId")
+  private String itemId = null;
 
-  @JsonProperty("icon")
-  private String icon = null;
+  @JsonProperty("isDefault")
+  private Boolean isDefault = null;
 
-  public Tag uuid(String uuid) {
-    this.uuid = uuid;
-    return this;
-  }
-
-  /**
-   * Get uuid
-   * @return uuid
-  **/
-  @ApiModelProperty(value = "")
-
-
-  public String getUuid() {
-    return uuid;
-  }
-
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
-  }
-
-  public Tag name(String name) {
+  public AddTagRequestBody name(String name) {
     this.name = name;
     return this;
   }
@@ -71,7 +48,7 @@ public class Tag   {
     this.name = name;
   }
 
-  public Tag scope(String scope) {
+  public AddTagRequestBody scope(String scope) {
     this.scope = scope;
     return this;
   }
@@ -91,44 +68,44 @@ public class Tag   {
     this.scope = scope;
   }
 
-  public Tag color(String color) {
-    this.color = color;
+  public AddTagRequestBody itemId(String itemId) {
+    this.itemId = itemId;
     return this;
   }
 
   /**
-   * Get color
-   * @return color
+   * Get itemId
+   * @return itemId
   **/
   @ApiModelProperty(value = "")
 
 
-  public String getColor() {
-    return color;
+  public String getItemId() {
+    return itemId;
   }
 
-  public void setColor(String color) {
-    this.color = color;
+  public void setItemId(String itemId) {
+    this.itemId = itemId;
   }
 
-  public Tag icon(String icon) {
-    this.icon = icon;
+  public AddTagRequestBody isDefault(Boolean isDefault) {
+    this.isDefault = isDefault;
     return this;
   }
 
   /**
-   * Get icon
-   * @return icon
+   * Get isDefault
+   * @return isDefault
   **/
   @ApiModelProperty(value = "")
 
 
-  public String getIcon() {
-    return icon;
+  public Boolean isIsDefault() {
+    return isDefault;
   }
 
-  public void setIcon(String icon) {
-    this.icon = icon;
+  public void setIsDefault(Boolean isDefault) {
+    this.isDefault = isDefault;
   }
 
 
@@ -140,29 +117,27 @@ public class Tag   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Tag tag = (Tag) o;
-    return Objects.equals(this.uuid, tag.uuid) &&
-        Objects.equals(this.name, tag.name) &&
-        Objects.equals(this.scope, tag.scope) &&
-        Objects.equals(this.color, tag.color) &&
-        Objects.equals(this.icon, tag.icon);
+    AddTagRequestBody addTagRequestBody = (AddTagRequestBody) o;
+    return Objects.equals(this.name, addTagRequestBody.name) &&
+        Objects.equals(this.scope, addTagRequestBody.scope) &&
+        Objects.equals(this.itemId, addTagRequestBody.itemId) &&
+        Objects.equals(this.isDefault, addTagRequestBody.isDefault);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, scope, color, icon);
+    return Objects.hash(name, scope, itemId, isDefault);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Tag {\n");
+    sb.append("class AddTagRequestBody {\n");
     
-    sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
-    sb.append("    color: ").append(toIndentedString(color)).append("\n");
-    sb.append("    icon: ").append(toIndentedString(icon)).append("\n");
+    sb.append("    itemId: ").append(toIndentedString(itemId)).append("\n");
+    sb.append("    isDefault: ").append(toIndentedString(isDefault)).append("\n");
     sb.append("}");
     return sb.toString();
   }

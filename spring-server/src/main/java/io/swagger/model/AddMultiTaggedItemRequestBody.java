@@ -10,56 +10,56 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * CommitTimeData
+ * AddMultiTaggedItemRequestBody
  */
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-03-04T08:22:59.607Z")
 
-public class CommitTimeData   {
-  @JsonProperty("status")
-  private String status = null;
+public class AddMultiTaggedItemRequestBody   {
+  @JsonProperty("item_id")
+  private String itemId = null;
 
-  @JsonProperty("commit_time")
-  private String commitTime = null;
+  @JsonProperty("tag_id")
+  private String tagId = null;
 
-  public CommitTimeData status(String status) {
-    this.status = status;
+  public AddMultiTaggedItemRequestBody itemId(String itemId) {
+    this.itemId = itemId;
     return this;
   }
 
   /**
-   * Get status
-   * @return status
+   * Get itemId
+   * @return itemId
   **/
   @ApiModelProperty(value = "")
 
 
-  public String getStatus() {
-    return status;
+  public String getItemId() {
+    return itemId;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
+  public void setItemId(String itemId) {
+    this.itemId = itemId;
   }
 
-  public CommitTimeData commitTime(String commitTime) {
-    this.commitTime = commitTime;
+  public AddMultiTaggedItemRequestBody tagId(String tagId) {
+    this.tagId = tagId;
     return this;
   }
 
   /**
-   * Get commitTime
-   * @return commitTime
+   * Get tagId
+   * @return tagId
   **/
   @ApiModelProperty(value = "")
 
 
-  public String getCommitTime() {
-    return commitTime;
+  public String getTagId() {
+    return tagId;
   }
 
-  public void setCommitTime(String commitTime) {
-    this.commitTime = commitTime;
+  public void setTagId(String tagId) {
+    this.tagId = tagId;
   }
 
 
@@ -71,23 +71,23 @@ public class CommitTimeData   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CommitTimeData commitTimeData = (CommitTimeData) o;
-    return Objects.equals(this.status, commitTimeData.status) &&
-        Objects.equals(this.commitTime, commitTimeData.commitTime);
+    AddMultiTaggedItemRequestBody addMultiTaggedItemRequestBody = (AddMultiTaggedItemRequestBody) o;
+    return Objects.equals(this.itemId, addMultiTaggedItemRequestBody.itemId) &&
+        Objects.equals(this.tagId, addMultiTaggedItemRequestBody.tagId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, commitTime);
+    return Objects.hash(itemId, tagId);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CommitTimeData {\n");
+    sb.append("class AddMultiTaggedItemRequestBody {\n");
     
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    commitTime: ").append(toIndentedString(commitTime)).append("\n");
+    sb.append("    itemId: ").append(toIndentedString(itemId)).append("\n");
+    sb.append("    tagId: ").append(toIndentedString(tagId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

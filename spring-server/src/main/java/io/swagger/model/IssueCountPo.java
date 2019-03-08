@@ -5,17 +5,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.threeten.bp.LocalDate;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * InlineResponse2001
+ * IssueCountPo
  */
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-03-04T08:22:59.607Z")
 
-public class InlineResponse2001   {
+public class IssueCountPo   {
+  @JsonProperty("date")
+  private LocalDate date = null;
+
   @JsonProperty("newIssueCount")
   private Integer newIssueCount = null;
 
@@ -25,7 +29,28 @@ public class InlineResponse2001   {
   @JsonProperty("remainingIssueCount")
   private Integer remainingIssueCount = null;
 
-  public InlineResponse2001 newIssueCount(Integer newIssueCount) {
+  public IssueCountPo date(LocalDate date) {
+    this.date = date;
+    return this;
+  }
+
+  /**
+   * Get date
+   * @return date
+  **/
+  @ApiModelProperty(value = "")
+
+  @Valid
+
+  public LocalDate getDate() {
+    return date;
+  }
+
+  public void setDate(LocalDate date) {
+    this.date = date;
+  }
+
+  public IssueCountPo newIssueCount(Integer newIssueCount) {
     this.newIssueCount = newIssueCount;
     return this;
   }
@@ -45,7 +70,7 @@ public class InlineResponse2001   {
     this.newIssueCount = newIssueCount;
   }
 
-  public InlineResponse2001 eliminatedIssueCount(Integer eliminatedIssueCount) {
+  public IssueCountPo eliminatedIssueCount(Integer eliminatedIssueCount) {
     this.eliminatedIssueCount = eliminatedIssueCount;
     return this;
   }
@@ -65,7 +90,7 @@ public class InlineResponse2001   {
     this.eliminatedIssueCount = eliminatedIssueCount;
   }
 
-  public InlineResponse2001 remainingIssueCount(Integer remainingIssueCount) {
+  public IssueCountPo remainingIssueCount(Integer remainingIssueCount) {
     this.remainingIssueCount = remainingIssueCount;
     return this;
   }
@@ -94,22 +119,24 @@ public class InlineResponse2001   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    InlineResponse2001 inlineResponse2001 = (InlineResponse2001) o;
-    return Objects.equals(this.newIssueCount, inlineResponse2001.newIssueCount) &&
-        Objects.equals(this.eliminatedIssueCount, inlineResponse2001.eliminatedIssueCount) &&
-        Objects.equals(this.remainingIssueCount, inlineResponse2001.remainingIssueCount);
+    IssueCountPo issueCountPo = (IssueCountPo) o;
+    return Objects.equals(this.date, issueCountPo.date) &&
+        Objects.equals(this.newIssueCount, issueCountPo.newIssueCount) &&
+        Objects.equals(this.eliminatedIssueCount, issueCountPo.eliminatedIssueCount) &&
+        Objects.equals(this.remainingIssueCount, issueCountPo.remainingIssueCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(newIssueCount, eliminatedIssueCount, remainingIssueCount);
+    return Objects.hash(date, newIssueCount, eliminatedIssueCount, remainingIssueCount);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class InlineResponse2001 {\n");
+    sb.append("class IssueCountPo {\n");
     
+    sb.append("    date: ").append(toIndentedString(date)).append("\n");
     sb.append("    newIssueCount: ").append(toIndentedString(newIssueCount)).append("\n");
     sb.append("    eliminatedIssueCount: ").append(toIndentedString(eliminatedIssueCount)).append("\n");
     sb.append("    remainingIssueCount: ").append(toIndentedString(remainingIssueCount)).append("\n");

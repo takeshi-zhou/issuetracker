@@ -10,48 +10,28 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * Tag
+ * ModifyTagRequestBody
  */
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-03-04T08:22:59.607Z")
 
-public class Tag   {
-  @JsonProperty("uuid")
-  private String uuid = null;
-
+public class ModifyTagRequestBody   {
   @JsonProperty("name")
   private String name = null;
 
   @JsonProperty("scope")
   private String scope = null;
 
-  @JsonProperty("color")
-  private String color = null;
+  @JsonProperty("itemId")
+  private String itemId = null;
 
-  @JsonProperty("icon")
-  private String icon = null;
+  @JsonProperty("oldName")
+  private String oldName = null;
 
-  public Tag uuid(String uuid) {
-    this.uuid = uuid;
-    return this;
-  }
+  @JsonProperty("isDefault")
+  private Boolean isDefault = null;
 
-  /**
-   * Get uuid
-   * @return uuid
-  **/
-  @ApiModelProperty(value = "")
-
-
-  public String getUuid() {
-    return uuid;
-  }
-
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
-  }
-
-  public Tag name(String name) {
+  public ModifyTagRequestBody name(String name) {
     this.name = name;
     return this;
   }
@@ -71,7 +51,7 @@ public class Tag   {
     this.name = name;
   }
 
-  public Tag scope(String scope) {
+  public ModifyTagRequestBody scope(String scope) {
     this.scope = scope;
     return this;
   }
@@ -91,44 +71,64 @@ public class Tag   {
     this.scope = scope;
   }
 
-  public Tag color(String color) {
-    this.color = color;
+  public ModifyTagRequestBody itemId(String itemId) {
+    this.itemId = itemId;
     return this;
   }
 
   /**
-   * Get color
-   * @return color
+   * Get itemId
+   * @return itemId
   **/
   @ApiModelProperty(value = "")
 
 
-  public String getColor() {
-    return color;
+  public String getItemId() {
+    return itemId;
   }
 
-  public void setColor(String color) {
-    this.color = color;
+  public void setItemId(String itemId) {
+    this.itemId = itemId;
   }
 
-  public Tag icon(String icon) {
-    this.icon = icon;
+  public ModifyTagRequestBody oldName(String oldName) {
+    this.oldName = oldName;
     return this;
   }
 
   /**
-   * Get icon
-   * @return icon
+   * Get oldName
+   * @return oldName
   **/
   @ApiModelProperty(value = "")
 
 
-  public String getIcon() {
-    return icon;
+  public String getOldName() {
+    return oldName;
   }
 
-  public void setIcon(String icon) {
-    this.icon = icon;
+  public void setOldName(String oldName) {
+    this.oldName = oldName;
+  }
+
+  public ModifyTagRequestBody isDefault(Boolean isDefault) {
+    this.isDefault = isDefault;
+    return this;
+  }
+
+  /**
+   * Get isDefault
+   * @return isDefault
+  **/
+  @ApiModelProperty(value = "")
+
+
+  public Boolean isIsDefault() {
+    return isDefault;
+  }
+
+  public void setIsDefault(Boolean isDefault) {
+    this.isDefault = isDefault;
   }
 
 
@@ -140,29 +140,29 @@ public class Tag   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Tag tag = (Tag) o;
-    return Objects.equals(this.uuid, tag.uuid) &&
-        Objects.equals(this.name, tag.name) &&
-        Objects.equals(this.scope, tag.scope) &&
-        Objects.equals(this.color, tag.color) &&
-        Objects.equals(this.icon, tag.icon);
+    ModifyTagRequestBody modifyTagRequestBody = (ModifyTagRequestBody) o;
+    return Objects.equals(this.name, modifyTagRequestBody.name) &&
+        Objects.equals(this.scope, modifyTagRequestBody.scope) &&
+        Objects.equals(this.itemId, modifyTagRequestBody.itemId) &&
+        Objects.equals(this.oldName, modifyTagRequestBody.oldName) &&
+        Objects.equals(this.isDefault, modifyTagRequestBody.isDefault);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, scope, color, icon);
+    return Objects.hash(name, scope, itemId, oldName, isDefault);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Tag {\n");
+    sb.append("class ModifyTagRequestBody {\n");
     
-    sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
-    sb.append("    color: ").append(toIndentedString(color)).append("\n");
-    sb.append("    icon: ").append(toIndentedString(icon)).append("\n");
+    sb.append("    itemId: ").append(toIndentedString(itemId)).append("\n");
+    sb.append("    oldName: ").append(toIndentedString(oldName)).append("\n");
+    sb.append("    isDefault: ").append(toIndentedString(isDefault)).append("\n");
     sb.append("}");
     return sb.toString();
   }

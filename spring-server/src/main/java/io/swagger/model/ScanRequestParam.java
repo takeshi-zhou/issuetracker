@@ -10,12 +10,12 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * ScanJSONObject
+ * ScanRequestParam
  */
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-03-04T08:22:59.607Z")
 
-public class ScanJSONObject   {
+public class ScanRequestParam   {
   @JsonProperty("category")
   private String category = null;
 
@@ -25,7 +25,7 @@ public class ScanJSONObject   {
   @JsonProperty("commitId")
   private String commitId = null;
 
-  public ScanJSONObject category(String category) {
+  public ScanRequestParam category(String category) {
     this.category = category;
     return this;
   }
@@ -45,7 +45,7 @@ public class ScanJSONObject   {
     this.category = category;
   }
 
-  public ScanJSONObject projectId(String projectId) {
+  public ScanRequestParam projectId(String projectId) {
     this.projectId = projectId;
     return this;
   }
@@ -65,7 +65,7 @@ public class ScanJSONObject   {
     this.projectId = projectId;
   }
 
-  public ScanJSONObject commitId(String commitId) {
+  public ScanRequestParam commitId(String commitId) {
     this.commitId = commitId;
     return this;
   }
@@ -94,10 +94,10 @@ public class ScanJSONObject   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ScanJSONObject scanJSONObject = (ScanJSONObject) o;
-    return Objects.equals(this.category, scanJSONObject.category) &&
-        Objects.equals(this.projectId, scanJSONObject.projectId) &&
-        Objects.equals(this.commitId, scanJSONObject.commitId);
+    ScanRequestParam scanRequestParam = (ScanRequestParam) o;
+    return Objects.equals(this.category, scanRequestParam.category) &&
+        Objects.equals(this.projectId, scanRequestParam.projectId) &&
+        Objects.equals(this.commitId, scanRequestParam.commitId);
   }
 
   @Override
@@ -108,7 +108,7 @@ public class ScanJSONObject   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ScanJSONObject {\n");
+    sb.append("class ScanRequestParam {\n");
     
     sb.append("    category: ").append(toIndentedString(category)).append("\n");
     sb.append("    projectId: ").append(toIndentedString(projectId)).append("\n");
