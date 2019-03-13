@@ -1,10 +1,12 @@
 package cn.edu.fudan.issueservice.util;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.util.Date;
 
 /**
  * @author WZY
@@ -36,6 +38,10 @@ public class DateTimeUtil {
 
     public static String format(LocalDateTime dateTime) {
         return dateTime.format(Y_M_D_H_M_S_formatter);
+    }
+
+    public static String format(Date date){
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
     }
 
     public static String y_m_d_format(LocalDateTime dateTime){

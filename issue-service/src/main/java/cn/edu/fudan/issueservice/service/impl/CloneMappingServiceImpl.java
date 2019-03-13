@@ -55,7 +55,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
         if (!insertIssueList.isEmpty()) {
             issueDao.insertIssueList(insertIssueList);
             log.info("new issues insert success!");
-            issueEventManager.sendIssueEvent(EventType.NEW_CLONE_CLASS,insertIssueList,committer,repo_id);
+            issueEventManager.sendIssueEvent(EventType.NEW_CLONE_CLASS,insertIssueList,committer,repo_id,commitDate);
             newIssueInfoUpdate(insertIssueList,category,repo_id);
             log.info("new issues id saved into redis!");
         }
@@ -125,7 +125,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
                             }
                         }
                         //匹配的2个group内的所有clone instance进行映射
-                        cloneInstanceMapping(rawIssuesInCurrentGroup,map1.get(preGroup),committer,repo_id);
+                        cloneInstanceMapping(rawIssuesInCurrentGroup,map1.get(preGroup),committer,repo_id,commitDate);
                         break;
                     }
                 }
@@ -155,12 +155,12 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
             log.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(rawIssues2);
-            modifyToSolvedTag(repo_id,category, pre_commit_id,EventType.REMOVE_CLONE_CLASS,committer);
+            modifyToSolvedTag(repo_id,category, pre_commit_id,EventType.REMOVE_CLONE_CLASS,committer,commitDate);
         }
         log.info("mapping finished!");
     }
 
-    private void  cloneInstanceMapping(List<RawIssue> pre ,List<RawIssue> current,String committer,String repoId){
+    private void  cloneInstanceMapping(List<RawIssue> pre ,List<RawIssue> current,String committer,String repoId,Date commitTime){
         List<RawIssue> removedCloneInstance=new ArrayList<>();
         List<RawIssue> newCloneInstance=new ArrayList<>();
         for(RawIssue currentRawIssue:current){
@@ -183,7 +183,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
                 removedCloneInstance.add(preRawIssue);
             }
         }
-        issueEventManager.sendRawIssueEvent(EventType.NEW_CLONE_INSTANCE,newCloneInstance,committer,repoId);
-        issueEventManager.sendRawIssueEvent(EventType.REMOVE_CLONE_INSTANCE,removedCloneInstance,committer,repoId);
+        issueEventManager.sendRawIssueEvent(EventType.NEW_CLONE_INSTANCE,newCloneInstance,committer,repoId,commitTime);
+        issueEventManager.sendRawIssueEvent(EventType.REMOVE_CLONE_INSTANCE,removedCloneInstance,committer,repoId,commitTime);
     }
 }

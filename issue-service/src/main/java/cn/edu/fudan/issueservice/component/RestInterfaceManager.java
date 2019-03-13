@@ -131,8 +131,12 @@ public class RestInterfaceManager {
     //----------------------------------------------end-----------------------------------------------------------------
 
     //---------------------------------------------code service---------------------------------------------------------
-    public JSONObject getCode(String filePath){
-        return restTemplate.getForObject(codeServicePath + "?file_path=" + filePath, JSONObject.class);
+    public JSONObject getRepoPath(String repoId,String commit_id){
+        return restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId+"&commit_id="+commit_id, JSONObject.class);
+    }
+
+    public JSONObject freeRepoPath(String repoId,String repoPath){
+        return restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId+"&path="+repoPath, JSONObject.class);
     }
 
 }

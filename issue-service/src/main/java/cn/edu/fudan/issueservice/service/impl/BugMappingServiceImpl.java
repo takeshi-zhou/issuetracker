@@ -23,6 +23,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         List<Issue> insertIssueList = new ArrayList<>();//存当前扫描后需要插入的新的issue
         List<JSONObject> tags = new ArrayList<>();
         Date date= new Date();//当前时间
+        Date commitDate=getCommitDate(current_commit_id);
         JSONArray ignoreTypes=restInterfaceManager.getIgnoreTypesOfRepo(repo_id);//获取该项目ignore的issue类型
         if (pre_commit_id.equals(current_commit_id)) {
             //当前project第一次扫描，所有的rawIssue都是issue
@@ -30,7 +31,6 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             if (rawIssues == null || rawIssues.isEmpty())
                 return;
             log.info("first scan mapping!");
-            Date commitDate=getCommitDate(current_commit_id);
             for (RawIssue rawIssue : rawIssues) {
                 Issue issue=generateOneNewIssue(repo_id,rawIssue,category,current_commit_id,commitDate,date);
                 insertIssueList.add(issue);
@@ -53,7 +53,6 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             log.info("not first mapping!");
             //mapping开始之前end commit是上一个commit的表示是上个commit存活的issue
             Set<String> existsIssueIds=issueDao.getIssuesByEndCommit(repo_id,category,pre_commit_id).stream().map(Issue::getUuid).collect(Collectors.toSet());
-            Date commitDate = getCommitDate(current_commit_id);
             //装需要更新的
             List<Issue> issues = new ArrayList<>();
             List<String> mappedIssueIds=new ArrayList<>();
@@ -109,13 +108,13 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
             log.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(currentRawIssues);
-            modifyToSolvedTag(repo_id, category,pre_commit_id,EventType.ELIMINATE_BUG,committer);
+            modifyToSolvedTag(repo_id, category,pre_commit_id,EventType.ELIMINATE_BUG,committer,commitDate);
             scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
         }
         //新的issue
         if (!insertIssueList.isEmpty()) {
             issueDao.insertIssueList(insertIssueList);
-            issueEventManager.sendIssueEvent(EventType.NEW_BUG,insertIssueList,committer,repo_id);
+            issueEventManager.sendIssueEvent(EventType.NEW_BUG,insertIssueList,committer,repo_id,commitDate);
             newIssueInfoUpdate(insertIssueList,category,repo_id);
             log.info("new issue insert success!");
         }
@@ -131,8 +130,9 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         String new_IssueId = UUID.randomUUID().toString();
         rawIssue.setIssue_id(new_IssueId);
         String targetFiles = rawIssue.getFile_name();
-        if (isDefaultDisplayId){
-             currentDisplayId = (issueDao.getMaxIssueDisplayId(repo_id) == null) ? 0 : issueDao.getMaxIssueDisplayId(repo_id);
+        boolean hasDisplayId=issueDao.getMaxIssueDisplayId(repo_id) == null;
+        if (hasDisplayId||isDefaultDisplayId){
+             currentDisplayId = hasDisplayId? 0 : issueDao.getMaxIssueDisplayId(repo_id);
             isDefaultDisplayId = false;
         }
         // 映射 （1-4）1 、（5-9）2、（10-14）3 、（15 -20） 4

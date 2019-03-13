@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author WZY
@@ -34,15 +35,15 @@ public class BaseMappingServiceImpl implements MappingService {
     @Value("${ignore.tag_id}")
     String ignoreTagId;
 
+    int currentDisplayId = 1;
+    volatile boolean  isDefaultDisplayId = true;
     IssueEventManager issueEventManager;
     IssueDao issueDao;
     RawIssueDao rawIssueDao;
     ScanResultDao scanResultDao;
-    private StringRedisTemplate stringRedisTemplate;
     RestInterfaceManager restInterfaceManager;
-    int currentDisplayId = 1;
-    boolean  isDefaultDisplayId = true;
 
+    private StringRedisTemplate stringRedisTemplate;
     private TagMapHelper tagMapHelper;
 
     @Autowired
@@ -162,11 +163,11 @@ public class BaseMappingServiceImpl implements MappingService {
         return result;
     }
 
-    void modifyToSolvedTag(String repo_id,String category, String pre_commit_id,EventType eventType,String committer) {
+    void modifyToSolvedTag(String repo_id,String category, String pre_commit_id,EventType eventType,String committer,Date currentCommitTime) {
         //mapping完后end commit还是上一个commit说明被solved
         List<Issue> issues=issueDao.getIssuesByEndCommit(repo_id,category,pre_commit_id);
         if(issues != null) {
-            issueEventManager.sendIssueEvent(eventType, issues, committer, repo_id);
+            issueEventManager.sendIssueEvent(eventType, issues, committer, repo_id,currentCommitTime);
             if (!issues.isEmpty()) {
                 eliminatedInfoUpdate(issues, category, repo_id);
                 List<JSONObject> taggeds = new ArrayList<>();

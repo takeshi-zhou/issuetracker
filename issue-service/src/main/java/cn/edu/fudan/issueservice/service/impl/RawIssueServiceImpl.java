@@ -7,10 +7,14 @@ import cn.edu.fudan.issueservice.domain.Location;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 import cn.edu.fudan.issueservice.service.RawIssueService;
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,11 +24,10 @@ import java.util.Map;
  * @author WZY
  * @version 1.0
  **/
+@Slf4j
 @Service
 public class RawIssueServiceImpl implements RawIssueService {
 
-    @Value("${repoHome}")
-    private String repoHome;
 
     private RestInterfaceManager restInterfaceManager;
 
@@ -93,21 +96,48 @@ public class RawIssueServiceImpl implements RawIssueService {
 
     @Override
     public Object getCode(String project_id, String commit_id, String file_path) {
-        file_path=file_path.replaceAll("\\\\","/");
+        file_path=file_path.substring(file_path.indexOf("/")+1);
+        file_path=file_path.substring(file_path.indexOf("/")+1);
         Map<String, Object> result = new HashMap<>();
         String repo_id =restInterfaceManager.getRepoIdOfProject(project_id) ;
-        JSONObject response = restInterfaceManager.checkOut(repo_id,commit_id);
-        if (response != null && response.getJSONObject("data").getString("status").equals("Successful")) {
-            JSONObject codeResponse = restInterfaceManager.getCode(repoHome+file_path);
-            if (codeResponse != null && codeResponse.getJSONObject("data").getString("status").equals("Successful")) {
-                result.put("code", codeResponse.getJSONObject("data").getString("content"));
+        String repoHome=null;
+        try{
+            JSONObject response = restInterfaceManager.getRepoPath(repo_id,commit_id).getJSONObject("data");
+            log.info(response.toJSONString());
+            if (response != null && response.getString("status").equals("Successful")) {
+                repoHome=response.getString("content");
+                log.info("repoHome -> {}" ,repoHome);
+                result.put("code", getFileContent(repoHome+"/"+file_path));
             } else {
-                throw new RuntimeException("load file failed!");
+                result.put("code", "");
             }
-        } else {
-            throw new RuntimeException("check out failed!");
+        }catch (Exception e){
+            log.error(e.getMessage());
+        }finally {
+            if(repoHome!=null){
+                JSONObject response =restInterfaceManager.freeRepoPath(repo_id,repoHome);
+                if (response != null && response.getJSONObject("data").getString("status").equals("Successful"))
+                    log.info("{} free success",repoHome);
+                else
+                    log.info("{} free failed",repoHome);
+            }
+
         }
         return result;
+    }
+
+    private String getFileContent(String filePath){
+        StringBuilder code = new StringBuilder();
+        String s = "";
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
+            while ((s = bufferedReader.readLine()) != null) {
+                code.append(s);
+                code.append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return code.toString();
     }
 
     @Override
