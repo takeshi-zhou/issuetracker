@@ -10,12 +10,18 @@ public class ScanInitialInfo {
     private String repoName;
     private String repoId;
     private String repoPath;
+    private boolean isSuccess;
 
-    public ScanInitialInfo(Scan scan, String repoName, String repoId, String repoPath) {
+    public ScanInitialInfo(boolean isSuccess) {
+        this.isSuccess = isSuccess;
+    }
+
+    public ScanInitialInfo(Scan scan, String repoName, String repoId, String repoPath, boolean isSuccess) {
         this.scan = scan;
         this.repoName = repoName;
         this.repoId = repoId;
         this.repoPath = repoPath;
+        this.isSuccess = isSuccess;
     }
 
     public Scan getScan() {
@@ -48,5 +54,13 @@ public class ScanInitialInfo {
 
     public void setRepoPath(String repoPath) {
         this.repoPath = repoPath;
+    }
+
+    public boolean isSuccess() {
+        return isSuccess;
+    }
+
+    public void setSuccess(boolean success) {
+        isSuccess = success;
     }
 }

@@ -67,7 +67,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         String fileName = sourceLineInClass.attributeValue("sourcefile");
         String sourcePath=sourceLineInClass.attributeValue("sourcepath");
         String filePath=null;
-        repoPath = repoPath.substring(repoPath.indexOf("/") + 1);//去除github前缀
+        //repoPath = repoPath.substring(repoPath.indexOf("/") + 1);//去除github前缀
         String candidateFilePaths = executeShellUtil.getFileLocation(repoPath, fileName);
         if (candidateFilePaths == null) {
             logger.error(sourcePath + "find 命令 找不到源文件！");
@@ -97,7 +97,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         int start = Integer.parseInt(sourceLineInMethod.attributeValue("start"));
         int end = Integer.parseInt(sourceLineInMethod.attributeValue("end"));
         String bugLines = null;
-        String code = null;
+        String code;
         if (iterator != null) {
             Set<String> container = new HashSet<>();
             StringBuilder bugLineBuilder = new StringBuilder();
@@ -113,11 +113,11 @@ public class FindBugScanOperation extends ScanOperationAdapter {
             if (bugLineBuilder.length() > 0)
                 bugLines = bugLineBuilder.deleteCharAt(0).toString();
             if (container.size() > 0)
-                code = ASTUtil.getCodeAtSpecificLines(container, repoHome + filePath);
+                code = ASTUtil.getCodeAtSpecificLines(container, repoPath+ "/" + filePath);
             else
-                code = ASTUtil.getCode(start, end, repoHome + filePath);
+                code = ASTUtil.getCode(start, end,  repoPath+ "/" + filePath);
         } else {
-            code = ASTUtil.getCode(start, end, repoHome + filePath);
+            code = ASTUtil.getCode(start, end, repoPath+ "/" + filePath);
         }
         JSONObject location = new JSONObject();
         location.put("uuid", UUID.randomUUID().toString());

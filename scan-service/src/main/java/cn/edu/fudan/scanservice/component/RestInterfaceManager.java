@@ -3,6 +3,7 @@ package cn.edu.fudan.scanservice.component;
 import cn.edu.fudan.scanservice.exception.AuthException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -13,6 +14,7 @@ import java.util.List;
  * @author WZY
  * @version 1.0
  **/
+@Slf4j
 @Component
 public class RestInterfaceManager {
 
@@ -26,6 +28,8 @@ public class RestInterfaceManager {
     private String repoServicePath;
     @Value("${issue.service.path}")
     private String issueServicePath;
+    @Value("${code.service.path}")
+    private String codeServicePath;
 
     private RestTemplate restTemplate;
 
@@ -96,6 +100,27 @@ public class RestInterfaceManager {
         }catch (Exception e) {
             throw new RuntimeException("project update failed!");
         }
+    }
+
+    //---------------------------------------------code service---------------------------------------------------------
+    public String getRepoPath(String repoId,String commit_id){
+        String repoPath=null;
+        JSONObject response=restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId+"&commit_id="+commit_id, JSONObject.class).getJSONObject("data");
+        if (response != null ){
+            if(response.getString("status").equals("Successful")) {
+                repoPath=response.getString("content");
+                log.info("repoHome -> {}" ,repoPath);
+            }else{
+                log.error("get repoHome fail -> {}",response.getString("content"));
+            }
+        } else {
+            log.error("code service response null!");
+        }
+        return repoPath;
+    }
+
+    public JSONObject freeRepoPath(String repoId,String repoPath){
+        return restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId+"&path="+repoPath, JSONObject.class);
     }
 
 }

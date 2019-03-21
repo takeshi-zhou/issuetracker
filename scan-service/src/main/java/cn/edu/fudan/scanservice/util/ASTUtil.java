@@ -62,7 +62,7 @@ public class ASTUtil {
             while ((s = bufferedReader.readLine()) != null) {
                 if (line >= startLine && line <= endLine) {
                     code.append(s);
-                    code.append("/n");
+                    code.append("\n");
                 }
                 line++;
                 if (line > endLine) break;
@@ -81,7 +81,7 @@ public class ASTUtil {
             while ((s = bufferedReader.readLine()) != null) {
                 if (lines.contains(String.valueOf(line))) {
                     code.append(s);
-                    code.append("/n");
+                    code.append("\n");
                 }
                 line++;
             }
@@ -91,34 +91,6 @@ public class ASTUtil {
         return code.toString();
     }
 
-    public static String getFullCode(String filePath) {
-        StringBuilder code = new StringBuilder();
-        String s = "";
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
-            while ((s = bufferedReader.readLine()) != null) {
-                code.append(s);
-                code.append("/n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return code.toString();
-    }
-
     public static void main(String[] args) {
-        for (int i = 1; i < 10; i++) {
-            boolean flag = false;
-            for (int j = 8; j < 16; j++) {
-                if (i == j) {
-                    flag = true;
-                    System.out.println(i + "==" + j);
-                    break;
-                }
-                System.out.println(j + "不等");
-            }
-            if (!flag) {
-                System.out.println(i + ": 没找到");
-            }
-        }
     }
 }

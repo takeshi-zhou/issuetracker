@@ -50,18 +50,20 @@ public class ScanOperationAdapter implements ScanOperation {
         return lastScannedCommitTime.before(commit_time);
     }
 
-    @Override
-    public boolean checkOut(String repoId, String commitId) {
-        JSONObject response = restInterfaceManager.checkOut(repoId, commitId);
-        return response != null && response.getJSONObject("data").getString("status").equals("Successful");
-    }
+//    @Override
+//    public boolean checkOut(String repoId, String commitId) {
+//        JSONObject response = restInterfaceManager.checkOut(repoId, commitId);
+//        return response != null && response.getJSONObject("data").getString("status").equals("Successful");
+//    }
 
     @Override
     public ScanInitialInfo initialScan(String repoId, String commitId,String category) {
+        String repoPath = restInterfaceManager.getRepoPath(repoId,commitId);
+        if(repoPath==null)
+            return new ScanInitialInfo(false);
         Date startTime = new Date();
         JSONObject currentRepo = restInterfaceManager.getRepoById(repoId);
         String repoName = currentRepo.getJSONObject("data").getString("repo_name");
-        String repoPath = currentRepo.getJSONObject("data").getString("local_addr");
         logger.info("repo_name ->{} ,repo local address -> {}",repoName,repoPath);
         //新建一个Scan对象
         Scan scan = new Scan();
@@ -78,7 +80,7 @@ public class ScanOperationAdapter implements ScanOperation {
         JSONObject jsonObject = restInterfaceManager.getCommitTime(commitId);
         Date commit_time = jsonObject.getJSONObject("data").getDate("commit_time");
         scan.setCommit_time(commit_time);
-        return new ScanInitialInfo(scan, repoName, repoId, repoPath);
+        return new ScanInitialInfo(scan, repoName, repoId, repoPath,true);
     }
 
     @Override

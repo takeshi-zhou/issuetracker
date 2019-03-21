@@ -102,7 +102,6 @@ public class KafkaServiceImpl implements KafkaService {
      *
      * @author WZY
      */
-    @SuppressWarnings("unchecked")
     @Override
     public void scanByRequest(JSONObject requestParam) {
         String category=requestParam.getString("category");
@@ -153,19 +152,19 @@ public class KafkaServiceImpl implements KafkaService {
         List<ScanMessageWithTime> commits=JSONArray.parseArray(msg,ScanMessageWithTime.class);
         int size=commits.size();
         logger.info("received message from topic -> " + consumerRecord.topic() + " : " + size+" commits need to scan!");
-        if(!commits.isEmpty()){
-            Map<LocalDate,List<ScanMessageWithTime>> map=commits.stream().collect(Collectors.groupingBy((ScanMessageWithTime scanMessageWithTime)->{
-                String dateStr=scanMessageWithTime.getCommitTime().split(" ")[0];
-                return LocalDate.parse(dateStr,DateTimeUtil.Y_M_D_formatter);
-            }));
-            List<LocalDate> dates=new ArrayList<>(map.keySet());
-            dates.sort(((o1, o2) -> {
-                if(o1.equals(o2))
-                    return 0;
-                return o1.isBefore(o2)?-1:1;
-            }));
-            firstAutoScan(map,dates);
-        }
+//        if(!commits.isEmpty()){
+//            Map<LocalDate,List<ScanMessageWithTime>> map=commits.stream().collect(Collectors.groupingBy((ScanMessageWithTime scanMessageWithTime)->{
+//                String dateStr=scanMessageWithTime.getCommitTime().split(" ")[0];
+//                return LocalDate.parse(dateStr,DateTimeUtil.Y_M_D_formatter);
+//            }));
+//            List<LocalDate> dates=new ArrayList<>(map.keySet());
+//            dates.sort(((o1, o2) -> {
+//                if(o1.equals(o2))
+//                    return 0;
+//                return o1.isBefore(o2)?-1:1;
+//            }));
+//            firstAutoScan(map,dates);
+//        }
     }
 
     private void firstAutoScan(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){

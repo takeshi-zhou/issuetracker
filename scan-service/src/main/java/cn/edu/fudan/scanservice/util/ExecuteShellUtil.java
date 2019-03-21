@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -55,7 +56,7 @@ public class ExecuteShellUtil {
     public  String getFileLocation(String repoPath, String fileName) {
         try {
             Runtime rt = Runtime.getRuntime();
-            String command = "find "+repoHome + repoPath + " -name " + fileName;
+            String command = "find "+ repoPath + " -name " + fileName;
             //String command =  binHome + "findOneFile.sh " + repoHome + repoPath + " "+ fileName;
             Process process = rt.exec(command);
             process.waitFor();
@@ -63,7 +64,8 @@ public class ExecuteShellUtil {
             StringBuffer sBuffer = new StringBuffer();
             String line ;
             while ((line = bReader.readLine())!= null) {
-                line = line.replace(repoHome, "");
+                line = line.replace(repoPath+"/", "");
+                log.info("candidate path: -> {}",line);
                 sBuffer.append(line).append(":");
             }
             return  sBuffer.toString();

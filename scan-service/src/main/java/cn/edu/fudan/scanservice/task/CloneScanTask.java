@@ -1,7 +1,5 @@
 package cn.edu.fudan.scanservice.task;
 
-import cn.edu.fudan.scanservice.domain.ScanInitialInfo;
-import cn.edu.fudan.scanservice.domain.ScanResult;
 import cn.edu.fudan.scanservice.service.ScanOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
