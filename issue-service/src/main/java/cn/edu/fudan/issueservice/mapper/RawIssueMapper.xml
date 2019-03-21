@@ -114,7 +114,7 @@
     </select>
 
 
-    <select id="getRawIssueByCommitIDAndCategory" parameterType="String" resultMap="rawIssue2">
+    <select id="getRawIssueByCommitIDAndCategory" parameterType="String" resultMap="rawIssue3">
         select * from rawIssue where repo_id = #{repo_id} and category = #{category} and commit_id = #{commit_id}
     </select>
 

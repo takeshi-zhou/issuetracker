@@ -54,12 +54,13 @@ public class IssueEventManager {
             JSONObject event=new JSONObject();
             event.put("id", UUID.randomUUID());
             event.put("category",rawIssue.getCategory());
+            event.put("eventType",eventType.toString());
             event.put("targetType",rawIssue.getType());
-            event.put("targetId",rawIssue.getUuid());
+            event.put("targetId",rawIssue.getIssue().getUuid());
+            event.put("targetDisplayId",rawIssue.getIssue().getDisplayId());
             event.put("targetCommitter",committer);
             event.put("repoId",repoId);
             event.put("createTime",commitTime);
-            event.put("eventType",eventType.toString());
             issueEvents.add(event);
         }
         if(!issueEvents.isEmpty())
