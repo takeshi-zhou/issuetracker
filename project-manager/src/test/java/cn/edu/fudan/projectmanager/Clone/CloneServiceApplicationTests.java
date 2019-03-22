@@ -1,8 +1,8 @@
-package cn.edu.fudan.cloneservice;
+package cn.edu.fudan.projectmanager.Clone;
 
 
 
-import cn.edu.fudan.cloneservice.domain.ScanInitialInfo;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +21,9 @@ public class CloneServiceApplicationTests {
     @Test
     @SuppressWarnings("unchecked")
     public void testCheckout(){
+        //ScanInitialInfo scanInitialInfo = new ScanInitialInfo("happy", "123", "here");
+
+        kafkaTemplate.send("Clone", "sss");
 
 
 

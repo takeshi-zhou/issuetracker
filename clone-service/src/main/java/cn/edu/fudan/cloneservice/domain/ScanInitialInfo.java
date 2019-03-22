@@ -6,26 +6,6 @@ package cn.edu.fudan.cloneservice.domain;
  **/
 public class ScanInitialInfo {
 
-    private Scan scan;
-    private String repoName;
-    private String repoId;
-    private String repoPath;
-
-    public ScanInitialInfo(Scan scan, String repoName, String repoId, String repoPath) {
-        this.scan = scan;
-        this.repoName = repoName;
-        this.repoId = repoId;
-        this.repoPath = repoPath;
-    }
-
-    public Scan getScan() {
-        return scan;
-    }
-
-    public void setScan(Scan scan) {
-        this.scan = scan;
-    }
-
     public String getRepoName() {
         return repoName;
     }
@@ -49,4 +29,18 @@ public class ScanInitialInfo {
     public void setRepoPath(String repoPath) {
         this.repoPath = repoPath;
     }
+
+    //    private Scan scan;
+    private String repoName;
+    private String repoId;
+    private String repoPath;
+
+    public ScanInitialInfo(String repoName, String repoId, String repoPath) {
+//        this.scan = scan;
+        this.repoName = repoName;
+        this.repoId = repoId;
+        this.repoPath = repoPath;
+    }
+
+
 }
