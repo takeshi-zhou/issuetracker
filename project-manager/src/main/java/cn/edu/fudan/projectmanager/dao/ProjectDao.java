@@ -1,6 +1,7 @@
 package cn.edu.fudan.projectmanager.dao;
 
 import cn.edu.fudan.projectmanager.domain.Project;
+import cn.edu.fudan.projectmanager.domain.RepoBasicInfo;
 import cn.edu.fudan.projectmanager.mapper.ProjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
