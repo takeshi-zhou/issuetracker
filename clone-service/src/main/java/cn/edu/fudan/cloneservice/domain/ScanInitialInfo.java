@@ -30,12 +30,13 @@ public class ScanInitialInfo {
         this.repoPath = repoPath;
     }
 
-    //    private Scan scan;
+//    private PackageScanStatus packageScanStatus;
     private String repoName;
     private String repoId;
     private String repoPath;
 
     public ScanInitialInfo(String repoName, String repoId, String repoPath) {
+
 //        this.scan = scan;
         this.repoName = repoName;
         this.repoId = repoId;
