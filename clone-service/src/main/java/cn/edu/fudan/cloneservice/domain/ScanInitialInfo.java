@@ -1,5 +1,7 @@
 package cn.edu.fudan.cloneservice.domain;
 
+import java.util.List;
+
 /**
  * @author WZY
  * @version 1.0
@@ -34,6 +36,15 @@ public class ScanInitialInfo {
     private String repoName;
     private String repoId;
     private String repoPath;
+    private List<String> commitList;
+
+    public List<String> getCommitList() {
+        return commitList;
+    }
+
+    public void setCommitList(List<String> commitList) {
+        this.commitList = commitList;
+    }
 
     public ScanInitialInfo(String repoName, String repoId, String repoPath) {
 

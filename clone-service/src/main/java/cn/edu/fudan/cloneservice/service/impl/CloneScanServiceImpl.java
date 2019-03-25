@@ -13,6 +13,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -55,6 +56,7 @@ public class CloneScanServiceImpl implements CloneScanService {
         String repoId=scanInitialInfo.getRepoId();
         String repoName=scanInitialInfo.getRepoName();
         String repoPath=scanInitialInfo.getRepoPath();
+        List<String> commitList = scanInitialInfo.getCommitList();
         //#1 根据给的信息，启动包的状态查询
         //把这个对象信息填充好 写一个task并run
         PackageScanStatus packageScanStatus;
@@ -62,7 +64,7 @@ public class CloneScanServiceImpl implements CloneScanService {
         //#2 如果scan状态未完成。需要一个scan列表，根据这个列表进行scan
 
 
-        Scan scan=scanInitialInfo.getScan();
+//        Scan scan=scanInitialInfo.getScan();
 
         //#2 如果scan全部完成，则OK！
         //每当接受一个clone的scan消息，启动一个异步任务取执行相关操作
