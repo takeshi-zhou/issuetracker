@@ -3,9 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.edu.fudan.cloneservice.domain.PackageScanStatus">
-    <select id="select_status" parameterType="String" resultType="cn.edu.fudan.cloneservice.domain.PackageScanStatus">
-        select * from ce_scan_status where repo_id = #{repo_id} limit 1
-    </select>
+
 
 
 </mapper>
