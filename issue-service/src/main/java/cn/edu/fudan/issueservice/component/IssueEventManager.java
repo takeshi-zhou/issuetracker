@@ -1,5 +1,6 @@
 package cn.edu.fudan.issueservice.component;
 
+import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.domain.EventType;
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.RawIssue;
@@ -22,9 +23,12 @@ public class IssueEventManager {
     private String eventServicePath;
 
     private RestTemplate restTemplate;
+    private IssueDao issueDao;
 
-    public IssueEventManager(RestTemplate restTemplate) {
+    public IssueEventManager(RestTemplate restTemplate,
+                             IssueDao issueDao) {
         this.restTemplate = restTemplate;
+        this.issueDao = issueDao;
     }
 
     public void sendIssueEvent(EventType eventType, List<Issue> issues, String committer, String repoId, Date currentCommitTime){
@@ -56,11 +60,12 @@ public class IssueEventManager {
             event.put("category",rawIssue.getCategory());
             event.put("eventType",eventType.toString());
             event.put("targetType",rawIssue.getType());
-            event.put("targetId",rawIssue.getIssue().getUuid());
-            event.put("targetDisplayId",rawIssue.getIssue().getDisplayId());
+            Issue issue=issueDao.getIssueByID(rawIssue.getIssue_id());
+            event.put("targetId",issue.getUuid());
+            event.put("targetDisplayId",issue.getDisplayId());
             event.put("targetCommitter",committer);
             event.put("repoId",repoId);
-            event.put("createTime",commitTime);
+            event.put("commitTime",commitTime);
             issueEvents.add(event);
         }
         if(!issueEvents.isEmpty())
