@@ -1,4 +1,4 @@
-package cn.edu.fudan.accountservice.controller;
+    package cn.edu.fudan.accountservice.controller;
 
 import cn.edu.fudan.accountservice.AccountServiceApplicationTests;
 import cn.edu.fudan.accountservice.domain.Account;

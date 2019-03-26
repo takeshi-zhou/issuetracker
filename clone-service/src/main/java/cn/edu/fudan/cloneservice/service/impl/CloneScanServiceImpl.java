@@ -13,6 +13,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -47,27 +48,42 @@ public class CloneScanServiceImpl implements CloneScanService {
         String msg = consumerRecord.value();
         logger.info("received message from topic -> " + consumerRecord.topic() + " : " + msg);
         ScanInitialInfo scanInitialInfo = JSONObject.parseObject(msg, ScanInitialInfo.class);
+
+        //#0 收到要扫描的项目信息
+        //1 repo id
+        //2 repo 名字
+        //3 repo 路径
         String repoId=scanInitialInfo.getRepoId();
         String repoName=scanInitialInfo.getRepoName();
         String repoPath=scanInitialInfo.getRepoPath();
-        Scan scan=scanInitialInfo.getScan();
+        List<String> commitList = scanInitialInfo.getCommitList();
+        //#1 根据给的信息，启动包的状态查询
+        //把这个对象信息填充好 写一个task并run
+        PackageScanStatus packageScanStatus;
+
+        //#2 如果scan状态未完成。需要一个scan列表，根据这个列表进行scan
+
+
+//        Scan scan=scanInitialInfo.getScan();
+
+        //#2 如果scan全部完成，则OK！
         //每当接受一个clone的scan消息，启动一个异步任务取执行相关操作
-        Future<?> future=cloneScanTask.run(repoId,repoName,repoPath,scan);
-        new Thread(() -> {
-            try {
-                future.get(10, TimeUnit.MINUTES);//设置10min的超时时间
-            } catch (TimeoutException e) {
-                //因scan超时而抛出异常
-                logger.error("超时了");
-                future.cancel(false);
-                ScanResult scanResult = new ScanResult(repoId, scan.getCommit_id(),"clone" ,"failed", "Time Out");
-                kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
-            } catch (InterruptedException e) {
-                logger.error(e.getMessage());
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        }).start();
+//        Future<?> future=cloneScanTask.run(repoId,repoName,repoPath,scan);
+//        new Thread(() -> {
+//            try {
+//                future.get(10, TimeUnit.MINUTES);//设置10min的超时时间
+//            } catch (TimeoutException e) {
+//                //因scan超时而抛出异常
+//                logger.error("超时了");
+//                future.cancel(false);
+//                ScanResult scanResult = new ScanResult(repoId, scan.getCommit_id(),"clone" ,"failed", "Time Out");
+//                kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
+//            } catch (InterruptedException e) {
+//                logger.error(e.getMessage());
+//                e.printStackTrace();
+//            } catch (ExecutionException e) {
+//                e.printStackTrace();
+//            }
+//        }).start();
     }
 }

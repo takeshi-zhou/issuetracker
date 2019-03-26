@@ -2,6 +2,7 @@ package cn.edu.fudan.projectmanager.service;
 
 
 import cn.edu.fudan.projectmanager.domain.Project;
+import cn.edu.fudan.projectmanager.domain.RepoBasicInfo;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
