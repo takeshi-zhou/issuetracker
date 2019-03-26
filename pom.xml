@@ -21,6 +21,7 @@
         <module>tag-service</module>
         <module>event-service</module>
         <module>measure-service</module>
+        <module>recommendation</module>
     </modules>
 
     <parent>
