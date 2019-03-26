@@ -4,5 +4,5 @@ import cn.edu.fudan.measureservice.domain.Duration;
 
 public interface MeasureService {
 
-    Object getMeasureDataChange(String projectId, Duration duration);
+    Object getMeasureDataChange(String userToken, Duration duration);
 }

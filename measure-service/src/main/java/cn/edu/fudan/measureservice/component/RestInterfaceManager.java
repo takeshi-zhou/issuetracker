@@ -7,10 +7,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 @Component
 public class RestInterfaceManager {
 
+    @Value("${account.service.path}")
+    private String accountServicePath;
     @Value("${code.service.path}")
     private String codeServicePath;
     @Value("${repository.service.path}")
@@ -26,6 +31,13 @@ public class RestInterfaceManager {
         this.restTemplate = restTemplate;
     }
 
+    //----------------------------------account service----------------------------------------------------
+    public String getAccountId(String userToken){
+        Map<String,String> urlParameters=new HashMap<>();
+        urlParameters.put("userToken",userToken);
+        return restTemplate.getForObject(accountServicePath+"/user/accountId?userToken={userToken}",String.class,urlParameters);
+    }
+
     //-----------------------------------------------project service-------------------------------------------------
     public String getRepoIdOfProject(String projectId) {
         return restTemplate.getForObject(projectServicePath + "/inner/project/repo-id?project-id=" + projectId, String.class);
@@ -38,6 +50,10 @@ public class RestInterfaceManager {
         return response.getJSONArray("data");
     }
 
+    public JSONArray getProjectList(String account_id) {
+        return restTemplate.getForObject(projectServicePath + "/inner/projects?account_id=" + account_id,JSONArray.class);
+    }
+
     //---------------------------------------------code service---------------------------------------------------------
     public String getRepoPath(String repoId,String commit_id){
         String repoPath=null;
@@ -48,6 +64,7 @@ public class RestInterfaceManager {
                 log.info("repoHome -> {}" ,repoPath);
             }else{
                 log.error("get repoHome fail -> {}",response.getString("content"));
+                log.error("repoId -> {} commitId -> {}",repoId,commit_id);
             }
         } else {
             log.error("code service response null!");

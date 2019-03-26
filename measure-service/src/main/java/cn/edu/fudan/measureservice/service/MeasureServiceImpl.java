@@ -11,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Slf4j
@@ -33,8 +30,25 @@ public class MeasureServiceImpl implements MeasureService {
         this.restInterfaceManager=restInterfaceManager;
     }
     @Override
-    public Object getMeasureDataChange(String projectId, Duration duration) {
-        String repoId=restInterfaceManager.getRepoIdOfProject(projectId);
+    public Object getMeasureDataChange(String userToken, Duration duration) {
+        List<Object> projectsMeasureChanges=new ArrayList<>();
+        String accountId=restInterfaceManager.getAccountId(userToken);
+        JSONArray projects=restInterfaceManager.getProjectList(accountId);
+        Set<String> repoIds=new HashSet<>();//去除重复的repoId
+        for(int i=0;i<projects.size();i++){
+            String repoName=projects.getJSONObject(i).getString("name");
+            String repoId=projects.getJSONObject(i).getString("repo_id");
+            if(!repoIds.contains(repoId)){
+                Object change=getMeasureChangeOfOneProject(repoId,repoName,duration);
+                if(change!=null)
+                    projectsMeasureChanges.add(change);
+                repoIds.add(repoId);
+            }
+        }
+        return projectsMeasureChanges;
+    }
+
+    private Map<String,Object> getMeasureChangeOfOneProject(String repoId,String repoName,Duration duration){
         List<String> twoCommits=getCommitIdsToCompare(repoId,duration);
         //当前时间该项目的度量值
         log.info("开始获取第一个度量........");
@@ -42,27 +56,30 @@ public class MeasureServiceImpl implements MeasureService {
         //某个时间跨度之前项目的度量值
         log.info("开始获取第二个度量........");
         Measure measure2=getMeasureDateOfOneCommit(repoId,twoCommits.get(1));
-        Map<String,Object> measureChanges=new HashMap<>();
-        int change1;double change2;
-        change1=measure1.getTotal().getClasses()-measure2.getTotal().getClasses();
-        measureChanges.put("classes",change1);
-        change1=measure1.getTotal().getFunctions()-measure2.getTotal().getFunctions();
-        measureChanges.put("functions",change1);
-        change1=measure1.getTotal().getNcss()-measure2.getTotal().getNcss();
-        measureChanges.put("ncss",change1);
-        change1=measure1.getTotal().getJavaDocs()-measure2.getTotal().getJavaDocs();
-        measureChanges.put("java_docs",change1);
-        change1=measure1.getTotal().getJavaDocsLines()-measure2.getTotal().getJavaDocsLines();
-        measureChanges.put("java_docs_lines",change1);
-        change1=measure1.getTotal().getSingleCommentLines()-measure2.getTotal().getSingleCommentLines();
-        measureChanges.put("single_comment_lines",change1);
-        change1=measure1.getTotal().getMultiCommentLines()-measure2.getTotal().getMultiCommentLines();
-        measureChanges.put("multi_comment_lines",change1);
-        change2=measure1.getFunctions().getFunctionAverage().getCcn()-measure2.getFunctions().getFunctionAverage().getCcn();
-        measureChanges.put("ccn",change2);
-        return measureChanges;
+        if(measure1!=null&&measure2!=null){
+            Map<String,Object> measureChanges=new HashMap<>();
+            measureChanges.put("repoName",repoName);
+            int change1;double change2;
+            change1=measure1.getTotal().getClasses()-measure2.getTotal().getClasses();
+            measureChanges.put("classes",change1);
+            change1=measure1.getTotal().getFunctions()-measure2.getTotal().getFunctions();
+            measureChanges.put("functions",change1);
+            change1=measure1.getTotal().getNcss()-measure2.getTotal().getNcss();
+            measureChanges.put("ncss",change1);
+            change1=measure1.getTotal().getJavaDocs()-measure2.getTotal().getJavaDocs();
+            measureChanges.put("java_docs",change1);
+            change1=measure1.getTotal().getJavaDocsLines()-measure2.getTotal().getJavaDocsLines();
+            measureChanges.put("java_docs_lines",change1);
+            change1=measure1.getTotal().getSingleCommentLines()-measure2.getTotal().getSingleCommentLines();
+            measureChanges.put("single_comment_lines",change1);
+            change1=measure1.getTotal().getMultiCommentLines()-measure2.getTotal().getMultiCommentLines();
+            measureChanges.put("multi_comment_lines",change1);
+            change2=measure1.getFunctions().getFunctionAverage().getCcn()-measure2.getFunctions().getFunctionAverage().getCcn();
+            measureChanges.put("ccn",change2);
+            return measureChanges;
+        }
+        return null;
     }
-
 
 
     private List<String> getCommitIdsToCompare(String repoId, Duration duration){
@@ -96,7 +113,8 @@ public class MeasureServiceImpl implements MeasureService {
         Measure measure=null;
         try{
             repoPath=restInterfaceManager.getRepoPath(repoId,commitId);
-            measure=measureAnalyzer.analyze(repoPath,"",resultHandler);
+            if(repoPath!=null)
+                measure=measureAnalyzer.analyze(repoPath,"",resultHandler);
         }catch (Exception e){
             e.printStackTrace();
             if(repoPath!=null)
