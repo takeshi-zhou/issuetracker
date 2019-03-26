@@ -97,7 +97,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
 
 
     private boolean invokeCloneTool(String repoPath,String repoName){
-        repoPath = repoPath.substring(repoPath.indexOf("/") + 1);//去除github前缀
+        //repoPath = repoPath.substring(repoPath.indexOf("/") + 1);//去除github前缀
         //String cmd = "java -jar CodeLexer.jar  " + repoHome+repoPath + " " + repoName;
         String cmd = "java -jar CodeLexer.jar  " + repoPath + " " + repoName;
         logger.info("command -> {}",cmd);
