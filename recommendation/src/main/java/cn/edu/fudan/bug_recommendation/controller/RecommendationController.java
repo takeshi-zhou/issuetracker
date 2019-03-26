@@ -53,7 +53,11 @@ public class RecommendationController {
             String nextcommitid = reco.getNext_commitid();
             String commitid = reco.getCurr_commitid();
             JSONObject json = analyzeDiffFile.getDiffRange(repopath,nextcommitid,commitid,bug_lines);
-            if(json.getInteger("nextstart_line")!=0){
+//            System.out.println("nextstart_line: "+ json.getInteger("nextstart_line"));
+//            System.out.println("nextend_line: "+ json.getInteger("nextend_line"));
+//            System.out.println("start_line: "+ json.getInteger("start_line"));
+//            System.out.println("end_line: "+ json.getInteger("end_line"));
+            if(json.getInteger("nextstart_line")!=0 && json.getInteger("start_line")!=0){
                 reco.setStart_line(json.getInteger("start_line"));
                 reco.setEnd_line(json.getInteger("end_line"));
                 reco.setNextstart_line(json.getInteger("nextstart_line"));
@@ -66,7 +70,7 @@ public class RecommendationController {
                 recommendationService.addBugRecommendation(reco);
             }
         }
-
+        System.out.println("controller end");
         try {
             return new ResponseBean(200, "Congratulations！successful add.", null);
         }catch (Exception e) {

@@ -23,7 +23,7 @@ public class RecommendationDao {
     }
 
     public boolean isLocationExist(String location){
-        return getRecommendationByLocation(location) != null;
+        return getRecommendationsByLocation(location).size() !=0;
     }
 
     public boolean isTypeExist(String type){
@@ -43,7 +43,12 @@ public class RecommendationDao {
         return list;
     }
 
-    public Recommendation getRecommendationByLocation(String location){
-        return recommendationMapper.getRecommendationByLocation(location);
+    public List<Recommendation> getRecommendationsByLocation(String location){
+        List<Recommendation> recommendations = recommendationMapper.getRecommendationsByLocation(location);
+        List<Recommendation> list = new ArrayList<>();
+        for (Recommendation recommendation : recommendations) {
+            list.add(recommendation);
+        }
+        return list;
     }
 }

@@ -37,7 +37,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         if (recommendation.getType()==null || recommendation.getDescription()==null ||
         recommendation.getLocation()==null || recommendation.getPrev_code()==null || recommendation.getCurr_code()==null ||
         recommendation.getStart_line()==null || recommendation.getEnd_line()==null || recommendation.getCurr_commitid()==null ||
-        recommendation.getNext_commitid()==null)
+        recommendation.getNext_commitid()==null ||recommendation.getNextstart_line()==null||recommendation.getNextend_line()==null)
         {
             throw new RuntimeException("param loss");
         }
