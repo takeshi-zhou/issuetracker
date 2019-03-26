@@ -46,12 +46,13 @@ public class ScanInitialInfo {
         this.commitList = commitList;
     }
 
-    public ScanInitialInfo(String repoName, String repoId, String repoPath) {
+    public ScanInitialInfo(String repoName, String repoId, String repoPath, List<String> commitList) {
 
 //        this.scan = scan;
         this.repoName = repoName;
         this.repoId = repoId;
         this.repoPath = repoPath;
+        this.commitList = commitList;
     }
 
 

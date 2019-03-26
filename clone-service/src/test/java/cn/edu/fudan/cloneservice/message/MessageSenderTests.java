@@ -13,9 +13,9 @@ public class MessageSenderTests {
     @Test
     @SuppressWarnings("unchecked")
     public void testSendMessage(){
-        ScanInitialInfo scanInitialInfo = new ScanInitialInfo("happy", "123", "here");
 
-        kafkaTemplate.send("Clone", scanInitialInfo.toString());
+
+//        kafkaTemplate.send("Clone", scanInitialInfo.toString());
 
     }
 }
