@@ -27,6 +27,7 @@ public class CompleteRecoImpl implements CompleteReco {
             recommendation.setEnd_line(l.getInteger("end_line"));
             recommendation.setStart_line(l.getInteger("start_line"));
             recommendation.setLocation(l.getString("file_path"));
+            recommendation.setCode(l.getString("code"));
             Object issue = jsonObject.getJSONObject("issue");
             JSONObject issuejson = JSON.parseObject(JSON.toJSONString(issue));
             recommendation.setType(issuejson.getString("type"));

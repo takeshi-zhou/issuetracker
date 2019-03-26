@@ -23,14 +23,14 @@ public class RecommendationDao {
     }
 
     public boolean isLocationExist(String location){
-        return getRecommendationByLocation(location) != null;
+        return getRecommendationsByLocation(location).size() !=0;
     }
 
     public boolean isTypeExist(String type){
         return getRecommendationsByType(type).size()!=0;
     }
 
-//    public BugRecommendation getRecommendationByType(String type){
+//    public Recommendation getRecommendationByType(String type){
 //        return recommendationMapper.getRecommendationByType(type);
 //    }
 
@@ -43,7 +43,12 @@ public class RecommendationDao {
         return list;
     }
 
-    public BugRecommendation getRecommendationByLocation(String location){
-        return recommendationMapper.getRecommendationByLocation(location);
+    public List<BugRecommendation> getRecommendationsByLocation(String location){
+        List<BugRecommendation> recommendations = recommendationMapper.getRecommendationByLocation(location);
+        List<BugRecommendation> list = new ArrayList<>();
+        for (BugRecommendation recommendation : recommendations) {
+            list.add(recommendation);
+        }
+        return list;
     }
 }

@@ -152,19 +152,19 @@ public class KafkaServiceImpl implements KafkaService {
         List<ScanMessageWithTime> commits=JSONArray.parseArray(msg,ScanMessageWithTime.class);
         int size=commits.size();
         logger.info("received message from topic -> " + consumerRecord.topic() + " : " + size+" commits need to scan!");
-//        if(!commits.isEmpty()){
-//            Map<LocalDate,List<ScanMessageWithTime>> map=commits.stream().collect(Collectors.groupingBy((ScanMessageWithTime scanMessageWithTime)->{
-//                String dateStr=scanMessageWithTime.getCommitTime().split(" ")[0];
-//                return LocalDate.parse(dateStr,DateTimeUtil.Y_M_D_formatter);
-//            }));
-//            List<LocalDate> dates=new ArrayList<>(map.keySet());
-//            dates.sort(((o1, o2) -> {
-//                if(o1.equals(o2))
-//                    return 0;
-//                return o1.isBefore(o2)?-1:1;
-//            }));
-//            firstAutoScan(map,dates);
-//        }
+        if(!commits.isEmpty()){
+            Map<LocalDate,List<ScanMessageWithTime>> map=commits.stream().collect(Collectors.groupingBy((ScanMessageWithTime scanMessageWithTime)->{
+                String dateStr=scanMessageWithTime.getCommitTime().split(" ")[0];
+                return LocalDate.parse(dateStr,DateTimeUtil.Y_M_D_formatter);
+            }));
+            List<LocalDate> dates=new ArrayList<>(map.keySet());
+            dates.sort(((o1, o2) -> {
+                if(o1.equals(o2))
+                    return 0;
+                return o1.isBefore(o2)?-1:1;
+            }));
+            firstAutoScan(map,dates);
+        }
     }
 
     private void firstAutoScan(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
@@ -217,13 +217,13 @@ public class KafkaServiceImpl implements KafkaService {
 
     private List<ScanMessageWithTime> getFilteredList(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
         int sourceSize=dates.size();
-        LocalDate twoWeekBefore=LocalDate.now().minusWeeks(2);
+        LocalDate twoWeekBefore=dates.get(sourceSize-1).minusWeeks(2);
         LinkedList<ScanMessageWithTime> result=new LinkedList<>();
         int i=0,step=1;
         while(i<sourceSize){
             LocalDate date=dates.get(sourceSize-1-i);
             if(i>10&&date.isBefore(twoWeekBefore)){
-                step+=2;
+                step+=50;
             }
             List<ScanMessageWithTime> list=map.get(date);
             result.addFirst(list.get(list.size()-1));

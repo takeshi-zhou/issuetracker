@@ -10,7 +10,7 @@ import java.util.List;
 public interface RecommendationMapper {
     void addBugRecommendation(BugRecommendation recommendation);
 
-    BugRecommendation getRecommendationByLocation(@Param("location") String location);
+    List<BugRecommendation> getRecommendationByLocation(@Param("location") String location);
 
 //    BugRecommendation getRecommendationByType(@Param("type") String type);
     List<BugRecommendation> getRecommendationsByType(@Param("type") String type);
