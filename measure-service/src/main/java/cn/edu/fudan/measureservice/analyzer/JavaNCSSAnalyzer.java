@@ -2,11 +2,15 @@ package cn.edu.fudan.measureservice.analyzer;
 
 import cn.edu.fudan.measureservice.domain.Measure;
 import cn.edu.fudan.measureservice.handler.ResultHandler;
+import javancss.Javancss;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.IOException;
 
+@Slf4j
 @Component
 public class JavaNCSSAnalyzer implements MeasureAnalyzer {
 
@@ -27,16 +31,23 @@ public class JavaNCSSAnalyzer implements MeasureAnalyzer {
             name=targetPath.substring(targetPath.lastIndexOf(File.separator)+1,targetPath.lastIndexOf("."));
         }
         String resultFileName=name+".xml";
-        Runtime runtime=Runtime.getRuntime();
-        String command=workHome+"javancss.bat -all -xml -recursive "+targetPath +" > " +resultFileHome+resultFileName;
-        System.out.println(command);
         try{
-            Process process = runtime.exec(command);
-            process.waitFor();
+            invokeJavaNcss(targetPath,resultFileHome+resultFileName);
             return resultHandler.handle(resultFileName,level);
         }catch (Exception e){
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void invokeJavaNcss(String targetPath,String outPath) throws IOException {
+        String[] asArgs=new String[6];
+        asArgs[0]="-all";
+        asArgs[1]="-xml";
+        asArgs[2]="-recursive";
+        asArgs[3]=targetPath;
+        asArgs[4]="-out";
+        asArgs[5]=outPath;
+        new Javancss(asArgs);
     }
 }

@@ -37,7 +37,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
 
 
     @SuppressWarnings("unchecked")
-    private boolean analyzeResultFile(String repo_id,String scanId,String commitId,String resultFilePath){
+    private boolean analyzeResultFile(String repo_id,String repoPath,String scanId,String commitId,String resultFilePath){
         SAXReader reader = new SAXReader();
         try{
             Document doc = reader.read(new File(resultFilePath));
@@ -75,7 +75,8 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
                     cloneLocation.put("end_token",null);
                     cloneLocation.put("file_path",filePath);
                     cloneLocation.put("rawIssue_id",cloneRawIssueId);
-                    cloneLocation.put("code", ASTUtil.getCode(startLine,endLine,repoHome+filePath));
+                    //cloneLocation.put("code", ASTUtil.getCode(startLine,endLine,repoHome+filePath));
+                    cloneLocation.put("code", ASTUtil.getCode(startLine,endLine,repoPath+"/"+filePath));
                     cloneLocations.add(cloneLocation);
 
                     cloneRawIssue.put("locations",cloneLocations);
@@ -96,8 +97,9 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
 
 
     private boolean invokeCloneTool(String repoPath,String repoName){
-        repoPath = repoPath.substring(repoPath.indexOf("/") + 1);//去除github前缀
-        String cmd = "java -jar CodeLexer.jar  " + repoHome+repoPath + " " + repoName;
+        //repoPath = repoPath.substring(repoPath.indexOf("/") + 1);//去除github前缀
+        //String cmd = "java -jar CodeLexer.jar  " + repoHome+repoPath + " " + repoName;
+        String cmd = "java -jar CodeLexer.jar  " + repoPath + " " + repoName;
         logger.info("command -> {}",cmd);
         try {
             Process process = Runtime.getRuntime().exec(cmd,null,new File(cloneWorkHome));
@@ -127,7 +129,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
         logger.info("start to analyze resultFile......");
         logger.info("tool invoke complete!");
         String resultFilePath1=cloneResultFileHome+repoName+"_A.xml";
-        if(!analyzeResultFile(repoId,scanId,commitId,resultFilePath1)){
+        if(!analyzeResultFile(repoId,repoPath,scanId,commitId,resultFilePath1)){
             logger.error("Result File Analyze Failed!");
             return new ScanResult("clone","failed", "analyze failed");
         }

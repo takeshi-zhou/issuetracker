@@ -1,6 +1,9 @@
 package cn.edu.fudan.projectmanager.domain;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 public class Project {
 
@@ -20,6 +23,32 @@ public class Project {
     private String repo_id;
     private String branch;
     private int first_auto_scan;
+
+    public static Project createOneProjectByRepoBasicInfo(RepoBasicInfo r,String type) throws ParseException {
+        return new Project(UUID.randomUUID().toString(), r.getName(), r.getLanguage(), r.getUrl(), r.getVcs_type(), type,"superAccount","Downloaded",
+                "Not Scan",(new SimpleDateFormat("yyyy-MM-dd")).parse(r.getAdd_time()) , (new SimpleDateFormat("yyyy-MM-dd")).parse(r.getTill_commit_time()), r.getDescription(), r.getRepo_id(), r.getBranch());
+    }
+
+    public Project() {
+    }
+
+    public Project(String uuid, String name, String language, String url, String vcs_type, String type, String account_id, String download_status,
+                   String scan_status, Date add_time, Date till_commit_time, String description, String repo_id, String branch) {
+        this.uuid = uuid;
+        this.name = name;
+        this.language = language;
+        this.url = url;
+        this.vcs_type = vcs_type;
+        this.type = type;
+        this.account_id = account_id;
+        this.download_status = download_status;
+        this.scan_status = scan_status;
+        this.add_time = add_time;
+        this.till_commit_time = till_commit_time;
+        this.description = description;
+        this.repo_id = repo_id;
+        this.branch = branch;
+    }
 
     public String getType() {
         return type;

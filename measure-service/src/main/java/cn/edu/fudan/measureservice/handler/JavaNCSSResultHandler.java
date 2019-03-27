@@ -86,18 +86,21 @@ public class JavaNCSSResultHandler implements ResultHandler{
                 Iterator<Element> tdIterator=packageTr.elementIterator("td");
                 while(tdIterator.hasNext()){
                     Element tdElement=tdIterator.next();
+                    String valueText=tdElement.getText();
+                    if(valueText.contains(","))
+                        valueText=valueText.replaceAll(",","");
                     switch (count2++){
                         case 2:
-                            packageAverage.setClasses(Double.valueOf(tdElement.getText()));
+                            packageAverage.setClasses(Double.valueOf(valueText));
                             break;
                         case 3:
-                            packageAverage.setFunctions(Double.valueOf(tdElement.getText()));
+                            packageAverage.setFunctions(Double.valueOf(valueText));
                             break;
                         case 4:
-                            packageAverage.setNcss(Double.valueOf(tdElement.getText()));
+                            packageAverage.setNcss(Double.valueOf(valueText));
                             break;
                         case 5:
-                            packageAverage.setJavaDocs(Double.valueOf(tdElement.getText()));
+                            packageAverage.setJavaDocs(Double.valueOf(valueText));
                             break;
                     }
                 }

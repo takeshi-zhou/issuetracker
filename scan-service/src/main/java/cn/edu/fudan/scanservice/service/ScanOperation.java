@@ -9,7 +9,7 @@ public interface ScanOperation {
 
     boolean checkCommit(String repoId,String commitId,String category);
 
-    boolean checkOut(String repoId, String commitId);
+    //boolean checkOut(String repoId, String commitId);
 
     ScanInitialInfo initialScan(String repoId, String commitId,String category);
 

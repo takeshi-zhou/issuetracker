@@ -102,7 +102,6 @@ public class KafkaServiceImpl implements KafkaService {
      *
      * @author WZY
      */
-    @SuppressWarnings("unchecked")
     @Override
     public void scanByRequest(JSONObject requestParam) {
         String category=requestParam.getString("category");
@@ -218,13 +217,13 @@ public class KafkaServiceImpl implements KafkaService {
 
     private List<ScanMessageWithTime> getFilteredList(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
         int sourceSize=dates.size();
-        LocalDate twoWeekBefore=LocalDate.now().minusWeeks(2);
+        LocalDate twoWeekBefore=dates.get(sourceSize-1).minusWeeks(2);
         LinkedList<ScanMessageWithTime> result=new LinkedList<>();
         int i=0,step=1;
         while(i<sourceSize){
             LocalDate date=dates.get(sourceSize-1-i);
             if(i>10&&date.isBefore(twoWeekBefore)){
-                step+=2;
+                step+=50;
             }
             List<ScanMessageWithTime> list=map.get(date);
             result.addFirst(list.get(list.size()-1));
