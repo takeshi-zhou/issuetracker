@@ -54,33 +54,12 @@ public class RecommendationController {
      * */
     @PostMapping("/bugRecommendation")
     @CrossOrigin
-    public Object addBugRecommendation(@RequestBody Object diffPostInfo){
-        log.info("diffPostInfo: " + diffPostInfo);
+    public Object addBugRecommendation(@RequestBody List<BugRecommendation> list){
+        //log.info("diffPostInfo: " + diffPostInfo);
         try {
-        //JSONObject allinfo = JSON.parseObject(JSON.toJSONString(diffPostInfo));
-            List<BugRecommendation> list = completeReco.getAllReco(diffPostInfo);
-            System.out.println("list size: "+list.size());
-            for (BugRecommendation reco : list) {
-                System.out.println("type: " + reco.getType());
-                String repopath = reco.getLocation();
-                String bug_lines = reco.getBugLines();
-                String nextcommitid = reco.getNext_commitid();
-                String commitid = reco.getCurr_commitid();
-
-                JSONObject json = analyzeDiffFile.getDiffRange(repopath,nextcommitid,commitid,bug_lines);
-                if(json.getInteger("nextstart_line")!=0){
-                    reco.setStart_line(json.getInteger("start_line"));
-                    reco.setEnd_line(json.getInteger("end_line"));
-                    reco.setNextstart_line(json.getInteger("nextstart_line"));
-                    reco.setNextend_line(json.getInteger("nextend_line"));
-                    reco.setDescription(json.getString("description"));
-                    String prevcode = getCode.getCodePrev(repopath,commitid,nextcommitid,json.getInteger("start_line"),json.getInteger("end_line"));
-                    String currcode = getCode.getCodeCurr(repopath,commitid,nextcommitid,json.getInteger("nextstart_line"),json.getInteger("nextend_line"));
-                    reco.setPrev_code(prevcode);
-                    reco.setCurr_code(currcode);
-                    recommendationService.addBugRecommendation(reco);
+            for (BugRecommendation info1 : list) {
+                recommendationService.addBugRecommendation(info1);
             }
-        }
             return new ResponseBean(200, "Congratulations！successful add.", null);
         } catch (Exception e) {
             return new ResponseBean(401, "add failed! " + e.getMessage(), null);
