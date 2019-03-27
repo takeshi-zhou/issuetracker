@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
@@ -77,7 +78,6 @@ public class AccountControllerTest extends AccountServiceApplicationTests {
     }
 
     @Test
-    //
     public void loginTestSuccess() throws Exception {
         String username = "admin";
         String password = "admin";
@@ -97,7 +97,6 @@ public class AccountControllerTest extends AccountServiceApplicationTests {
     }
 
     @Test
-    //
     public void loginTestFail() throws Exception {
         String username = "admin";
         String password = "admins";
