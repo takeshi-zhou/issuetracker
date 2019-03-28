@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.fudan.bug_recommendation.mapper.RecommendationMapper">
+
+    <resultMap id="recommendation" type="Recommendation">
+        <id property="uuid" column="uuid"/>
+        <result property="type" column="type"/>
+        <result property="location" column="location"/>
+        <result property="description" column="description"/>
+        <result property="bug_lines" column="bug_lines"/>
+        <result property="start_line" column="start_line"/>
+        <result property="end_line" column="end_line"/>
+        <result property="prev_code" column="prev_code"/>
+        <result property="curr_code" column="curr_code"/>
+        <result property="curr_commitid" column="curr_commitid"/>
+        <result property="next_commitid" column="next_commitid"/>
+        <result property="nextstart_line" column="nextstart_line"/>
+        <result property="nextend_line" column="nextend_line"/>
+    </resultMap>
+
+    <insert id="addBugRecommendation" parameterType="Recommendation">
+        insert into bug_recommendation
+        (
+        uuid,
+        type,
+        location,
+        description,
+        bug_lines,
+        start_line,
+        end_line,
+        prev_code,
+        curr_code,
+        curr_commitid,
+        next_commitid,
+        nextstart_line,
+        nextend_line
+        )
+        values
+        (
+        #{uuid},
+        #{type},
+        #{location},
+        #{description},
+        #{bug_lines},
+        #{start_line},
+        #{end_line},
+        #{prev_code},
+        #{curr_code},
+        #{curr_commitid},
+        #{next_commitid},
+        #{nextstart_line},
+        #{nextend_line}
+        )
+    </insert>
+
+    <select id="getRecommendationsByLocation" parameterType="String" resultMap="recommendation">
+        select * from bug_recommendation where location = #{location}
+    </select>
+
+    <select id="getRecommendationsByType" parameterType="String" resultMap="recommendation">
+        select * from bug_recommendation where type = #{type}
+    </select>
+
+    <select id="getAllBugRecommendationId" resultType="String">
+        select uuid from bug_recommendation;
+    </select>
+
+</mapper>
