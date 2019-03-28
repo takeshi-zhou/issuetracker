@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @Repository
@@ -21,8 +22,13 @@ public class PackageScanStatusDao {
     }
 
     public String selectPackageScanStatusByRepoIdAndCommitId(String repod_id, String commit_id){
-//        return  packageScanStatusMapper.selectPackageScanStatusByRepoIdAndCommitId(repod_id,commit_id);
-        return packageScanStatusMapper.selectAllStatus();
+        return  packageScanStatusMapper.selectPackageScanStatusByRepoIdAndCommitId(repod_id,commit_id);
+    }
+
+    public void insertPackageScanStatusByRepoIdAndCommitId(String repo_id, String commit_id){
+        String status = "Scanned";
+        String uuid = UUID.randomUUID().toString();
+        packageScanStatusMapper.insertPackageScanStatusByRepoIdAndCommitId(uuid,repo_id,commit_id,status);
     }
 
 }

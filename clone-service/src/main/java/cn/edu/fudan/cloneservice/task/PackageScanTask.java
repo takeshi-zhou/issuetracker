@@ -1,6 +1,9 @@
 package cn.edu.fudan.cloneservice.task;
 
 import cn.edu.fudan.cloneservice.component.RestInterfaceManager;
+import cn.edu.fudan.cloneservice.dao.PackageNameDao;
+import cn.edu.fudan.cloneservice.dao.PackageScanStatusDao;
+import cn.edu.fudan.cloneservice.domain.PackageScanStatus;
 import cn.edu.fudan.cloneservice.domain.Scan;
 import cn.edu.fudan.cloneservice.domain.ScanResult;
 import com.alibaba.fastjson.JSONObject;
@@ -24,6 +27,10 @@ public class PackageScanTask {
 
     private RestInterfaceManager restInterfaceManager;
     private KafkaTemplate kafkaTemplate;
+
+    private PackageScanStatusDao packageScanStatusDao;
+    private PackageNameDao packageNameDao;
+
 
     private boolean checkOut(String repoId, String commitId) {
         JSONObject response = restInterfaceManager.checkOut(repoId, commitId);
@@ -49,14 +56,27 @@ public class PackageScanTask {
         }
         logger.info("checkout complete -> start the package scan operation......");
 
+        //#2 考虑上锁 释放锁
+
+        //#3 获取分析结果 存入数据库
         List<File> fileList = getFileList(repoPath);
+
+        Set<String> packageNameSet = getName(fileList);
+
+        packageNameDao.insertPackageName(repoId, commit_id, packageNameSet);
 
 
     }
 
-    //#2 考虑上锁 释放锁
+    public void run(String repoId, String repoName, String repoPath, List<String> commit_list){
+        //对外启动接口
 
-    //#3 获取分析结果 存入数据库
+        for(String commit_id:commit_list){
+            startScan(repoId, repoName, repoPath, commit_id);
+        }
+
+    }
+
     private  List<File> getFileList(String strPath) {
         List<File> fileList = new ArrayList<>();
         File dir = new File(strPath);

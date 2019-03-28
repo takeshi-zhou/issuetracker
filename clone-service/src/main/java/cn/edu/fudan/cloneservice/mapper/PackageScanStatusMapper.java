@@ -15,7 +15,14 @@ public interface PackageScanStatusMapper {
 
     String selectPackageScanStatusByRepoIdAndCommitId(@Param("p_repo_id") String repo_id,
                                               @Param("p_commit_id") String commit_id);
-    String selectAllStatus();
+
+
+    void insertPackageScanStatusByRepoIdAndCommitId(@Param("p_uuid") String uuid,
+                                                @Param("p_repo_id") String repo_id,
+                                                 @Param("p_commit_id") String commit_id,
+                                                @Param("p_status") String status);
+
+
 
 
 
