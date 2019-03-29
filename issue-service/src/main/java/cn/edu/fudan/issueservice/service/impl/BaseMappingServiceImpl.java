@@ -184,8 +184,7 @@ public class BaseMappingServiceImpl implements MappingService {
         }
     }
 
-    @Async
-    public void saveSolvedInfo(List<RawIssue> rawIssues,String pre_commit_id,String current_commit_id){
+    void saveSolvedInfo(List<RawIssue> rawIssues,String pre_commit_id,String current_commit_id){
         List<JSONObject> solvedInfos=new ArrayList<>();
         for(RawIssue rawIssue:rawIssues){
             JSONObject solvedInfo=new JSONObject();
