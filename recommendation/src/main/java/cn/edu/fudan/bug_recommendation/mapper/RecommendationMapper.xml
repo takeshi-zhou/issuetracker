@@ -15,6 +15,8 @@
         <result property="curr_code" column="curr_code"/>
         <result property="curr_commitid" column="curr_commitid"/>
         <result property="next_commitid" column="next_commitid"/>
+        <result property="nextstart_line" column="nextstart_line"/>
+        <result property="nextend_line" column="nextend_line"/>
     </resultMap>
 
     <insert id="addBugRecommendation" parameterType="Recommendation">
@@ -27,13 +29,12 @@
         bug_lines,
         start_line,
         end_line,
-        nextstart_line,
-        nextend_line,
-        code,
         prev_code,
         curr_code,
         curr_commitid,
-        next_commitid
+        next_commitid,
+        nextstart_line,
+        nextend_line
         )
         values
         (
@@ -44,13 +45,12 @@
         #{bug_lines},
         #{start_line},
         #{end_line},
-        #{nextstart_line},
-        #{nextend_line},
-        #{code},
         #{prev_code},
         #{curr_code},
         #{curr_commitid},
-        #{next_commitid}
+        #{next_commitid},
+        #{nextstart_line},
+        #{nextend_line}
         )
     </insert>
 

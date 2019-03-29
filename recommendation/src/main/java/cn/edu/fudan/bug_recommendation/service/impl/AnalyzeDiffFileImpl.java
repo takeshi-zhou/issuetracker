@@ -47,7 +47,7 @@ public class AnalyzeDiffFileImpl implements AnalyzeDiffFile {
         for (int i = 0; i<jsonArray.size();i++){
             JSONObject item = JSONObject.parseObject(jsonArray.getString(i));
             String range = item.getString("range");
-            if(item.getString("description").indexOf("delete")==-1 && item.getString("description").indexOf("add")==-1) {
+            if(item.getString("description").indexOf("delete")==-1) {
                 //当前版本start-end-line
                 String currRange = range.split("-")[0];
                 String tem0 = currRange.split(",")[0];
@@ -55,16 +55,12 @@ public class AnalyzeDiffFileImpl implements AnalyzeDiffFile {
                 Integer currStartLine = Integer.valueOf(tem0.substring(1, tem0.length()));
                 Integer currEndLine = Integer.valueOf(tem00.substring(0, tem00.length() - 1));
 
-                Integer nextStartLine = new Integer("0");
-                Integer nextEndLine= new Integer("0");
-                if(currStartLine < bug_lines && currEndLine > bug_lines) {
-                    //下一版本start-end-line
-                    String nextRange = range.split("-")[1];
-                    String tem1 = nextRange.split(",")[0];
-                    String tem11 = nextRange.split(",")[1];
-                    nextStartLine = Integer.valueOf(tem1.substring(1, tem1.length()));
-                    nextEndLine = Integer.valueOf(tem11.substring(0, tem11.length() - 1));
-                }
+                //下一版本start-end-line
+                String nextRange = range.split("-")[1];
+                String tem1 = nextRange.split(",")[0];
+                String tem11 = nextRange.split(",")[1];
+                Integer nextStartLine = Integer.valueOf(tem1.substring(1, tem1.length()));
+                Integer nextEndLine = Integer.valueOf(tem11.substring(0, tem11.length() - 1));
 
                 if (currStartLine < bug_lines && currEndLine > bug_lines) {
                     start_line = currStartLine;
@@ -73,11 +69,6 @@ public class AnalyzeDiffFileImpl implements AnalyzeDiffFile {
                     nextend_line = nextEndLine;
                     description = item.getString("description");
                 }
-            }else if(item.getString("description").indexOf("add")!=-1){
-                start_line = 0;
-                end_line = 0;
-                nextstart_line = 0;
-                nextend_line = 0;
             }else {
                 String pretem = range.split(",")[0];
                 Integer currStartLine = Integer.valueOf(pretem.substring(1, pretem.length()));
@@ -95,7 +86,7 @@ public class AnalyzeDiffFileImpl implements AnalyzeDiffFile {
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject item = JSONObject.parseObject(jsonArray.getString(i));
                 String range = item.getString("range");
-                if (item.getString("description").indexOf("delete") == -1 && item.getString("description").indexOf("add") == -1) {
+                if (item.getString("description").indexOf("delete") == -1) {
                     //当前版本start-end-line
                     String currRange = range.split("-")[0];
                     String tem0 = currRange.split(",")[0];
@@ -103,17 +94,12 @@ public class AnalyzeDiffFileImpl implements AnalyzeDiffFile {
                     Integer currStartLine = Integer.valueOf(tem0.substring(1, tem0.length()));
                     Integer currEndLine = Integer.valueOf(tem00.substring(0, tem00.length() - 1));
 
-                    Integer nextStartLine = new Integer("0");
-                    Integer nextEndLine= new Integer("0");
-
-                    if(currStartLine <= bug_lines && currEndLine >= bug_lines) {
-                        //下一版本start-end-line
-                        String nextRange = range.split("-")[1];
-                        String tem1 = nextRange.split(",")[0];
-                        String tem11 = nextRange.split(",")[1];
-                        nextStartLine = Integer.valueOf(tem1.substring(1, tem1.length()));
-                        nextEndLine = Integer.valueOf(tem11.substring(0, tem11.length() - 1));
-                    }
+                    //下一版本start-end-line
+                    String nextRange = range.split("-")[1];
+                    String tem1 = nextRange.split(",")[0];
+                    String tem11 = nextRange.split(",")[1];
+                    Integer nextStartLine = Integer.valueOf(tem1.substring(1, tem1.length()));
+                    Integer nextEndLine = Integer.valueOf(tem11.substring(0, tem11.length() - 1));
 
                     if (currStartLine <= bug_lines && currEndLine >= bug_lines) {
                         start_line = currStartLine;
@@ -122,13 +108,7 @@ public class AnalyzeDiffFileImpl implements AnalyzeDiffFile {
                         nextend_line = nextEndLine;
                         description = item.getString("description");
                     }
-                } else if(item.getString("description").indexOf("add")!=-1){
-                    start_line = 0;
-                    end_line = 0;
-                    nextstart_line = 0;
-                    nextend_line = 0;
-                }
-                else {
+                } else {
                     String pretem = range.split(",")[0];
                     Integer currStartLine = Integer.valueOf(pretem.substring(1, pretem.length()));
                     String endtem = range.split(",")[1];

@@ -7,7 +7,7 @@
         <id property="uuid" column="uuid"/>
         <result property="start_line" column="start_line"/>
         <result property="end_line" column="end_line"/>
-        <result property="bug_lines" column="bug_lines"/>
+        <result property="bugLines" column="bugLines"/>
         <result property="start_token" column="start_token"/>
         <result property="end_token" column="end_token"/>
         <result property="file_path" column="file_path"/>
@@ -24,7 +24,7 @@
         uuid,
         start_line,
         end_line,
-        bug_lines,
+        bugLines,
         start_token,
         end_token,
         file_path,
@@ -39,7 +39,7 @@
             #{item.uuid},
             #{item.start_line},
             #{item.end_line},
-            #{item.bug_lines},
+            #{item.bugLines},
             #{item.start_token},
             #{item.end_token},
             #{item.file_path},

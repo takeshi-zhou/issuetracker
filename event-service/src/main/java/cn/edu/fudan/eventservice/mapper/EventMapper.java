@@ -15,4 +15,6 @@ public interface EventMapper {
     void deleteEventByRepoIdAndCategory(@Param("category")String category,@Param("repo_id")String repo_id);
 
     List<Event> getRecentEventsByEventType(@Param("list") List<String> list, @Param("event_type")EventType eventType);
+
+    
 }

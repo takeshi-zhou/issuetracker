@@ -61,6 +61,7 @@ public class CloneScanServiceImpl implements CloneScanService {
         //把这个对象信息填充好 写一个task并run
         PackageScanStatus packageScanStatus;
 
+
         //#2 如果scan状态未完成。需要一个scan列表，根据这个列表进行scan
 
 

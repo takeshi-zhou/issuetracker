@@ -23,7 +23,7 @@ public class RecommendationDao {
     }
 
     public boolean isLocationExist(String location){
-        return getRecommendationsByLocation(location).size() !=0;
+        return getRecommendationsByLocation(location).size() != 0;
     }
 
     public boolean isTypeExist(String type){

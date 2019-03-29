@@ -3,8 +3,9 @@ package cn.edu.fudan.projectmanager.Clone;
 
 
 
+import com.alibaba.fastjson.JSONObject;
 import io.netty.handler.codec.json.JsonObjectDecoder;
-import org.json.JSONObject;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,52 @@ import java.util.List;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class CloneServiceApplicationTests {
+    public class ScanInitialInfo {
+        public String getRepoName() {
+            return repoName;
+        }
+
+        public void setRepoName(String repoName) {
+            this.repoName = repoName;
+        }
+
+        public String getRepoId() {
+            return repoId;
+        }
+
+        public void setRepoId(String repoId) {
+            this.repoId = repoId;
+        }
+
+        public String getRepoPath() {
+            return repoPath;
+        }
+
+        public void setRepoPath(String repoPath) {
+            this.repoPath = repoPath;
+        }
+
+        public List<String> getCommitList() {
+            return commitList;
+        }
+
+        public void setCommitList(List<String> commitList) {
+            this.commitList = commitList;
+        }
+
+        private String repoName;
+        private String repoId;
+        private String repoPath;
+        private List<String> commitList;
+        public ScanInitialInfo(String repoName, String repoId, String repoPath, List<String> commitList) {
+
+//        this.scan = scan;
+            this.repoName = repoName;
+            this.repoId = repoId;
+            this.repoPath = repoPath;
+            this.commitList = commitList;
+        }
+    }
 
     @Autowired
     private KafkaTemplate kafkaTemplate;
@@ -25,18 +72,18 @@ public class CloneServiceApplicationTests {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testCheckout()throws Exception{
+    public void testPackageScan()throws Exception{
         //ScanInitialInfo scanInitialInfo = new ScanInitialInfo("happy", "123", "here");
         String urlPrefix = "/home/fdse/user/issueTracker/repo";
         List<String> commitList = new ArrayList<>();
         commitList.add("922dc95453760d98b0ccb00a08239f0a5b695bf0");
 
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("repoName", "genson");
-        jsonObject.put("repoId", "76a84f5a-4ec6-11e9-af18-9dfa342942d6");
-        jsonObject.put("commitList", commitList);
-        jsonObject.put("repoPath", "/home/fdse/user/issueTracker/repo/github/owlike/genson-master");
-        kafkaTemplate.send("Clone", jsonObject);
+        ScanInitialInfo scanInitialInfo = new ScanInitialInfo("genson",
+                "76a84f5a-4ec6-11e9-af18-9dfa342942d6",
+                "/home/fdse/user/issueTracker/repo/github/owlike/genson-master" ,
+                commitList);
+        System.out.println(JSONObject.toJSONString(scanInitialInfo));
+        kafkaTemplate.send("CloneZNJ", JSONObject.toJSONString(scanInitialInfo));
 
 
 

@@ -10,21 +10,12 @@ public class Recommendation implements Serializable {
     private String bug_lines;
     private Integer start_line;
     private Integer end_line;
-    private String code;
     private Integer nextstart_line;
     private Integer nextend_line;
     private String prev_code;
     private String curr_code;
     private String curr_commitid;
     private String next_commitid;
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
 
     public Integer getNextstart_line() {
         return nextstart_line;
