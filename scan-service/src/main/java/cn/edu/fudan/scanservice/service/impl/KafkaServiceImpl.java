@@ -217,17 +217,26 @@ public class KafkaServiceImpl implements KafkaService {
 
     private List<ScanMessageWithTime> getFilteredList(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
         int sourceSize=dates.size();
-        LocalDate twoWeekBefore=dates.get(sourceSize-1).minusWeeks(2);
+        LocalDate nextTimeLimit=dates.get(sourceSize-1).minusMonths(1);
         LinkedList<ScanMessageWithTime> result=new LinkedList<>();
-        int i=0,step=1;
+        int i=0;
+        boolean isRecent=true;
         while(i<sourceSize){
             LocalDate date=dates.get(sourceSize-1-i);
-            if(i>10&&date.isBefore(twoWeekBefore)){
-                step+=50;
+            if(isRecent&&date.isAfter(nextTimeLimit)){
+                List<ScanMessageWithTime> list=map.get(date);
+                result.addFirst(list.get(list.size()-1));
+            }else{
+                isRecent=false;
             }
-            List<ScanMessageWithTime> list=map.get(date);
-            result.addFirst(list.get(list.size()-1));
-            i+=step;
+            if(!isRecent){
+                if(date.isBefore(nextTimeLimit)||i==sourceSize-1){
+                    List<ScanMessageWithTime> list=map.get(date);
+                    result.addFirst(list.get(list.size()-1));
+                    nextTimeLimit=nextTimeLimit.minusMonths(3);
+                }
+            }
+            i++;
         }
         return result;
     }
