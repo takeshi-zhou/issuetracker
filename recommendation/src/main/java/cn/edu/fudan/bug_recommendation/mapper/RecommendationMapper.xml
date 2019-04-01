@@ -34,7 +34,8 @@
         curr_commitid,
         next_commitid,
         nextstart_line,
-        nextend_line
+        nextend_line,
+        repoid
         )
         values
         (
@@ -50,7 +51,8 @@
         #{curr_commitid},
         #{next_commitid},
         #{nextstart_line},
-        #{nextend_line}
+        #{nextend_line},
+        #{repoid}
         )
     </insert>
 
