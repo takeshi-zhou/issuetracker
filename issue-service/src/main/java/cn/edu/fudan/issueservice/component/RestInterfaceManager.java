@@ -29,6 +29,8 @@ public class RestInterfaceManager {
     private String commitServicePath;
     @Value("${tag.service.path}")
     private String tagServicePath;
+    @Value("${recommendation.path}")
+    String recommendationServicePath;
 
     private RestTemplate restTemplate;
 
@@ -137,6 +139,15 @@ public class RestInterfaceManager {
 
     public JSONObject freeRepoPath(String repoId,String repoPath){
         return restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId+"&path="+repoPath, JSONObject.class);
+    }
+
+    //-----------------------------------recommendation service---------------------------------------------------------
+    public void addSolvedIssueInfo(List<JSONObject> solvedInfos){
+        try{
+            restTemplate.postForObject(recommendationServicePath+"/add-bug-recommendation",solvedInfos,JSONObject.class);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

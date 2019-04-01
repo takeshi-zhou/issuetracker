@@ -4,6 +4,7 @@ import cn.edu.fudan.cloneservice.dao.PackageScanStatusDao;
 import cn.edu.fudan.cloneservice.domain.PackageScanStatus;
 import cn.edu.fudan.cloneservice.domain.ScanInitialInfo;
 import cn.edu.fudan.cloneservice.service.PackageService;
+import cn.edu.fudan.cloneservice.task.PackageScanTask;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,16 +16,16 @@ import java.util.List;
 
 @Service
 public class PackageServiceImpl implements PackageService {
-    PackageScanStatusDao packageScanStatusDao;
     private KafkaTemplate kafkaTemplate;
+    private PackageScanTask packageScanTask;
 
     @Autowired
     public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public PackageServiceImpl(PackageScanStatusDao packageScanStatusDao){
-        this.packageScanStatusDao = packageScanStatusDao;
+    public PackageServiceImpl(){
+
     }
 
     @SuppressWarnings("unchecked")
@@ -44,21 +45,33 @@ public class PackageServiceImpl implements PackageService {
         String repoName=scanInitialInfo.getRepoName();
         String repoPath=scanInitialInfo.getRepoPath();
         List<String> commitList = scanInitialInfo.getCommitList();
-        //#1 根据给的信息，启动包的状态查询
+        //#1 根据给的信息，启动包的扫描服务
         //把这个对象信息填充好 写一个task并run
-        try{
-            for(String commit_id:commitList)
-            {
-                String test  = packageScanStatusDao.selectPackageScanStatusByRepoIdAndCommitId(repoId, commit_id);
-                System.out.println(test);
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+
+        packageScanTask.run(repoId,repoName,repoPath,commitList);
+
+
+//        for(String commit_id:commitList)
+//        {
+//            String test  = packageScanStatusDao.selectPackageScanStatusByRepoIdAndCommitId(repoId, commit_id);
+//            System.out.println(test);
+//            if(test.equals("Not Scanned")){
+//                //#2 如果scan状态未完成。需要一个scan列表，根据这个列表进行scan
+//                //就用这个commit_list来扫描
+//
+//
+//
+//            }
+//            else {
+//                //Scanned
+//                //do nothing
+//            }
+//        }
 
 
 
-        //#2 如果scan状态未完成。需要一个scan列表，根据这个列表进行scan
+
+
 
 
 //        Scan scan=scanInitialInfo.getScan();
@@ -67,4 +80,6 @@ public class PackageServiceImpl implements PackageService {
         //每当接受一个clone的scan消息，启动一个异步任务取执行相关操作
 
     }
+
+
 }

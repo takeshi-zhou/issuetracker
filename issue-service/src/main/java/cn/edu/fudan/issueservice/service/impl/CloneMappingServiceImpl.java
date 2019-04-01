@@ -98,8 +98,8 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             //装需要更新的Issue
             List<Issue> issues = new ArrayList<>();
             List<String> mappedIssueIds=new ArrayList<>();
-            Map<String,List<RawIssue>> map1=rawIssues1.stream().collect(Collectors.groupingBy(RawIssue::getType));
-            Map<String,List<RawIssue>> map2=rawIssues2.stream().collect(Collectors.groupingBy(RawIssue::getType));
+            Map<String,List<RawIssue>> map1=rawIssues1.stream().collect(Collectors.groupingBy(RawIssue::getType));//前一个版本
+            Map<String,List<RawIssue>> map2=rawIssues2.stream().collect(Collectors.groupingBy(RawIssue::getType));//当前版本
             Set<String> preGroups=map1.keySet();
             Set<String> currentGroups=map2.keySet();
             Set<String> newGroups=new HashSet<>();
@@ -137,7 +137,6 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             }
             //group映射完成,新的group作为新的issue插进去
            int ignoreCountInNewIssues=newCloneInsert(false,map2,newGroups,repo_id,current_commit_id,commitDate,category,committer,date);
-
             if (!issues.isEmpty()) {
                 //更新issue
                 issueDao.batchUpdateIssue(issues);

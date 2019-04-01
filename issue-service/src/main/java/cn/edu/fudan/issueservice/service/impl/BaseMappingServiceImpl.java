@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -181,6 +182,22 @@ public class BaseMappingServiceImpl implements MappingService {
                 restInterfaceManager.modifyTags(taggeds);
             }
         }
+    }
+
+    void saveSolvedInfo(List<RawIssue> rawIssues,String pre_commit_id,String current_commit_id){
+        List<JSONObject> solvedInfos=new ArrayList<>();
+        for(RawIssue rawIssue:rawIssues){
+            JSONObject solvedInfo=new JSONObject();
+            solvedInfo.put("type",rawIssue.getType());
+            solvedInfo.put("location",rawIssue.firstLocation().getFile_path());
+            solvedInfo.put("bug_lines",rawIssue.firstLocation().getBug_lines());
+            solvedInfo.put("start_line",rawIssue.firstLocation().getStart_line());
+            solvedInfo.put("end_line",rawIssue.firstLocation().getEnd_line());
+            solvedInfo.put("curr_commitid",pre_commit_id);
+            solvedInfo.put("next_commitid",current_commit_id);
+            solvedInfos.add(solvedInfo);
+        }
+        restInterfaceManager.addSolvedIssueInfo(solvedInfos);
     }
 
 }

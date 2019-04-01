@@ -1,6 +1,5 @@
 package cn.edu.fudan.scanservice.domain;
 
-import java.util.Date;
 
 /**
  * @author WZY
