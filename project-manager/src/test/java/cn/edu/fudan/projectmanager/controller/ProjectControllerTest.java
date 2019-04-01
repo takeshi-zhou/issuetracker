@@ -44,6 +44,7 @@ import static org.mockito.Mockito.doNothing;
 
 @PrepareForTest({ProjectController.class, ProjectService.class, ProjectServiceImpl.class, AuthTokenInterceptor.class})
 @WebAppConfiguration
+@Ignore
 public class ProjectControllerTest extends ProjectManagerApplicationTests {
 
     @Autowired

@@ -1,7 +1,5 @@
 package cn.edu.fudan.projectmanager.controller;
 
-import cn.edu.fudan.projectmanager.component.cat.CatHttpRequestTransaction;
-import cn.edu.fudan.projectmanager.component.cat.CatTransaction;
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.domain.ResponseBean;
 import cn.edu.fudan.projectmanager.service.ProjectService;
@@ -35,7 +33,6 @@ public class ProjectController {
 
     //get project list
     @GetMapping(value = {"/project"})
-    @CatHttpRequestTransaction(type = "ProjectURL", name = "/project")
     public Object query(HttpServletRequest request,
                         @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
         String userToken = request.getHeader("token");
@@ -43,7 +40,6 @@ public class ProjectController {
     }
 
     @GetMapping(value = {"/project/filter"})
-    @CatHttpRequestTransaction(type = "ProjectURL", name = "/project/filter")
     public Object keyWordQuery(HttpServletRequest request,
                                @RequestParam("keyWord") String keyWord,
                                @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
@@ -52,8 +48,6 @@ public class ProjectController {
     }
 
     @DeleteMapping(value = {"/project/{projectId}"})
-    @CatHttpRequestTransaction(type = "ProjectURL")
-    @CatTransaction(type = "ProjectService",name = "delete_project")
     public Object delete(@PathVariable("projectId") String projectId,
                          @RequestParam(name = "type",required = false,defaultValue = "bug")String type,
                          HttpServletRequest request) {

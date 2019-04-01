@@ -2,10 +2,9 @@ package cn.edu.fudan.projectmanager.service.impl;
 
 
 import cn.edu.fudan.projectmanager.component.RestInterfaceManager;
-import cn.edu.fudan.projectmanager.dao.*;
+import cn.edu.fudan.projectmanager.dao.ProjectDao;
 import cn.edu.fudan.projectmanager.domain.NeedDownload;
 import cn.edu.fudan.projectmanager.domain.Project;
-import cn.edu.fudan.projectmanager.domain.RepoBasicInfo;
 import cn.edu.fudan.projectmanager.service.ProjectService;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
