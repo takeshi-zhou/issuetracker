@@ -4,7 +4,6 @@
 <mapper namespace="cn.edu.fudan.measureservice.mapper.RepoMeasureMapper">
 
     <resultMap id="repoMeasure" type="RepoMeasure">
-        <id property="uuid" column="uuid"/>
         <result property="files" column="files"/>
         <result property="ncss" column="ncss"/>
         <result property="classes" column="classes"/>
@@ -50,4 +49,26 @@
               #{repo_id}
            )
     </insert>
+
+    <select id="getLatestMeasureData" resultMap="repoMeasure">
+        select
+            files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines
+        from
+            repo_measure
+        where
+            repo_id = #{repo_id}
+        order by commit_time desc
+        limit 1
+    </select>
+
+    <select id="getFirstMeasureDataAfterDuration" resultMap="repoMeasure">
+         select
+            files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines
+        from
+            repo_measure
+        where
+            repo_id = #{repo_id}   and  commmit_time  &lt; #{time_line}
+        order by commit_time desc
+        limit 1
+    </select>
 </mapper>
