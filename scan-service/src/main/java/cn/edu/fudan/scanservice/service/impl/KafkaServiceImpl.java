@@ -136,6 +136,7 @@ public class KafkaServiceImpl implements KafkaService {
      * @author WZY
      */
     @Override
+    @SuppressWarnings("unchecked")
     @KafkaListener(id = "projectScan", topics = {"Scan"}, groupId = "scan")
     public void scanByMQ(ConsumerRecord<String, String> consumerRecord) {
         String msg = consumerRecord.value();
@@ -148,6 +149,12 @@ public class KafkaServiceImpl implements KafkaService {
             findBugScanTask.runSynchronously(repoId, commitId,"bug");
         if(existProject(repoId,"clone",false))
             cloneScanTask.runSynchronously(repoId,commitId,"clone");
+        List<ScanMessageWithTime> list=new ArrayList<>();
+        ScanMessageWithTime scanMessageWithTime=new ScanMessageWithTime(repoId,commitId);
+        scanMessageWithTime.setCommitTime(restInterfaceManager.getCommitTime(commitId).getJSONObject("data").getString("commit_time"));
+        list.add(scanMessageWithTime);
+        //发送消息给度量服务，将度量信息保存
+        kafkaTemplate.send("Measure",JSONArray.toJSONString(list));
     }
 
     @KafkaListener(id = "updateCommit", topics = {"UpdateCommit"}, groupId = "updateCommit")
