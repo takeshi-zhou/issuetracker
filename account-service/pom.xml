@@ -81,13 +81,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.dianping.cat/cat-client -->
-        <dependency>
-            <groupId>com.dianping.cat</groupId>
-            <artifactId>cat-core</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-
     </dependencies>
 
     <build>

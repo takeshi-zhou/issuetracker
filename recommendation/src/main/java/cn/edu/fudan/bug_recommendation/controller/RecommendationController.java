@@ -40,7 +40,7 @@ public class RecommendationController {
 
     @PostMapping("/add-bug-recommendation")
     @CrossOrigin
-    public Object addBugRecommendation(@RequestBody List<Recommendation> list){
+    public void addBugRecommendation(@RequestBody List<Recommendation> list){
 //        System.out.println("diffPostInfo: "+diffPostInfo);
 //        List<Recommendation> list = completeReco.getAllReco(diffPostInfo);
 //        System.out.println("list size: "+list.size());
@@ -65,14 +65,15 @@ public class RecommendationController {
 //            }
 //        }
 
-        try {
-            for (Recommendation info: list){
-                recommendationService.addBugRecommendation(info);
-            }
-            return new ResponseBean(200, "Congratulations！successful add.", null);
-        }catch (Exception e) {
-            return new ResponseBean(401, "add failed! " + e.getMessage(), null);
-       }
+//        try {
+//            for (Recommendation info: list){
+//                Recommendation newInfo = completeReco.completeCode(info);
+//                recommendationService.addBugRecommendation(newInfo);
+//            }
+//            return new ResponseBean(200, "Congratulations！successful add.", null);
+//        }catch (Exception e) {
+//            return new ResponseBean(401, "add failed! " + e.getMessage(), null);
+//       }
 
     }
     @GetMapping("/get-bug-recommendation")
