@@ -31,4 +31,7 @@ public interface RawIssueMapper {
 
     List<String> getTypesByCommit(@Param("category")String category,@Param("commit_id")String commit_id);
 
+    Integer getNumberOfRemainingIssueBaseFile(String repoId, String commit, String fileName);
+
+    Integer getNumberOfRemainingIssue(String repoId, String commit);
 }
