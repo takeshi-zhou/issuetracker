@@ -9,7 +9,7 @@
 
 
 
-    <insert id="insertPackageScanStatusByRepoIdAndCommitId" parameterType="String">
+    <insert id="insertPackageScanStatusByRepoIdAndCommitId" >
         INSERT into ce_scan_status SET uuid = #{p_uuid}, repo_id = #{p_repo_id}, commit_id = #{p_commit_id}, status = #{p_status}
     </insert>
 

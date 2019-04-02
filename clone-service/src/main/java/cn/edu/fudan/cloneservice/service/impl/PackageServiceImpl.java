@@ -20,6 +20,15 @@ public class PackageServiceImpl implements PackageService {
     private PackageScanTask packageScanTask;
 
     @Autowired
+    public PackageScanTask getPackageScanTask() {
+        return packageScanTask;
+    }
+    @Autowired
+    public void setPackageScanTask(PackageScanTask packageScanTask) {
+        this.packageScanTask = packageScanTask;
+    }
+
+    @Autowired
     public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }

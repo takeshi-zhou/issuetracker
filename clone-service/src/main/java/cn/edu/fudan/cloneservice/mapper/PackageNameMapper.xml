@@ -6,10 +6,7 @@
 
     <!--<select id="selectPackageNameSet"-->
 
-    <insert id="insertPackageNameSetByRepoIdAndCommitId" parameterType="Stirng">
-        insert into ce_package_info set uuid = #{p_uuid},
-                                          repo_id = #{p_repo_id},
-                                          commit_id = #{p_commit_id},
-                                          package_name = #{p_package_name}
+    <insert id="insertPackageNameSetByRepoIdAndCommitId" parameterType="cn.edu.fudan.cloneservice.domain.PackageInfo">
+        insert into ce_package_info values (#{uuid},#{repd_id},#{commit_id}, #{package_name}, #{method_num})
     </insert>
 </mapper>
