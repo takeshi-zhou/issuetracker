@@ -1,6 +1,6 @@
 package cn.edu.fudan.measureservice.domain;
 
-public class Object {
+public class OObject {
     private String name;
     private int ncss;
     private int functions;

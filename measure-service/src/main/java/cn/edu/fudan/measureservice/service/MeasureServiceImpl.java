@@ -2,12 +2,17 @@ package cn.edu.fudan.measureservice.service;
 
 import cn.edu.fudan.measureservice.analyzer.MeasureAnalyzer;
 import cn.edu.fudan.measureservice.component.RestInterfaceManager;
+import cn.edu.fudan.measureservice.domain.CommitWithTime;
 import cn.edu.fudan.measureservice.domain.Duration;
 import cn.edu.fudan.measureservice.domain.Measure;
+import cn.edu.fudan.measureservice.domain.RepoMeasure;
 import cn.edu.fudan.measureservice.handler.ResultHandler;
+import cn.edu.fudan.measureservice.mapper.RepoMeasureMapper;
 import cn.edu.fudan.measureservice.util.DateTimeUtil;
 import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,13 +26,16 @@ public class MeasureServiceImpl implements MeasureService {
     private MeasureAnalyzer measureAnalyzer;
     private ResultHandler resultHandler;
     private RestInterfaceManager restInterfaceManager;
+    private RepoMeasureMapper repoMeasureMapper;
 
     public MeasureServiceImpl(MeasureAnalyzer measureAnalyzer,
                              ResultHandler resultHandler,
-                              RestInterfaceManager restInterfaceManager) {
+                              RestInterfaceManager restInterfaceManager,
+                              RepoMeasureMapper repoMeasureMapper) {
         this.measureAnalyzer = measureAnalyzer;
         this.resultHandler = resultHandler;
         this.restInterfaceManager=restInterfaceManager;
+        this.repoMeasureMapper=repoMeasureMapper;
     }
     @Override
     public Object getMeasureDataChange(String userToken, Duration duration) {
@@ -46,6 +54,31 @@ public class MeasureServiceImpl implements MeasureService {
             }
         }
         return projectsMeasureChanges;
+    }
+
+    @Override
+    public void saveMeasureData(String repoId, String commitId,String commitTime) {
+        try{
+            Measure measure=getMeasureDateOfOneCommit(repoId,commitId);
+            RepoMeasure repoMeasure=new RepoMeasure();
+            repoMeasure.setUuid(UUID.randomUUID().toString());
+            repoMeasure.setFiles(measure.getTotal().getFiles());
+            repoMeasure.setNcss(measure.getTotal().getNcss());
+            repoMeasure.setClasses(measure.getTotal().getClasses());
+            repoMeasure.setFunctions(measure.getTotal().getFunctions());
+            repoMeasure.setCcn(measure.getFunctions().getFunctionAverage().getNcss());
+            repoMeasure.setJava_docs(measure.getTotal().getJavaDocs());
+            repoMeasure.setJava_doc_lines(measure.getTotal().getJavaDocsLines());
+            repoMeasure.setSingle_comment_lines(measure.getTotal().getSingleCommentLines());
+            repoMeasure.setMulti_comment_lines(measure.getTotal().getMultiCommentLines());
+            repoMeasure.setCommit_id(commitId);
+            repoMeasure.setCommit_time(commitTime);
+            repoMeasure.setRepo_id(repoId);
+            repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
+        }catch (Exception e){
+            log.error(e.getMessage());
+        }
+
     }
 
     private Map<String,Object> getMeasureChangeOfOneProject(String repoId,String repoName,Duration duration){
@@ -124,6 +157,15 @@ public class MeasureServiceImpl implements MeasureService {
                 restInterfaceManager.freeRepoPath(repoId,repoPath);
         }
         return measure;
+    }
+
+    @KafkaListener(id = "measure", topics = {"Measure"}, groupId = "measure")
+    public void commitInfoListener(ConsumerRecord<String, String> consumerRecord) {
+        List<CommitWithTime> commits=JSONArray.parseArray(consumerRecord.value(),CommitWithTime.class);
+        log.info("received message from topic -> " + consumerRecord.topic() + " : " + commits.size()+" commits need to scan!");
+        for(CommitWithTime commit:commits){
+            saveMeasureData(commit.getRepoId(),commit.getCommitId(),commit.getCommitTime());
+        }
     }
 
 }
