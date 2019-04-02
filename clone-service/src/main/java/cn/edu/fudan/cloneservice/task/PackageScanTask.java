@@ -1,14 +1,17 @@
 package cn.edu.fudan.cloneservice.task;
 
 import cn.edu.fudan.cloneservice.component.RestInterfaceManager;
+import cn.edu.fudan.cloneservice.dao.CloneInfoDao;
 import cn.edu.fudan.cloneservice.dao.PackageNameDao;
 import cn.edu.fudan.cloneservice.dao.PackageScanStatusDao;
-import cn.edu.fudan.cloneservice.domain.PackageScanStatus;
-import cn.edu.fudan.cloneservice.domain.Scan;
+
+import cn.edu.fudan.cloneservice.domain.CloneInfo;
 import cn.edu.fudan.cloneservice.domain.ScanResult;
 import com.alibaba.fastjson.JSONObject;
+import com.github.javaparser.ast.visitor.VoidVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -16,12 +19,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
+
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.github.javaparser.ast.body.*;
 
-@Component("PackageScanTask")
+@Component("packageScanTask")
 public class PackageScanTask {
     private static final Logger logger= LoggerFactory.getLogger(CloneScanTask.class);
 
@@ -30,6 +35,28 @@ public class PackageScanTask {
 
     private PackageScanStatusDao packageScanStatusDao;
     private PackageNameDao packageNameDao;
+    private CloneInfoDao cloneInfoDao;
+
+    List<File> fileList = new ArrayList<>();
+
+    @Autowired
+    public void setCloneInfoDao(CloneInfoDao cloneInfoDao) {
+        this.cloneInfoDao = cloneInfoDao;
+    }
+
+    @Autowired
+    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
+        this.restInterfaceManager = restInterfaceManager;
+    }
+    @Autowired
+    public void setPackageScanStatusDao(PackageScanStatusDao packageScanStatusDao) {
+        this.packageScanStatusDao = packageScanStatusDao;
+    }
+    @Autowired
+    public void setPackageNameDao(PackageNameDao packageNameDao) {
+        this.packageNameDao = packageNameDao;
+    }
+
 
 
     private boolean checkOut(String repoId, String commitId) {
@@ -49,11 +76,12 @@ public class PackageScanTask {
         logger.info("start to checkout -> " + commitId);
 
         //checkout,如果失败发送错误消息，直接返回
-        if (!checkOut(repoId, commitId)) {
-            send(repoId, commitId, "failed", "Package Scan - check out failed");
-            logger.error("Package Scan Check Out Failed!");
-            return;
-        }
+//        if (!checkOut(repoId, commitId)) {
+//            send(repoId, commitId, "failed", "Package Scan - check out failed");
+//            logger.error("Package Scan Check Out Failed!");
+//            return;
+//        }
+        //TODO checkout
         logger.info("checkout complete -> start the package scan operation......");
 
         //#2 考虑上锁 释放锁
@@ -61,10 +89,19 @@ public class PackageScanTask {
         //#3 获取分析结果 存入数据库
         List<File> fileList = getFileList(repoPath);
 
-        Set<String> packageNameSet = getName(fileList);
+//        Map<String, Integer> map_name_mecount = getName(fileList);
 
-        packageNameDao.insertPackageName(repoId, commit_id, packageNameSet);
+//        packageNameDao.insertPackageName(repoId, commit_id, map_name_mecount);
 
+
+        List<CloneInfo> lci = cloneInfoDao.getCloneInfoByRepoIdAndCommitId(repoId, commit_id);
+
+
+        //继续写 处理List
+        for(CloneInfo ci:lci){
+            String file_path = ci.getFile_path();
+
+        }
 
     }
 
@@ -78,7 +115,7 @@ public class PackageScanTask {
     }
 
     private  List<File> getFileList(String strPath) {
-        List<File> fileList = new ArrayList<>();
+
         File dir = new File(strPath);
         File[] files = dir.listFiles(); // 该文件目录下文件全部放入数组
         if (files != null) {
@@ -104,14 +141,16 @@ public class PackageScanTask {
         }
 
     }
-    public Set<String> getName(List<File> filelist){
-        Set<String> package_name_set = new HashSet<>();
+    public Map<String, Integer> getName(List<File> filelist){
+        Map<String, Integer> map_name_method_num = new HashMap<>();
         for(File file:filelist){
             try {
+                //把一个java代码文本解析成单元
                 CompilationUnit cunit = JavaParser.parse(file);
-                cunit.accept(new ClassLevelVisitor(),null);
+//                cunit.accept(new ClassLevelVisitor(),null);
                 String name = cunit.getPackageDeclaration().get().getNameAsString();
-                package_name_set.add(name);
+                List<MethodDeclaration> lmd = getMethodList(cunit);
+                map_name_method_num.put(name, lmd.size());
             }
             catch (NoSuchElementException e){
 //					e.printStackTrace();
@@ -122,7 +161,24 @@ public class PackageScanTask {
             }
 
         }
-        return package_name_set;
+        return map_name_method_num;
+    }
+
+    public static List<MethodDeclaration> getMethodList(CompilationUnit cu) {
+        List<MethodDeclaration> methodList = new ArrayList<MethodDeclaration>();
+        new MethodGetterVisitor().visit(cu, methodList);//访问单元内的节点
+        return methodList;
+    }
+
+    private static class MethodGetterVisitor extends VoidVisitorAdapter<Object> {
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public void visit(MethodDeclaration n, Object arg) {
+            List<MethodDeclaration> methodList = new ArrayList<MethodDeclaration>();
+            methodList =  (List<MethodDeclaration>) arg;
+            methodList.add(n);
+        }
     }
 
 

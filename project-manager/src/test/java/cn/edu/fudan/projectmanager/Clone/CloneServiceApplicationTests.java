@@ -76,11 +76,11 @@ public class CloneServiceApplicationTests {
         //ScanInitialInfo scanInitialInfo = new ScanInitialInfo("happy", "123", "here");
         String urlPrefix = "/home/fdse/user/issueTracker/repo";
         List<String> commitList = new ArrayList<>();
-        commitList.add("922dc95453760d98b0ccb00a08239f0a5b695bf0");
+        commitList.add("556b393e1f68462722faa4564daea792e2607cb1");
 
         ScanInitialInfo scanInitialInfo = new ScanInitialInfo("genson",
                 "76a84f5a-4ec6-11e9-af18-9dfa342942d6",
-                "/home/fdse/user/issueTracker/repo/github/owlike/genson-master" ,
+                "D:\\repo\\github\\genson" ,
                 commitList);
         System.out.println(JSONObject.toJSONString(scanInitialInfo));
         kafkaTemplate.send("CloneZNJ", JSONObject.toJSONString(scanInitialInfo));
