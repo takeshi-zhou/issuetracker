@@ -103,4 +103,12 @@ public class IssueDao {
     public void batchUpdateIssueListPriority(List issueUuid, int priority) {
         issueMapper.batchUpdateIssueListPriority(issueUuid, priority);
     }
+
+    public int getNumberOfNewIssueByDuration(String repoId, String start, String end) {
+        return issueMapper.getNumberOfNewIssueByDuration(repoId, start, end);
+    }
+
+    public int getNumberOfEliminateIssueByDuration(String repoId, String start, String end) {
+        return issueMapper.getNumberOfEliminateIssueByDuration(repoId, start, end);
+    }
 }
