@@ -2,11 +2,13 @@ package cn.edu.fudan.measureservice;
 
 
 import java.io.IOException;
+import java.math.BigDecimal;
 
 public class Test {
 
     public static void main(String[] args) throws IOException {
-           Runtime  runtime=Runtime.getRuntime();
-           runtime.exec("C:\\Users\\WZY\\Desktop\\javancss-master\\bin\\javancss.bat -all -xml -recursive C:\\wzy\\programme\\intellijWorkSpace\\leet-code > C:\\Users\\WZY\\Desktop\\leet-code.xml");
+        BigDecimal b1=new BigDecimal("1.83");
+        BigDecimal b2=new BigDecimal("2.42");
+        System.out.println(b1.subtract(b2).doubleValue());
     }
 }

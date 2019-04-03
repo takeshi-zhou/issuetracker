@@ -2,6 +2,7 @@ package cn.edu.fudan.measureservice.analyzer;
 
 import cn.edu.fudan.measureservice.domain.Measure;
 import cn.edu.fudan.measureservice.handler.ResultHandler;
+import cn.edu.fudan.measureservice.util.FileUtil;
 import javancss.Javancss;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,11 @@ public class JavaNCSSAnalyzer implements MeasureAnalyzer {
     @Value("${result.file.home}")
     private String resultFileHome;
 
+    private FileUtil fileUtil;
+
+    public JavaNCSSAnalyzer(FileUtil fileUtil) {
+        this.fileUtil = fileUtil;
+    }
 
     @Override
     public Measure analyze(String targetPath, String level,ResultHandler resultHandler) {
@@ -33,7 +39,9 @@ public class JavaNCSSAnalyzer implements MeasureAnalyzer {
         String resultFileName=name+".xml";
         try{
             invokeJavaNcss(targetPath,resultFileHome+resultFileName);
-            return resultHandler.handle(resultFileName,level);
+            Measure measure=resultHandler.handle(resultFileName,level);
+            measure.getTotal().setFiles(fileUtil.getFileCountInDirectory(targetPath));//文件个数
+            return measure;
         }catch (Exception e){
             e.printStackTrace();
         }

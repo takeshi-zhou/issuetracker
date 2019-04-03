@@ -1,6 +1,7 @@
 package cn.edu.fudan.measureservice.domain;
 
 public class Total {
+    private int files;
     private int classes;
     private int functions;
     private int ncss;
@@ -8,6 +9,14 @@ public class Total {
     private int javaDocsLines;
     private int singleCommentLines;
     private int multiCommentLines;
+
+    public int getFiles() {
+        return files;
+    }
+
+    public void setFiles(int files) {
+        this.files = files;
+    }
 
     public int getClasses() {
         return classes;

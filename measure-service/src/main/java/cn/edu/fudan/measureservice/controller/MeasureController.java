@@ -1,11 +1,10 @@
 package cn.edu.fudan.measureservice.controller;
 
+import cn.edu.fudan.measureservice.domain.CommitWithTime;
 import cn.edu.fudan.measureservice.domain.Duration;
 import cn.edu.fudan.measureservice.domain.ResponseBean;
 import cn.edu.fudan.measureservice.service.MeasureService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -31,6 +30,12 @@ public class MeasureController {
             return new ResponseBean(401,"failed",null);
         }
 
+    }
+
+    @PostMapping("/measure")
+    public ResponseBean saveMeasureData(@RequestBody CommitWithTime commits){
+         measureService.saveMeasureData(commits.getRepoId(),commits.getCommitId(),commits.getCommitTime());
+         return new ResponseBean(200,"success","");
     }
 
 }

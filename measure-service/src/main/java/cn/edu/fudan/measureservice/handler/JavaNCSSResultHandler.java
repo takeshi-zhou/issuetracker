@@ -1,7 +1,7 @@
 package cn.edu.fudan.measureservice.handler;
 
 import cn.edu.fudan.measureservice.domain.*;
-import cn.edu.fudan.measureservice.domain.Object;
+import cn.edu.fudan.measureservice.domain.OObject;
 import cn.edu.fudan.measureservice.domain.Package;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -112,11 +112,11 @@ public class JavaNCSSResultHandler implements ResultHandler{
     @SuppressWarnings("unchecked")
     private Objects analyzeObjects(Element objectsElement){
         Objects objects=new Objects();
-        List<Object> objectList=new ArrayList<>();
+        List<OObject> objectList=new ArrayList<>();
         Iterator<Element> iterator=objectsElement.elementIterator("object");
         while (iterator.hasNext()){
             Element objectElement=iterator.next();
-            Object object=new Object();
+            OObject object=new OObject();
             object.setName(objectElement.elementText("name"));
             object.setNcss(Integer.valueOf(objectElement.elementText("ncss")));
             object.setFunctions(Integer.valueOf(objectElement.elementText("functions")));

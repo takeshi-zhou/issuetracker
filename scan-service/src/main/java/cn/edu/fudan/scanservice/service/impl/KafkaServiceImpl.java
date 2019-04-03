@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -38,14 +39,17 @@ public class KafkaServiceImpl implements KafkaService {
     private FindBugScanTask findBugScanTask;
     private CloneScanTask cloneScanTask;
     private RestInterfaceManager restInterfaceManager;
+    private KafkaTemplate kafkaTemplate;
 
     @Autowired
     public KafkaServiceImpl(FindBugScanTask findBugScanTask,
                             CloneScanTask cloneScanTask,
-                            RestInterfaceManager restInterfaceManager) {
+                            RestInterfaceManager restInterfaceManager,
+                            KafkaTemplate kafkaTemplate) {
         this.findBugScanTask = findBugScanTask;
         this.cloneScanTask = cloneScanTask;
         this.restInterfaceManager=restInterfaceManager;
+        this.kafkaTemplate=kafkaTemplate;
     }
 
     //初始化project的一些状态,表示目前正在scan
@@ -132,6 +136,7 @@ public class KafkaServiceImpl implements KafkaService {
      * @author WZY
      */
     @Override
+    @SuppressWarnings("unchecked")
     @KafkaListener(id = "projectScan", topics = {"Scan"}, groupId = "scan")
     public void scanByMQ(ConsumerRecord<String, String> consumerRecord) {
         String msg = consumerRecord.value();
@@ -144,6 +149,12 @@ public class KafkaServiceImpl implements KafkaService {
             findBugScanTask.runSynchronously(repoId, commitId,"bug");
         if(existProject(repoId,"clone",false))
             cloneScanTask.runSynchronously(repoId,commitId,"clone");
+        List<ScanMessageWithTime> list=new ArrayList<>();
+        ScanMessageWithTime scanMessageWithTime=new ScanMessageWithTime(repoId,commitId);
+        scanMessageWithTime.setCommitTime(restInterfaceManager.getCommitTime(commitId).getJSONObject("data").getString("commit_time"));
+        list.add(scanMessageWithTime);
+        //发送消息给度量服务，将度量信息保存
+        kafkaTemplate.send("Measure",JSONArray.toJSONString(list));
     }
 
     @KafkaListener(id = "updateCommit", topics = {"UpdateCommit"}, groupId = "updateCommit")
@@ -167,6 +178,7 @@ public class KafkaServiceImpl implements KafkaService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void firstAutoScan(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
         try {
             Thread.sleep(3000);
@@ -202,6 +214,8 @@ public class KafkaServiceImpl implements KafkaService {
         }else{
             logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
+        //发送消息给度量服务，将度量信息保存
+        kafkaTemplate.send("Measure",JSONArray.toJSONString(filteredCommits));
     }
 
     private boolean existProject(String repoId,String category,boolean isFirst){

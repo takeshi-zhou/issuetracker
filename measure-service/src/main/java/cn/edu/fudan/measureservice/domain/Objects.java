@@ -4,14 +4,14 @@ import java.util.List;
 
 public class Objects {
 
-    private List<Object> objects;
+    private List<OObject> objects;
     private ObjectAverage objectAverage;
 
-    public List<Object> getObjects() {
+    public List<OObject> getObjects() {
         return objects;
     }
 
-    public void setObjects(List<Object> objects) {
+    public void setObjects(List<OObject> objects) {
         this.objects = objects;
     }
 

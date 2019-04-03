@@ -52,5 +52,13 @@ public class DateTimeUtil {
         return dateTime.format(Y_M_D_formatter);
     }
 
+    public static Date transfer(LocalDateTime target){
+        try{
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(format(target));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 }
