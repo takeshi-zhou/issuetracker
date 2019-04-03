@@ -16,10 +16,16 @@ public class PackageNameDao {
         this.packageNameMapper = packageNameMapper;
     }
 
-    public void  insertPackageName(String repo_id, String commi_id, Map<String, Integer> map_name_mecount){
+    public void  insertPackageInfo(String repo_id, String commi_id, Map<String, Integer> map_name_mecount, Map<String, Integer> map_clone_dis){
         for(String name:map_name_mecount.keySet()){
             String uuid = UUID.randomUUID().toString();
-            PackageInfo packageInfo = new PackageInfo(uuid,repo_id,commi_id, name, map_name_mecount.get(name).intValue());
+            int clone_num;
+            if(map_clone_dis.containsKey(name)){
+                clone_num = map_clone_dis.get(name);
+            }else {
+                clone_num = 0;
+            }
+            PackageInfo packageInfo = new PackageInfo(uuid,repo_id,commi_id, name, map_name_mecount.get(name).intValue(), clone_num);
             packageNameMapper.insertPackageNameSetByRepoIdAndCommitId(packageInfo);
         }
     }

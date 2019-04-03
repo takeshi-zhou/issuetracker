@@ -18,5 +18,13 @@
         and commit_id = #{commitId}
     </select>
 
+    <update id="updateCloneInfoByCommitIdAndRepoId"  >
+        UPDATE ce_package_info
+        SET clone_ins_num = #{cloneInsNum}
+        WHERE repo_id = #{repoId}
+            AND commit_id = #{commitId}
+            AND package_name = #{packageName}
+    </update>
+
 
 </mapper>

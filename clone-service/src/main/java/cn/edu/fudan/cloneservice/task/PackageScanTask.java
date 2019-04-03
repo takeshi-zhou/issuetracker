@@ -7,6 +7,7 @@ import cn.edu.fudan.cloneservice.dao.PackageScanStatusDao;
 
 import cn.edu.fudan.cloneservice.domain.CloneInfo;
 import cn.edu.fudan.cloneservice.domain.ScanResult;
+import cn.edu.fudan.cloneservice.util.AddrTransUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
 import java.util.*;
 
 
@@ -88,20 +90,14 @@ public class PackageScanTask {
 
         //#3 获取分析结果 存入数据库
         List<File> fileList = getFileList(repoPath);
-
-//        Map<String, Integer> map_name_mecount = getName(fileList);
-
-//        packageNameDao.insertPackageName(repoId, commit_id, map_name_mecount);
-
-
+        Map<String, Integer> map_name_mecount = getNameMeCountMap(fileList);
         List<CloneInfo> lci = cloneInfoDao.getCloneInfoByRepoIdAndCommitId(repoId, commit_id);
+        Map<String, Integer> map_clone_dis = getCloneDistriMap(lci);
+        // store this into db
+        packageNameDao.insertPackageInfo(repoId, commit_id, map_name_mecount, map_clone_dis);
+        System.out.println("Successed!");
 
 
-        //继续写 处理List
-        for(CloneInfo ci:lci){
-            String file_path = ci.getFile_path();
-
-        }
 
     }
 
@@ -109,7 +105,14 @@ public class PackageScanTask {
         //对外启动接口
 
         for(String commit_id:commit_list){
-            startScan(repoId, repoName, repoPath, commit_id);
+            String status =  packageScanStatusDao.selectPackageScanStatusByRepoIdAndCommitId(repoId, commit_id);
+            if(status != null && status.equals("Scanned")){
+                continue;
+            }else {
+                startScan(repoId, repoName, repoPath, commit_id);
+                packageScanStatusDao.insertPackageScanStatusByRepoIdAndCommitId(repoId, commit_id);
+            }
+
         }
 
     }
@@ -133,6 +136,33 @@ public class PackageScanTask {
         }
         return fileList;
     }
+
+    public Map<String, Integer> getCloneDistriMap(List<CloneInfo> lci){
+        Map<String, Integer> res = new HashMap<>();
+        for(CloneInfo ci:lci) {
+            String file_path = ci.getFile_path();
+            //TODO need to be del when publish
+            String file_path_transed = AddrTransUtil.AddrTrans(file_path);
+            File f = new File(file_path_transed);
+
+            try {
+                CompilationUnit cunit = JavaParser.parse(f);
+                String key = cunit.getPackageDeclaration().get().getNameAsString();
+                if(res.containsKey(key)){
+                    res.put(key, res.get(key) + 1);
+                }else{
+                    res.put(key, 1);
+                }
+
+            }catch (Exception e){
+                e.printStackTrace();
+                continue;
+            }
+
+        }
+        return res;
+    }
+
     static class ClassLevelVisitor extends VoidVisitorAdapter<Void>{
         @Override
         public void visit(PackageDeclaration node,Void arg){
@@ -141,7 +171,7 @@ public class PackageScanTask {
         }
 
     }
-    public Map<String, Integer> getName(List<File> filelist){
+    public Map<String, Integer> getNameMeCountMap(List<File> filelist){
         Map<String, Integer> map_name_method_num = new HashMap<>();
         for(File file:filelist){
             try {
