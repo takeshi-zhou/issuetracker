@@ -16,13 +16,12 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author WZY
@@ -46,6 +45,12 @@ public class BaseMappingServiceImpl implements MappingService {
 
     private StringRedisTemplate stringRedisTemplate;
     private TagMapHelper tagMapHelper;
+    private KafkaTemplate kafkaTemplate;
+
+    @Autowired
+    public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
 
     @Autowired
     public void setTagMapHelper(TagMapHelper tagMapHelper) {
@@ -184,7 +189,8 @@ public class BaseMappingServiceImpl implements MappingService {
         }
     }
 
-    void saveSolvedInfo(List<RawIssue> rawIssues,String pre_commit_id,String current_commit_id){
+    @SuppressWarnings("unchecked")
+    void saveSolvedInfo(List<RawIssue> rawIssues,String repo_id,String pre_commit_id,String current_commit_id){
         List<JSONObject> solvedInfos=new ArrayList<>();
         for(RawIssue rawIssue:rawIssues){
             JSONObject solvedInfo=new JSONObject();
@@ -195,9 +201,11 @@ public class BaseMappingServiceImpl implements MappingService {
             solvedInfo.put("end_line",rawIssue.firstLocation().getEnd_line());
             solvedInfo.put("curr_commitid",pre_commit_id);
             solvedInfo.put("next_commitid",current_commit_id);
+            solvedInfo.put("repoid",repo_id);
             solvedInfos.add(solvedInfo);
         }
-        restInterfaceManager.addSolvedIssueInfo(solvedInfos);
+        kafkaTemplate.send("solvedBug",JSONArray.toJSONString(solvedInfos));
+        //restInterfaceManager.addSolvedIssueInfo(solvedInfos);
     }
 
 }
