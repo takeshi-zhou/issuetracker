@@ -95,7 +95,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 }
             }
             //存储上个commit没匹配上的，也就是被solved的rawIssue的信息
-            saveSolvedInfo(preRawIssues.stream().filter(rawIssue -> !rawIssue.isMapped()).collect(Collectors.toList()),pre_commit_id,current_commit_id);
+            saveSolvedInfo(preRawIssues.stream().filter(rawIssue -> !rawIssue.isMapped()).collect(Collectors.toList()),repo_id,pre_commit_id,current_commit_id);
             if (!issues.isEmpty()) {
                 //更新issue
                 issueDao.batchUpdateIssue(issues);
