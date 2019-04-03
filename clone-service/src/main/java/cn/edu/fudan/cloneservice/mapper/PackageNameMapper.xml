@@ -7,6 +7,6 @@
     <!--<select id="selectPackageNameSet"-->
 
     <insert id="insertPackageNameSetByRepoIdAndCommitId" parameterType="cn.edu.fudan.cloneservice.domain.PackageInfo">
-        insert into ce_package_info values (#{uuid},#{repd_id},#{commit_id}, #{package_name}, #{method_num})
+        insert into ce_package_info values (#{uuid},#{repd_id},#{commit_id}, #{package_name}, #{method_num}, #{clone_ins_num})
     </insert>
 </mapper>

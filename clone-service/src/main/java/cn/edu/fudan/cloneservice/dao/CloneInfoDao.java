@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class CloneInfoDao {
@@ -25,6 +26,17 @@ public class CloneInfoDao {
             e.printStackTrace();
         }
         return lci;
+
+    }
+
+    public void updateCloneInfoByRepoIdAndCommitId(String repo_id, String commit_id, Map<String, Integer> map_clone_dis){
+        for(String key: map_clone_dis.keySet()){
+
+                cloneInfoMapper.updateCloneInfoByCommitIdAndRepoId(repo_id, commit_id, key, map_clone_dis.get(key));
+
+
+        }
+        System.out.println("happy!");
 
     }
 }

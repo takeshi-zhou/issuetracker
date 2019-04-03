@@ -52,4 +52,12 @@ public class RawIssueDao {
     public List<RawIssue> getRawIssueByCommitIDAndFile(String repo_id,String commit_id,String category,String file){
         return rawIssueMapper.getRawIssueByCommitIDAndFile(repo_id,commit_id, category, file);
     }
+
+    public Integer getNumberOfRemainingIssue(String repoId, String commit) {
+        return rawIssueMapper.getNumberOfRemainingIssue(repoId, commit);
+    }
+
+    public Integer getNumberOfRemainingIssueBaseFile(String repoId, String commit, String fileName) {
+        return rawIssueMapper.getNumberOfRemainingIssueBaseFile(repoId, commit, fileName);
+    }
 }

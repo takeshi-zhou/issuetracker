@@ -19,10 +19,7 @@ public class PackageServiceImpl implements PackageService {
     private KafkaTemplate kafkaTemplate;
     private PackageScanTask packageScanTask;
 
-    @Autowired
-    public PackageScanTask getPackageScanTask() {
-        return packageScanTask;
-    }
+
     @Autowired
     public void setPackageScanTask(PackageScanTask packageScanTask) {
         this.packageScanTask = packageScanTask;
@@ -33,9 +30,7 @@ public class PackageServiceImpl implements PackageService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public PackageServiceImpl(){
 
-    }
 
     @SuppressWarnings("unchecked")
     @Override

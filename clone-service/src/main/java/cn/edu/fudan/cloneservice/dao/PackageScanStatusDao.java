@@ -22,7 +22,16 @@ public class PackageScanStatusDao {
     }
 
     public String selectPackageScanStatusByRepoIdAndCommitId(String repod_id, String commit_id){
-        return  packageScanStatusMapper.selectPackageScanStatusByRepoIdAndCommitId(repod_id,commit_id);
+        String res = "NotFound";
+        try{
+            res = packageScanStatusMapper.selectPackageScanStatusByRepoIdAndCommitId(repod_id,commit_id);
+            if(res == null){
+                return "NotFound";
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return  res;
     }
 
     public void insertPackageScanStatusByRepoIdAndCommitId(String repo_id, String commit_id){
