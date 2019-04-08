@@ -351,4 +351,11 @@
         and tag_id = #{ignoreId}
     </select>
 
+    <select id="getNumberOfNewIssueByDuration" resultType="int">
+        select count(*) from issue where repo_id = #{repo-id} and start_commit_date between #{start} and #{end}
+    </select>
+
+    <select id="getNumberOfEliminateIssueByDuration" resultType="int">
+        select count(*) from issue where repo_id = #{repo-id} and end_commit_date between #{start} and #{end}
+    </select>
 </mapper>
