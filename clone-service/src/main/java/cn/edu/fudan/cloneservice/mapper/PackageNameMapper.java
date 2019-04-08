@@ -13,5 +13,7 @@ public interface PackageNameMapper {
 //            @Param("p_repo_id") String repo_id,
 //            @Param("p_commit_id") String commit_id );
     void insertPackageNameSetByRepoIdAndCommitId(PackageInfo packageInfo);
+    String selectPackageNameSetByRepoIdAndCommitId(@Param("p_repo_id") String repo_id,
+                                                  @Param("p_commit_id") String commit_id );
 
 }

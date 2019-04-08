@@ -29,4 +29,16 @@ public class PackageNameDao {
             packageNameMapper.insertPackageNameSetByRepoIdAndCommitId(packageInfo);
         }
     }
+    public String selectTest(String repo_id, String commit_id){
+        try{
+            return packageNameMapper.selectPackageNameSetByRepoIdAndCommitId(repo_id, commit_id);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return "error";
+    }
+
+
 }

@@ -9,4 +9,8 @@
     <insert id="insertPackageNameSetByRepoIdAndCommitId" parameterType="cn.edu.fudan.cloneservice.domain.PackageInfo">
         insert into ce_package_info values (#{uuid},#{repd_id},#{commit_id}, #{package_name}, #{method_num}, #{clone_ins_num})
     </insert>
+
+    <select id="selectPackageNameSetByRepoIdAndCommitId" parameterType="String" resultType="String">
+        select package_name from ce_package_info where repo_id = #{p_repo_id} and commit_id = #{p_commit_id} limit 1
+    </select>
 </mapper>
