@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -16,9 +17,8 @@ public class CloneVisServiceImpl implements CloneVisService {
 
 
     @Override
-    public String getCommitInfoByRepoId(String repo_id){
-//        packageNameDao.insertTest(new PackageInfo("test", repo_id, "ss", "ss", 1, 1));
-        return packageNameDao.selectTest(repo_id, "556b393e1f68462722faa4564daea792e2607cb1");
+    public List<PackageInfo> getCommitInfoByRepoId(String repo_id, String commit_id){
+        return packageNameDao.getPackageInfoByRepoIdAndCommitId(repo_id, commit_id);
 
     }
 }

@@ -20,7 +20,7 @@ public class CommitInfoDao {
                             String commit_id){
         try{
             PackageInfo packageInfo = new PackageInfo("test","test","test","test",1,1);
-            packageInfoMapper.insertPackageNameSetByRepoIdAndCommitId(packageInfo);
+//            packageInfoMapper.insertPackageNameSetByRepoIdAndCommitId(packageInfo);
         }
         catch (Exception e){
             e.printStackTrace();

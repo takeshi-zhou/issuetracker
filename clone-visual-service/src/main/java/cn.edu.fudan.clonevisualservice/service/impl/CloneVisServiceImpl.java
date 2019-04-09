@@ -15,6 +15,10 @@ public class CloneVisServiceImpl implements CloneVisService {
     @Autowired
     private CommitInfoDao commitInfoDao;
 
+    @Override
+    public void insertTest(String repo_id){
+        commitInfoDao.testInsert(repo_id, "commit");
+    }
 
     @Override
     public Object getCommitInfoByRepoId(String repo_id){
