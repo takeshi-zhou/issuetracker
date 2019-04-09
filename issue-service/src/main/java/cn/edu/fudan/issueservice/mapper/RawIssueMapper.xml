@@ -137,4 +137,12 @@
        where category = #{category} and commit_id = #{commit_id}
        order by types
    </select>
+
+    <select id="getNumberOfRemainingIssue" resultType="Integer">
+        select count (*) from rawIssue where repo_id = #{repo_id} and commit_id = #{commit_id}
+    </select>
+
+    <select id="getNumberOfRemainingIssueBaseFile" resultType="Integer">
+        select count (*) from rawIssue where repo_id = #{repo_id} and commit_id = #{commit_id} and file_name like  ${file_name}
+    </select>
 </mapper>

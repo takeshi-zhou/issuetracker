@@ -54,4 +54,8 @@ public interface IssueMapper {
     List<String> getNotSolvedIssueListByTypeAndRepoId(@Param("repo_id") String repoId,@Param("type")  String type);
 
     void batchUpdateIssueListPriority(@Param("list")List<String> issueUuid,@Param("priority") int priority);
+
+    int getNumberOfNewIssueByDuration(@Param("repo-id") String repoId,@Param("start") String start,@Param("end") String end);
+
+    int getNumberOfEliminateIssueByDuration(@Param("repo-id") String repoId,@Param("start") String start,@Param("end") String end);
 }

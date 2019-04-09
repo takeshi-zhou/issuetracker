@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.fudan.clonevisualservice.mapper.PackageInfoMapper">
+
+    <!--<select id="selectPackageNameSet"-->
+
+    <insert id="insertPackageNameSetByRepoIdAndCommitId" parameterType="cn.edu.fudan.clonevisualservice.domain.PackageInfo">
+        insert into ce_package_info values (#{uuid},#{repd_id},#{commit_id}, #{package_name}, #{method_num}, #{clone_ins_num})
+    </insert>
+</mapper>
