@@ -4,6 +4,7 @@ import cn.edu.fudan.scanservice.domain.ResponseBean;
 import cn.edu.fudan.scanservice.service.KafkaService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
  * @version 1.0
  **/
 @RestController
+@EnableAutoConfiguration
 public class CloneController {
 
     private KafkaService kafkaService;

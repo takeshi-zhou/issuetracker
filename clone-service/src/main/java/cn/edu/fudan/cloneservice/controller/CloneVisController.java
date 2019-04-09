@@ -4,6 +4,7 @@ package cn.edu.fudan.cloneservice.controller;
 import cn.edu.fudan.cloneservice.domain.PackageInfo;
 import cn.edu.fudan.cloneservice.service.CloneVisService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@EnableAutoConfiguration
 public class CloneVisController {
     private CloneVisService cloneVisService;
 

@@ -17,7 +17,10 @@
         <artifactId>issueTracker</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
+    <properties>
+        <brave.version>3.16.0</brave.version>
+        <zipkin-reporter.version>0.6.9</zipkin-reporter.version>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -98,8 +101,36 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Sleuth automatically adds trace interceptors when in the classpath -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-sleuth</artifactId>
+        </dependency>
+        <!-- Sends trace data to zipkin over http (defaults to http://localhost:9411/api/v2/spans) -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-sleuth-zipkin</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.xerial.snappy</groupId>
+            <artifactId>snappy-java</artifactId>
+            <version>1.1.7.1</version>
+        </dependency>
 
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-sleuth</artifactId>
+                <version>2.0.0.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <resources>
@@ -123,6 +154,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

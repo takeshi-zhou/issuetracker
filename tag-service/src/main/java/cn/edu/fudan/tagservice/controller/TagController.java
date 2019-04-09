@@ -5,6 +5,7 @@ import cn.edu.fudan.tagservice.domain.TaggedItem;
 import cn.edu.fudan.tagservice.service.TagService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import java.util.List;
  * @version 1.0
  **/
 @RestController
+@EnableAutoConfiguration
 public class TagController {
 
     private TagService tagService;
