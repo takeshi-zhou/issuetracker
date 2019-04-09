@@ -5,11 +5,13 @@ import cn.edu.fudan.projectmanager.domain.ResponseBean;
 import cn.edu.fudan.projectmanager.service.ProjectService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
+@EnableAutoConfiguration
 public class ProjectController {
 
     private ProjectService projectService;

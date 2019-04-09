@@ -88,6 +88,7 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public void deleteIssueByRepoIdAndCategory(String repoId,String category) {
         log.info("start to delete issue -> repoId={} , category={}",repoId,category);
+
         //先删除该项目所有issue对应的tag
         List<String> issueIds = issueDao.getIssueIdsByRepoIdAndCategory(repoId, category);
         restInterfaceManager.deleteTagsOfIssueInOneRepo(issueIds);
@@ -96,6 +97,7 @@ public class IssueServiceImpl implements IssueService {
         log.info("issue delete success!");
         scanResultDao.deleteScanResultsByRepoIdAndCategory(repoId, category);
         log.info("scan result delete success!");
+
     }
 
     @Override

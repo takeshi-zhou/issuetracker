@@ -4,13 +4,20 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.edu.fudan.cloneservice.mapper.PackageNameMapper">
 
-    <!--<select id="selectPackageNameSet"-->
+    <resultMap id="map_package_info" type="cn.edu.fudan.cloneservice.domain.PackageInfo">
+        <id property="uuid" column="uuid"/>
+        <result property="repo_id" column="repo_id"/>
+        <result property="commit_id" column="commit_id"/>
+        <result property="package_name" column="package_name"/>
+        <result property="method_num" column="method_num"/>
+        <result property="clone_ins_num" column="clone_ins_num"/>
+    </resultMap>
 
     <insert id="insertPackageNameSetByRepoIdAndCommitId" parameterType="cn.edu.fudan.cloneservice.domain.PackageInfo">
         insert into ce_package_info values (#{uuid},#{repd_id},#{commit_id}, #{package_name}, #{method_num}, #{clone_ins_num})
     </insert>
 
-    <select id="selectPackageNameSetByRepoIdAndCommitId" parameterType="String" resultType="String">
-        select package_name from ce_package_info where repo_id = #{p_repo_id} and commit_id = #{p_commit_id} limit 1
+    <select id="selectPackageNameSetByRepoIdAndCommitId" parameterType="String" resultMap="map_package_info">
+        select * from ce_package_info where repo_id = #{p_repo_id} and commit_id = #{p_commit_id}
     </select>
 </mapper>

@@ -6,9 +6,11 @@ import cn.edu.fudan.scanservice.service.KafkaService;
 import cn.edu.fudan.scanservice.service.ScanService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@EnableAutoConfiguration
 public class ScanController {
 
 

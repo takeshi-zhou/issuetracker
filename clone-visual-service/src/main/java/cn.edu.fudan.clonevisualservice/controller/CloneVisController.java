@@ -15,10 +15,11 @@ public class CloneVisController {
         this.cloneVisService = cloneVisService;
     }
 
-    @GetMapping(value = {"/CloneVis"})
+    @GetMapping(value = {"/CloneVis/"})
     public Object getHistoInfo(@RequestParam("repo_id") String  repo_id){
 
         System.out.println(repo_id);
-        return cloneVisService.getCommitInfoByRepoId(repo_id);
+        cloneVisService.insertTest(repo_id);
+        return null;
     }
 }

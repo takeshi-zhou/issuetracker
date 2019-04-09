@@ -4,15 +4,15 @@ public class PackageInfo {
 
 
     private String uuid;
-    private String repd_id;
+    private String repo_id;
     private String commit_id;
     private String package_name;
     private int method_num;
     private int clone_ins_num;
 
-    public PackageInfo(String uuid, String repd_id, String commit_id, String package_name, int method_num, int clone_ins_num) {
+    public PackageInfo(String uuid, String repo_id, String commit_id, String package_name, int method_num, int clone_ins_num) {
         this.uuid = uuid;
-        this.repd_id = repd_id;
+        this.repo_id = repo_id;
         this.commit_id = commit_id;
         this.package_name = package_name;
         this.method_num = method_num;
@@ -27,12 +27,12 @@ public class PackageInfo {
         this.uuid = uuid;
     }
 
-    public String getRepd_id() {
-        return repd_id;
+    public String getRepo_id() {
+        return repo_id;
     }
 
-    public void setRepd_id(String repd_id) {
-        this.repd_id = repd_id;
+    public void setRepo_id(String repo_id) {
+        this.repo_id = repo_id;
     }
 
     public String getCommit_id() {

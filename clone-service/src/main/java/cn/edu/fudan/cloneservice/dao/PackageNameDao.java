@@ -4,6 +4,7 @@ import cn.edu.fudan.cloneservice.domain.PackageInfo;
 import cn.edu.fudan.cloneservice.mapper.PackageNameMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -29,9 +30,15 @@ public class PackageNameDao {
             packageNameMapper.insertPackageNameSetByRepoIdAndCommitId(packageInfo);
         }
     }
+    public List<PackageInfo> getPackageInfoByRepoIdAndCommitId(String repo_id, String commit_id){
+        return packageNameMapper.selectPackageNameSetByRepoIdAndCommitId(repo_id, commit_id);
+    }
+
     public String selectTest(String repo_id, String commit_id){
         try{
-            return packageNameMapper.selectPackageNameSetByRepoIdAndCommitId(repo_id, commit_id);
+            List<PackageInfo> lpi =  packageNameMapper.selectPackageNameSetByRepoIdAndCommitId(repo_id, commit_id);
+
+            return lpi.get(0).getPackage_name();
         }
         catch (Exception e){
             e.printStackTrace();
