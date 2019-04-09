@@ -112,6 +112,12 @@
             <artifactId>spring-cloud-sleuth-zipkin</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.xerial.snappy</groupId>
+            <artifactId>snappy-java</artifactId>
+            <version>1.1.7.1</version>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>
@@ -148,6 +154,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

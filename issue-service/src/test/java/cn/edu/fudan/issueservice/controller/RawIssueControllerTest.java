@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
@@ -234,6 +235,7 @@ public class RawIssueControllerTest extends IssueServiceApplicationTests {
         等scan单元测试之后完善
      */
     @Test
+    @Ignore
     public void getRawIssues() throws Exception {
         String repo_id="repo1";
         String commit_id = "cmm1";

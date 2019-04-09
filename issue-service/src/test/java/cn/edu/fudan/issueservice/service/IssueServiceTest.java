@@ -152,6 +152,7 @@ public class IssueServiceTest extends IssueServiceApplicationTests {
     }
 
     @Test
+    @Ignore
     public void deleteIssueByProjectId() throws Exception {
         String repo_id = "repo_id";
         List<String> stringList = new ArrayList<String>();
