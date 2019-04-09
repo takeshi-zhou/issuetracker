@@ -2,6 +2,7 @@ package cn.edu.fudan.tagservice.controller;
 
 import cn.edu.fudan.tagservice.domain.ResponseBean;
 import cn.edu.fudan.tagservice.exception.AuthException;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
  * @version 1.0
  **/
 @RestControllerAdvice
+@EnableAutoConfiguration
 public class ExceptionController {
 
     //捕捉认证异常

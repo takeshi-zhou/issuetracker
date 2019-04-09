@@ -5,12 +5,14 @@ import cn.edu.fudan.accountservice.domain.ResponseBean;
 import cn.edu.fudan.accountservice.service.AccountService;
 import cn.edu.fudan.accountservice.util.CookieUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 
 
 @RestController
+@EnableAutoConfiguration
 @RequestMapping("/user")
 public class AccountController {
 
