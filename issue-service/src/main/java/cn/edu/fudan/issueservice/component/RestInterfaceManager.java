@@ -154,6 +154,10 @@ public class RestInterfaceManager {
         return null;
     }
 
+    public List<String> getDevelopers(String repoId) {
+        return null;
+    }
+
 /*    public List<String> getScanCommitsIdByDuration(String detail, String start, String end) {
         return null;
     }*/

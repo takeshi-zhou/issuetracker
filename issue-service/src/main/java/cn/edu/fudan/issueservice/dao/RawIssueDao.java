@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * @author WZY
@@ -62,6 +63,7 @@ public class RawIssueDao {
         return rawIssueMapper.getNumberOfRemainingIssueBaseFile(repoId, commit, fileName);
     }
 
-    public Map getRankOfFileBaseIssueQuantity(String repoId, String commitId) {
+    public List<WeakHashMap<String,String>> getRankOfFileBaseIssueQuantity(String repoId, String commitId) {
+        return rawIssueMapper.getRankOfFileBaseIssueQuantity(repoId, commitId);
     }
 }

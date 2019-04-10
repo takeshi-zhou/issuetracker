@@ -12,8 +12,10 @@ import cn.edu.fudan.issueservice.util.ExecuteShellUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class IssueRankServiceImpl implements IssueRankService {
@@ -46,17 +48,23 @@ public class IssueRankServiceImpl implements IssueRankService {
     }
 
     @Override
-    public Map rankOfFileBaseIssueQuantity(String repoId, String commitId) {
-
-        return rawIssueDao.getRankOfFileBaseIssueQuantity(repoId, commitId);
+    public Object rankOfFileBaseIssueQuantity(String repoId, String commitId) {
+        Map<String, String> map = new WeakHashMap<>();
+        for (Map<String, String> m : rawIssueDao.getRankOfFileBaseIssueQuantity(repoId, commitId)) {
+            map.put(m.get("key"), m.get("value"));
+        }
+        return map;
     }
 
 
     // ？？？？ 需要代码行数 需要提前入库
     @Override
-    public Map rankOfFileBaseDensity(String repoId, String commit) {
-
-        return null;
+    public Map rankOfFileBaseDensity(String repoId, String commitId) {
+        Map<String, String> map = new WeakHashMap<>();
+        for (Map<String, String> m : rawIssueDao.getRankOfFileBaseIssueQuantity(repoId, commitId)) {
+            map.put(m.get("key"), m.get("value"));
+        }
+        return map;
     }
 
     // 开发人员在某段时间内贡献的代码行数 除以 产生的新Issue数量
@@ -69,18 +77,14 @@ public class IssueRankServiceImpl implements IssueRankService {
         String start = duration.substring(0,10);
         String end = duration.substring(11,21);
         String repoPath = restInterfaceManager.getRepoPath(repoId);
-
-        // 开发人员姓 代码行数
-        Map map = executeShellUtil.developerLinesOfCode(start, end , repoPath);
+        List<String> developers = restInterfaceManager.getDevelopers(repoId);
+        // 开发人员 代码行数
+        Map<String,Integer> usersCodeLine  = executeShellUtil.developersLinesOfCode(start, end , repoPath, developers);
         // 开发人员 Issue数量
-        Map<Object, Integer> map1 = new WeakHashMap<>();
-        for (Object key : map.keySet()) {
-            if (map1.containsKey(key)) {
-                map.put(key, (double)map.get(key)/map1.get(key));
-            }
-        }
-        
-        return map;
+
+       // List<Integer> issueNumber =
+
+        return usersCodeLine;
     }
 
     @Override

@@ -145,4 +145,11 @@
     <select id="getNumberOfRemainingIssueBaseFile" resultType="Integer">
         select count (*) from rawIssue where repo_id = #{repo_id} and commit_id = #{commit_id} and file_name like  ${file_name}
     </select>
+
+    <select id="getRankOfFileBaseIssueQuantity" resultType="java.util.WeakHashMap">
+        select file_name as 'key',count(file_name) as 'value'
+        from rawIssue
+        where commit_id = #{commit_id} and repo_id = #{repo_id}
+        group by file_name order by value desc limit 20;
+    </select>
 </mapper>
