@@ -150,6 +150,10 @@ public class RestInterfaceManager {
         }
     }
 
+    public String getRepoPath(String repoId) {
+        return null;
+    }
+
 /*    public List<String> getScanCommitsIdByDuration(String detail, String start, String end) {
         return null;
     }*/

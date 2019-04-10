@@ -4,11 +4,18 @@ import java.util.Map;
 
 public interface IssueRankService {
 
-    public Map rankOfFile(String repoId, String commit) ;
+    //参与开发者最多的文件排名
+    public Map rankOfFileBaseDeveloperQuantity(String repoId, String duration, String spaceType, String detail) ;
 
-    public Map rankOfFileBaseDensity(String repoId, String commit) ;
+    //问题最多的文件排名
+    public Map rankOfFileBaseIssueQuantity(String repoId, String commitId) ;
 
-    public Map rankOfDeveloper(String duration,String repoId);
+    //问题密度最大的文件排名
+    public Map rankOfFileBaseDensity(String repoId, String commitId) ;
 
-    public Map rankOfRepoBaseDensity(String duration,String repoId) ;
+    //问题密度最大的开发者排名
+    public Map rankOfDeveloper(String repoId, String duration,String developerId);
+
+    //问题密度最大（小）的项目排名
+    public Map rankOfRepoBaseDensity(String repoId, String duration) ;
 }
