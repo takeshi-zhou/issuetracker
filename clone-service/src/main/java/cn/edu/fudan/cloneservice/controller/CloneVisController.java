@@ -5,6 +5,7 @@ import cn.edu.fudan.cloneservice.domain.PackageInfo;
 import cn.edu.fudan.cloneservice.service.CloneVisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
