@@ -14,6 +14,7 @@ public class RawIssue {
     private String issue_id;
     private String commit_id;
     private String repo_id;
+    private int code_lines;
     private List<Location> locations;
     private Date commit_time;
     private String developer_email;
@@ -108,6 +109,14 @@ public class RawIssue {
 
     public void setRepo_id(String repo_id) {
         this.repo_id = repo_id;
+    }
+
+    public int getCode_lines() {
+        return code_lines;
+    }
+
+    public void setCode_lines(int code_lines) {
+        this.code_lines = code_lines;
     }
 
     public Location firstLocation() {
