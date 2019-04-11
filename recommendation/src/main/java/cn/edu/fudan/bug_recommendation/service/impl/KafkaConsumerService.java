@@ -3,6 +3,7 @@ package cn.edu.fudan.bug_recommendation.service.impl;
 import cn.edu.fudan.bug_recommendation.dao.RecommendationDao;
 import cn.edu.fudan.bug_recommendation.domain.BugSolvedBasicInfo;
 import cn.edu.fudan.bug_recommendation.domain.Recommendation;
+import cn.edu.fudan.bug_recommendation.service.AnalyzeDiffFile;
 import cn.edu.fudan.bug_recommendation.service.CompleteReco;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -18,6 +19,7 @@ import java.util.List;
 public class KafkaConsumerService {
     RecommendationDao recommendationDao;
     private CompleteReco completeReco;
+    private AnalyzeDiffFile analyzeDiffFile;
 
     @Autowired
     public void setRecommendationDao(RecommendationDao recommendationDao) {
@@ -28,6 +30,11 @@ public class KafkaConsumerService {
         this.completeReco = completeReco;
     }
 
+    @Autowired
+    public void setAnalyzeDiffFile(AnalyzeDiffFile analyzeDiffFile){
+        this.analyzeDiffFile = analyzeDiffFile;
+    }
+
     @KafkaListener(id = "bugSolvedInfo", topics = {"solvedBug"}, groupId = "recommendation")
     public void bugSolvedInfo(ConsumerRecord<String,String> consumerRecord){
         String msg = consumerRecord.value();
@@ -36,6 +43,14 @@ public class KafkaConsumerService {
         if (list!=null){
             for (Recommendation info: list){
                 Recommendation newInfo = completeReco.completeCode(info);
+                JSONObject json = analyzeDiffFile.getDiffRange(newInfo.getLocation(),newInfo.getNext_commitid(),newInfo.getCurr_commitid(),newInfo.getBug_lines());
+                if(json.getInteger("nextstart_line")!=0){
+                    newInfo.setStart_line(json.getInteger("start_line"));
+                    newInfo.setEnd_line(json.getInteger("end_line"));
+                    newInfo.setNextstart_line(json.getInteger("nextstart_line"));
+                    newInfo.setNextend_line(json.getInteger("nextend_line"));
+                    newInfo.setDescription(json.getString("description"));
+                }
                 recommendationDao.addBugRecommendation(newInfo);
             }
         }
