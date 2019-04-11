@@ -99,7 +99,7 @@ public class RawIssueServiceImpl implements RawIssueService {
 //        file_path=file_path.substring(file_path.indexOf("/")+1);
 //        file_path=file_path.substring(file_path.indexOf("/")+1);
         Map<String, Object> result = new HashMap<>();
-        String repo_id =restInterfaceManager.getRepoIdOfProject(project_id) ;
+        String repo_id =restInterfaceManager.getRepoIdOfProject(project_id);
         String repoHome=null;
         try{
             JSONObject response = restInterfaceManager.getRepoPath(repo_id,commit_id).getJSONObject("data");
