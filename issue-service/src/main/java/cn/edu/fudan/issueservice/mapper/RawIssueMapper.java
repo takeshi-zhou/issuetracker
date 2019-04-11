@@ -37,5 +37,5 @@ public interface RawIssueMapper {
 
     Integer getNumberOfRemainingIssue(@Param("repo_id") String repoId, @Param("commit_id") String commit);
 
-    List<WeakHashMap<String,String>> getRankOfFileBaseIssueQuantity(@Param("repo_id")String repoId, @Param("commit_id")String commitId);
+    List<WeakHashMap<String, String>> getRankOfFileBaseIssueQuantity(@Param("repo_id")String repoId, @Param("commit_id")String commitId);
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 @Repository
@@ -110,5 +111,13 @@ public class IssueDao {
 
     public int getNumberOfEliminateIssueByDuration(String repoId, String start, String end) {
         return issueMapper.getNumberOfEliminateIssueByDuration(repoId, start, end);
+    }
+
+    public Map<String, Integer> getCommitNewIssue(String start, String end, String repoId) {
+        Map<String, Integer> map = new ConcurrentHashMap<>();
+        for (Map<String, String> m : issueMapper.getCommitNewIssue(start, end, repoId)) {
+            map.put(m.get("key"), Integer.valueOf(m.get("value")));
+        }
+        return map;
     }
 }

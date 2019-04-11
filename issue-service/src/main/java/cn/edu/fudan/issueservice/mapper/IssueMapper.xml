@@ -352,10 +352,17 @@
     </select>
 
     <select id="getNumberOfNewIssueByDuration" resultType="int">
-        select count(*) from issue where repo_id = #{repo-id} and start_commit_date between #{start} and #{end}
+        select count(*) from issue where repo_id = #{repo_id} and start_commit_date between #{start} and #{end}
     </select>
 
     <select id="getNumberOfEliminateIssueByDuration" resultType="int">
-        select count(*) from issue where repo_id = #{repo-id} and end_commit_date between #{start} and #{end}
+        select count(*) from issue where repo_id = #{repo_id} and end_commit_date between #{start} and #{end}
+    </select>
+
+    <select id="getCommitNewIssue" resultType="java.util.WeakHashMap">
+        select start_commit as 'key',count(start_commit) as 'value'
+        from issue
+        where repo_id = #{repo_id} and start_commit_date between #{start} and #{end}
+        group by start_commit order by value
     </select>
 </mapper>
