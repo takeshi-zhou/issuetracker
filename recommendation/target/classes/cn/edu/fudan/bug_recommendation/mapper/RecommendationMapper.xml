@@ -35,7 +35,8 @@
         next_commitid,
         nextstart_line,
         nextend_line,
-        repoid
+        repoid,
+        modification_method
         )
         values
         (
@@ -52,7 +53,8 @@
         #{next_commitid},
         #{nextstart_line},
         #{nextend_line},
-        #{repoid}
+        #{repoid},
+        #{modification_method}
         )
     </insert>
 

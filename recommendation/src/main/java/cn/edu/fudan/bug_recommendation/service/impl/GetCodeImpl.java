@@ -2,6 +2,7 @@ package cn.edu.fudan.bug_recommendation.service.impl;
 
 import cn.edu.fudan.bug_recommendation.service.GetCode;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -15,35 +16,41 @@ public class GetCodeImpl implements GetCode {
     @Value("${codePath}")
     private String codeServicePath;
 
+    @Autowired
     private RestTemplate restTemplate;
+
+    public String curr_code_isExist = "";
 
     @Override
     public JSONObject getRepoPath(String repoId,String commit_id){
         return restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId + "&commit_id=" + commit_id, JSONObject.class);
+
     }
     @Override
     public JSONObject freeRepoPath(String repoId,String repoPath){
+        System.out.println("repoId: "+repoId);
+        System.out.println("repoPath: "+repoPath);
         return restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId + "&path=" +repoPath, JSONObject.class);
     }
     @Override
     public String getCode(String repoId,String commit_id,String location){
+        System.out.println("intogetCode");
         String code = null;
         String repoHome = null;
         String[] paths = location.split("/");
-        String file_path = "";
-        for (int i = 2; i<paths.length ;i++){
-            file_path += paths[i];
-            if(i!=paths.length-1){
-                file_path += "/";
-            }
-        }
+        String file_path = location;
+//        for (int i = 2; i<paths.length ;i++){
+//            file_path += paths[i];
+//            if(i!=paths.length-1){
+//                file_path += "/";
+//            }
+//        }
+
         System.out.println("file_path: " + file_path);
         try{
             JSONObject response = getRepoPath(repoId,commit_id).getJSONObject("data");
-            System.out.println("response: "+ response.toJSONString());
             if (response != null && response.getString("status").equals("Successful")) {
                 repoHome=response.getString("content");
-                System.out.println(("repoHome: " +repoHome));
                 code = getFileContent(repoHome+"/" +file_path);
             } else {
                 code = "";
@@ -65,6 +72,12 @@ public class GetCodeImpl implements GetCode {
     @Override
     public String getFileContent(String filePath){
         System.out.println("filePath: "+filePath);
+        File file = new File(filePath);
+        if (file.exists()){
+            curr_code_isExist = "modify";
+        }else {
+            curr_code_isExist = "delete";
+        }
         StringBuilder code = new StringBuilder();
         String s = "";
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
@@ -77,6 +90,10 @@ public class GetCodeImpl implements GetCode {
             e.printStackTrace();
         }
         return code.toString();
+    }
+    @Override
+    public String getModification_method(){
+        return curr_code_isExist;
     }
 
     //repopath前两块/nextscan/curr/commitid/repo剩下的  next的

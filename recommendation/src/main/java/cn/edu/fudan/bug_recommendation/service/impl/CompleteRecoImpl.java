@@ -25,15 +25,17 @@ public class CompleteRecoImpl implements CompleteReco {
     public Recommendation completeCode(Recommendation info){
         //setPrevCode
         //查一下file_path指的是什么
-        //String prevCode = getCode.getCode(info.getRepoid(),info.getCurr_commitid(),info.getLocation());
-        String prevCode = getCode.getFileContent("/home/fdse/user/issueTracker/ScanMessageWithTime.java");
+        String prevCode = getCode.getCode(info.getRepoid(),info.getCurr_commitid(),info.getLocation());
+        //String prevCode = getCode.getFileContent("/home/fdse/user/issueTracker/ScanMessageWithTime.java");
         System.out.println("prevCode: "+prevCode);
         info.setPrev_code(prevCode);
         //setCurrCode
-        //String currCode = getCode.getCode(info.getRepoid(),info.getNext_commitid(),info.getLocation());
-        String currCode = getCode.getFileContent("/home/fdse/user/issueTracker/ScanMessageWithTime.java");
+        String currCode = getCode.getCode(info.getRepoid(),info.getNext_commitid(),info.getLocation());
+        //String currCode = getCode.getFileContent("/home/fdse/user/issueTracker/ScanMessageWithTime.java");
         System.out.println("currCode: "+currCode);
         info.setCurr_code(currCode);
+        String modification_method = getCode.getModification_method();
+        info.setModification_method(modification_method);
         return info;
     }
 //    public List<Recommendation> getAllReco(Object param){

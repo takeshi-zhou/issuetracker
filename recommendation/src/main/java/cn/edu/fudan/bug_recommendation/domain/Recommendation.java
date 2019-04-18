@@ -17,6 +17,17 @@ public class Recommendation implements Serializable {
     private String curr_commitid;
     private String next_commitid;
     private String repoid;
+    private String modification_method;
+
+    public String getModification_method() {
+        return modification_method;
+    }
+
+    public void setModification_method(String modification_method) {
+        this.modification_method = modification_method;
+    }
+
+
 
     public String getRepoid() {
         return repoid;
