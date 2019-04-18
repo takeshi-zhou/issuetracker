@@ -111,9 +111,17 @@ public class IssueRankServiceImpl implements IssueRankService {
 
     @Override
     public Map rankOfRepoBaseDensity(String repoId, String duration) {
+        // duration eg: 2018.01.01-2018.12.12
+        if (duration.length() < 21)
+            throw new RuntimeException("duration error!");
+        String start = duration.substring(0,10);
+        String end = duration.substring(11,21);
+
+
         return null;
     }
 
+    //类型 V 必须实现 Comparable 接口，并且这个接口的类型是 V 或 V 的任一父类。这样声明后，V 的实例之间，V 的实例和它的父类的实例之间，可以相互比较大小。
     private static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
 /*        List<Map.Entry<K, V>> list = new LinkedList<>(map.entrySet());
         Collections.sort(list, (o1,o2) -> (o2.getValue()).compareTo(o1.getValue()));
