@@ -1,0 +1,16 @@
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\service\RecommendationService.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\domain\BugSolvedBasicInfo.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\service\GetCode.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\service\CompleteReco.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\service\impl\CompleteRecoImpl.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\domain\ResponseBean.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\service\impl\AnalyzeDiffFileImpl.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\service\impl\KafkaConsumerService.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\domain\Recommendation.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\BugRecommendationApplication.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\controller\RecommendationController.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\service\AnalyzeDiffFile.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\service\impl\RecommendationServiceImpl.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\dao\RecommendationDao.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\mapper\RecommendationMapper.java
+D:\www\git\bug-recommendation\src\main\java\cn\edu\fudan\bug_recommendation\service\impl\GetCodeImpl.java
