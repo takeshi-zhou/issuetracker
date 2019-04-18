@@ -5,6 +5,7 @@ import cn.edu.fudan.bug_recommendation.domain.BugSolvedBasicInfo;
 import cn.edu.fudan.bug_recommendation.domain.Recommendation;
 import cn.edu.fudan.bug_recommendation.service.AnalyzeDiffFile;
 import cn.edu.fudan.bug_recommendation.service.CompleteReco;
+import cn.edu.fudan.bug_recommendation.service.RecommendationService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -18,9 +19,14 @@ import java.util.List;
 @Component
 public class KafkaConsumerService {
     RecommendationDao recommendationDao;
+    private RecommendationService recommendationService;
     private CompleteReco completeReco;
     private AnalyzeDiffFile analyzeDiffFile;
 
+    @Autowired
+    public void setRecommendationService(RecommendationService recommendationService){
+        this.recommendationService = recommendationService;
+    }
     @Autowired
     public void setRecommendationDao(RecommendationDao recommendationDao) {
         this.recommendationDao = recommendationDao;
@@ -39,20 +45,23 @@ public class KafkaConsumerService {
     public void bugSolvedInfo(ConsumerRecord<String,String> consumerRecord){
         String msg = consumerRecord.value();
         System.out.println("receive message from topic -> " + consumerRecord.topic() + " : " + msg);
-        List<Recommendation> list = JSONArray.parseObject(msg,List.class);
+        System.out.println(msg.getClass());
+        JSONArray jsonMsg = JSONArray.parseArray(msg);
+        List<Recommendation> list = JSONObject.parseArray(msg,Recommendation.class);
         if (list!=null){
             for (Recommendation info: list){
-                Recommendation newInfo = completeReco.completeCode(info);
-                JSONObject json = analyzeDiffFile.getDiffRange(newInfo.getLocation(),newInfo.getNext_commitid(),newInfo.getCurr_commitid(),newInfo.getBug_lines());
-                if(json.getInteger("nextstart_line")!=0){
-                    newInfo.setStart_line(json.getInteger("start_line"));
-                    newInfo.setEnd_line(json.getInteger("end_line"));
-                    newInfo.setNextstart_line(json.getInteger("nextstart_line"));
-                    newInfo.setNextend_line(json.getInteger("nextend_line"));
-                    newInfo.setDescription(json.getString("description"));
-                }
-                recommendationDao.addBugRecommendation(newInfo);
+                completeReco.completeCode(info);
+//                JSONObject json = analyzeDiffFile.getDiffRange(newInfo.getLocation(),newInfo.getNext_commitid(),newInfo.getCurr_commitid(),newInfo.getBug_lines());
+//                if(json.getInteger("nextstart_line")!=0){
+//                    newInfo.setStart_line(json.getInteger("start_line"));
+//                    newInfo.setEnd_line(json.getInteger("end_line"));
+//                    newInfo.setNextstart_line(json.getInteger("nextstart_line"));
+//                    newInfo.setNextend_line(json.getInteger("nextend_line"));
+//                    newInfo.setDescription(json.getString("description"));
+//                }
+                recommendationService.addBugRecommendation(info);
             }
+
         }
 
     }

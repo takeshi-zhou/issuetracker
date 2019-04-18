@@ -64,6 +64,7 @@ public class GetCodeImpl implements GetCode {
     }
     @Override
     public String getFileContent(String filePath){
+        System.out.println("filePath: "+filePath);
         StringBuilder code = new StringBuilder();
         String s = "";
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
@@ -71,6 +72,7 @@ public class GetCodeImpl implements GetCode {
                 code.append(s);
                 code.append("\n");
             }
+            System.out.println("s: "+s);
         } catch (IOException e) {
             e.printStackTrace();
         }
