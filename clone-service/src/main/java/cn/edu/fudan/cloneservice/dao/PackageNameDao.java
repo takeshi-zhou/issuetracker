@@ -17,8 +17,8 @@ public class PackageNameDao {
         this.packageNameMapper = packageNameMapper;
     }
 
-    public void  insertPackageInfo(String repo_id, String commi_id, Map<String, Integer> map_name_mecount, Map<String, Integer> map_clone_dis){
-        for(String name:map_name_mecount.keySet()){
+    public void  insertPackageInfo(String repo_id, String commi_id, Map<String, List> map_name_method_file_count, Map<String, Integer> map_clone_dis){
+        for(String name:map_name_method_file_count.keySet()){
             String uuid = UUID.randomUUID().toString();
             int clone_num;
             if(map_clone_dis.containsKey(name)){
@@ -26,13 +26,16 @@ public class PackageNameDao {
             }else {
                 clone_num = 0;
             }
-            PackageInfo packageInfo = new PackageInfo(uuid,repo_id,commi_id, name, map_name_mecount.get(name).intValue(), clone_num);
+            List<Integer> list = map_name_method_file_count.get(name);
+            assert (list.size() == 2);
+            PackageInfo packageInfo = new PackageInfo(uuid,repo_id,commi_id, name, list.get(0).intValue(), clone_num, list.get(1).intValue());
             packageNameMapper.insertPackageNameSetByRepoIdAndCommitId(packageInfo);
         }
     }
     public List<PackageInfo> getPackageInfoByRepoIdAndCommitId(String repo_id, String commit_id){
         return packageNameMapper.selectPackageNameSetByRepoIdAndCommitId(repo_id, commit_id);
     }
+
 
     public String selectTest(String repo_id, String commit_id){
         try{

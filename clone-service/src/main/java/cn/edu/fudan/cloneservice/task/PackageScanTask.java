@@ -90,11 +90,11 @@ public class PackageScanTask {
 
         //#3 获取分析结果 存入数据库
         List<File> fileList = getFileList(repoPath);
-        Map<String, Integer> map_name_mecount = getNameMeCountMap(fileList);
+        Map<String, List> map_name_method_file_count = getNameMethodFileCountMap(fileList);
         List<CloneInfo> lci = cloneInfoDao.getCloneInfoByRepoIdAndCommitId(repoId, commit_id);
         Map<String, Integer> map_clone_dis = getCloneDistriMap(lci);
         // store this into db
-        packageNameDao.insertPackageInfo(repoId, commit_id, map_name_mecount, map_clone_dis);
+        packageNameDao.insertPackageInfo(repoId, commit_id, map_name_method_file_count, map_clone_dis);
         System.out.println("Successed!");
 
 
@@ -171,8 +171,11 @@ public class PackageScanTask {
         }
 
     }
-    public Map<String, Integer> getNameMeCountMap(List<File> filelist){
-        Map<String, Integer> map_name_method_num = new HashMap<>();
+
+
+    public Map<String, List> getNameMethodFileCountMap(List<File> filelist){
+        Map<String, List> map_name_method_num = new HashMap<>();
+
         for(File file:filelist){
             try {
                 //把一个java代码文本解析成单元
@@ -180,7 +183,16 @@ public class PackageScanTask {
 //                cunit.accept(new ClassLevelVisitor(),null);
                 String name = cunit.getPackageDeclaration().get().getNameAsString();
                 List<MethodDeclaration> lmd = getMethodList(cunit);
-                map_name_method_num.put(name, lmd.size());
+                List<Integer> list;
+                if(!map_name_method_num.containsKey(name)){//if not contains this name
+                    list = new ArrayList<>();
+                    list.add(0);//index = 0 means method num
+                    list.add(0);//index = 1 means file num
+                    map_name_method_num.put(name, list);
+                }
+                list = map_name_method_num.get(name);
+                list.set(0, list.get(0) +  lmd.size()) ;//update method num
+                list.set(1, list.get(1) + 1);//update file num
             }
             catch (NoSuchElementException e){
 //					e.printStackTrace();

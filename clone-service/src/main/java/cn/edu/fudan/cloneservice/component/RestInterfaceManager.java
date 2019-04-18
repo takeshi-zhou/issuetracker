@@ -21,6 +21,8 @@ public class RestInterfaceManager {
     private String commitServicePath;
     @Value("${scan.service.path}")
     private String scanServicePath;
+    @Value("${code.service.path}")
+    private String codeServicePath;
 
     private RestTemplate restTemplate;
 
@@ -28,14 +30,6 @@ public class RestInterfaceManager {
         this.restTemplate = restTemplate;
     }
 
-    //-----------------------------------issue service-------------------------------------------------------
-    public JSONObject mapping(JSONObject requestParam){
-        return restTemplate.postForObject(issueServicePath + "/inner/issue/mapping", requestParam, JSONObject.class);
-    }
-
-    public void insertRawIssuesWithLocations(List<JSONObject> rawIssues){
-        restTemplate.postForObject(issueServicePath+"/inner/raw-issue",rawIssues,JSONObject.class);
-    }
 
     //------------------------------------scan service----------------------------------------------------------
     public String getLastScannedCommitId(String repoId,String category){
@@ -49,5 +43,15 @@ public class RestInterfaceManager {
     //-----------------------------------commit service-------------------------------------------------------
     public JSONObject checkOut(String repo_id,String commit_id){
         return restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class);
+    }
+
+    //-----------------------------------code service-------------------------------------------------------
+
+    public JSONObject getURL(String repo_id, String commit_id){
+        return restTemplate.getForObject(codeServicePath + "?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class);
+    }
+
+    public JSONObject freeRepoPath(String repoId,String repoPath){
+        return restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId+"&path="+repoPath, JSONObject.class);
     }
 }

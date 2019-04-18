@@ -9,14 +9,16 @@ public class PackageInfo {
     private String package_name;
     private int method_num;
     private int clone_ins_num;
+    private int file_num;
 
-    public PackageInfo(String uuid, String repo_id, String commit_id, String package_name, int method_num, int clone_ins_num) {
+    public PackageInfo(String uuid, String repo_id, String commit_id, String package_name, int method_num, int clone_ins_num, int file_num) {
         this.uuid = uuid;
         this.repo_id = repo_id;
         this.commit_id = commit_id;
         this.package_name = package_name;
         this.method_num = method_num;
         this.clone_ins_num = clone_ins_num;
+        this.file_num = file_num;
     }
 
     public String getUuid() {
@@ -65,5 +67,13 @@ public class PackageInfo {
 
     public void setClone_ins_num(int clone_ins_num) {
         this.clone_ins_num = clone_ins_num;
+    }
+
+    public int getFile_num() {
+        return file_num;
+    }
+
+    public void setFile_num(int file_num) {
+        this.file_num = file_num;
     }
 }

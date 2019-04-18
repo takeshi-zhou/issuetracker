@@ -54,35 +54,6 @@ public class PackageServiceImpl implements PackageService {
 
         packageScanTask.run(repoId,repoName,repoPath,commitList);
 
-
-//        for(String commit_id:commitList)
-//        {
-//            String test  = packageScanStatusDao.selectPackageScanStatusByRepoIdAndCommitId(repoId, commit_id);
-//            System.out.println(test);
-//            if(test.equals("Not Scanned")){
-//                //#2 如果scan状态未完成。需要一个scan列表，根据这个列表进行scan
-//                //就用这个commit_list来扫描
-//
-//
-//
-//            }
-//            else {
-//                //Scanned
-//                //do nothing
-//            }
-//        }
-
-
-
-
-
-
-
-//        Scan scan=scanInitialInfo.getScan();
-
-        //#2 如果scan全部完成，则OK！
-        //每当接受一个clone的scan消息，启动一个异步任务取执行相关操作
-
     }
 
 

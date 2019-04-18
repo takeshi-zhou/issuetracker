@@ -34,6 +34,7 @@ public class CloneVisController {
         Map<String, List<Integer>> commit_map = new HashMap<>();
         for(PackageInfo pi:lpi){
             List<Integer> package_list = new ArrayList<>();
+            package_list.add(pi.getFile_num());
             package_list.add(pi.getMethod_num());
             package_list.add(pi.getClone_ins_num());
             commit_map.put(pi.getPackage_name(), package_list);

@@ -11,10 +11,11 @@
         <result property="package_name" column="package_name"/>
         <result property="method_num" column="method_num"/>
         <result property="clone_ins_num" column="clone_ins_num"/>
+        <result property="file_num" column="file_num"/>
     </resultMap>
 
     <insert id="insertPackageNameSetByRepoIdAndCommitId" parameterType="cn.edu.fudan.cloneservice.domain.PackageInfo">
-        insert into ce_package_info values (#{uuid},#{repd_id},#{commit_id}, #{package_name}, #{method_num}, #{clone_ins_num})
+        insert into ce_package_info values (#{uuid},#{repo_id},#{commit_id}, #{package_name}, #{method_num}, #{clone_ins_num}, #{file_num})
     </insert>
 
     <select id="selectPackageNameSetByRepoIdAndCommitId" parameterType="String" resultMap="map_package_info">

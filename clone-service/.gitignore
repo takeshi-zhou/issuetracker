@@ -27,3 +27,4 @@
 ### Build ###
 /target/
 *.class
+LOG_HOME_IS_UNDEFINED
