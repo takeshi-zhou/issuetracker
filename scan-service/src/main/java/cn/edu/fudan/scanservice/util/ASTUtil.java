@@ -91,6 +91,18 @@ public class ASTUtil {
         return code.toString();
     }
 
+    public static int getCodeLines(String filePath){
+        int result=0;
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
+            while (bufferedReader.readLine() != null) {
+                result++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     public static void main(String[] args) {
     }
 }

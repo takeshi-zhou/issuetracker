@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 @Repository
 public interface RawIssueMapper {
@@ -33,5 +35,7 @@ public interface RawIssueMapper {
 
     Integer getNumberOfRemainingIssueBaseFile(@Param("repo_id") String repoId,@Param("commit_id") String commit,@Param("file_name") String fileName);
 
-    Integer getNumberOfRemainingIssue(@Param("repo_id") String repoId,@Param("commit_id") String commit);
+    Integer getNumberOfRemainingIssue(@Param("repo_id") String repoId, @Param("commit_id") String commit);
+
+    List<WeakHashMap<String, String>> getRankOfFileBaseIssueQuantity(@Param("repo_id")String repoId, @Param("commit_id")String commitId);
 }

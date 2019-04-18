@@ -30,6 +30,7 @@ public class MvcConfig implements WebMvcConfigurer {
         //添加拦截的URL
         urlPatterns.add("/issue/**");
         urlPatterns.add("/raw-issue/**");
+        urlPatterns.add("/measurement/**");
         registry.addInterceptor(authTokenInterceptor()).addPathPatterns(urlPatterns);
     }
 

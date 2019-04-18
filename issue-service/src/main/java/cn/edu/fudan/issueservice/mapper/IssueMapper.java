@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 
 @Repository
@@ -55,7 +56,9 @@ public interface IssueMapper {
 
     void batchUpdateIssueListPriority(@Param("list")List<String> issueUuid,@Param("priority") int priority);
 
-    int getNumberOfNewIssueByDuration(@Param("repo-id") String repoId,@Param("start") String start,@Param("end") String end);
+    int getNumberOfNewIssueByDuration(@Param("repo_id") String repoId,@Param("start") String start,@Param("end") String end);
 
-    int getNumberOfEliminateIssueByDuration(@Param("repo-id") String repoId,@Param("start") String start,@Param("end") String end);
+    int getNumberOfEliminateIssueByDuration(@Param("repo_id") String repoId,@Param("start") String start,@Param("end") String end);
+
+    List<WeakHashMap<String, String>> getCommitNewIssue(@Param("start") String start, @Param("end") String end, @Param("repo_id") String repoId);
 }

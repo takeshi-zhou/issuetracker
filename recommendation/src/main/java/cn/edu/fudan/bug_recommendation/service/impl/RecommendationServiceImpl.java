@@ -34,6 +34,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
 
     public void addBugRecommendation(Recommendation recommendation){
+        System.out.println("into addreco");
         if (recommendation.getType()==null ||
                 recommendation.getLocation()==null ||
                 recommendation.getStart_line()==null || recommendation.getEnd_line()==null || recommendation.getCurr_commitid()==null ||
@@ -45,6 +46,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         if (isLocationExist(recommendation.getLocation()) && isTypeExist(recommendation.getType()))
             throw new RuntimeException("This error message already exists");
         recommendation.setUuid(UUID.randomUUID().toString());
+
 
         recommendationDao.addBugRecommendation(recommendation);
 

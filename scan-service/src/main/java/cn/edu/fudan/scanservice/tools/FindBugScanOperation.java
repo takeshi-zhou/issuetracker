@@ -1,5 +1,6 @@
 package cn.edu.fudan.scanservice.tools;
 
+import cn.edu.fudan.scanservice.domain.FileInfo;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.domain.ScanInitialInfo;
 import cn.edu.fudan.scanservice.domain.ScanResult;
@@ -61,7 +62,8 @@ public class FindBugScanOperation extends ScanOperationAdapter {
     }
 
     @SuppressWarnings("unchecked")
-    private String analyzeLocations(String rawIssueUUID, String repoPath, Element bugInstance, List<JSONObject> locations) {
+    private FileInfo analyzeLocations(String rawIssueUUID, String repoPath, Element bugInstance, List<JSONObject> locations) {
+        FileInfo fileInfo=new FileInfo();
         Element sourceLineInClass = bugInstance.element("Class").element("SourceLine");
         String className = sourceLineInClass.attributeValue("classname");
         String fileName = sourceLineInClass.attributeValue("sourcefile");
@@ -119,6 +121,8 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         } else {
             code = ASTUtil.getCode(start, end, repoPath+ "/" + filePath);
         }
+        fileInfo.setCode_lines(ASTUtil.getCodeLines(repoPath+ "/" + filePath));
+        fileInfo.setFileName(fileName);
         JSONObject location = new JSONObject();
         location.put("uuid", UUID.randomUUID().toString());
         location.put("start_line", start);
@@ -130,7 +134,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         location.put("rawIssue_id", rawIssueUUID);
         location.put("code", code);
         locations.add(location);
-        return filePath;
+        return fileInfo;
     }
 
     @SuppressWarnings("unchecked")
@@ -150,17 +154,18 @@ public class FindBugScanOperation extends ScanOperationAdapter {
                 List<JSONObject> locations = new ArrayList<>();//每个rawIssue会有多个location
                 String rawIssueUUID = UUID.randomUUID().toString();
                 //解析当前bugInstance中的location
-                String fileName = analyzeLocations(rawIssueUUID, repoPath, bugInstance, locations);
-                if (fileName != null&&!locations.isEmpty()) {
+                FileInfo fileInfo = analyzeLocations(rawIssueUUID, repoPath, bugInstance, locations);
+                if (fileInfo != null&&!locations.isEmpty()) {
                     //只有location解析成功并且rawIssue有location才会插入当前rawIssue
                     JSONObject rawIssue = new JSONObject();
                     rawIssue.put("type", bugInstance.attributeValue("type"));
                     rawIssue.put("category","bug");
                     rawIssue.put("detail", getJsonString(bugInstance));
-                    rawIssue.put("file_name", fileName);
+                    rawIssue.put("file_name", fileInfo.getFileName());
                     rawIssue.put("scan_id", scan.getUuid());
                     rawIssue.put("commit_id", scan.getCommit_id());
                     rawIssue.put("repo_id",scan.getRepo_id());
+                    rawIssue.put("code_lines",fileInfo.getCode_lines());
                     rawIssue.put("uuid", rawIssueUUID);
                     rawIssue.put("locations", locations);
                     rawIssues.add(rawIssue);

@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author WZY
@@ -151,6 +152,14 @@ public class RestInterfaceManager {
     }
 
     public String getRepoPath(String repoId) {
+        return null;
+    }
+
+    public List<String> getDevelopers(String repoId) {
+        return null;
+    }
+
+    public Map<String, String> getDeveloperByComits(Set<String> keySet) {
         return null;
     }
 

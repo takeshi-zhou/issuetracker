@@ -1,0 +1,8 @@
+-------------------------------------------------------------------------------
+Test set: cn.edu.fudan.bug_recommendation.controller.RecommendationControllerTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 13.507 s <<< FAILURE! - in cn.edu.fudan.bug_recommendation.controller.RecommendationControllerTest
+addBugRecommendationTestFail(cn.edu.fudan.bug_recommendation.controller.RecommendationControllerTest)  Time elapsed: 0.046 s  <<< FAILURE!
+java.lang.AssertionError: expected:<401> but was:<200>
+	at cn.edu.fudan.bug_recommendation.controller.RecommendationControllerTest.addBugRecommendationTestFail(RecommendationControllerTest.java:104)
+

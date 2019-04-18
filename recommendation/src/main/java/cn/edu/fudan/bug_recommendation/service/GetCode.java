@@ -1,7 +1,7 @@
 package cn.edu.fudan.bug_recommendation.service;
 
 import com.alibaba.fastjson.JSONObject;
-
+//得到代码的通用接口
 public interface GetCode {
     JSONObject getRepoPath(String repoId,String commit_id);
     JSONObject freeRepoPath(String repoId,String repoPath);

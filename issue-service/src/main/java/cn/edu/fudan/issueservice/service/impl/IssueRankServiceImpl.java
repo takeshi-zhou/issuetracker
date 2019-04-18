@@ -6,19 +6,23 @@
 package cn.edu.fudan.issueservice.service.impl;
 
 import cn.edu.fudan.issueservice.component.RestInterfaceManager;
+import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.service.IssueRankService;
 import cn.edu.fudan.issueservice.util.ExecuteShellUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Service
+@Slf4j
 public class IssueRankServiceImpl implements IssueRankService {
 
     private RawIssueDao rawIssueDao;
+    private IssueDao issueDao;
     private ExecuteShellUtil executeShellUtil;
     private RestInterfaceManager restInterfaceManager;
 
@@ -26,6 +30,11 @@ public class IssueRankServiceImpl implements IssueRankService {
     @Autowired
     public void setRawIssueDao(RawIssueDao rawIssueDao) {
         this.rawIssueDao = rawIssueDao;
+    }
+
+    @Autowired
+    public void setIssueDao(IssueDao issueDao) {
+        this.issueDao = issueDao;
     }
 
     @Autowired
@@ -46,17 +55,23 @@ public class IssueRankServiceImpl implements IssueRankService {
     }
 
     @Override
-    public Map rankOfFileBaseIssueQuantity(String repoId, String commitId) {
-
-        return rawIssueDao.getRankOfFileBaseIssueQuantity(repoId, commitId);
+    public Object rankOfFileBaseIssueQuantity(String repoId, String commitId) {
+        Map<String, String> map = new WeakHashMap<>();
+        for (Map<String, String> m : rawIssueDao.getRankOfFileBaseIssueQuantity(repoId, commitId)) {
+            map.put(m.get("key"), m.get("value"));
+        }
+        return map;
     }
 
 
     // ？？？？ 需要代码行数 需要提前入库
     @Override
-    public Map rankOfFileBaseDensity(String repoId, String commit) {
-
-        return null;
+    public Map rankOfFileBaseDensity(String repoId, String commitId) {
+        Map<String, String> map = new WeakHashMap<>();
+        for (Map<String, String> m : rawIssueDao.getRankOfFileBaseIssueQuantity(repoId, commitId)) {
+            map.put(m.get("key"), m.get("value"));
+        }
+        return map;
     }
 
     // 开发人员在某段时间内贡献的代码行数 除以 产生的新Issue数量
@@ -69,22 +84,56 @@ public class IssueRankServiceImpl implements IssueRankService {
         String start = duration.substring(0,10);
         String end = duration.substring(11,21);
         String repoPath = restInterfaceManager.getRepoPath(repoId);
+        //commitId 单个commit所对应的引入Issue数量
+        Map<String, Integer> commitNewIssue = issueDao.getCommitNewIssue(start, end, repoId);
+        //某段时间内的commit列表以及对应的Issue数量 commitId developer-email
+        Map<String, String> commitDeveloper = restInterfaceManager.getDeveloperByComits(commitNewIssue.keySet());
 
-        // 开发人员姓 代码行数
-        Map map = executeShellUtil.developerLinesOfCode(start, end , repoPath);
-        // 开发人员 Issue数量
-        Map<Object, Integer> map1 = new WeakHashMap<>();
-        for (Object key : map.keySet()) {
-            if (map1.containsKey(key)) {
-                map.put(key, (double)map.get(key)/map1.get(key));
+        // 某段时间内开发人员列表
+        List<String> developers = (List<String>) commitDeveloper.values();
+        // 开发人员 代码行数
+        Map<String,Integer> usersCodeLine  = executeShellUtil.developersLinesOfCode(start, end , repoPath, developers);
+        try {
+            for (String commitId : commitDeveloper.keySet()) {
+                String developer = commitDeveloper.get(commitId);
+                int newIssue = commitNewIssue.get(commitId);
+                int codeLine = usersCodeLine.get(developer);
+                // 平均多少行代码会出现一个bug（取整）
+                usersCodeLine.put(developer, codeLine/newIssue);
             }
+        }catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
-        
-        return map;
+        //排序
+        return sortByValue(usersCodeLine);
     }
 
     @Override
     public Map rankOfRepoBaseDensity(String repoId, String duration) {
+        // duration eg: 2018.01.01-2018.12.12
+        if (duration.length() < 21)
+            throw new RuntimeException("duration error!");
+        String start = duration.substring(0,10);
+        String end = duration.substring(11,21);
+
+
         return null;
     }
+
+    //类型 V 必须实现 Comparable 接口，并且这个接口的类型是 V 或 V 的任一父类。这样声明后，V 的实例之间，V 的实例和它的父类的实例之间，可以相互比较大小。
+    private static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+/*        List<Map.Entry<K, V>> list = new LinkedList<>(map.entrySet());
+        Collections.sort(list, (o1,o2) -> (o2.getValue()).compareTo(o1.getValue()));
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list) {
+            result.put(entry.getKey(), entry.getValue());
+        }*/
+        Map<K, V> result = new LinkedHashMap<>();
+        Stream<Map.Entry<K, V>> st = map.entrySet().stream();
+        //st.sorted(Comparator.comparing(Map.Entry::getValue)).forEach(e -> result.put(e.getKey(), e.getValue()));
+        st.sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue())).forEach(e -> result.put(e.getKey(), e.getValue()));
+        return result;
+    }
+
 }

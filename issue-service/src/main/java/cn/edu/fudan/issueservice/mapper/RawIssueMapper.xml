@@ -13,6 +13,7 @@
         <result property="issue_id" column="issue_id"/>
         <result property="commit_id" column="commit_id"/>
         <result property="repo_id" column="repo_id"/>
+        <result property="code_lines" column="code_lines"/>
         <result property="commit_time" column="commit_time"/>
         <result property="developer_email" column="developer_email"/>
         <collection property="locations" column="uuid"
@@ -29,6 +30,7 @@
         <result property="issue_id" column="issue_id"/>
         <result property="commit_id" column="commit_id"/>
         <result property="repo_id" column="repo_id"/>
+        <result property="code_lines" column="code_lines"/>
         <collection property="locations" column="uuid"
                     select="cn.edu.fudan.issueservice.mapper.LocationMapper.getLocations"/>
     </resultMap>
@@ -43,6 +45,7 @@
         <result property="issue_id" column="issue_id"/>
         <result property="commit_id" column="commit_id"/>
         <result property="repo_id" column="repo_id"/>
+        <result property="code_lines" column="code_lines"/>
         <association property="issue" column="issue_id"
                      select="cn.edu.fudan.issueservice.mapper.IssueMapper.getIssueByID"/>
         <collection property="locations" column="uuid"
@@ -61,7 +64,8 @@
         scan_id,
         issue_id,
         commit_id,
-        repo_id
+        repo_id,
+        code_lines
         )
         VALUES
         <foreach collection="list" item="item" index="index"
@@ -75,7 +79,8 @@
             #{item.scan_id},
             #{item.issue_id},
             #{item.commit_id},
-            #{item.repo_id}
+            #{item.repo_id},
+            #{item.code_lines}
             )
         </foreach>
     </insert>
@@ -144,5 +149,12 @@
 
     <select id="getNumberOfRemainingIssueBaseFile" resultType="Integer">
         select count (*) from rawIssue where repo_id = #{repo_id} and commit_id = #{commit_id} and file_name like  ${file_name}
+    </select>
+
+    <select id="getRankOfFileBaseIssueQuantity" resultType="java.util.WeakHashMap">
+        select file_name as 'key',count(file_name) as 'value'
+        from rawIssue
+        where commit_id = #{commit_id} and repo_id = #{repo_id}
+        group by file_name order by value desc limit 20;
     </select>
 </mapper>
