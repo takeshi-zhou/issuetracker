@@ -30,7 +30,7 @@ import com.github.javaparser.ast.body.*;
 
 @Component("packageScanTask")
 public class PackageScanTask {
-    private static final Logger logger= LoggerFactory.getLogger(CloneScanTask.class);
+    private static final Logger logger= LoggerFactory.getLogger(PackageScanTask.class);
 
     private RestInterfaceManager restInterfaceManager;
     private KafkaTemplate kafkaTemplate;

@@ -29,123 +29,123 @@ import java.util.concurrent.*;
  * @author WZY
  * @version 1.0
  **/
-@Component("cloneScanTask")
-public class CloneScanTask {
+//@Component("cloneScanTask")
+//public class CloneScanTask {
 
-    private static final Logger logger= LoggerFactory.getLogger(CloneScanTask.class);
+//    private static final Logger logger= LoggerFactory.getLogger(CloneScanTask.class);
+//
+//
+//    @Value("${workHome}")
+//    private String workHome;
+//    @Value("${resultFileHome}")
+//    private String resultFileHome;
+//    @Value("${repoHome}")
+//    private String repoHome;
+//    @Value("${shareDir}")
+//    private String shareDir;
+//
+//    private KafkaTemplate kafkaTemplate;
+//    private RedisLuaLock redisLock;
+//    private RestInterfaceManager restInterfaceManager;
+//
+//    @Autowired
+//    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
+//        this.restInterfaceManager = restInterfaceManager;
+//    }
+
+//    @Autowired
+//    public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
+//        this.kafkaTemplate = kafkaTemplate;
+//    }
+//    @Autowired
+//    public void setRedisLock(RedisLuaLock redisLock) {
+//        this.redisLock = redisLock;
+//    }
 
 
-    @Value("${workHome}")
-    private String workHome;
-    @Value("${resultFileHome}")
-    private String resultFileHome;
-    @Value("${repoHome}")
-    private String repoHome;
-    @Value("${shareDir}")
-    private String shareDir;
+//    private boolean analyzeResultFile(String repoId,String scanId,String commitId,String resultFilePath){
+//        SAXReader reader = new SAXReader();
+//        try{
+//            Document doc = reader.read(new File(resultFilePath));
+//            Element root = doc.getRootElement();
+//            Iterator<Element> iterator = root.elementIterator("group");
+//            List<JSONObject> cloneRawIssues=new ArrayList<>();
+//            while (iterator.hasNext()){
+//                Element group=iterator.next();
+//                String group_id=group.attributeValue("id");
+//                Iterator<Element> cloneInstances=group.elementIterator("cloneInstance");
+//                while(cloneInstances.hasNext()){
+//                    //一个clone instance是一个rawIssue
+//                    List<JSONObject> cloneLocations=new ArrayList<>();
+//                    Element cloneInstance=cloneInstances.next();
+//                    String filePath=cloneInstance.attributeValue("path");
+//                    String cloneRawIssueId= UUID.randomUUID().toString();
+//                    JSONObject cloneRawIssue=new JSONObject();
+//                    cloneRawIssue.put("uuid",cloneRawIssueId);
+//                    cloneRawIssue.put("type",group_id);
+//                    cloneRawIssue.put("category","clone");
+//                    cloneRawIssue.put("detail",null);
+//                    cloneRawIssue.put("file_name",filePath);
+//                    cloneRawIssue.put("scan_id",scanId);
+//                    cloneRawIssue.put("commit_id",commitId);
+//                    cloneRawIssue.put("repo_id",repoId);
+//
+//                    JSONObject cloneLocation=new JSONObject();
+//                    cloneLocation.put("uuid",UUID.randomUUID().toString());
+//                    int startLine=Integer.parseInt(cloneInstance.attributeValue("startLine"));
+//                    int endLine=Integer.parseInt(cloneInstance.attributeValue("endLine"));
+//                    cloneLocation.put("start_line",startLine);
+//                    cloneLocation.put("end_line",endLine);
+//                    cloneLocation.put("start_token",Integer.parseInt(cloneInstance.attributeValue("startToken")));
+//                    cloneLocation.put("end_token",Integer.parseInt(cloneInstance.attributeValue("endToken")));
+//                    cloneLocation.put("file_path",filePath);
+//                    cloneLocation.put("rawIssue_id",cloneRawIssueId);
+//                    cloneLocation.put("code",ASTUtil.getCode(startLine,endLine,repoHome+filePath));
+//                    cloneLocations.add(cloneLocation);
+//
+//                    cloneRawIssue.put("locations",cloneLocations);
+//                    cloneRawIssues.add(cloneRawIssue);
+//                }
+//            }
+//            if(!cloneRawIssues.isEmpty()){
+//                //插入所有的rawIssue
+////                restInterfaceManager.insertRawIssuesWithLocations(cloneRawIssues);
+//            }
+//            return true;
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
 
-    private KafkaTemplate kafkaTemplate;
-    private RedisLuaLock redisLock;
-    private RestInterfaceManager restInterfaceManager;
-
-    @Autowired
-    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
-        this.restInterfaceManager = restInterfaceManager;
-    }
-
-    @Autowired
-    public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
-        this.kafkaTemplate = kafkaTemplate;
-    }
-    @Autowired
-    public void setRedisLock(RedisLuaLock redisLock) {
-        this.redisLock = redisLock;
-    }
-
-    @SuppressWarnings("unchecked")
-    private boolean analyzeResultFile(String repoId,String scanId,String commitId,String resultFilePath){
-        SAXReader reader = new SAXReader();
-        try{
-            Document doc = reader.read(new File(resultFilePath));
-            Element root = doc.getRootElement();
-            Iterator<Element> iterator = root.elementIterator("group");
-            List<JSONObject> cloneRawIssues=new ArrayList<>();
-            while (iterator.hasNext()){
-                Element group=iterator.next();
-                String group_id=group.attributeValue("id");
-                Iterator<Element> cloneInstances=group.elementIterator("cloneInstance");
-                while(cloneInstances.hasNext()){
-                    //一个clone instance是一个rawIssue
-                    List<JSONObject> cloneLocations=new ArrayList<>();
-                    Element cloneInstance=cloneInstances.next();
-                    String filePath=cloneInstance.attributeValue("path");
-                    String cloneRawIssueId= UUID.randomUUID().toString();
-                    JSONObject cloneRawIssue=new JSONObject();
-                    cloneRawIssue.put("uuid",cloneRawIssueId);
-                    cloneRawIssue.put("type",group_id);
-                    cloneRawIssue.put("category","clone");
-                    cloneRawIssue.put("detail",null);
-                    cloneRawIssue.put("file_name",filePath);
-                    cloneRawIssue.put("scan_id",scanId);
-                    cloneRawIssue.put("commit_id",commitId);
-                    cloneRawIssue.put("repo_id",repoId);
-
-                    JSONObject cloneLocation=new JSONObject();
-                    cloneLocation.put("uuid",UUID.randomUUID().toString());
-                    int startLine=Integer.parseInt(cloneInstance.attributeValue("startLine"));
-                    int endLine=Integer.parseInt(cloneInstance.attributeValue("endLine"));
-                    cloneLocation.put("start_line",startLine);
-                    cloneLocation.put("end_line",endLine);
-                    cloneLocation.put("start_token",Integer.parseInt(cloneInstance.attributeValue("startToken")));
-                    cloneLocation.put("end_token",Integer.parseInt(cloneInstance.attributeValue("endToken")));
-                    cloneLocation.put("file_path",filePath);
-                    cloneLocation.put("rawIssue_id",cloneRawIssueId);
-                    cloneLocation.put("code",ASTUtil.getCode(startLine,endLine,repoHome+filePath));
-                    cloneLocations.add(cloneLocation);
-
-                    cloneRawIssue.put("locations",cloneLocations);
-                    cloneRawIssues.add(cloneRawIssue);
-                }
-            }
-            if(!cloneRawIssues.isEmpty()){
-                //插入所有的rawIssue
-//                restInterfaceManager.insertRawIssuesWithLocations(cloneRawIssues);
-            }
-            return true;
-        }catch (Exception e){
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private boolean invokeCloneTool(String repoPath,String repoName){
-        String cmd = "java -jar SAGA.jar  " + repoPath + " " + repoName;
-        BufferedInputStream br = null;
-        try {
-            Process process = Runtime.getRuntime().exec(cmd,null,new File(workHome));
-            //输出process打印信息
-            br = new BufferedInputStream(process.getInputStream());
-            int ch;
-            StringBuilder text = new StringBuilder("getInfo: \n");
-            while ((ch = br.read()) != -1) {
-                text.append((char) ch);
-            }
-            logger.info(text.toString());
-            process.waitFor();
-            return process.exitValue()==0;
-        }catch (Exception e){
-            e.printStackTrace();
-            return false;
-        }finally {
-            if(br != null){
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
+//    private boolean invokeCloneTool(String repoPath,String repoName){
+//        String cmd = "java -jar SAGA.jar  " + repoPath + " " + repoName;
+//        BufferedInputStream br = null;
+//        try {
+//            Process process = Runtime.getRuntime().exec(cmd,null,new File(workHome));
+//            //输出process打印信息
+//            br = new BufferedInputStream(process.getInputStream());
+//            int ch;
+//            StringBuilder text = new StringBuilder("getInfo: \n");
+//            while ((ch = br.read()) != -1) {
+//                text.append((char) ch);
+//            }
+//            logger.info(text.toString());
+//            process.waitFor();
+//            return process.exitValue()==0;
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            return false;
+//        }finally {
+//            if(br != null){
+//                try {
+//                    br.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    }
 
 //    private boolean mapping(String repo_id,String current_commit_id,String category){
 //        String pre_commit_id = restInterfaceManager.getLastScannedCommitId(repo_id,category);
@@ -162,10 +162,10 @@ public class CloneScanTask {
 //        return result != null && result.getIntValue("code") == 200;
 //    }
 
-    private boolean checkOut(String repoId, String commitId) {
-        JSONObject response = restInterfaceManager.checkOut(repoId, commitId);
-        return response != null && response.getJSONObject("data").getString("status").equals("Successful");
-    }
+//    private boolean checkOut(String repoId, String commitId) {
+//        JSONObject response = restInterfaceManager.checkOut(repoId, commitId);
+//        return response != null && response.getJSONObject("data").getString("status").equals("Successful");
+//    }
 
 //    private void startScan(String repoId,String repoName,String repoPath,Scan scan){
 //        logger.info(repoPath+"  : "+repoName);
@@ -215,7 +215,7 @@ public class CloneScanTask {
 //        logger.info("scan complete!");
 //    }
 
-    @Async
+//    @Async
 //    public Future<String> run(String repoId, String repoName, String repoPath, Scan scan) {
 //        //获取分布式锁，一个repo同一时间只能有一个线程在扫
 //        //15min恰好是一个整个Scan操作的超时时间，如果某个线程获得锁之后Scan过程卡死导致锁没有释放
@@ -235,10 +235,10 @@ public class CloneScanTask {
 //
 //    }
 
-    @SuppressWarnings("unchecked")
-    private void send(String repoId, String commitId ,String status, String description) {
-        ScanResult scanResult = new ScanResult(repoId, commitId,"clone" ,status, description);
-        kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
-    }
 
-}
+//    private void send(String repoId, String commitId ,String status, String description) {
+//        ScanResult scanResult = new ScanResult(repoId, commitId,"clone" ,status, description);
+//        kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
+//    }
+
+//}
