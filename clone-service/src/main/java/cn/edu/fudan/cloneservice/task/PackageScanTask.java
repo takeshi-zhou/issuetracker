@@ -61,9 +61,34 @@ public class PackageScanTask {
 
 
 
-    private boolean checkOut(String repoId, String commitId) {
-        JSONObject response = restInterfaceManager.checkOut(repoId, commitId);
-        return response != null && response.getJSONObject("data").getString("status").equals("Successful");
+    private String getRepoUrl(String repoId, String commitId) {
+//        JSONObject response = restInterfaceManager.checkOut(repoId, commitId);
+//        return response != null && response.getJSONObject("data").getString("status").equals("Successful");
+
+        JSONObject jsonObject=  restInterfaceManager.getURL(repoId, commitId);
+        JSONObject data= jsonObject.getJSONObject("data");
+        String status = data.get("status").toString();
+        String content = data.get("content").toString();
+        if(status.equals("Successful")){
+            logger.info("get url successful:" + content);
+            logger.info("get repo url complete -> start the package scan operation......");
+            return content;
+        }else {
+            logger.info("get url failed " + status + content);
+            return "error";
+        }
+    }
+
+    private boolean freeRepoUrl(String repoId, String repoUrl){
+        JSONObject nj = restInterfaceManager.freeRepoPath(repoId,repoUrl);
+        JSONObject njdata = nj.getJSONObject("data");
+        String s = njdata.get("status").toString();
+        if(s.equals("Successful")){
+            logger.info("free repo successful");
+            return true;
+        }{
+            return false;
+        }
     }
     @SuppressWarnings("unchecked")
     private void send(String repoId, String commitId ,String status, String description) {
@@ -71,45 +96,47 @@ public class PackageScanTask {
         kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
     }
     //#1 先写scan方法
-    private void startScan(String repoId, String repoName, String repoPath, String commit_id) {
-        logger.info(repoPath+"  : "+repoName);
+    private void startScan(String repo_id, String commit_id) {
+        logger.info("method startScan" + repo_id+"  : "+commit_id);
 
-        String commitId= commit_id;
-        logger.info("start to checkout -> " + commitId);
+        String repoId = repo_id;
+        String commitId = commit_id;
+        logger.info("startScan-->start to get URL " + repoId + commitId);
 
-        //checkout,如果失败发送错误消息，直接返回
-//        if (!checkOut(repoId, commitId)) {
-//            send(repoId, commitId, "failed", "Package Scan - check out failed");
-//            logger.error("Package Scan Check Out Failed!");
-//            return;
-//        }
-        //TODO checkout
-        logger.info("checkout complete -> start the package scan operation......");
+        //访问文件服务,如果失败发送错误消息，直接返回
 
+        String repo_url = getRepoUrl(repoId, commitId);
+        if(repo_url.equals("error")){
+            logger.info("startScan-->" + repo_id + "," + commit_id +"Get url failed cannot start scan");
+            return;
+        }
         //#2 考虑上锁 释放锁
 
         //#3 获取分析结果 存入数据库
-        List<File> fileList = getFileList(repoPath);
+        List<File> fileList = getFileList(repo_url);
         Map<String, List> map_name_method_file_count = getNameMethodFileCountMap(fileList);
         List<CloneInfo> lci = cloneInfoDao.getCloneInfoByRepoIdAndCommitId(repoId, commit_id);
         Map<String, Integer> map_clone_dis = getCloneDistriMap(lci);
         // store this into db
         packageNameDao.insertPackageInfo(repoId, commit_id, map_name_method_file_count, map_clone_dis);
-        System.out.println("Successed!");
+        logger.info("startScan-->insert package info should be OK!");
 
-
-
+        //now free the repo
+        if(freeRepoUrl(repoId, repo_url) == true){
+            logger.info("startScan-->Free url ok");
+        }else{
+            logger.info("startScan-->Free url failed");
+        }
     }
 
-    public void run(String repoId, String repoName, String repoPath, List<String> commit_list){
-        //对外启动接口
+    public void run(String repoId, List<String> commit_list){        //对外启动接口
 
         for(String commit_id:commit_list){
             String status =  packageScanStatusDao.selectPackageScanStatusByRepoIdAndCommitId(repoId, commit_id);
             if(status != null && status.equals("Scanned")){
                 continue;
             }else {
-                startScan(repoId, repoName, repoPath, commit_id);
+                startScan(repoId, commit_id);
                 packageScanStatusDao.insertPackageScanStatusByRepoIdAndCommitId(repoId, commit_id);
             }
 

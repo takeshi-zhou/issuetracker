@@ -8,12 +8,12 @@ import java.util.List;
  **/
 public class ScanInitialInfo {
 
-    public String getRepoName() {
-        return repoName;
-    }
+    private String repoId;
+    private List<String> commitList;
 
-    public void setRepoName(String repoName) {
-        this.repoName = repoName;
+    public ScanInitialInfo(String repoId, List<String> commitList) {
+        this.repoId = repoId;
+        this.commitList = commitList;
     }
 
     public String getRepoId() {
@@ -24,20 +24,6 @@ public class ScanInitialInfo {
         this.repoId = repoId;
     }
 
-    public String getRepoPath() {
-        return repoPath;
-    }
-
-    public void setRepoPath(String repoPath) {
-        this.repoPath = repoPath;
-    }
-
-//    private PackageScanStatus packageScanStatus;
-    private String repoName;
-    private String repoId;
-    private String repoPath;
-    private List<String> commitList;
-
     public List<String> getCommitList() {
         return commitList;
     }
@@ -45,15 +31,4 @@ public class ScanInitialInfo {
     public void setCommitList(List<String> commitList) {
         this.commitList = commitList;
     }
-
-    public ScanInitialInfo(String repoName, String repoId, String repoPath, List<String> commitList) {
-
-//        this.scan = scan;
-        this.repoName = repoName;
-        this.repoId = repoId;
-        this.repoPath = repoPath;
-        this.commitList = commitList;
-    }
-
-
 }
