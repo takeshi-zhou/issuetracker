@@ -13,6 +13,7 @@ import cn.edu.fudan.issueservice.domain.RawIssueDetail;
 import cn.edu.fudan.issueservice.service.MappingService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -27,6 +28,7 @@ import java.util.List;
  * @author WZY
  * @version 1.0
  **/
+@Slf4j
 @Service
 public class BaseMappingServiceImpl implements MappingService {
 
@@ -204,8 +206,10 @@ public class BaseMappingServiceImpl implements MappingService {
             solvedInfo.put("repoid",repo_id);
             solvedInfos.add(solvedInfo);
         }
-        kafkaTemplate.send("solvedBug",JSONArray.toJSONString(solvedInfos));
-        //restInterfaceManager.addSolvedIssueInfo(solvedInfos);
+        log.info("solvedBug -> {}",JSONArray.toJSONString(solvedInfos));
+        if(!solvedInfos.isEmpty()){
+            kafkaTemplate.send("solvedBug",JSONArray.toJSONString(solvedInfos));
+        }
     }
 
 }

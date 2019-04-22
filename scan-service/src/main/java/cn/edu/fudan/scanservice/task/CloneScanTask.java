@@ -28,14 +28,15 @@ public class CloneScanTask extends BaseScanTask{
 
 
     private void run(String repoId, String commitId, String category) {
-        String identifier = redisLock.acquireLockWithTimeOut(repoId, 15, 15, TimeUnit.MINUTES);
-        try {
-            scan(scanOperation,repoId, commitId,category);
-        } finally {
-            if (!redisLock.releaseLock(repoId, identifier)) {
-                logger.error("repo->" + repoId + " release lock failed!");
-            }
-        }
+//        String identifier = redisLock.acquireLockWithTimeOut(repoId, 15, 15, TimeUnit.MINUTES);
+//        try {
+//
+//        } finally {
+//            if (!redisLock.releaseLock(repoId, identifier)) {
+//                logger.error("repo->" + repoId + " release lock failed!");
+//            }
+//        }
+        scan(scanOperation,repoId, commitId,category);
     }
 
     @Async("forRequest")
