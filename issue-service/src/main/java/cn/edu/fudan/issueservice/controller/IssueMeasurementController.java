@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 @EnableAutoConfiguration
 public class IssueMeasurementController {
@@ -86,10 +88,10 @@ public class IssueMeasurementController {
         return issueRankService.rankOfDeveloper(repoId, duration, developerId);
     }
 
-    @GetMapping(value = {"/measurement/rankOfRepoBaseDensity/{repoId}"})
-    public Object getRankOfRepoBaseDensity(@PathVariable("repoId") String repoId, @RequestParam("duration") String duration) {
-
-        return issueRankService.rankOfRepoBaseDensity(repoId, duration);
+    @GetMapping(value = {"/measurement/rankOfRepoBaseDensity"})
+    public Object getRankOfRepoBaseDensity(HttpServletRequest request) {
+        String userToken = request.getHeader("token");
+        return issueRankService.rankOfRepoBaseDensity(userToken);
     }
 
 
