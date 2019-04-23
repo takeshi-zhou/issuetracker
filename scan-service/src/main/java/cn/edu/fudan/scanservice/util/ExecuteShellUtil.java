@@ -63,7 +63,6 @@ public class ExecuteShellUtil {
             String line ;
             while ((line = bReader.readLine())!= null) {
                 line = line.replace(repoPath+"/", "");
-                log.info("candidate path: -> {}",line);
                 sBuffer.append(line).append(":");
             }
             return  sBuffer.toString();
