@@ -133,9 +133,9 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         String new_IssueId = UUID.randomUUID().toString();
         rawIssue.setIssue_id(new_IssueId);
         String targetFiles = rawIssue.getFile_name();
-        boolean hasDisplayId=issueDao.getMaxIssueDisplayId(repo_id) == null;
+        boolean hasDisplayId=issueDao.getMaxIssueDisplayId(repo_id) != null;
         if (hasDisplayId||isDefaultDisplayId){
-             currentDisplayId = hasDisplayId? 0 : issueDao.getMaxIssueDisplayId(repo_id);
+             currentDisplayId = hasDisplayId ? issueDao.getMaxIssueDisplayId(repo_id) : 0;
             isDefaultDisplayId = false;
         }
         // 映射 （1-4）1 、（5-9）2、（10-14）3 、（15 -20） 4

@@ -10,8 +10,10 @@ import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.service.IssueRankService;
 import cn.edu.fudan.issueservice.util.ExecuteShellUtil;
+import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -25,7 +27,7 @@ public class IssueRankServiceImpl implements IssueRankService {
     private IssueDao issueDao;
     private ExecuteShellUtil executeShellUtil;
     private RestInterfaceManager restInterfaceManager;
-
+    private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
     public void setRawIssueDao(RawIssueDao rawIssueDao) {
@@ -46,6 +48,12 @@ public class IssueRankServiceImpl implements IssueRankService {
     public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
         this.restInterfaceManager = restInterfaceManager;
     }
+
+    @Autowired
+    public void setStringRedisTemplate(StringRedisTemplate stringRedisTemplate) {
+        this.stringRedisTemplate = stringRedisTemplate;
+    }
+
 
     // 参与开发者最多的文件排名（？）	周，月	文件，项目	看项目的参与者的多少 ???? 单独放在另外的服务中
     @Override
@@ -101,24 +109,41 @@ public class IssueRankServiceImpl implements IssueRankService {
                 // 平均多少行代码会出现一个bug（取整）
                 usersCodeLine.put(developer, codeLine/newIssue);
             }
-        }catch (Exception e) {
-            log.error(e.getMessage());
+        }catch (NullPointerException e) {
             throw new RuntimeException(e.getMessage());
         }
         //排序
         return sortByValue(usersCodeLine);
     }
 
+    //基于目前最新版本的排名
     @Override
-    public Map rankOfRepoBaseDensity(String repoId, String duration) {
-        // duration eg: 2018.01.01-2018.12.12
-        if (duration.length() < 21)
-            throw new RuntimeException("duration error!");
-        String start = duration.substring(0,10);
-        String end = duration.substring(11,21);
+    @SuppressWarnings("unchecked")
+    public Map rankOfRepoBaseDensity(String token) {
 
 
-        return null;
+        String userId = restInterfaceManager.getAccountId(token);
+
+        //得到用户的所有项目目前的代码函数
+        JSONArray jsonArray = restInterfaceManager.getProjectList(userId);
+        List repoList = jsonArray.toJavaList(ArrayList.class);
+        Map repoCommit = restInterfaceManager.getRepoAndLatestCommit(repoList);
+        Map<String, Integer> repoCodeLine = restInterfaceManager.getRepoAndCodeLine(repoCommit);
+
+        //得到项目所对应的剩余issue数量
+        Map<String, Integer> repoIssueNum = rawIssueDao.getRepoAndIssueNum(repoCommit);
+        try {
+            for (String repoId : repoCodeLine.keySet()) {
+                int codeLines = repoCodeLine.get(repoId);
+                int newIssue = repoIssueNum.get(repoId);
+                // 平均多少行代码会出现一个bug（取整）
+                repoIssueNum.put(repoId, codeLines/newIssue);
+            }
+        }catch (NullPointerException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        return repoIssueNum;
     }
 
     //类型 V 必须实现 Comparable 接口，并且这个接口的类型是 V 或 V 的任一父类。这样声明后，V 的实例之间，V 的实例和它的父类的实例之间，可以相互比较大小。

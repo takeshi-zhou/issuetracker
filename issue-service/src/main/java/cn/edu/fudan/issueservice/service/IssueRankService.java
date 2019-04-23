@@ -17,5 +17,5 @@ public interface IssueRankService {
     Map rankOfDeveloper(String repoId, String duration,String developerId);
 
     //问题密度最大（小）的项目排名
-    Map rankOfRepoBaseDensity(String repoId, String duration) ;
+    Map rankOfRepoBaseDensity(String token) ;
 }
