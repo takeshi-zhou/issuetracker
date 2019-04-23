@@ -104,29 +104,37 @@ public class PackageScanTask {
         logger.info("startScan-->start to get URL " + repoId + commitId);
 
         //访问文件服务,如果失败发送错误消息，直接返回
+        String repo_url = "nourl";
+        try{
+            repo_url = getRepoUrl(repoId, commitId);
+            if(repo_url.equals("error")){
+                logger.info("startScan-->" + repo_id + "," + commit_id +"Get url failed cannot start scan");
+                return;
+            }
+            //#2 考虑上锁 释放锁
 
-        String repo_url = getRepoUrl(repoId, commitId);
-        if(repo_url.equals("error")){
-            logger.info("startScan-->" + repo_id + "," + commit_id +"Get url failed cannot start scan");
-            return;
+            //#3 获取分析结果 存入数据库
+            List<File> fileList = getFileList(repo_url);
+            Map<String, List> map_name_method_file_count = getNameMethodFileCountMap(fileList);
+            List<CloneInfo> lci = cloneInfoDao.getCloneInfoByRepoIdAndCommitId(repoId, commit_id);
+            Map<String, Integer> map_clone_dis = getCloneDistriMap(lci, repo_url);
+            // store this into db
+            packageNameDao.insertPackageInfo(repoId, commit_id, map_name_method_file_count, map_clone_dis);
+            logger.info("startScan-->insert package info should be OK!");
+
+        }catch (Exception e){
+            logger.info("startScan-->" + e.getMessage());
         }
-        //#2 考虑上锁 释放锁
-
-        //#3 获取分析结果 存入数据库
-        List<File> fileList = getFileList(repo_url);
-        Map<String, List> map_name_method_file_count = getNameMethodFileCountMap(fileList);
-        List<CloneInfo> lci = cloneInfoDao.getCloneInfoByRepoIdAndCommitId(repoId, commit_id);
-        Map<String, Integer> map_clone_dis = getCloneDistriMap(lci);
-        // store this into db
-        packageNameDao.insertPackageInfo(repoId, commit_id, map_name_method_file_count, map_clone_dis);
-        logger.info("startScan-->insert package info should be OK!");
-
-        //now free the repo
-        if(freeRepoUrl(repoId, repo_url) == true){
-            logger.info("startScan-->Free url ok");
-        }else{
-            logger.info("startScan-->Free url failed");
+        finally {
+            //now free the repo
+            if(freeRepoUrl(repoId, repo_url) == true){
+                logger.info("startScan-->Free url ok");
+            }else{
+                logger.info("startScan-->Free url failed");
+            }
         }
+
+
     }
 
     public void run(String repoId, List<String> commit_list){        //对外启动接口
@@ -164,15 +172,16 @@ public class PackageScanTask {
         return fileList;
     }
 
-    public Map<String, Integer> getCloneDistriMap(List<CloneInfo> lci){
+    public Map<String, Integer> getCloneDistriMap(List<CloneInfo> lci, String repo_url){
         Map<String, Integer> res = new HashMap<>();
         for(CloneInfo ci:lci) {
             String file_path = ci.getFile_path();
-            //TODO need to be del when publish
-            String file_path_transed = AddrTransUtil.AddrTrans(file_path);
-            File f = new File(file_path_transed);
+            String file_path_transed = AddrTransUtil.AddrTrans(file_path, repo_url);
+
+
 
             try {
+                File f = new File(file_path_transed);
                 CompilationUnit cunit = JavaParser.parse(f);
                 String key = cunit.getPackageDeclaration().get().getNameAsString();
                 if(res.containsKey(key)){
@@ -182,7 +191,7 @@ public class PackageScanTask {
                 }
 
             }catch (Exception e){
-                e.printStackTrace();
+                logger.info("getCloneDistriMap-->" + e.getMessage());
                 continue;
             }
 
@@ -226,7 +235,8 @@ public class PackageScanTask {
                 continue;
             }
             catch (FileNotFoundException e){
-                e.printStackTrace();
+                logger.info("getNameMethodFileCountMap-->" + e.toString());
+                continue;
             }
 
         }
