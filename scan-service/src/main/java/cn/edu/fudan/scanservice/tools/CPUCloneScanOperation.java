@@ -67,15 +67,28 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
 
                     JSONObject cloneLocation=new JSONObject();
                     cloneLocation.put("uuid",UUID.randomUUID().toString());
-                    int startLine=Integer.parseInt(cloneInstance.attributeValue("startLine"));
-                    int endLine=Integer.parseInt(cloneInstance.attributeValue("endLine"));
+                    int startLine=Integer.parseInt(cloneInstance.attributeValue("methodStartLine"));
+                    int endLine=Integer.parseInt(cloneInstance.attributeValue("methodEndLine"));
+                    String bugLines=null;
+                    int fragStart=Integer.parseInt(cloneInstance.attributeValue("fragStartLine"));
+                    int fragEnd=Integer.parseInt(cloneInstance.attributeValue("fragEndLine"));
+                    StringBuilder sb=new StringBuilder();
+                    while(fragStart<=fragEnd){
+                        sb.append(",");
+                        sb.append(fragStart);
+                        fragStart++;
+                    }
+                    if (sb.length() > 0)
+                        bugLines = sb.deleteCharAt(0).toString();
                     cloneLocation.put("start_line",startLine);
                     cloneLocation.put("end_line",endLine);
+                    cloneLocation.put("bug_lines",bugLines);
                     cloneLocation.put("start_token",null);
                     cloneLocation.put("end_token",null);
+                    cloneLocation.put("class_name", cloneInstance.attributeValue("className"));
+                    cloneLocation.put("method_name", cloneInstance.attributeValue("methodName"));
                     cloneLocation.put("file_path",filePath);
                     cloneLocation.put("rawIssue_id",cloneRawIssueId);
-                    //cloneLocation.put("code", ASTUtil.getCode(startLine,endLine,repoHome+filePath));
                     cloneLocation.put("code", ASTUtil.getCode(startLine,endLine,repoPath+"/"+filePath));
                     cloneLocations.add(cloneLocation);
 
@@ -99,7 +112,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
     private boolean invokeCloneTool(String repoPath,String repoName){
         //repoPath = repoPath.substring(repoPath.indexOf("/") + 1);//去除github前缀
         //String cmd = "java -jar CodeLexer.jar  " + repoHome+repoPath + " " + repoName;
-        String cmd = "java -jar CodeLexer.jar  " + repoPath + " " + repoName;
+        String cmd = "java -jar SAGA-CPUv423.jar " + repoPath + " " + repoName;
         logger.info("command -> {}",cmd);
         try {
             Process process = Runtime.getRuntime().exec(cmd,null,new File(cloneWorkHome));
