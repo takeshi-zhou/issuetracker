@@ -56,14 +56,19 @@ public class CloneServiceApplicationTests {
         //ScanInitialInfo scanInitialInfo = new ScanInitialInfo("happy", "123", "here");
         String urlPrefix = "/home/fdse/user/issueTracker/repo";
         List<String> commitList = new ArrayList<>();
-        commitList.add("7a51fb3a2d5d22ae430702a9e358ff65e912a740");
-        commitList.add("50289e92d4d2f205745e0e7c6f862d5568259051");
-        commitList.add("62fcf3710b68a439c8c457be01854169f206ea45");
-        commitList.add("e0707ecd8a55e1b792f2b992cc29e7b35819bfd9");
-        commitList.add("2a8f0fc60c94b795d9061687b21552ce8b97f72c");
+
+
+
+        commitList.add("03f353e39d23c71825405acd22db94428323997b");
+        commitList.add("5a262a78557009f38915416dd7ddcfb98bc42f49");
+        commitList.add("363a95acf17c2452986581f76fb44af953e12a28");
+        commitList.add("55d6f13c230c7aa7dc5bf0423a8941b76ddd5eb6");
+        commitList.add("6e71ed2d357b637e4f346663d386278e713bb7bd");
+        commitList.add("74f0fc9619708e2aaed7018a352ef491967d787f");
+
 
         ScanInitialInfo scanInitialInfo = new ScanInitialInfo(
-                "76a84f5a-4ec6-11e9-af18-9dfa342942d6",
+                "4f696ccc-65ef-11e9-9ddc-f93dfaa9da61",
                 commitList);
         System.out.println(JSONObject.toJSONString(scanInitialInfo));
         kafkaTemplate.send("CloneZNJ", JSONObject.toJSONString(scanInitialInfo));
