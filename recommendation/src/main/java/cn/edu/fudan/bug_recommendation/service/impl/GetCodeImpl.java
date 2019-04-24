@@ -71,7 +71,6 @@ public class GetCodeImpl implements GetCode {
     }
     @Override
     public String getFileContent(String filePath){
-        System.out.println("filePath: "+filePath);
         File file = new File(filePath);
         if (file.exists()){
             curr_code_isExist = "modify";
@@ -85,7 +84,6 @@ public class GetCodeImpl implements GetCode {
                 code.append(s);
                 code.append("\n");
             }
-            System.out.println("s: "+s);
         } catch (IOException e) {
             e.printStackTrace();
         }

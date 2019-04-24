@@ -41,12 +41,11 @@ public class KafkaConsumerService {
         this.analyzeDiffFile = analyzeDiffFile;
     }
 
-    @KafkaListener(id = "bugSolvedInfo", topics = {"solvedBug"}, groupId = "recommendation")
+    @KafkaListener(topics = {"solvedBug"})
     public void bugSolvedInfo(ConsumerRecord<String,String> consumerRecord){
         String msg = consumerRecord.value();
         System.out.println("receive message from topic -> " + consumerRecord.topic() + " : " + msg);
         System.out.println(msg.getClass());
-        JSONArray jsonMsg = JSONArray.parseArray(msg);
         List<Recommendation> list = JSONObject.parseArray(msg,Recommendation.class);
         if (list!=null){
             for (Recommendation info: list){

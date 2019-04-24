@@ -23,8 +23,17 @@ public class RecommendationServiceImpl implements RecommendationService {
         return recommendationDao.isLocationExist(location);
     }
 
+    public boolean isStart_lineExist(Integer start_line){
+        return recommendationDao.isStart_lineExist(start_line);
+
+    }
+
     public boolean isTypeExist(String type){
         return recommendationDao.isTypeExist(type);
+    }
+
+    public boolean isEnd_lineExist(Integer end_line){
+        return recommendationDao.isEnd_lineExist(end_line);
     }
 
     public List<Recommendation> getRecommendationsByType(String type){
@@ -34,7 +43,6 @@ public class RecommendationServiceImpl implements RecommendationService {
 
 
     public void addBugRecommendation(Recommendation recommendation){
-        System.out.println("into addreco");
         if (recommendation.getType()==null ||
                 recommendation.getLocation()==null ||
                 recommendation.getStart_line()==null || recommendation.getEnd_line()==null || recommendation.getCurr_commitid()==null ||
@@ -43,8 +51,8 @@ public class RecommendationServiceImpl implements RecommendationService {
             throw new RuntimeException("param loss");
         }
 
-        if (isLocationExist(recommendation.getLocation()) && isTypeExist(recommendation.getType()))
-            throw new RuntimeException("This error message already exists");
+//        if (isLocationExist(recommendation.getLocation()) && isTypeExist(recommendation.getType()) && isStart_lineExist(recommendation.getStart_line()) && isEnd_lineExist(recommendation.getEnd_line()))
+//            throw new RuntimeException("This error message already exists");
         recommendation.setUuid(UUID.randomUUID().toString());
 
 

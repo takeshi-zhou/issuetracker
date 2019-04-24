@@ -66,6 +66,14 @@
         select * from bug_recommendation where type = #{type}
     </select>
 
+    <select id="getRecommendationsByStart_line" parameterType="Integer" resultMap="recommendation">
+        select * from bug_recommendation where start_line = #{start_line}
+    </select>
+
+    <select id="getRecommendationsByEnd_line" parameterType="Integer" resultMap="recommendation">
+        select * from bug_recommendation where end_line = #{end_line}
+    </select>
+
     <select id="getAllBugRecommendationId" resultType="String">
         select uuid from bug_recommendation;
     </select>
