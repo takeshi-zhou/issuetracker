@@ -30,9 +30,34 @@ public class RecommendationDao {
         return getRecommendationsByType(type).size()!=0;
     }
 
+    public boolean isStart_lineExist(Integer start_line){
+        return getRecommendationsStart_line(start_line).size()!=0;
+    }
+
+    public boolean isEnd_lineExist(Integer end_line){
+        return getRecommendationsEnd_line(end_line).size()!=0;
+    }
+
 //    public Recommendation getRecommendationByType(String type){
 //        return recommendationMapper.getRecommendationByType(type);
 //    }
+    public List<Recommendation> getRecommendationsEnd_line(Integer end_line){
+        List<Recommendation> recommendations = recommendationMapper.getRecommendationsByEnd_line(end_line);
+        List<Recommendation> list = new ArrayList<>();
+        for (Recommendation recommendation : recommendations) {
+            list.add(recommendation);
+        }
+        return list;
+    }
+
+    public List<Recommendation> getRecommendationsStart_line(Integer start_line){
+        List<Recommendation> recommendations = recommendationMapper.getRecommendationsByStart_line(start_line);
+        List<Recommendation> list = new ArrayList<>();
+        for (Recommendation recommendation : recommendations) {
+            list.add(recommendation);
+        }
+        return list;
+    }
 
     public List<Recommendation> getRecommendationsByType(String type) {
         List<Recommendation> recommendations = recommendationMapper.getRecommendationsByType(type);
