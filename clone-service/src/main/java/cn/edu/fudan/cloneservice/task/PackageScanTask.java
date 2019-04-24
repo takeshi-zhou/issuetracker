@@ -172,23 +172,50 @@ public class PackageScanTask {
         return fileList;
     }
 
-    public Map<String, Integer> getCloneDistriMap(List<CloneInfo> lci, String repo_url){
-        Map<String, Integer> res = new HashMap<>();
+    private void addLines(Set<Integer> si, String bug_lines){
+        try {
+            String div[] = bug_lines.split(",");
+            for(String str:div){
+                si.add(Integer.parseInt(str));
+            }
+        }catch (Exception e){
+            logger.info("addLines-->");
+        }
+
+    }
+    public List<Map> getCloneDistriMap(List<CloneInfo> lci, String repo_url){
+        Map<String, Integer> ins_map = new HashMap<>();
+        Map<String, Map> line_map = new HashMap<>();
         for(CloneInfo ci:lci) {
-            String file_path = ci.getFile_path();
-            String file_path_transed = AddrTransUtil.AddrTrans(file_path, repo_url);
-
-
-
             try {
-                File f = new File(file_path_transed);
-                CompilationUnit cunit = JavaParser.parse(f);
-                String key = cunit.getPackageDeclaration().get().getNameAsString();
-                if(res.containsKey(key)){
-                    res.put(key, res.get(key) + 1);
+                String file_path = ci.getFile_path();
+                String package_name = ci.getPackageName();
+                String method_name = ci.getMethod_name();
+                String bug_lines = ci.getBug_lines();
+                if(ins_map.containsKey(package_name)){
+                    ins_map.put(package_name, ins_map.get(package_name) + 1);
                 }else{
-                    res.put(key, 1);
+                    ins_map.put(package_name, 1);
                 }
+                if(line_map.containsKey(package_name)){
+                    Map<String, Set> subMap =  line_map.get(package_name);
+                    if(subMap.containsKey(file_path)){
+                        Set<Integer> si =  subMap.get(file_path);
+                        addLines(si, bug_lines);
+                    }else {
+                        Set<Integer> si = new HashSet<>();
+                        addLines(si,bug_lines);
+                        subMap.put(file_path, si);
+                    }
+                }else {
+                    Map<String, Set> file_line_map = new HashMap<>();
+                    Set<Integer> si = new HashSet<>();
+                    addLines(si,bug_lines);
+                    file_line_map.put(file_path, si);
+                    line_map.put(package_name, file_line_map);
+                }
+
+
 
             }catch (Exception e){
                 logger.info("getCloneDistriMap-->" + e.getMessage());

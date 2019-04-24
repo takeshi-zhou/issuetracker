@@ -3,7 +3,9 @@ package cn.edu.fudan.cloneservice;
 
 
 import cn.edu.fudan.cloneservice.component.RestInterfaceManager;
+import cn.edu.fudan.cloneservice.dao.CloneInfoDao;
 import cn.edu.fudan.cloneservice.dao.PackageNameDao;
+import cn.edu.fudan.cloneservice.domain.CloneInfo;
 import cn.edu.fudan.cloneservice.domain.PackageInfo;
 import cn.edu.fudan.cloneservice.domain.ScanInitialInfo;
 import cn.edu.fudan.cloneservice.mapper.PackageNameMapper;
@@ -15,6 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class CloneServiceApplicationTests {
@@ -25,6 +29,8 @@ public class CloneServiceApplicationTests {
     private PackageNameMapper packageNameMapper;
     @Autowired
     private RestInterfaceManager restInterfaceManager;
+    @Autowired
+    private CloneInfoDao cloneInfoDao;
 
     @Test
     @SuppressWarnings("unchecked")
@@ -59,6 +65,16 @@ public class CloneServiceApplicationTests {
 
             System.out.println("Error");
         }
+
+    }
+
+    @Test
+    public void testCloneInfo(){
+        String repoId = "4f696ccc-65ef-11e9-9ddc-f93dfaa9da61";
+        String commit_id = "03f353e39d23c71825405acd22db94428323997b";
+        List<CloneInfo> lci = cloneInfoDao.getCloneInfoByRepoIdAndCommitId(repoId, commit_id);
+        System.out.println(lci.size());
+
 
     }
 }

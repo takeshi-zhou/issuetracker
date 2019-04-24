@@ -9,9 +9,10 @@
         <result property="end_line" column="end_line"/>
         <result property="file_path" column="file_path"/>
         <result property="class_name" column="method_name"/>
+        <result property="bug_lines" column="bug_lines"/>
     </resultMap>
     <select id="selectCloneInfoByCommitIdAndRepoId" parameterType="String" resultMap="clone_info_result_map">
-        select rawIssue.uuid, start_line, end_line, file_path, class_name, method_name
+        select rawIssue.uuid, start_line, end_line, file_path, class_name, method_name, bug_lines
         from rawIssue INNER JOIN location ON rawIssue.uuid = location.rawIssue_id
         where category = 'clone'
         and repo_id  = #{repoId}

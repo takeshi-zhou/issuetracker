@@ -7,14 +7,41 @@ public class CloneInfo {
     private String file_path;
     private String class_name;
     private String method_name;
+    private String bug_lines;
 
-    public CloneInfo(String uuid, int start_line, int end_line, String file_path, String class_name, String method_name) {
+    public CloneInfo(String uuid, int start_line, int end_line, String file_path, String class_name, String method_name, String bug_lines) {
         this.uuid = uuid;
         this.start_line = start_line;
         this.end_line = end_line;
         this.file_path = file_path;
         this.class_name = class_name;
         this.method_name = method_name;
+        this.bug_lines = bug_lines;
+    }
+
+    public String getPackageName(){
+        String div[] = class_name.split("-*-");
+        if(div.length != 2){
+            return "get_package_name_error";
+        }else {
+            return div[0];
+        }
+    }
+    public String getClassName(){
+        String div[] = class_name.split("-*-");
+        if(div.length != 2){
+            return "get_package_name_error";
+        }else {
+            return div[1];
+        }
+    }
+
+    public String getBug_lines() {
+        return bug_lines;
+    }
+
+    public void setBug_lines(String bug_lines) {
+        this.bug_lines = bug_lines;
     }
 
     public String getUuid() {
