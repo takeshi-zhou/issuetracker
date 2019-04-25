@@ -8,6 +8,8 @@ public interface GetCode {
     String getCode(String repoId,String commit_id,String location);
     String getFileContent(String filePath);
     String getModification_method();
+    String getRepoName(String repoid);
+    String getFileName(String location);
     String getCodePrev(String repopath,String commitid,String nextcommitid,int startline,int endline);
     String getCodeCurr(String repopath,String commitid,String nextcommitid,int startline,int endline);
 }

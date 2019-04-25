@@ -5,6 +5,7 @@ import cn.edu.fudan.bug_recommendation.domain.BugSolvedBasicInfo;
 import cn.edu.fudan.bug_recommendation.domain.Recommendation;
 import cn.edu.fudan.bug_recommendation.service.AnalyzeDiffFile;
 import cn.edu.fudan.bug_recommendation.service.CompleteReco;
+import cn.edu.fudan.bug_recommendation.service.GetCode;
 import cn.edu.fudan.bug_recommendation.service.RecommendationService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -22,6 +23,7 @@ public class KafkaConsumerService {
     private RecommendationService recommendationService;
     private CompleteReco completeReco;
     private AnalyzeDiffFile analyzeDiffFile;
+    private GetCode getCode;
 
     @Autowired
     public void setRecommendationService(RecommendationService recommendationService){
@@ -31,6 +33,9 @@ public class KafkaConsumerService {
     public void setRecommendationDao(RecommendationDao recommendationDao) {
         this.recommendationDao = recommendationDao;
     }
+    @Autowired
+    public void setGetCode(GetCode getCode){this.getCode=getCode;}
+
     @Autowired
     public void setCompleteReco(CompleteReco completeReco){
         this.completeReco = completeReco;
@@ -43,13 +48,17 @@ public class KafkaConsumerService {
 
     @KafkaListener(topics = {"solvedBug"})
     public void bugSolvedInfo(ConsumerRecord<String,String> consumerRecord){
-        String msg = consumerRecord.value();
-        System.out.println("receive message from topic -> " + consumerRecord.topic() + " : " + msg);
-        System.out.println(msg.getClass());
-        List<Recommendation> list = JSONObject.parseArray(msg,Recommendation.class);
-        if (list!=null){
-            for (Recommendation info: list){
-                completeReco.completeCode(info);
+            String msg = consumerRecord.value();
+            System.out.println("receive message from topic -> " + consumerRecord.topic() + " : " + msg);
+            List<Recommendation> list = JSONObject.parseArray(msg, Recommendation.class);
+            if (list != null) {
+                for (Recommendation info : list) {
+                    completeReco.completeCode(info);
+                    String repoName = getCode.getRepoName(info.getRepoid());
+                    String fileName = getCode.getFileName(info.getLocation());
+                    info.setReponame(repoName);
+                    info.setFilename(fileName);
+                    System.out.println("repoName: "+repoName);
 //                JSONObject json = analyzeDiffFile.getDiffRange(newInfo.getLocation(),newInfo.getNext_commitid(),newInfo.getCurr_commitid(),newInfo.getBug_lines());
 //                if(json.getInteger("nextstart_line")!=0){
 //                    newInfo.setStart_line(json.getInteger("start_line"));
@@ -58,8 +67,8 @@ public class KafkaConsumerService {
 //                    newInfo.setNextend_line(json.getInteger("nextend_line"));
 //                    newInfo.setDescription(json.getString("description"));
 //                }
-                recommendationService.addBugRecommendation(info);
-            }
+                    recommendationService.addBugRecommendation(info);
+                }
 
         }
 

@@ -36,7 +36,9 @@
         nextstart_line,
         nextend_line,
         repoid,
-        modification_method
+        modification_method,
+        reponame,
+        filename
         )
         values
         (
@@ -54,7 +56,9 @@
         #{nextstart_line},
         #{nextend_line},
         #{repoid},
-        #{modification_method}
+        #{modification_method},
+        #{reponame},
+        #{filename}
         )
     </insert>
 
@@ -76,6 +80,10 @@
 
     <select id="getAllBugRecommendationId" resultType="String">
         select uuid from bug_recommendation;
+    </select>
+
+    <select id="getRepoNameByRepoId" resultType="String">
+        select name from project where repo_id = #{repoid};
     </select>
 
 </mapper>

@@ -19,6 +19,8 @@ public interface RecommendationMapper {
 
     List<Recommendation> getRecommendationsByEnd_line(@Param("end_line") Integer end_line);
 
+    String getRepoNameByRepoId(@Param("repoid") String repoid);
+
     List<String> getAllBugRecommendationId();
 
 }
