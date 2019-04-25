@@ -20,7 +20,7 @@ public class CloneInfo {
     }
 
     public String getPackageName(){
-        String div[] = class_name.split("-*-");
+        String div[] = class_name.split("-\\*-");
         if(div.length != 2){
             return "get_package_name_error";
         }else {
@@ -28,9 +28,9 @@ public class CloneInfo {
         }
     }
     public String getClassName(){
-        String div[] = class_name.split("-*-");
+        String div[] = class_name.split("-\\*-");
         if(div.length != 2){
-            return "get_package_name_error";
+            return "get_class_name_error";
         }else {
             return div[1];
         }
@@ -91,4 +91,6 @@ public class CloneInfo {
     public void setMethod_name(String method_name) {
         this.method_name = method_name;
     }
+
+
 }

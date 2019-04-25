@@ -39,7 +39,7 @@ public class PackageScanTask {
     private PackageNameDao packageNameDao;
     private CloneInfoDao cloneInfoDao;
 
-    List<File> fileList = new ArrayList<>();
+    private List<File> fileList;
 
     @Autowired
     public void setCloneInfoDao(CloneInfoDao cloneInfoDao) {
@@ -114,18 +114,20 @@ public class PackageScanTask {
             //#2 考虑上锁 释放锁
 
             //#3 获取分析结果 存入数据库
-            List<File> fileList = getFileList(repo_url);
+            fileList = new ArrayList<>();
+            getFileList(repo_url);
             Map<String, List> map_name_method_file_count = getNameMethodFileCountMap(fileList);
             List<CloneInfo> lci = cloneInfoDao.getCloneInfoByRepoIdAndCommitId(repoId, commit_id);
-            Map<String, Integer> map_clone_dis = getCloneDistriMap(lci, repo_url);
+            List<Map> list_distr = getCloneDistriMap(lci);
             // store this into db
-            packageNameDao.insertPackageInfo(repoId, commit_id, map_name_method_file_count, map_clone_dis);
+            packageNameDao.insertPackageInfo(repoId, commit_id, map_name_method_file_count, list_distr);
             logger.info("startScan-->insert package info should be OK!");
 
         }catch (Exception e){
             logger.info("startScan-->" + e.getMessage());
         }
         finally {
+            fileList = null;
             //now free the repo
             if(freeRepoUrl(repoId, repo_url) == true){
                 logger.info("startScan-->Free url ok");
@@ -151,6 +153,8 @@ public class PackageScanTask {
         }
 
     }
+
+
 
     private  List<File> getFileList(String strPath) {
 
@@ -183,7 +187,7 @@ public class PackageScanTask {
         }
 
     }
-    public List<Map> getCloneDistriMap(List<CloneInfo> lci, String repo_url){
+    public List<Map> getCloneDistriMap(List<CloneInfo> lci){
         Map<String, Integer> ins_map = new HashMap<>();
         Map<String, Map> line_map = new HashMap<>();
         for(CloneInfo ci:lci) {
@@ -223,6 +227,9 @@ public class PackageScanTask {
             }
 
         }
+        List<Map> res = new ArrayList<>();
+        res.add(ins_map);
+        res.add(line_map);
         return res;
     }
 
@@ -243,8 +250,12 @@ public class PackageScanTask {
             try {
                 //把一个java代码文本解析成单元
                 CompilationUnit cunit = JavaParser.parse(file);
-//                cunit.accept(new ClassLevelVisitor(),null);
-                String name = cunit.getPackageDeclaration().get().getNameAsString();
+                String name;
+                try {
+                    name = cunit.getPackageDeclaration().get().getNameAsString();
+                }catch (NoSuchElementException e){
+                    name = "null";
+                }
                 List<MethodDeclaration> lmd = getMethodList(cunit);
                 List<Integer> list;
                 if(!map_name_method_num.containsKey(name)){//if not contains this name
@@ -256,10 +267,6 @@ public class PackageScanTask {
                 list = map_name_method_num.get(name);
                 list.set(0, list.get(0) +  lmd.size()) ;//update method num
                 list.set(1, list.get(1) + 1);//update file num
-            }
-            catch (NoSuchElementException e){
-//					e.printStackTrace();
-                continue;
             }
             catch (FileNotFoundException e){
                 logger.info("getNameMethodFileCountMap-->" + e.toString());

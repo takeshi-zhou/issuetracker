@@ -17,20 +17,32 @@ public class PackageNameDao {
         this.packageNameMapper = packageNameMapper;
     }
 
-    public void  insertPackageInfo(String repo_id, String commi_id, Map<String, List> map_name_method_file_count, Map<String, Integer> map_clone_dis){
-        for(String name:map_name_method_file_count.keySet()){
-            String uuid = UUID.randomUUID().toString();
-            int clone_num;
-            if(map_clone_dis.containsKey(name)){
-                clone_num = map_clone_dis.get(name);
-            }else {
-                clone_num = 0;
+    public void  insertPackageInfo(String repo_id, String commi_id, Map<String, List> map_name_method_file_count, List<Map> list_distr)
+    {
+
+            Map<String, Integer> ins_map = list_distr.get(0);
+            Map<String, Map> line_map = list_distr.get(1);
+            for(String name:map_name_method_file_count.keySet()){
+                String uuid = UUID.randomUUID().toString();
+                int clone_ins_num;
+                if(ins_map.containsKey(name)){
+                    clone_ins_num = ins_map.get(name);
+                }else {
+                    clone_ins_num = 0;
+                }
+                List<Integer> list = map_name_method_file_count.get(name);
+//            assert (list.size() == 2);
+                int clone_ins_line = 0;
+                if(line_map.containsKey(name)){
+                    Map<String, Set> submap = line_map.get(name);
+                    for(String path:submap.keySet()){
+                        clone_ins_line += submap.get(path).size();
+                    }
+                }
+                PackageInfo packageInfo = new PackageInfo(uuid,repo_id,commi_id, name, list.get(1), list.get(0), clone_ins_num, clone_ins_line, 0);
+                packageNameMapper.insertPackageNameSetByRepoIdAndCommitId(packageInfo);
             }
-            List<Integer> list = map_name_method_file_count.get(name);
-            assert (list.size() == 2);
-            PackageInfo packageInfo = new PackageInfo(uuid,repo_id,commi_id, name, list.get(0).intValue(), clone_num, list.get(1).intValue());
-            packageNameMapper.insertPackageNameSetByRepoIdAndCommitId(packageInfo);
-        }
+
     }
     public List<PackageInfo> getPackageInfoByRepoIdAndCommitId(String repo_id, String commit_id){
         return packageNameMapper.selectPackageNameSetByRepoIdAndCommitId(repo_id, commit_id);

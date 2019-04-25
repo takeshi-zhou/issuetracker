@@ -36,7 +36,7 @@ public class CloneServiceApplicationTests {
     @SuppressWarnings("unchecked")
     public void testDao(){
         String test = "test";
-        PackageInfo packageInfo = new PackageInfo(test, test,test,test,1,1,1);
+        PackageInfo packageInfo = new PackageInfo(test, test,test,test,1,1,1,1,1);
 
 //        packageNameMapper.insertPackageNameSetByRepoIdAndCommitId(packageInfo);
 

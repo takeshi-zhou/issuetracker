@@ -8,7 +8,8 @@
         <result property="start_line" column="start_line"/>
         <result property="end_line" column="end_line"/>
         <result property="file_path" column="file_path"/>
-        <result property="class_name" column="method_name"/>
+        <result property="class_name" column="class_name"/>
+        <result property="method_name" column="method_name"/>
         <result property="bug_lines" column="bug_lines"/>
     </resultMap>
     <select id="selectCloneInfoByCommitIdAndRepoId" parameterType="String" resultMap="clone_info_result_map">
