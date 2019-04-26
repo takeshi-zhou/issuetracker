@@ -190,11 +190,12 @@ public class PackageScanTask {
     public List<Map> getCloneDistriMap(List<CloneInfo> lci){
         Map<String, Integer> ins_map = new HashMap<>();
         Map<String, Map> line_map = new HashMap<>();
+        Map<String, Set> method_map = new HashMap<>();
         for(CloneInfo ci:lci) {
             try {
                 String file_path = ci.getFile_path();
                 String package_name = ci.getPackageName();
-                String method_name = ci.getMethod_name();
+                String full_method_name = file_path + "," + ci.getMethod_name();
                 String bug_lines = ci.getBug_lines();
                 if(ins_map.containsKey(package_name)){
                     ins_map.put(package_name, ins_map.get(package_name) + 1);
@@ -218,6 +219,14 @@ public class PackageScanTask {
                     file_line_map.put(file_path, si);
                     line_map.put(package_name, file_line_map);
                 }
+                if(method_map.containsKey(package_name)){
+                    Set<String> subset = method_map.get(package_name);
+                    subset.add(full_method_name);
+                }else {
+                    Set<String> subset = new HashSet<>();
+                    subset.add(full_method_name);
+                    method_map.put(package_name, subset);
+                }
 
 
 
@@ -230,6 +239,7 @@ public class PackageScanTask {
         List<Map> res = new ArrayList<>();
         res.add(ins_map);
         res.add(line_map);
+        res.add(method_map);
         return res;
     }
 

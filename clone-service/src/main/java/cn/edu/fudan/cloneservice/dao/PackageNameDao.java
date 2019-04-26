@@ -22,6 +22,7 @@ public class PackageNameDao {
 
             Map<String, Integer> ins_map = list_distr.get(0);
             Map<String, Map> line_map = list_distr.get(1);
+            Map<String, Set> method_map = list_distr.get(2);
             for(String name:map_name_method_file_count.keySet()){
                 String uuid = UUID.randomUUID().toString();
                 int clone_ins_num;
@@ -39,7 +40,12 @@ public class PackageNameDao {
                         clone_ins_line += submap.get(path).size();
                     }
                 }
-                PackageInfo packageInfo = new PackageInfo(uuid,repo_id,commi_id, name, list.get(1), list.get(0), clone_ins_num, clone_ins_line, 0);
+                int method_num = 0;
+                if(method_map.containsKey(name)){
+                    Set subset = method_map.get(name);
+                    method_num = subset.size();
+                }
+                PackageInfo packageInfo = new PackageInfo(uuid,repo_id,commi_id, name, list.get(1), list.get(0), clone_ins_num, clone_ins_line, method_num);
                 packageNameMapper.insertPackageNameSetByRepoIdAndCommitId(packageInfo);
             }
 
