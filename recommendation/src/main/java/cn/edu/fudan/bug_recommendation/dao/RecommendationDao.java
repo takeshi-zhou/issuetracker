@@ -2,6 +2,7 @@ package cn.edu.fudan.bug_recommendation.dao;
 
 import cn.edu.fudan.bug_recommendation.domain.Recommendation;
 import cn.edu.fudan.bug_recommendation.mapper.RecommendationMapper;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -36,6 +37,11 @@ public class RecommendationDao {
 
     public boolean isEnd_lineExist(Integer end_line){
         return getRecommendationsEnd_line(end_line).size()!=0;
+    }
+
+    public String getRepoNameByRepoId(String repoId){
+        String reponame = recommendationMapper.getRepoNameByRepoId(repoId);
+        return reponame;
     }
 
 //    public Recommendation getRecommendationByType(String type){

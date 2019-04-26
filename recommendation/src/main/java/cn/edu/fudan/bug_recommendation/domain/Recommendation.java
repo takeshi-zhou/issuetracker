@@ -18,6 +18,25 @@ public class Recommendation implements Serializable {
     private String next_commitid;
     private String repoid;
     private String modification_method;
+    private String reponame;
+    private String filename;
+
+    public String getReponame() {
+        return reponame;
+    }
+
+    public void setReponame(String reponame) {
+        this.reponame = reponame;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
 
     public String getModification_method() {
         return modification_method;

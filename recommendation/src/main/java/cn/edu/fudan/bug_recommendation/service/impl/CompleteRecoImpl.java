@@ -32,9 +32,12 @@ public class CompleteRecoImpl implements CompleteReco {
         String currCode = getCode.getCode(info.getRepoid(),info.getNext_commitid(),info.getLocation());
         //String currCode = getCode.getFileContent("/home/fdse/user/issueTracker/ScanMessageWithTime.java");
         info.setCurr_code(currCode);
+        System.out.println("prevcode: "+prevCode.length());
+        System.out.println("currCode: "+currCode.length());
         String modification_method = getCode.getModification_method();
         System.out.println(modification_method);
         info.setModification_method(modification_method);
+
         return info;
     }
 //    public List<Recommendation> getAllReco(Object param){

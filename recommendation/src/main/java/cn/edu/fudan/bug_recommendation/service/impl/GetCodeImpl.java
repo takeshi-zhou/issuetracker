@@ -1,7 +1,9 @@
 package cn.edu.fudan.bug_recommendation.service.impl;
 
+import cn.edu.fudan.bug_recommendation.dao.RecommendationDao;
 import cn.edu.fudan.bug_recommendation.service.GetCode;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,12 @@ import java.util.Map;
 public class GetCodeImpl implements GetCode {
     @Value("${codePath}")
     private String codeServicePath;
+    private RecommendationDao recommendationDao;
+
+    @Autowired
+    public void setRecommendationDao(RecommendationDao recommendationDao){
+        this.recommendationDao=recommendationDao;
+    }
 
     @Autowired
     private RestTemplate restTemplate;
@@ -23,18 +31,28 @@ public class GetCodeImpl implements GetCode {
 
     @Override
     public JSONObject getRepoPath(String repoId,String commit_id){
+        System.out.println("getpathurl: " + codeServicePath + "?repo_id=" + repoId + "&commit_id=" + commit_id);
         return restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId + "&commit_id=" + commit_id, JSONObject.class);
 
     }
     @Override
+    public String getRepoName(String repoid){
+        return recommendationDao.getRepoNameByRepoId(repoid);
+    }
+    @Override
+    public String getFileName(String location){
+        String paths[] = location.split("/");
+        int len = paths.length;
+        return paths[len-1];
+
+    }
+    @Override
     public JSONObject freeRepoPath(String repoId,String repoPath){
-        System.out.println("repoId: "+repoId);
-        System.out.println("repoPath: "+repoPath);
+        System.out.println("freeurl: "+codeServicePath + "/free?repo_id=" + repoId + "&path=" +repoPath);
         return restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId + "&path=" +repoPath, JSONObject.class);
     }
     @Override
     public String getCode(String repoId,String commit_id,String location){
-        System.out.println("intogetCode");
         String code = null;
         String repoHome = null;
         String[] paths = location.split("/");
@@ -51,12 +69,14 @@ public class GetCodeImpl implements GetCode {
             JSONObject response = getRepoPath(repoId,commit_id).getJSONObject("data");
             if (response != null && response.getString("status").equals("Successful")) {
                 repoHome=response.getString("content");
+                System.out.println(repoHome);
+                System.out.println(repoHome+"/" +file_path);
                 code = getFileContent(repoHome+"/" +file_path);
             } else {
                 code = "";
             }
         }catch (Exception e){
-            System.out.println(e.getMessage());
+            System.out.println("errormsg"+e.getMessage());
         }finally {
             if(repoHome!=null){
                 JSONObject response = freeRepoPath(repoId,repoHome);
