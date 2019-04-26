@@ -24,6 +24,7 @@ public class KafkaConsumerService {
     private CompleteReco completeReco;
     private AnalyzeDiffFile analyzeDiffFile;
     private GetCode getCode;
+    int cnt = 0;
 
     @Autowired
     public void setRecommendationService(RecommendationService recommendationService){
@@ -58,7 +59,7 @@ public class KafkaConsumerService {
                     String fileName = getCode.getFileName(info.getLocation());
                     info.setReponame(repoName);
                     info.setFilename(fileName);
-                    System.out.println("repoName: "+repoName);
+                    System.out.println("repoName: " + repoName);
 //                JSONObject json = analyzeDiffFile.getDiffRange(newInfo.getLocation(),newInfo.getNext_commitid(),newInfo.getCurr_commitid(),newInfo.getBug_lines());
 //                if(json.getInteger("nextstart_line")!=0){
 //                    newInfo.setStart_line(json.getInteger("start_line"));
@@ -67,10 +68,11 @@ public class KafkaConsumerService {
 //                    newInfo.setNextend_line(json.getInteger("nextend_line"));
 //                    newInfo.setDescription(json.getString("description"));
 //                }
-                    recommendationService.addBugRecommendation(info);
+                    if(repoName!=null){
+                        recommendationService.addBugRecommendation(info);
+                    }
+
                 }
-
-        }
-
+            }
     }
 }

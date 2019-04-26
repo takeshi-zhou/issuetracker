@@ -86,4 +86,9 @@
         select name from project where repo_id = #{repoid};
     </select>
 
+    <select id="getRecommendationsByBuglines" resultType="String">
+        select * from bug_recommendation where bug_lines = #{bug_lines};
+    </select>
+
+
 </mapper>

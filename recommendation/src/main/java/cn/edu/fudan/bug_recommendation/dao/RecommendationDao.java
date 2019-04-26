@@ -31,6 +31,10 @@ public class RecommendationDao {
         return getRecommendationsByType(type).size()!=0;
     }
 
+    public boolean isBuglinesExist(String buglines){
+        return getRecommendationsByBuglines(buglines).size()!=0;
+    }
+
     public boolean isStart_lineExist(Integer start_line){
         return getRecommendationsStart_line(start_line).size()!=0;
     }
@@ -65,8 +69,18 @@ public class RecommendationDao {
         return list;
     }
 
+
     public List<Recommendation> getRecommendationsByType(String type) {
         List<Recommendation> recommendations = recommendationMapper.getRecommendationsByType(type);
+        List<Recommendation> list = new ArrayList<>();
+        for (Recommendation recommendation : recommendations) {
+            list.add(recommendation);
+        }
+        return list;
+    }
+
+    public List<Recommendation> getRecommendationsByBuglines(String buglines) {
+        List<Recommendation> recommendations = recommendationMapper.getRecommendationsByBug_lines(buglines);
         List<Recommendation> list = new ArrayList<>();
         for (Recommendation recommendation : recommendations) {
             list.add(recommendation);
