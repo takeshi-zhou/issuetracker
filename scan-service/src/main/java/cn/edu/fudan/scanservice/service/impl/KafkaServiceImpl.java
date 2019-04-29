@@ -155,6 +155,7 @@ public class KafkaServiceImpl implements KafkaService {
         list.add(scanMessageWithTime);
         //发送消息给度量服务，将度量信息保存
         kafkaTemplate.send("Measure",JSONArray.toJSONString(list));
+        logger.info("message has been send to topic Measure -> {}",repoId);
     }
 
     @KafkaListener(id = "updateCommit", topics = {"UpdateCommit"}, groupId = "updateCommit")
@@ -216,6 +217,7 @@ public class KafkaServiceImpl implements KafkaService {
         }
         //发送消息给度量服务，将度量信息保存
         kafkaTemplate.send("Measure",JSONArray.toJSONString(filteredCommits));
+        logger.info("message has been send to topic Measure -> {}",repoId);
     }
 
     private boolean existProject(String repoId,String category,boolean isFirst){
