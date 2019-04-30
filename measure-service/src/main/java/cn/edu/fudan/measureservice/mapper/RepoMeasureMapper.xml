@@ -50,6 +50,10 @@
            )
     </insert>
 
+    <select id="sameMeasureOfOneCommit" resultType="int">
+        select count(*) from repo_measure where repo_id = #{repo_id} and commit_id = #{commit_id}
+    </select>
+
     <select id="getLatestMeasureData" resultMap="repoMeasure">
         select
             files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines
@@ -67,7 +71,7 @@
         from
             repo_measure
         where
-            repo_id = #{repo_id}   and  commmit_time  &lt; #{time_line}
+            repo_id = #{repo_id}   and  commit_time  &lt; #{time_line}
         order by commit_time desc
         limit 1
     </select>

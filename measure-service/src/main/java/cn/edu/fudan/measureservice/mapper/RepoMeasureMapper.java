@@ -9,6 +9,8 @@ import java.util.Date;
 @Repository
 public interface RepoMeasureMapper {
 
+    int sameMeasureOfOneCommit(@Param("repo_id")String repo_id,@Param("commit_id")String commit_id);
+
     void insertOneRepoMeasure(RepoMeasure repoMeasure);
 
     RepoMeasure getLatestMeasureData(@Param("repo_id")String repo_id);
