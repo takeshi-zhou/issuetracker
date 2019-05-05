@@ -32,6 +32,8 @@ public class RestInterfaceManager {
     private String tagServicePath;
     @Value("${recommendation.path}")
     String recommendationServicePath;
+    @Value("${repository.service.path}")
+    private String repoServicePath;
 
     private RestTemplate restTemplate;
 
@@ -145,22 +147,40 @@ public class RestInterfaceManager {
     //-----------------------------------recommendation service---------------------------------------------------------
     public void addSolvedIssueInfo(List<JSONObject> solvedInfos){
         try{
-            restTemplate.postForObject(recommendationServicePath+"/add-bug-recommendation",solvedInfos,JSONObject.class);
+            restTemplate.postForObject(recommendationServicePath + "/add-bug-recommendation",solvedInfos,JSONObject.class);
         }catch (Exception e){
             e.printStackTrace();
         }
     }
 
     public String getRepoPath(String repoId) {
-        return null;
+        //restTemplate.getForObject(repoServicePath + "/" + repoId, String.class);
+        return "/home/fdse/user/issueTracker/repo/github/FasterXML/jackson-core-master";
     }
 
-    public List<String> getDevelopers(String repoId) {
-        return null;
-    }
-
-    public Map<String, String> getDeveloperByComits(Set<String> keySet) {
-        return null;
+    public Map<String, String> getDeveloperByCommits(Set<String> keySet) {
+        //restTemplate.postForObject(repoServicePath + "/developerListsByCommits", keySet ,HashMap.class);
+        Map<String,String> s = new HashMap<>();
+        s.put("7e89cfe4d854e5c1b00d6f01b3790ba2d3c9738a", "tatu.saloranta@iki.fi");
+        s.put("99d90d43bd14d7b1262e5b32f3fb14355dab220d", "tatu.saloranta@iki.fi");
+        s.put("6cfdce3eed883e10b0c67ce4b4e7738cfcb1fc7b", "tatu.saloranta@iki.fi");
+        s.put("b712954e0a4d7bf86f470d123f1768e07f14d6c3", "tatu.saloranta@iki.fi");
+        s.put("105102ba5bbcdd8cd752f9a9dd820164132688e3", "tatu.saloranta@iki.fi");
+        s.put("50905423394bbcf2d6df9d86a1472b81db3b6d62", "tatu.saloranta@iki.fi");
+        s.put("c2b69429e5f8791022b3b6c1bbb585592983f880", "tatu.saloranta@iki.fi");
+        s.put("feddb66f98874a1022c74a7b0bc5b550dc7236e1", "tatu.saloranta@iki.fi");
+        s.put("acda0f9e69043dfcf0a6758ad4dee0af1de3b4ac", "tatu.saloranta@iki.fi");
+        s.put("e7551ed0153df46ee7324567fd4dc8ce8afe7aff", "tatu.saloranta@iki.fi");
+        s.put("569c9e9ec6e53ba54013d254825cf293257edbf6", "tatu.saloranta@iki.fi");
+        s.put("d708338d421df111ab3d4a36bb90b14900594ec0", "tatu.saloranta@iki.fi");
+        s.put("3b4b0a174949ddc83bbba5d74283a243c866844b", "tatu.saloranta@iki.fi");
+        s.put("fdf1663ef024c89535aedef8f890a34938db8c4c", "tatu.saloranta@iki.fi");
+        s.put("d8bed348eb375baa4a2dff933fdac1160ad35f67", "doug.roper@rallyhealth.com");
+        s.put("24f65a28db07467ae9d3b8c5e765e7783067cf06", "tatu.saloranta@iki.fi");
+        s.put("9b53cf5e214aa55f4eebee9e61cb25af21e35ec1", "tatu.saloranta@iki.fi");
+        s.put("465fd8e3ef598abf919feeb01577376b492558a0", "tatu.saloranta@iki.fi");
+        s.put("a8eb65dd6d4da0faf8b329de8fcf53ecd4c2fa8a", "tatu.saloranta@iki.fi");
+        return s;
     }
 
     public Map getRepoAndLatestCommit(List repoList) {

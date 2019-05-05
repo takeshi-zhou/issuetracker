@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -115,8 +116,9 @@ public class IssueDao {
 
     public Map<String, Integer> getCommitNewIssue(String start, String end, String repoId) {
         Map<String, Integer> map = new ConcurrentHashMap<>();
-        for (Map<String, String> m : issueMapper.getCommitNewIssue(start, end, repoId)) {
-            map.put(m.get("key"), Integer.valueOf(m.get("value")));
+        for (WeakHashMap<Object, Object> m : issueMapper.getCommitNewIssue(start, end, repoId)) {
+            Long value = (Long)m.get("value");
+            map.put((String) m.get("key"), value.intValue());
         }
         return map;
     }

@@ -60,5 +60,5 @@ public interface IssueMapper {
 
     int getNumberOfEliminateIssueByDuration(@Param("repo_id") String repoId,@Param("start") String start,@Param("end") String end);
 
-    List<WeakHashMap<String, String>> getCommitNewIssue(@Param("start") String start, @Param("end") String end, @Param("repo_id") String repoId);
+    List<WeakHashMap<Object, Object>> getCommitNewIssue(@Param("start") String start, @Param("end") String end, @Param("repo_id") String repoId);
 }

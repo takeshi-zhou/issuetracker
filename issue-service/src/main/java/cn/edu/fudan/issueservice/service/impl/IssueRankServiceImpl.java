@@ -17,6 +17,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 @Service
@@ -68,11 +69,11 @@ public class IssueRankServiceImpl implements IssueRankService {
         for (Map<String, String> m : rawIssueDao.getRankOfFileBaseIssueQuantity(repoId, commitId)) {
             map.put(m.get("key"), m.get("value"));
         }
-        return map;
+        return sortByValue(map);
     }
 
 
-    // ？？？？ 需要代码行数 需要提前入库
+    // 需要文件的代码行数 需要提前入库
     @Override
     public Map rankOfFileBaseDensity(String repoId, String commitId) {
         Map<String, String> map = new WeakHashMap<>();
@@ -85,7 +86,7 @@ public class IssueRankServiceImpl implements IssueRankService {
     // 开发人员在某段时间内贡献的代码行数 除以 产生的新Issue数量
     // 平均每多少行代码会产生一个新的Issue
     @Override
-    public Map rankOfDeveloper(String repoId, String duration, String developerId) {
+    public Map rankOfDeveloper(String repoId, String duration) {
         // duration: 2018.01.01-2018.12.12
         if (duration.length() < 21)
             throw new RuntimeException("duration error!");
@@ -94,24 +95,31 @@ public class IssueRankServiceImpl implements IssueRankService {
         String repoPath = restInterfaceManager.getRepoPath(repoId);
         //commitId 单个commit所对应的引入Issue数量
         Map<String, Integer> commitNewIssue = issueDao.getCommitNewIssue(start, end, repoId);
-        //某段时间内的commit列表以及对应的Issue数量 commitId developer-email
-        Map<String, String> commitDeveloper = restInterfaceManager.getDeveloperByComits(commitNewIssue.keySet());
+        // 某段时间内的commit列表以及对应的Issue数量 commitId developer-email
+        // 一个开发人员可能对应多个commit
+        Map<String, String> commitDeveloper = restInterfaceManager.getDeveloperByCommits(commitNewIssue.keySet());
 
         // 某段时间内开发人员列表
-        List<String> developers = (List<String>) commitDeveloper.values();
+        Set<String> developers = new HashSet<>(commitDeveloper.values());
+
         // 开发人员 代码行数
         Map<String,Integer> usersCodeLine  = executeShellUtil.developersLinesOfCode(start, end , repoPath, developers);
-        try {
-            for (String commitId : commitDeveloper.keySet()) {
-                String developer = commitDeveloper.get(commitId);
-                int newIssue = commitNewIssue.get(commitId);
-                int codeLine = usersCodeLine.get(developer);
-                // 平均多少行代码会出现一个bug（取整）
-                usersCodeLine.put(developer, codeLine/newIssue);
+
+        // 开发人员 issue数量
+        Map<String, Integer> developerNewIssue = new ConcurrentHashMap<>(16);
+        for (String commitId : commitDeveloper.keySet()) {
+            String developer = commitDeveloper.get(commitId);
+            int newIssue = commitNewIssue.get(commitId);
+            if (developerNewIssue.containsKey(developer)) {
+                newIssue += developerNewIssue.get(developer);
             }
-        }catch (NullPointerException e) {
-            throw new RuntimeException(e.getMessage());
+            developerNewIssue.put(developer, newIssue);
         }
+
+        for (String developer : developerNewIssue.keySet()) {
+            usersCodeLine.put(developer, usersCodeLine.get(developer) / developerNewIssue.get(developer) );
+        }
+
         //排序
         return sortByValue(usersCodeLine);
     }
@@ -120,8 +128,6 @@ public class IssueRankServiceImpl implements IssueRankService {
     @Override
     @SuppressWarnings("unchecked")
     public Map rankOfRepoBaseDensity(String token) {
-
-
         String userId = restInterfaceManager.getAccountId(token);
 
         //得到用户的所有项目目前的代码函数
@@ -146,6 +152,7 @@ public class IssueRankServiceImpl implements IssueRankService {
         return repoIssueNum;
     }
 
+    // 默认由大到小排序
     //类型 V 必须实现 Comparable 接口，并且这个接口的类型是 V 或 V 的任一父类。这样声明后，V 的实例之间，V 的实例和它的父类的实例之间，可以相互比较大小。
     private static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
 /*        List<Map.Entry<K, V>> list = new LinkedList<>(map.entrySet());
