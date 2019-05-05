@@ -70,4 +70,8 @@ public class RawIssueDao {
     public Map<String, Integer> getRepoAndIssueNum(Map repoCommit) {
         return null;
     }
+
+    public int getNumberOfRemainingIssueBasePackage(String repoId, String commit, String packageName) {
+        return rawIssueMapper.getNumberOfRemainingIssueBasePackage(repoId, commit, packageName);
+    }
 }

@@ -40,7 +40,7 @@ public class IssueMeasurementController {
     //detail : developerId fileName packageName
     @GetMapping(value = {"/measurement/remainingIssue/{repoId}/{commit}"})
     public Object getNumberOfRemainingIssue(@PathVariable("repoId") String repoId, @PathVariable("commit") String commit,
-                                            @RequestParam("spaceType") String spaceType,@RequestParam("detail") String detail) {
+                                            @RequestParam("spaceType") String spaceType,@RequestParam(value = "detail", required = false) String detail) {
         return issueMeasureInfoService.numberOfRemainingIssue(repoId, commit, spaceType, detail);
     }
 

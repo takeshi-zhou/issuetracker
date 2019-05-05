@@ -143,12 +143,18 @@
        order by types
    </select>
 
-    <select id="getNumberOfRemainingIssue" resultType="Integer">
-        select count (*) from rawIssue where repo_id = #{repo_id} and commit_id = #{commit_id}
+    <select id="getNumberOfRemainingIssue" parameterType="String" resultType="Integer">
+        select count(*) from rawIssue where repo_id = #{repo_id} and commit_id = #{commit_id};
     </select>
 
     <select id="getNumberOfRemainingIssueBaseFile" resultType="Integer">
-        select count (*) from rawIssue where repo_id = #{repo_id} and commit_id = #{commit_id} and file_name like  ${file_name}
+        select count(*) from rawIssue where repo_id = #{repo_id} and commit_id = #{commit_id} and file_name =   #{file_name}
+    </select>
+
+    <select id="getNumberOfRemainingIssueBasePackage" resultType="Integer">
+        select count(*) from location where rawIssue_id in
+        (select uuid from rawIssue where repo_id = #{repo_id} and commit_id = #{commit_id})
+        and file_path like #{package_name}
     </select>
 
     <select id="getRankOfFileBaseIssueQuantity" resultType="java.util.WeakHashMap">
