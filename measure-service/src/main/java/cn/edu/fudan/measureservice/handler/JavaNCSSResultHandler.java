@@ -49,15 +49,18 @@ public class JavaNCSSResultHandler implements ResultHandler{
         while(iterator.hasNext()){
             Element packageElement=iterator.next();
             Package i_package=new Package();
-            i_package.setName(packageElement.elementText("name"));
-            i_package.setClasses(Integer.valueOf(packageElement.elementText("classes")));
-            i_package.setFunctions(Integer.valueOf(packageElement.elementText("functions")));
-            i_package.setNcss(Integer.valueOf(packageElement.elementText("ncss")));
-            i_package.setJavaDocs(Integer.valueOf(packageElement.elementText("javadocs")));
-            i_package.setJavaDocsLines(Integer.valueOf(packageElement.elementText("javadoc_lines")));
-            i_package.setSingleCommentLines(Integer.valueOf(packageElement.elementText("single_comment_lines")));
-            i_package.setMultiCommentLines(Integer.valueOf(packageElement.elementText("multi_comment_lines")));
-            packageList.add(i_package);
+            String name=packageElement.elementText("name");
+            if(!name.equals(".")){
+                i_package.setName(name);
+                i_package.setClasses(Integer.valueOf(packageElement.elementText("classes")));
+                i_package.setFunctions(Integer.valueOf(packageElement.elementText("functions")));
+                i_package.setNcss(Integer.valueOf(packageElement.elementText("ncss")));
+                i_package.setJavaDocs(Integer.valueOf(packageElement.elementText("javadocs")));
+                i_package.setJavaDocsLines(Integer.valueOf(packageElement.elementText("javadoc_lines")));
+                i_package.setSingleCommentLines(Integer.valueOf(packageElement.elementText("single_comment_lines")));
+                i_package.setMultiCommentLines(Integer.valueOf(packageElement.elementText("multi_comment_lines")));
+                packageList.add(i_package);
+            }
         }
         packages.setPackages(packageList);
         Element totalElement=packagesElement.element("total");

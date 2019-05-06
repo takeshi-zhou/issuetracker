@@ -12,10 +12,10 @@
                 classes,
                 functions,
                 ncss,
-                javaDocs,
-                javaDocsLines,
-                singleCommentLines,
-                multiCommentLines,
+                java_docs,
+                java_docs_lines,
+                single_comment_lines,
+                multi_comment_lines,
                 commit_id,
                 commit_time,
                 repo_id
@@ -23,18 +23,18 @@
         values
         <foreach collection="list" item="item" index="index" separator=",">
             (
-                #{uuid},
-                #{name},
-                #{classes},
-                #{functions},
-                #{ncss},
-                #{javaDocs},
-                #{javaDocsLines},
-                #{singleCommentLines},
-                #{multiCommentLines},
-                #{commit_id},
-                #{commit_time},
-                #{repo_id}
+                #{item.uuid},
+                #{item.name},
+                #{item.classes},
+                #{item.functions},
+                #{item.ncss},
+                #{item.javaDocs},
+                #{item.javaDocsLines},
+                #{item.singleCommentLines},
+                #{item.multiCommentLines},
+                #{item.commit_id},
+                #{item.commit_time},
+                #{item.repo_id}
             )
         </foreach>
     </insert>

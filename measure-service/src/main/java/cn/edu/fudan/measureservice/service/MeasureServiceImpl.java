@@ -42,6 +42,8 @@ public class MeasureServiceImpl implements MeasureService {
         this.repoMeasureMapper=repoMeasureMapper;
         this.packageMeasureMapper=packageMeasureMapper;
     }
+
+    //获取一个用户所有项目在某个时间段前后度量值的变化
     @Override
     public Object getMeasureDataChange(String userToken, Duration duration) {
         List<Object> projectsMeasureChanges=new ArrayList<>();
@@ -59,50 +61,6 @@ public class MeasureServiceImpl implements MeasureService {
             }
         }
         return projectsMeasureChanges;
-    }
-
-    @Override
-    public void saveMeasureData(String repoId, String commitId,String commitTime) {
-        try{
-            Measure measure=getMeasureDataOfOneCommit(repoId,commitId);
-            saveRepoLevelMeasureData(measure,repoId,commitId,commitTime);
-            savePackageMeasureData(measure,repoId,commitId,commitTime);
-        }catch (Exception e){
-            log.error(e.getMessage());
-        }
-    }
-
-    private void savePackageMeasureData(Measure measure,String repoId,String commitId,String commitTime){
-         List<Package> packages =new ArrayList<>();
-         for(Package p:measure.getPackages().getPackages()){
-             p.setUuid(UUID.randomUUID().toString());
-             p.setCommit_id(commitId);
-             p.setCommit_time(commitTime);
-             p.setRepo_id(repoId);
-             packages.add(p);
-         }
-         if(!packages.isEmpty()){
-             packageMeasureMapper.insertPackageMeasureDataList(packages);
-         }
-    }
-
-    private void saveRepoLevelMeasureData(Measure measure,String repoId,String commitId,String commitTime){
-        RepoMeasure repoMeasure=new RepoMeasure();
-        repoMeasure.setUuid(UUID.randomUUID().toString());
-        repoMeasure.setFiles(measure.getTotal().getFiles());
-        repoMeasure.setNcss(measure.getTotal().getNcss());
-        repoMeasure.setClasses(measure.getTotal().getClasses());
-        repoMeasure.setFunctions(measure.getTotal().getFunctions());
-        repoMeasure.setCcn(measure.getFunctions().getFunctionAverage().getNcss());
-        repoMeasure.setJava_docs(measure.getTotal().getJavaDocs());
-        repoMeasure.setJava_doc_lines(measure.getTotal().getJavaDocsLines());
-        repoMeasure.setSingle_comment_lines(measure.getTotal().getSingleCommentLines());
-        repoMeasure.setMulti_comment_lines(measure.getTotal().getMultiCommentLines());
-        repoMeasure.setCommit_id(commitId);
-        repoMeasure.setCommit_time(commitTime);
-        repoMeasure.setRepo_id(repoId);
-        if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0)
-           repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
     }
 
     private Map<String,Object> getMeasureChangeOfOneProject(String repoId,String repoName,Duration duration){
@@ -145,13 +103,89 @@ public class MeasureServiceImpl implements MeasureService {
             change1=measure1.getMulti_comment_lines()-measure2.getMulti_comment_lines();
             measureChanges.put("multi_comment_lines",change1);
             change2=measure1.getCcn()-measure2.getCcn();
-            measureChanges.put("ccn",change2);
+            measureChanges.put("ccn",Double.valueOf(String.format("%.2f",change2)));
             return measureChanges;
         }
         return null;
     }
 
-/*
+    //监听项目的commit列表的消息,保存度量信息
+    @KafkaListener(id = "measure", topics = {"Measure"}, groupId = "measure")
+    public void commitInfoListener(ConsumerRecord<String, String> consumerRecord) {
+        List<CommitWithTime> commits=JSONArray.parseArray(consumerRecord.value(),CommitWithTime.class);
+        log.info("received message from topic -> " + consumerRecord.topic() + " : " + commits.size()+" commits need to scan!");
+        for(CommitWithTime commit:commits){
+            saveMeasureData(commit.getRepoId(),commit.getCommitId(),commit.getCommitTime());
+        }
+    }
+
+    //保存某个项目某个commit的度量信息
+    @Override
+    public void saveMeasureData(String repoId, String commitId,String commitTime) {
+        try{
+            Measure measure=getMeasureDataOfOneCommit(repoId,commitId);
+            saveRepoLevelMeasureData(measure,repoId,commitId,commitTime);
+            savePackageMeasureData(measure,repoId,commitId,commitTime);
+        }catch (Exception e){
+            log.error(e.getMessage());
+        }
+    }
+
+    //获取单个项目某个commit的度量值
+    private Measure getMeasureDataOfOneCommit(String repoId,String commitId){
+        String repoPath=null;
+        Measure measure=null;
+        try{
+            repoPath=restInterfaceManager.getRepoPath(repoId,commitId);
+            if(repoPath!=null)
+                measure=measureAnalyzer.analyze(repoPath,"",resultHandler);
+        }catch (Exception e){
+            e.printStackTrace();
+            if(repoPath!=null)
+                restInterfaceManager.freeRepoPath(repoId,repoPath);
+        }finally {
+            if(repoPath!=null)
+                restInterfaceManager.freeRepoPath(repoId,repoPath);
+        }
+        return measure;
+    }
+
+    //保存某个项目某个commit包级别的度量
+    private void savePackageMeasureData(Measure measure,String repoId,String commitId,String commitTime){
+         List<Package> packages =new ArrayList<>();
+         for(Package p:measure.getPackages().getPackages()){
+             p.setUuid(UUID.randomUUID().toString());
+             p.setCommit_id(commitId);
+             p.setCommit_time(commitTime);
+             p.setRepo_id(repoId);
+             packages.add(p);
+         }
+         if(!packages.isEmpty()){
+             packageMeasureMapper.insertPackageMeasureDataList(packages);
+         }
+    }
+
+    //保存某个项目某个commit项目级别的度量
+    private void saveRepoLevelMeasureData(Measure measure,String repoId,String commitId,String commitTime){
+        RepoMeasure repoMeasure=new RepoMeasure();
+        repoMeasure.setUuid(UUID.randomUUID().toString());
+        repoMeasure.setFiles(measure.getTotal().getFiles());
+        repoMeasure.setNcss(measure.getTotal().getNcss());
+        repoMeasure.setClasses(measure.getTotal().getClasses());
+        repoMeasure.setFunctions(measure.getTotal().getFunctions());
+        repoMeasure.setCcn(measure.getFunctions().getFunctionAverage().getNcss());
+        repoMeasure.setJava_docs(measure.getTotal().getJavaDocs());
+        repoMeasure.setJava_doc_lines(measure.getTotal().getJavaDocsLines());
+        repoMeasure.setSingle_comment_lines(measure.getTotal().getSingleCommentLines());
+        repoMeasure.setMulti_comment_lines(measure.getTotal().getMultiCommentLines());
+        repoMeasure.setCommit_id(commitId);
+        repoMeasure.setCommit_time(commitTime);
+        repoMeasure.setRepo_id(repoId);
+        if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0)
+           repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
+    }
+
+    /*
     private List<String> getCommitIdsToCompare(String repoId, Duration duration){
         List<String> twoCommits=new ArrayList<>();
         LocalDateTime now=LocalDateTime.now();
@@ -178,32 +212,5 @@ public class MeasureServiceImpl implements MeasureService {
         return twoCommits;
     }
 */
-    //获取单个项目某个commit的度量值
-    private Measure getMeasureDataOfOneCommit(String repoId,String commitId){
-        String repoPath=null;
-        Measure measure=null;
-        try{
-            repoPath=restInterfaceManager.getRepoPath(repoId,commitId);
-            if(repoPath!=null)
-                measure=measureAnalyzer.analyze(repoPath,"",resultHandler);
-        }catch (Exception e){
-            e.printStackTrace();
-            if(repoPath!=null)
-                restInterfaceManager.freeRepoPath(repoId,repoPath);
-        }finally {
-            if(repoPath!=null)
-                restInterfaceManager.freeRepoPath(repoId,repoPath);
-        }
-        return measure;
-    }
-
-    @KafkaListener(id = "measure", topics = {"Measure"}, groupId = "measure")
-    public void commitInfoListener(ConsumerRecord<String, String> consumerRecord) {
-        List<CommitWithTime> commits=JSONArray.parseArray(consumerRecord.value(),CommitWithTime.class);
-        log.info("received message from topic -> " + consumerRecord.topic() + " : " + commits.size()+" commits need to scan!");
-        for(CommitWithTime commit:commits){
-            saveMeasureData(commit.getRepoId(),commit.getCommitId(),commit.getCommitTime());
-        }
-    }
 
 }
