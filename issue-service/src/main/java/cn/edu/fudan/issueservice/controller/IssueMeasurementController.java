@@ -76,6 +76,7 @@ public class IssueMeasurementController {
         return issueRankService.rankOfFileBaseIssueQuantity(repoId, commitId);
     }
 
+    // 平均每行产生多少个bug
     @GetMapping(value = {"/measurement/rankOfFileBaseDensity/{repoId}"})
     public Object getRankOfFileBaseDensity(@PathVariable("repoId") String repoId, @RequestParam("commitId") String commitId) {
 

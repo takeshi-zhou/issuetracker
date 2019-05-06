@@ -161,6 +161,13 @@
         select file_name as 'key',count(file_name) as 'value'
         from rawIssue
         where commit_id = #{commit_id} and repo_id = #{repo_id}
-        group by file_name order by value desc limit 20;
+        group by file_name order by value ;
+    </select>
+
+    <select id="getRankOfFileBaseDensity" resultType="java.util.WeakHashMap">
+        select file_name as 'key',code_lines/count(file_name) as 'value'
+        from rawIssue
+        where commit_id = #{commit_id} and repo_id = #{repo_id}
+        group by file_name order by value ;
     </select>
 </mapper>

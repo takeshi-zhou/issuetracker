@@ -67,6 +67,10 @@ public class RawIssueDao {
         return rawIssueMapper.getRankOfFileBaseIssueQuantity(repoId, commitId);
     }
 
+    public List<WeakHashMap<String,String>> getRankOfFileBaseDensity(String repoId, String commitId) {
+        return rawIssueMapper.getRankOfFileBaseDensity(repoId, commitId);
+    }
+
     public Map<String, Integer> getRepoAndIssueNum(Map repoCommit) {
         return null;
     }

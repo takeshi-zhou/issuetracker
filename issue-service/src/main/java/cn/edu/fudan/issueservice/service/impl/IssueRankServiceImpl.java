@@ -77,10 +77,10 @@ public class IssueRankServiceImpl implements IssueRankService {
     @Override
     public Map rankOfFileBaseDensity(String repoId, String commitId) {
         Map<String, String> map = new WeakHashMap<>();
-        for (Map<String, String> m : rawIssueDao.getRankOfFileBaseIssueQuantity(repoId, commitId)) {
+        for (Map<String, String> m : rawIssueDao.getRankOfFileBaseDensity(repoId, commitId)) {
             map.put(m.get("key"), m.get("value"));
         }
-        return map;
+        return sortByValue(map);
     }
 
     // 开发人员在某段时间内贡献的代码行数 除以 产生的新Issue数量
