@@ -76,6 +76,7 @@ public class ProjectController {
     }
 
     @GetMapping(value = {"/inner/project"})
+    @CrossOrigin
     public Object getProjectByRepoId(@RequestParam("repo_id") String repo_id){
         return projectService.getProjectByRepoId(repo_id);
     }

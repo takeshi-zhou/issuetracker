@@ -36,8 +36,8 @@ public class RecommendationServiceImpl implements RecommendationService {
         return recommendationDao.isEnd_lineExist(end_line);
     }
 
-    public boolean isBuglinesExit(String buglines){
-        return recommendationDao.isBuglinesExist(buglines);
+    public boolean isBuglinesExit(String bug_lines){
+        return recommendationDao.isBuglinesExist(bug_lines);
     }
 
     public List<Recommendation> getRecommendationsByType(String type){
