@@ -25,3 +25,5 @@
 /.nb-gradle/
 
 .DS_Store
+LOG_HOME_IS_UNDEFINED/error.log
+*.log
