@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.fudan.measureservice.mapper.PackageMeasureMapper">
+
+
+    <insert id="insertPackageMeasureDataList" parameterType="list">
+        insert into package_measure
+             (
+                uuid,
+                name,
+                classes,
+                functions,
+                ncss,
+                java_docs,
+                java_docs_lines,
+                single_comment_lines,
+                multi_comment_lines,
+                commit_id,
+                commit_time,
+                repo_id
+             )
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+                #{item.uuid},
+                #{item.name},
+                #{item.classes},
+                #{item.functions},
+                #{item.ncss},
+                #{item.javaDocs},
+                #{item.javaDocsLines},
+                #{item.singleCommentLines},
+                #{item.multiCommentLines},
+                #{item.commit_id},
+                #{item.commit_time},
+                #{item.repo_id}
+            )
+        </foreach>
+    </insert>
+</mapper>

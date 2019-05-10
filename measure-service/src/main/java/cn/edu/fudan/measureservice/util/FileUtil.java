@@ -19,7 +19,6 @@ public class FileUtil {
         try{
             Runtime runtime=Runtime.getRuntime();
             String command = binHome+"getFileCount.sh  " +path;
-            log.info(command);
             Process process=runtime.exec(command);
             BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(process.getInputStream()));
             return Integer.valueOf(bufferedReader.readLine());

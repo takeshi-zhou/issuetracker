@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,7 +20,7 @@ public class ExecuteShellUtil {
     @Value("${binHome}")
     private String binHome;
 
-    public Map<String, Integer> developersLinesOfCode(String start, String end, String repoPath, List<String> user) {
+    public Map<String, Integer> developersLinesOfCode(String start, String end, String repoPath, Set<String> user) {
         Runtime rt = Runtime.getRuntime();
         StringBuilder sb = new StringBuilder(binHome + "lineNumberOfDevelopers.sh " + repoPath + " " + start + " " + end + " ");
         for (String userName : user) {

@@ -3,6 +3,7 @@ package cn.edu.fudan.bug_recommendation.service.impl;
 import cn.edu.fudan.bug_recommendation.domain.Recommendation;
 import cn.edu.fudan.bug_recommendation.service.CompleteReco;
 import cn.edu.fudan.bug_recommendation.service.GetCode;
+import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -37,7 +39,19 @@ public class CompleteRecoImpl implements CompleteReco {
         String modification_method = getCode.getModification_method();
         System.out.println(modification_method);
         info.setModification_method(modification_method);
-
+        //对buglines进行排序
+        String buglines = info.getBug_lines();
+        String[] buglinesingle = buglines.split(",");
+        int[] buglinesint = new int[buglinesingle.length];
+        for(int i=0;i<buglinesingle.length;i++){
+            buglinesint[i] = Integer.parseInt(buglinesingle[i]);
+        }
+        Arrays.sort(buglinesint);
+        String result = String.valueOf(buglinesint[0]);
+        for(int i = 1; i < buglinesint.length; i++) {
+            result = result + "," + String.valueOf(buglinesint[i]);
+        }
+        info.setBug_lines(result);
         return info;
     }
 //    public List<Recommendation> getAllReco(Object param){

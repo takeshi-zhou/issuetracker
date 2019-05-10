@@ -69,8 +69,8 @@ public class GetCodeImpl implements GetCode {
             JSONObject response = getRepoPath(repoId,commit_id).getJSONObject("data");
             if (response != null && response.getString("status").equals("Successful")) {
                 repoHome=response.getString("content");
-                System.out.println(repoHome);
-                System.out.println(repoHome+"/" +file_path);
+                System.out.println("repohome: "+repoHome);
+                System.out.println("file_path: "+repoHome+"/" +file_path);
                 code = getFileContent(repoHome+"/" +file_path);
             } else {
                 code = "";

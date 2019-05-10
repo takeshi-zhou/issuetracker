@@ -155,6 +155,7 @@ public class KafkaServiceImpl implements KafkaService {
         list.add(scanMessageWithTime);
         //发送消息给度量服务，将度量信息保存
         kafkaTemplate.send("Measure",JSONArray.toJSONString(list));
+        logger.info("message has been send to topic Measure -> {}",repoId);
     }
 
     @KafkaListener(id = "updateCommit", topics = {"UpdateCommit"}, groupId = "updateCommit")
@@ -216,6 +217,7 @@ public class KafkaServiceImpl implements KafkaService {
         }
         //发送消息给度量服务，将度量信息保存
         kafkaTemplate.send("Measure",JSONArray.toJSONString(filteredCommits));
+        logger.info("message has been send to topic Measure -> {}",repoId);
     }
 
     private boolean existProject(String repoId,String category,boolean isFirst){
@@ -231,23 +233,31 @@ public class KafkaServiceImpl implements KafkaService {
 
     private List<ScanMessageWithTime> getFilteredList(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
         int sourceSize=dates.size();
-        LocalDate nextTimeLimit=dates.get(sourceSize-1).minusMonths(1);
+        LocalDate oneMonthPoint=dates.get(sourceSize-1).minusMonths(1);
+        LocalDate sixMonthsPoint=dates.get(sourceSize-1).minusMonths(6);
+        LocalDate nextTimeLimit1=oneMonthPoint;
+        LocalDate nextTimeLimit2=sixMonthsPoint;
         LinkedList<ScanMessageWithTime> result=new LinkedList<>();
         int i=0;
-        boolean isRecent=true;
         while(i<sourceSize){
             LocalDate date=dates.get(sourceSize-1-i);
-            if(isRecent&&date.isAfter(nextTimeLimit)){
+            if(date.isAfter(oneMonthPoint)){
+                //一个月以内
                 List<ScanMessageWithTime> list=map.get(date);
                 result.addFirst(list.get(list.size()-1));
-            }else{
-                isRecent=false;
-            }
-            if(!isRecent){
-                if(date.isBefore(nextTimeLimit)||i==sourceSize-1){
+            }else if(date.isAfter(sixMonthsPoint)){
+                //一个月后，6个月之前
+                if(date.isBefore(nextTimeLimit1)){
                     List<ScanMessageWithTime> list=map.get(date);
                     result.addFirst(list.get(list.size()-1));
-                    nextTimeLimit=nextTimeLimit.minusMonths(3);
+                    nextTimeLimit1=date.minusWeeks(1);
+                }
+            }else{
+                //6个月之后
+                if(date.isBefore(nextTimeLimit2)){
+                    List<ScanMessageWithTime> list=map.get(date);
+                    result.addFirst(list.get(list.size()-1));
+                    nextTimeLimit2=date.minusMonths(1);
                 }
             }
             i++;

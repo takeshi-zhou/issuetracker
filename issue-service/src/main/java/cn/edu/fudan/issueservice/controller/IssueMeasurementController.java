@@ -40,7 +40,7 @@ public class IssueMeasurementController {
     //detail : developerId fileName packageName
     @GetMapping(value = {"/measurement/remainingIssue/{repoId}/{commit}"})
     public Object getNumberOfRemainingIssue(@PathVariable("repoId") String repoId, @PathVariable("commit") String commit,
-                                            @RequestParam("spaceType") String spaceType,@RequestParam("detail") String detail) {
+                                            @RequestParam("spaceType") String spaceType,@RequestParam(value = "detail", required = false) String detail) {
         return issueMeasureInfoService.numberOfRemainingIssue(repoId, commit, spaceType, detail);
     }
 
@@ -76,6 +76,7 @@ public class IssueMeasurementController {
         return issueRankService.rankOfFileBaseIssueQuantity(repoId, commitId);
     }
 
+    // 平均每行产生多少个bug
     @GetMapping(value = {"/measurement/rankOfFileBaseDensity/{repoId}"})
     public Object getRankOfFileBaseDensity(@PathVariable("repoId") String repoId, @RequestParam("commitId") String commitId) {
 
@@ -83,9 +84,9 @@ public class IssueMeasurementController {
     }
 
     @GetMapping(value = {"/measurement/rankOfDeveloper/{repoId}"})
-    public Object getRankOfDeveloper(@PathVariable("repoId") String repoId, @RequestParam("duration") String duration, @RequestParam("developerId") String developerId) {
+    public Object getRankOfDeveloper(@PathVariable("repoId") String repoId, @RequestParam("duration") String duration) {
 
-        return issueRankService.rankOfDeveloper(repoId, duration, developerId);
+        return issueRankService.rankOfDeveloper(repoId, duration);
     }
 
     @GetMapping(value = {"/measurement/rankOfRepoBaseDensity"})

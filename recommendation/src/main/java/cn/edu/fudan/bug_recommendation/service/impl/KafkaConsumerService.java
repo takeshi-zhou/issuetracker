@@ -68,7 +68,7 @@ public class KafkaConsumerService {
 //                    newInfo.setNextend_line(json.getInteger("nextend_line"));
 //                    newInfo.setDescription(json.getString("description"));
 //                }
-                    if(repoName!=null){
+                    if (repoName != null) {
                         recommendationService.addBugRecommendation(info);
                     }
 

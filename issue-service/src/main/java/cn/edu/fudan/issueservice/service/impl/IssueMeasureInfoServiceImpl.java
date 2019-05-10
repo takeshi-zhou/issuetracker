@@ -7,6 +7,7 @@ package cn.edu.fudan.issueservice.service.impl;
 
 import cn.edu.fudan.issueservice.component.RestInterfaceManager;
 import cn.edu.fudan.issueservice.dao.IssueDao;
+import cn.edu.fudan.issueservice.dao.LocationDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.domain.SpaceType;
 import cn.edu.fudan.issueservice.service.IssueMeasureInfoService;
@@ -47,13 +48,14 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
             return rawIssueDao.getNumberOfRemainingIssue(repoId, commit);
         }
         if (SpaceType.PACKAGE.getLevel().equals(spaceType)) {
+
             // package name 需要做处理
-            detail.replace('.','/');
-            return rawIssueDao.getNumberOfRemainingIssueBaseFile(repoId, commit, "%" + detail + "%");
+            return rawIssueDao.getNumberOfRemainingIssueBasePackage(repoId, commit,
+                    "%" + detail.replace('.','/') + "%");
         }
         if (SpaceType.FILE.getLevel().equals(spaceType)) {
 
-            return rawIssueDao.getNumberOfRemainingIssueBaseFile(repoId, commit, "%" + detail);
+            return rawIssueDao.getNumberOfRemainingIssueBaseFile(repoId, commit, detail);
         }
         // 需要单独引入用户问题记录表 ？
 /*        if (SpaceType.DEVELOPER.getLevel().equals(spaceType)) {
