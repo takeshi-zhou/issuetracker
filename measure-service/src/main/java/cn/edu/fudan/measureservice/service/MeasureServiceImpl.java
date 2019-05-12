@@ -158,6 +158,8 @@ public class MeasureServiceImpl implements MeasureService {
              p.setCommit_id(commitId);
              p.setCommit_time(commitTime);
              p.setRepo_id(repoId);
+             if(packageMeasureMapper.samePackageMeasureExist(repoId,commitId,p.getName())>0)
+                 continue;
              packages.add(p);
          }
          if(!packages.isEmpty()){

@@ -3,6 +3,21 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.edu.fudan.measureservice.mapper.PackageMeasureMapper">
 
+    <resultMap id="package" type="Package" >
+        <id property="uuid" column="uuid"/>
+        <result property="name" column="name"/>
+        <result property="classes" column="classes"/>
+        <result property="functions" column="functions"/>
+        <result property="ncss" column="ncss"/>
+        <result property="java_docs" column="java_docs"/>
+        <result property="java_docs_lines" column="java_docs_lines"/>
+        <result property="single_comment_lines" column="single_comment_lines"/>
+        <result property="multi_comment_lines" column="multi_comment_lines"/>
+        <result property="commit_id" column="commit_id"/>
+        <result property="commit_time" column="commit_time"/>
+        <result property="repo_id" column="repo_id"/>
+    </resultMap>
+
 
     <insert id="insertPackageMeasureDataList" parameterType="list">
         insert into package_measure
@@ -38,4 +53,8 @@
             )
         </foreach>
     </insert>
+
+    <select id="samePackageMeasureExist" resultType="int">
+        select count(*) from package_measure where commit_id = #{commit_id} and repo_id = #{repo_id} and name = #{name}
+    </select>
 </mapper>
