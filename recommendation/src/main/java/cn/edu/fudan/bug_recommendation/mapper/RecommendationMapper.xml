@@ -17,6 +17,10 @@
         <result property="next_commitid" column="next_commitid"/>
         <result property="nextstart_line" column="nextstart_line"/>
         <result property="nextend_line" column="nextend_line"/>
+        <result property="repoid" column="repoid"/>
+        <result property="modification_method" column="modification_method"/>
+        <result property="reponame" column="reponame"/>
+        <result property="filename" column="filename"/>
     </resultMap>
 
     <insert id="addBugRecommendation" parameterType="Recommendation">
@@ -86,7 +90,7 @@
         select name from project where repo_id = #{repoid};
     </select>
 
-    <select id="getRecommendationsByBuglines" resultType="String">
+    <select id="getRecommendationsByBug_lines" parameterType="String" resultMap="recommendation">
         select * from bug_recommendation where bug_lines = #{bug_lines};
     </select>
 
