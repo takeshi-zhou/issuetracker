@@ -58,6 +58,7 @@ public class ScanOperationAdapter implements ScanOperation {
 
     @Override
     public ScanInitialInfo initialScan(String repoId, String commitId,String category) {
+        //没有拿到repoPath
         String repoPath = restInterfaceManager.getRepoPath(repoId,commitId);
         if(repoPath==null)
             return new ScanInitialInfo(false);

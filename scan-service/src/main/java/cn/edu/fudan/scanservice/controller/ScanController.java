@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 @EnableAutoConfiguration
 public class ScanController {
 
-
     private ScanService scanService;
 
     @Autowired
