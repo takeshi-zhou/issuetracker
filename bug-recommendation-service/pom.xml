@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>cn.edu.fudan</groupId>
-    <artifactId>bug_recommendation</artifactId>
+    <artifactId>bug-recommendation-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>bug_recommendation</name>
-    <description>Demo project for Spring Boot</description>
+    <name>bug-recommendation-service</name>
+    <description>Defect repair recommendation service</description>
 
     <properties>
         <java.version>1.8</java.version>
