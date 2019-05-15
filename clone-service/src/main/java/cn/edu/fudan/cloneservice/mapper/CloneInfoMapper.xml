@@ -19,7 +19,6 @@
         and repo_id  = #{repoId}
         and commit_id = #{commitId}
     </select>
-
     <update id="updateCloneInfoByCommitIdAndRepoId"  >
         UPDATE ce_package_info
         SET clone_ins_num = #{cloneInsNum}

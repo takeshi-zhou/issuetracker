@@ -1,6 +1,12 @@
 package cn.edu.fudan.cloneservice.controller;
 
 
+import cn.edu.fudan.cloneservice.bean.CloneInstanceInfo;
+import cn.edu.fudan.cloneservice.bean.GroupInfo;
+import cn.edu.fudan.cloneservice.bean.ProjectInfo;
+import cn.edu.fudan.cloneservice.dao.CloneInfoDao;
+import cn.edu.fudan.cloneservice.dao.CloneInstanceInfoDao;
+import cn.edu.fudan.cloneservice.domain.CloneInfo;
 import cn.edu.fudan.cloneservice.domain.PackageInfo;
 import cn.edu.fudan.cloneservice.service.CloneVisService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +25,11 @@ import java.util.Map;
 @EnableAutoConfiguration
 public class CloneVisController {
     private CloneVisService cloneVisService;
+    @Autowired
+    private CloneInfoDao cloneInfo;
+
+    @Autowired
+    private CloneInstanceInfoDao cloneInstanceInfo;
 
     @Autowired
     public void setCloneVisService(CloneVisService cloneVisService) {
@@ -42,5 +53,25 @@ public class CloneVisController {
         return commit_map;
     }
 
+    @GetMapping(value = {"/CloneInfo"})
+    public Object getCloneInfo(@RequestParam("repo_id") String  repo_id,
+                               @RequestParam("commit_id") String commit_id) {
 
+        List<CloneInfo> lci = new ArrayList<>();
+        lci = cloneInfo.getCloneInfoByRepoIdAndCommitId(repo_id, commit_id);
+
+        return lci;
+    }
+
+    @GetMapping(value = {"/CloneInstanceInfo"})
+    public Object getInfo(@RequestParam("repo_id") String  repo_id,
+                               @RequestParam("commit_id") String commit_id) {
+
+        List<CloneInstanceInfo> lci = new ArrayList<>();
+        Map<Integer, GroupInfo> result = new HashMap<>();
+        ProjectInfo proInfo;
+        proInfo = cloneInstanceInfo.getCloneInfoByRepoIdAndCommitId(repo_id, commit_id);
+
+        return proInfo;
+    }
 }

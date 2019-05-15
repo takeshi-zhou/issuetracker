@@ -2,6 +2,7 @@ package cn.edu.fudan.cloneservice.dao;
 
 import cn.edu.fudan.cloneservice.domain.CloneInfo;
 import cn.edu.fudan.cloneservice.mapper.CloneInfoMapper;
+import cn.edu.fudan.cloneservice.mapper.CloneInstanceInfoMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
