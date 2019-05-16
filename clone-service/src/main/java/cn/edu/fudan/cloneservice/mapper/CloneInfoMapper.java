@@ -10,6 +10,7 @@ import java.util.Set;
 public interface CloneInfoMapper {
      List<CloneInfo> selectCloneInfoByCommitIdAndRepoId(@Param("repoId")  String repo_id,
                                                         @Param("commitId") String commit_id);
+
      void updateCloneInfoByCommitIdAndRepoId(
              @Param("repoId") String repo_id,
              @Param("commitId") String commit_id,

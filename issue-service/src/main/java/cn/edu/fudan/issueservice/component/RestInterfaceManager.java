@@ -183,7 +183,9 @@ public class RestInterfaceManager {
         return s;
     }
 
-    public Map getRepoAndLatestCommit(List repoList) {
+    public Map getRepoAndLatestCommit(Set repoList) {
+        Map<String,String> s = new HashMap<>();
+        s.put("repoID", "commitID");
         return null;
     }
 
