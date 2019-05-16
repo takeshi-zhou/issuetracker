@@ -57,4 +57,8 @@
     <select id="samePackageMeasureExist" resultType="int">
         select count(*) from package_measure where commit_id = #{commit_id} and repo_id = #{repo_id} and name = #{name}
     </select>
+
+    <select id="getModuleOfRepo" resultType="string">
+        select distinct (name) from package_measure where repo_id = #{repo_id} order by name
+    </select>
 </mapper>

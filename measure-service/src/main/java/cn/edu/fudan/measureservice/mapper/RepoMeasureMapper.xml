@@ -15,6 +15,22 @@
         <result property="multi_comment_lines" column="multi_comment_lines"/>
     </resultMap>
 
+    <resultMap id="repoMeasureWithDate" type="RepoMeasure">
+        <id property="uuid" column="uuid"/>
+        <result property="files" column="files"/>
+        <result property="ncss" column="ncss"/>
+        <result property="classes" column="classes"/>
+        <result property="functions" column="functions"/>
+        <result property="ccn" column="ccn"/>
+        <result property="java_docs" column="java_docs"/>
+        <result property="java_doc_lines" column="java_doc_lines"/>
+        <result property="single_comment_lines" column="single_comment_lines"/>
+        <result property="multi_comment_lines" column="multi_comment_lines"/>
+        <result property="commit_id" column="commit_id"/>
+        <result property="commit_time" column="commit_time"/>
+        <result property="repo_id" column="repo_id"/>
+    </resultMap>
+
     <insert id="insertOneRepoMeasure" >
         insert into repo_measure
             (
@@ -74,5 +90,11 @@
             repo_id = #{repo_id}   and  commit_time  &lt; #{time_line}
         order by commit_time desc
         limit 1
+    </select>
+
+    <select id="getRepoMeasureByRepoId" resultMap="repoMeasureWithDate">
+        select * from repo_measure
+        where repo_id = #{repo_id} and commit_time &gt; #{time_line}
+        order by commit_time;
     </select>
 </mapper>

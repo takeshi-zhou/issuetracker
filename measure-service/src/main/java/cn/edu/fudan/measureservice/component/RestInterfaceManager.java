@@ -80,4 +80,8 @@ public class RestInterfaceManager {
             log.warn("{} -> free failed",repoPath);
         return response;
     }
+
+    public JSONObject getRepoById(String repoId){
+        return restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
+    }
 }

@@ -2,45 +2,53 @@ package cn.edu.fudan.measureservice.service;
 
 import cn.edu.fudan.measureservice.analyzer.MeasureAnalyzer;
 import cn.edu.fudan.measureservice.component.RestInterfaceManager;
-import cn.edu.fudan.measureservice.domain.CommitWithTime;
-import cn.edu.fudan.measureservice.domain.Duration;
-import cn.edu.fudan.measureservice.domain.Measure;
-import cn.edu.fudan.measureservice.domain.RepoMeasure;
+import cn.edu.fudan.measureservice.domain.*;
 import cn.edu.fudan.measureservice.domain.Package;
 import cn.edu.fudan.measureservice.handler.ResultHandler;
 import cn.edu.fudan.measureservice.mapper.PackageMeasureMapper;
 import cn.edu.fudan.measureservice.mapper.RepoMeasureMapper;
 import cn.edu.fudan.measureservice.util.DateTimeUtil;
+import cn.edu.fudan.measureservice.util.GitUtil;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
 @Service
 public class MeasureServiceImpl implements MeasureService {
 
+    @Value("${repoHome}")
+    private String repoHome;
+
     private MeasureAnalyzer measureAnalyzer;
     private ResultHandler resultHandler;
     private RestInterfaceManager restInterfaceManager;
     private RepoMeasureMapper repoMeasureMapper;
     private PackageMeasureMapper packageMeasureMapper;
+    private GitUtil gitUtil;
 
     public MeasureServiceImpl(MeasureAnalyzer measureAnalyzer,
                              ResultHandler resultHandler,
                               RestInterfaceManager restInterfaceManager,
                               RepoMeasureMapper repoMeasureMapper,
-                              PackageMeasureMapper packageMeasureMapper) {
+                              PackageMeasureMapper packageMeasureMapper,
+                              GitUtil gitUtil) {
         this.measureAnalyzer = measureAnalyzer;
         this.resultHandler = resultHandler;
         this.restInterfaceManager=restInterfaceManager;
         this.repoMeasureMapper=repoMeasureMapper;
         this.packageMeasureMapper=packageMeasureMapper;
+        this.gitUtil=gitUtil;
     }
 
     //获取一个用户所有项目在某个时间段前后度量值的变化
@@ -130,7 +138,6 @@ public class MeasureServiceImpl implements MeasureService {
             log.error(e.getMessage());
         }
     }
-
     //获取单个项目某个commit的度量值
     private Measure getMeasureDataOfOneCommit(String repoId,String commitId){
         String repoPath=null;
@@ -152,19 +159,19 @@ public class MeasureServiceImpl implements MeasureService {
 
     //保存某个项目某个commit包级别的度量
     private void savePackageMeasureData(Measure measure,String repoId,String commitId,String commitTime){
-         List<Package> packages =new ArrayList<>();
-         for(Package p:measure.getPackages().getPackages()){
-             p.setUuid(UUID.randomUUID().toString());
-             p.setCommit_id(commitId);
-             p.setCommit_time(commitTime);
-             p.setRepo_id(repoId);
-             if(packageMeasureMapper.samePackageMeasureExist(repoId,commitId,p.getName())>0)
-                 continue;
-             packages.add(p);
-         }
-         if(!packages.isEmpty()){
-             packageMeasureMapper.insertPackageMeasureDataList(packages);
-         }
+        List<Package> packages =new ArrayList<>();
+        for(Package p:measure.getPackages().getPackages()){
+            p.setUuid(UUID.randomUUID().toString());
+            p.setCommit_id(commitId);
+            p.setCommit_time(commitTime);
+            p.setRepo_id(repoId);
+            if(packageMeasureMapper.samePackageMeasureExist(repoId,commitId,p.getName())>0)
+                continue;
+            packages.add(p);
+        }
+        if(!packages.isEmpty()){
+            packageMeasureMapper.insertPackageMeasureDataList(packages);
+        }
     }
 
     //保存某个项目某个commit项目级别的度量
@@ -184,35 +191,108 @@ public class MeasureServiceImpl implements MeasureService {
         repoMeasure.setCommit_time(commitTime);
         repoMeasure.setRepo_id(repoId);
         if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0)
-           repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
+            repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
     }
 
-    /*
-    private List<String> getCommitIdsToCompare(String repoId, Duration duration){
-        List<String> twoCommits=new ArrayList<>();
+    @Override
+    public List<RepoMeasure> getRepoMeasureByRepoId(String repoId,Duration duration) {
         LocalDateTime now=LocalDateTime.now();
-        LocalDateTime dateTimeBeforeDuration;
+        LocalDateTime time_line;
         switch (duration){
             case week:
-                dateTimeBeforeDuration=now.minusWeeks(1);
+                time_line=now.minusWeeks(4);
                 break;
             case month:
-                dateTimeBeforeDuration=now.minusMonths(1);
+                time_line=now.minusMonths(4);
                 break;
-                default:
-                    dateTimeBeforeDuration=now.minusWeeks(1);
+            default:
+                time_line=now.minusWeeks(4);
         }
-        JSONArray commits=restInterfaceManager.getCommitsOfRepo(repoId);
-        for(int i=0;i<commits.size();i++){
-            if(i==0)
-                twoCommits.add(commits.getJSONObject(0).getString("commit_id"));
-            else if(DateTimeUtil.format(dateTimeBeforeDuration).compareTo(commits.getJSONObject(i).getString("commit_time"))>0){
-                twoCommits.add(commits.getJSONObject(i).getString("commit_id"));
-                break;
-            }
+        List<RepoMeasure> repoMeasures=repoMeasureMapper.getRepoMeasureByRepoId(repoId,DateTimeUtil.format(time_line));
+        if(repoMeasures!=null&&!repoMeasures.isEmpty()){
+            return repoMeasures.stream().map(repoMeasure -> {
+                String date=repoMeasure.getCommit_time();
+                repoMeasure.setCommit_time(date.split(" ")[0]);
+                return repoMeasure;
+            }).collect(Collectors.toList());
         }
-        return twoCommits;
+        return Collections.emptyList();
     }
-*/
+
+    @Override
+    public List<String> getModulesOfRepo(String repoId) {
+        List<String> modules= packageMeasureMapper.getModuleOfRepo(repoId);
+        if(modules!=null&&!modules.isEmpty())
+            return modules;
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<ActiveMeasure> getActiveMeasure(String repoId, String since, String until, Granularity granularity) {
+        List<ActiveMeasure> result=new ArrayList<>();
+        String repoPath=getRepoPath(repoId);
+        LocalDate date=LocalDate.parse(since,DateTimeUtil.Y_M_D_formatter);
+        LocalDate limit=LocalDate.parse(until,DateTimeUtil.Y_M_D_formatter);
+        LocalDate next;
+        switch (granularity){
+            case day:
+                do{
+                    if(date.plusDays(1).isAfter(limit))
+                        result.add(getOneActiveMeasure(repoPath,DateTimeUtil.y_m_d_format(date),DateTimeUtil.y_m_d_format(limit)));
+                    else{
+                        next=date.plusDays(1);
+                        result.add(getOneActiveMeasure(repoPath,DateTimeUtil.y_m_d_format(date),DateTimeUtil.y_m_d_format(next)));
+                        date=next;
+                    }
+                }while(date.isBefore(limit));
+                break;
+            case week:
+                do{
+                    if(date.plusWeeks(1).isAfter(limit))
+                        result.add(getOneActiveMeasure(repoPath,DateTimeUtil.y_m_d_format(date),DateTimeUtil.y_m_d_format(limit)));
+                    else{
+                        next=date.plusWeeks(1);
+                        result.add(getOneActiveMeasure(repoPath,DateTimeUtil.y_m_d_format(date),DateTimeUtil.y_m_d_format(next)));
+                        date=next;
+                    }
+                }while(date.isBefore(limit));
+                break;
+            case month:
+                do{
+                    if(date.plusMonths(1).isAfter(limit))
+                        result.add(getOneActiveMeasure(repoPath,DateTimeUtil.y_m_d_format(date),DateTimeUtil.y_m_d_format(limit)));
+                    else{
+                        next=date.plusMonths(1);
+                        result.add(getOneActiveMeasure(repoPath,DateTimeUtil.y_m_d_format(date),DateTimeUtil.y_m_d_format(next)));
+                        date=next;
+                    }
+                }while(date.isBefore(limit));
+                break;
+        }
+        return result;
+    }
+
+    private String getRepoPath(String repoId){
+        JSONObject currentRepo = restInterfaceManager.getRepoById(repoId);
+        String repoPath = currentRepo.getJSONObject("data").getString("local_addr");
+        return repoHome+repoPath;
+    }
+
+    private ActiveMeasure getOneActiveMeasure(String repoPath,String since,String until){
+            ActiveMeasure activeMeasure=new ActiveMeasure();
+            activeMeasure.setCommitInfos(gitUtil.getCommitInfoByAuthor(repoPath,since,until));
+            Map<String,Integer> map=new HashMap<>();
+            for(String file:gitUtil.getCommitFiles(repoPath,since,until)){
+                if(map.containsKey(file)){
+                    int count=map.get(file);
+                    map.put(file,count+1);
+                }else
+                    map.put(file,0);
+            }
+            List<String> distinctFiles=new ArrayList<>(map.keySet());
+            distinctFiles.sort((file1,file2)->map.get(file2)-map.get(file1));
+            activeMeasure.setMostCommitFiles(distinctFiles.subList(0,10));
+            return activeMeasure;
+    }
 
 }
