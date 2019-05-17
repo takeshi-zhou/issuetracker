@@ -3,14 +3,14 @@ package cn.edu.fudan.issueservice.component;
 import cn.edu.fudan.issueservice.exception.AuthException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author WZY
@@ -34,6 +34,8 @@ public class RestInterfaceManager {
     String recommendationServicePath;
     @Value("${repository.service.path}")
     private String repoServicePath;
+    @Value("${scan.service.path}")
+    private String scanServicePath;
 
     private RestTemplate restTemplate;
 
@@ -155,12 +157,15 @@ public class RestInterfaceManager {
 
     public String getRepoPath(String repoId) {
         //restTemplate.getForObject(repoServicePath + "/" + repoId, String.class);
-        return "/home/fdse/user/issueTracker/repo/github/FasterXML/jackson-core-master";
+        MultiValueMap<String, String> requestEntity = new LinkedMultiValueMap<>(1);
+        requestEntity.add("query", "uuid=\"" + repoId + "\"");
+        JSONObject jsonObject = restTemplate.postForObject(repoServicePath, requestEntity,JSONObject.class);
+        return jsonObject.getJSONArray("data").getJSONObject(0).getString("local_addr");
     }
 
     public Map<String, String> getDeveloperByCommits(Set<String> keySet) {
         //restTemplate.postForObject(repoServicePath + "/developerListsByCommits", keySet ,HashMap.class);
-        Map<String,String> s = new HashMap<>();
+/*        Map<String,String> s = new HashMap<>();
         s.put("7e89cfe4d854e5c1b00d6f01b3790ba2d3c9738a", "tatu.saloranta@iki.fi");
         s.put("99d90d43bd14d7b1262e5b32f3fb14355dab220d", "tatu.saloranta@iki.fi");
         s.put("6cfdce3eed883e10b0c67ce4b4e7738cfcb1fc7b", "tatu.saloranta@iki.fi");
@@ -179,17 +184,26 @@ public class RestInterfaceManager {
         s.put("24f65a28db07467ae9d3b8c5e765e7783067cf06", "tatu.saloranta@iki.fi");
         s.put("9b53cf5e214aa55f4eebee9e61cb25af21e35ec1", "tatu.saloranta@iki.fi");
         s.put("465fd8e3ef598abf919feeb01577376b492558a0", "tatu.saloranta@iki.fi");
-        s.put("a8eb65dd6d4da0faf8b329de8fcf53ecd4c2fa8a", "tatu.saloranta@iki.fi");
-        return s;
+        s.put("a8eb65dd6d4da0faf8b329de8fcf53ecd4c2fa8a", "tatu.saloranta@iki.fi");*/
+        StringBuffer stringBuffer = new StringBuffer();
+        for (String s : keySet) {
+            stringBuffer.append(s);
+            stringBuffer.append(",");
+        }
+        stringBuffer.deleteCharAt(stringBuffer.length() - 1);
+        MultiValueMap<String, String> requestEntity = new LinkedMultiValueMap<>(1);
+        requestEntity.add("key_set", stringBuffer.toString());
+        JSONObject jsonObject = restTemplate.postForObject(commitServicePath + "/developer-lists-by-commits", requestEntity,JSONObject.class);
+        return jsonObject.getObject("data",Map.class);
     }
 
-    public Map getRepoAndLatestCommit(Set repoList) {
-        Map<String,String> s = new HashMap<>();
-        s.put("repoID", "commitID");
+    public Map getRepoAndLatestScannedCommit(Set repoList) {
+        //restTemplate.postForObject(scanServicePath + "/repo", repoList, JSONArray.class);
         return null;
     }
 
     public Map getRepoAndCodeLine(Map repoCommit) {
+        //return restTemplate.postForObject(tagServicePath + "/item-ids", tag_ids, JSONArray.class);
         return null;
     }
 

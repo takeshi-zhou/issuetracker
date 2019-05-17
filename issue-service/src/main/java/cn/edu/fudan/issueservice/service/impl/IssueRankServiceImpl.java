@@ -137,9 +137,11 @@ public class IssueRankServiceImpl implements IssueRankService {
         Map<String, String> repoIDName = new ConcurrentHashMap<>(10);
         for(Object json : jsonArray ) {
             Map<String, String> map = (LinkedHashMap)json;
-            repoIDName.put(map.get("repo_id"), map.get("name"));
+            if ("bug".equals(map.get("type"))) {
+                repoIDName.put(map.get("repo_id"), map.get("name"));
+            }
         }
-        Map repoCommit = restInterfaceManager.getRepoAndLatestCommit(repoIDName.keySet());
+        Map repoCommit = restInterfaceManager.getRepoAndLatestScannedCommit(repoIDName.keySet());
         Map<String, Integer> repoCodeLine = restInterfaceManager.getRepoAndCodeLine(repoCommit);
 
         //得到项目所对应的剩余issue数量
