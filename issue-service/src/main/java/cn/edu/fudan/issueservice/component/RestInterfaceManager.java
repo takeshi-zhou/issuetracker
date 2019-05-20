@@ -160,7 +160,7 @@ public class RestInterfaceManager {
         MultiValueMap<String, String> requestEntity = new LinkedMultiValueMap<>(1);
         requestEntity.add("query", "uuid=\"" + repoId + "\"");
         JSONObject jsonObject = restTemplate.postForObject(repoServicePath, requestEntity,JSONObject.class);
-        return jsonObject.getJSONArray("data").git getJSONObject(0).getString("local_addr");
+        return jsonObject.getJSONArray("data").getJSONObject(0).getString("local_addr");
     }
 
     public Map<String, String> getDeveloperByCommits(Set<String> keySet) {
