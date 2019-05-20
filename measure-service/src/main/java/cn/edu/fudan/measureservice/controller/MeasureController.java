@@ -57,14 +57,16 @@ public class MeasureController {
         }
     }
 
-    @GetMapping("/measure")
+    @GetMapping("/measure/repo-rank")
     @CrossOrigin
-    public ResponseBean getMeasureData(@RequestParam("duration")Duration duration, HttpServletRequest request){
+    public ResponseBean getMeasureData(@Param("since")String since,
+                                       @Param("until")String until,
+                                       HttpServletRequest request){
         try{
             String userToken=request.getHeader("token");
             if(userToken==null)
                 throw new Exception("need user token!");
-            return new ResponseBean(200,"success",measureService.getMeasureDataChange(userToken,duration));
+            return new ResponseBean(200,"success",measureService.getRepoRankByCommit(userToken,since,until));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",null);

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,29 +18,23 @@ public class GitUtil {
 
     public  List<String> getCommitFiles(String repoPath,String since,String until){
        List<String> files=new ArrayList<>();
-        BufferedReader bufferedReader=null;
         try{
             Runtime runtime=Runtime.getRuntime();
             String command = binHome+ "commitFiles.sh "+repoPath+" "+since+" "+until;
             Process process=runtime.exec(command);
             process.waitFor();
             String s;
-            bufferedReader=new BufferedReader(new InputStreamReader(process.getInputStream()));
-            while((s=bufferedReader.readLine())!=null){
-                s=s.trim();
-                if(!s.isEmpty())
-                    files.add(s);
+            try(BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(process.getInputStream()))){
+                while((s=bufferedReader.readLine())!=null){
+                    s=s.trim();
+                    if(!s.isEmpty())
+                        files.add(s);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }catch (Exception e){
             e.printStackTrace();
-        }finally {
-            if(bufferedReader!=null) {
-                try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
         return files;
     }
@@ -88,5 +81,23 @@ public class GitUtil {
             e.printStackTrace();
         }
         return infos;
+    }
+
+
+    public int getCommitCount(String repoPath,String since,String until){
+        try{
+            Runtime runtime=Runtime.getRuntime();
+            String command = binHome+ "commitCount.sh "+repoPath+" "+since+" "+until;
+            Process process=runtime.exec(command);
+            process.waitFor();
+            try(BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(process.getInputStream()))){
+                return Integer.valueOf(bufferedReader.readLine());
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

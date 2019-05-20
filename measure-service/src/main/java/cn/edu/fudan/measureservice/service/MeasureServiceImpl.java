@@ -316,4 +316,33 @@ public class MeasureServiceImpl implements MeasureService {
             return activeMeasure;
     }
 
+    @Override
+    public List<RepoRank> getRepoRankByCommit(String token, String since, String until) {
+        List<RepoRank> result=new ArrayList<>();
+        String accountId=restInterfaceManager.getAccountId(token);
+        JSONArray projects=restInterfaceManager.getProjectList(accountId);
+        for(int i=0;i<projects.size();i++){
+            JSONObject project=projects.getJSONObject(i);
+            String name=project.getString("name");
+            String repoId=project.getString("repo_id");
+            result.add(getRepoRankInfo(repoId,name,since,until));
+        }
+        result.sort((o1,o2)->o2.getCommitCount()-o1.getCommitCount());
+        return result.stream().distinct().collect(Collectors.toList());
+    }
+
+    private RepoRank getRepoRankInfo(String repoId,String repoName,String since,String until){
+        RepoRank repoRank=new RepoRank();
+        repoRank.setReoName(repoName);
+        String repoPath=null;
+        try{
+            repoPath=restInterfaceManager.getRepoPath(repoId,"");
+            repoRank.setCommitCount(gitUtil.getCommitCount(repoPath,since,until));
+        }finally {
+            if(repoPath!=null)
+                restInterfaceManager.freeRepoPath(repoId,repoPath);
+        }
+        return repoRank;
+    }
+
 }

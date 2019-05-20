@@ -1,9 +1,6 @@
 package cn.edu.fudan.measureservice.service;
 
-import cn.edu.fudan.measureservice.domain.ActiveMeasure;
-import cn.edu.fudan.measureservice.domain.Duration;
-import cn.edu.fudan.measureservice.domain.Granularity;
-import cn.edu.fudan.measureservice.domain.RepoMeasure;
+import cn.edu.fudan.measureservice.domain.*;
 
 import java.util.List;
 
@@ -44,4 +41,13 @@ public interface MeasureService {
      * @return 项目在某段时间有关提交的活跃度的度量信息
      */
     ActiveMeasure getOneActiveMeasure(String repoId,String since,String until);
+
+    /**
+     * 一个用户提交次数最多的项目排名
+     * @param token 用户token
+     * @param since 起始时间
+     * @param until 终止时间
+     * @return 提交次数最多的项目排名
+     */
+    List<RepoRank> getRepoRankByCommit(String token,String since,String until);
 }
