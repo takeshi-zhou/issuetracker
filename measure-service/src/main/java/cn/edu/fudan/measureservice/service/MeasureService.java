@@ -5,7 +5,6 @@ import cn.edu.fudan.measureservice.domain.Duration;
 import cn.edu.fudan.measureservice.domain.Granularity;
 import cn.edu.fudan.measureservice.domain.RepoMeasure;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public interface MeasureService {
