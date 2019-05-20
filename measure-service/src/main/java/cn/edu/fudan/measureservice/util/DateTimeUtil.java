@@ -36,6 +36,10 @@ public class DateTimeUtil {
             .appendValue(ChronoField.DAY_OF_MONTH, 2)
             .toFormatter();
 
+    public static LocalDate parse(String dateStr){
+        return LocalDate.parse(dateStr,Y_M_D_formatter);
+    }
+
     public static String format(LocalDateTime dateTime) {
         return dateTime.format(Y_M_D_H_M_S_formatter);
     }

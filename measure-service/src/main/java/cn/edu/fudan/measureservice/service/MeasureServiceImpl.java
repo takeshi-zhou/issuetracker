@@ -51,7 +51,6 @@ public class MeasureServiceImpl implements MeasureService {
         this.gitUtil=gitUtil;
     }
 
-    //获取一个用户所有项目在某个时间段前后度量值的变化
     @Override
     public Object getMeasureDataChange(String userToken, Duration duration) {
         List<Object> projectsMeasureChanges=new ArrayList<>();
@@ -128,8 +127,7 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     //保存某个项目某个commit的度量信息
-    @Override
-    public void saveMeasureData(String repoId, String commitId,String commitTime) {
+    private void saveMeasureData(String repoId, String commitId,String commitTime) {
         try{
             Measure measure=getMeasureDataOfOneCommit(repoId,commitId);
             saveRepoLevelMeasureData(measure,repoId,commitId,commitTime);
@@ -195,28 +193,40 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     @Override
-    public List<RepoMeasure> getRepoMeasureByRepoId(String repoId,Duration duration) {
-        LocalDateTime now=LocalDateTime.now();
-        LocalDateTime time_line;
-        switch (duration){
+    public List<RepoMeasure> getRepoMeasureByRepoId(String repoId,String since,String until,Granularity granularity) {
+        List<RepoMeasure> result=new ArrayList<>();
+        //先统一把这个时间段的所有度量值对象都取出来，然后按照时间单位要求来过滤
+        List<RepoMeasure> repoMeasures=repoMeasureMapper.getRepoMeasureBetween(repoId,since,until);
+        if(repoMeasures==null||repoMeasures.isEmpty())
+            return Collections.emptyList();
+        repoMeasures= repoMeasures.stream().map(repoMeasure -> {
+            String date=repoMeasure.getCommit_time();
+            repoMeasure.setCommit_time(date.split(" ")[0]);
+            return repoMeasure;
+        }).collect(Collectors.toList());
+        //LocalDate end=DateTimeUtil.parse(until);
+        LocalDate nextTimeLimit= DateTimeUtil.parse(since);
+        switch (granularity){
             case week:
-                time_line=now.minusWeeks(4);
+                for(RepoMeasure measure:repoMeasures){
+                    LocalDate current=DateTimeUtil.parse(measure.getCommit_time());
+                    if(current.isAfter(nextTimeLimit)){
+                        result.add(measure);
+                        nextTimeLimit=nextTimeLimit.plusWeeks(1);
+                    }
+                }
                 break;
             case month:
-                time_line=now.minusMonths(4);
+                for(RepoMeasure measure:repoMeasures){
+                    LocalDate current=DateTimeUtil.parse(measure.getCommit_time());
+                    if(current.isAfter(nextTimeLimit)){
+                        result.add(measure);
+                        nextTimeLimit=nextTimeLimit.plusMonths(1);
+                    }
+                }
                 break;
-            default:
-                time_line=now.minusWeeks(4);
         }
-        List<RepoMeasure> repoMeasures=repoMeasureMapper.getRepoMeasureByRepoId(repoId,DateTimeUtil.format(time_line));
-        if(repoMeasures!=null&&!repoMeasures.isEmpty()){
-            return repoMeasures.stream().map(repoMeasure -> {
-                String date=repoMeasure.getCommit_time();
-                repoMeasure.setCommit_time(date.split(" ")[0]);
-                return repoMeasure;
-            }).collect(Collectors.toList());
-        }
-        return Collections.emptyList();
+        return result;
     }
 
     @Override
@@ -228,7 +238,7 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     @Override
-    public List<ActiveMeasure> getActiveMeasure(String repoId, String since, String until, Granularity granularity) {
+    public List<ActiveMeasure> getActiveMeasureChange(String repoId, String since, String until,Granularity granularity) {
         List<ActiveMeasure> result=new ArrayList<>();
         String repoPath=getRepoPath(repoId);
         LocalDate date=LocalDate.parse(since,DateTimeUtil.Y_M_D_formatter);
@@ -278,20 +288,31 @@ public class MeasureServiceImpl implements MeasureService {
         return repoHome+repoPath;
     }
 
-    private ActiveMeasure getOneActiveMeasure(String repoPath,String since,String until){
+    @Override
+    public ActiveMeasure getOneActiveMeasure(String repoId,String since,String until){
             ActiveMeasure activeMeasure=new ActiveMeasure();
-            activeMeasure.setCommitInfos(gitUtil.getCommitInfoByAuthor(repoPath,since,until));
-            Map<String,Integer> map=new HashMap<>();
-            for(String file:gitUtil.getCommitFiles(repoPath,since,until)){
-                if(map.containsKey(file)){
-                    int count=map.get(file);
-                    map.put(file,count+1);
-                }else
-                    map.put(file,0);
+            String repoPath=null;
+            try{
+                repoPath=restInterfaceManager.getRepoPath(repoId,"");
+                activeMeasure.setCommitInfos(gitUtil.getCommitInfoByAuthor(repoPath,since,until));
+                Map<String,Integer> map=new HashMap<>();
+                for(String file:gitUtil.getCommitFiles(repoPath,since,until)){
+                    if(map.containsKey(file)){
+                        int count=map.get(file);
+                        map.put(file,count+1);
+                    }else
+                        map.put(file,0);
+                }
+                List<String> distinctFiles=new ArrayList<>(map.keySet());
+                distinctFiles.sort((file1,file2)->map.get(file2)-map.get(file1));
+                if(distinctFiles.size()>=10)
+                    activeMeasure.setMostCommitFiles(distinctFiles.subList(0,10));
+                else
+                    activeMeasure.setMostCommitFiles(distinctFiles);
+            }finally {
+                if(repoPath!=null)
+                    restInterfaceManager.freeRepoPath(repoId,repoPath);
             }
-            List<String> distinctFiles=new ArrayList<>(map.keySet());
-            distinctFiles.sort((file1,file2)->map.get(file2)-map.get(file1));
-            activeMeasure.setMostCommitFiles(distinctFiles.subList(0,10));
             return activeMeasure;
     }
 

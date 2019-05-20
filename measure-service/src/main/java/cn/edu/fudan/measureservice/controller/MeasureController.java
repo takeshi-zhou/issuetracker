@@ -1,7 +1,7 @@
 package cn.edu.fudan.measureservice.controller;
 
-import cn.edu.fudan.measureservice.domain.CommitWithTime;
 import cn.edu.fudan.measureservice.domain.Duration;
+import cn.edu.fudan.measureservice.domain.Granularity;
 import cn.edu.fudan.measureservice.domain.ResponseBean;
 import cn.edu.fudan.measureservice.service.MeasureService;
 import org.apache.ibatis.annotations.Param;
@@ -19,11 +19,14 @@ public class MeasureController {
         this.measureService = measureService;
     }
 
-    @GetMapping("/measure/trend")
+    @GetMapping("/measure/repository")
     @CrossOrigin
-    public ResponseBean getMeasureDataByRepoId(@Param("repo_id")String repo_id,@Param("duration")Duration duration){
+    public ResponseBean getMeasureDataByRepoId(@Param("repo_id")String repo_id,
+                                               @Param("since")String since,
+                                               @Param("until")String until,
+                                               @Param("duration") Granularity granularity){
         try{
-            return new ResponseBean(200,"success",measureService.getRepoMeasureByRepoId(repo_id,duration));
+            return new ResponseBean(200,"success",measureService.getRepoMeasureByRepoId(repo_id,since,until,granularity));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",null);
@@ -35,6 +38,19 @@ public class MeasureController {
     public ResponseBean getModules(@Param("repo_id")String repo_id){
         try{
             return new ResponseBean(200,"success",measureService.getModulesOfRepo(repo_id));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
+    @GetMapping("/measure/active")
+    @CrossOrigin
+    public ResponseBean getActiveMeasure(@Param("repo_id")String repo_id,
+                                         @Param("since")String since,
+                                         @Param("until")String until){
+        try{
+            return new ResponseBean(200,"success",measureService.getOneActiveMeasure(repo_id, since, until));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",null);
@@ -55,12 +71,4 @@ public class MeasureController {
         }
 
     }
-
-    @PostMapping("/measure")
-    @CrossOrigin
-    public ResponseBean saveMeasureData(@RequestBody CommitWithTime commits){
-         measureService.saveMeasureData(commits.getRepoId(),commits.getCommitId(),commits.getCommitTime());
-         return new ResponseBean(200,"success","");
-    }
-
 }

@@ -199,6 +199,8 @@ public class BaseMappingServiceImpl implements MappingService {
             solvedInfo.put("type",rawIssue.getType());
             solvedInfo.put("location",rawIssue.firstLocation().getFile_path());
             solvedInfo.put("bug_lines",rawIssue.firstLocation().getBug_lines());
+            solvedInfo.put("class_name",rawIssue.firstLocation().getClass_name());
+            solvedInfo.put("method_name",rawIssue.firstLocation().getMethod_name());
             solvedInfo.put("start_line",rawIssue.firstLocation().getStart_line());
             solvedInfo.put("end_line",rawIssue.firstLocation().getEnd_line());
             solvedInfo.put("curr_commitid",pre_commit_id);

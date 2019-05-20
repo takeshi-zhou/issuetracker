@@ -92,9 +92,9 @@
         limit 1
     </select>
 
-    <select id="getRepoMeasureByRepoId" resultMap="repoMeasureWithDate">
+    <select id="getRepoMeasureBetween" resultMap="repoMeasureWithDate">
         select * from repo_measure
-        where repo_id = #{repo_id} and commit_time &gt; #{time_line}
+        where repo_id = #{repo_id} and commit_time &gt; #{since} and commit_time &lt; #{until}
         order by commit_time;
     </select>
 </mapper>
