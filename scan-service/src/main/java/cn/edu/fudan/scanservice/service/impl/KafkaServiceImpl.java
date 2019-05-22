@@ -146,7 +146,6 @@ public class KafkaServiceImpl implements KafkaService {
      * @author WZY
      */
     @Override
-    @SuppressWarnings("unchecked")
     @KafkaListener(id = "projectScan", topics = {"Scan"}, groupId = "scan")
     public void scanByMQ(ConsumerRecord<String, String> consumerRecord) {
         String msg = consumerRecord.value();
@@ -161,12 +160,29 @@ public class KafkaServiceImpl implements KafkaService {
         //串行扫
         if(existProject(repoId,"bug",false)){
             findBugScanTask.runSynchronously(repoId, commitId,"bug");
-            //发送消息给度量服务，将度量信息保存
-            kafkaTemplate.send("Measure",JSONArray.toJSONString(list));
-            logger.info("message has been send to topic Measure -> {}",repoId);
+             sendMessageToMeasure(repoId,list);
         }
-        if(existProject(repoId,"clone",false))
+        if(existProject(repoId,"clone",false)){
             cloneScanTask.runSynchronously(repoId,commitId,"clone");
+            sendMessageToClone(repoId,list);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void sendMessageToMeasure(String repoId,List<ScanMessageWithTime> list){
+        //发送消息给度量服务，将度量信息保存
+        kafkaTemplate.send("Measure",JSONArray.toJSONString(list));
+        logger.info("message has been send to topic Measure -> {}",repoId);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void sendMessageToClone(String repoId,List<ScanMessageWithTime> list){
+        JSONObject cloneInfo =new JSONObject();
+        cloneInfo.put("repoId",repoId);
+        cloneInfo.put("commitList",list.stream().map(ScanMessageWithTime::getCommitId).collect(Collectors.toList()));
+        //发送消息给clone服务，将度量信息保存
+        kafkaTemplate.send("CloneZNJ",JSONObject.toJSONString(cloneInfo));
+        logger.info("message has been send to topic Clone -> {}",repoId);
     }
 
     @KafkaListener(id = "updateCommit", topics = {"UpdateCommit"}, groupId = "updateCommit")
@@ -190,7 +206,6 @@ public class KafkaServiceImpl implements KafkaService {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void firstAutoScan(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
         try {
             Thread.sleep(3000);
@@ -213,9 +228,7 @@ public class KafkaServiceImpl implements KafkaService {
                 findBugScanTask.runSynchronously(repoId,commitId,"bug");
             }
             restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
-            //发送消息给度量服务，将度量信息保存
-            kafkaTemplate.send("Measure",JSONArray.toJSONString(filteredCommits));
-            logger.info("message has been send to topic Measure -> {}",repoId);
+            sendMessageToMeasure(repoId,filteredCommits);
         }else{
             logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
@@ -226,6 +239,7 @@ public class KafkaServiceImpl implements KafkaService {
                 cloneScanTask.runSynchronously(repoId,commitId,"clone");
             }
             restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
+            sendMessageToClone(repoId,filteredCommits);
         }else{
             logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
