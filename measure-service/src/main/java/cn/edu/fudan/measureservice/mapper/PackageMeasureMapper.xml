@@ -9,6 +9,7 @@
         <result property="classes" column="classes"/>
         <result property="functions" column="functions"/>
         <result property="ncss" column="ncss"/>
+        <result property="ccn" column="ccn"/>
         <result property="java_docs" column="java_docs"/>
         <result property="java_docs_lines" column="java_docs_lines"/>
         <result property="single_comment_lines" column="single_comment_lines"/>
@@ -27,6 +28,7 @@
                 classes,
                 functions,
                 ncss,
+                ccn,
                 java_docs,
                 java_docs_lines,
                 single_comment_lines,
@@ -43,6 +45,7 @@
                 #{item.classes},
                 #{item.functions},
                 #{item.ncss},
+                #{item.ccn},
                 #{item.javaDocs},
                 #{item.javaDocsLines},
                 #{item.singleCommentLines},

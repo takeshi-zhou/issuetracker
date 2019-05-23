@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -158,6 +159,7 @@ public class MeasureServiceImpl implements MeasureService {
     //保存某个项目某个commit包级别的度量
     private void savePackageMeasureData(Measure measure,String repoId,String commitId,String commitTime){
         List<Package> packages =new ArrayList<>();
+        DecimalFormat df=new DecimalFormat("#.00");
         for(Package p:measure.getPackages().getPackages()){
             p.setUuid(UUID.randomUUID().toString());
             p.setCommit_id(commitId);
@@ -165,6 +167,16 @@ public class MeasureServiceImpl implements MeasureService {
             p.setRepo_id(repoId);
             if(packageMeasureMapper.samePackageMeasureExist(repoId,commitId,p.getName())>0)
                 continue;
+            String packageName=p.getName();
+            int count=0;
+            double ccn=0.0;
+            for(Function function:measure.getFunctions().getFunctions()){
+                if(function.getName().startsWith(packageName)){
+                    count++;
+                    ccn+=function.getCcn();
+                }
+            }
+            p.setCcn(Double.valueOf(df.format(ccn/count)));
             packages.add(p);
         }
         if(!packages.isEmpty()){
