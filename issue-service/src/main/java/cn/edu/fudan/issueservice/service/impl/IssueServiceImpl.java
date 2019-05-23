@@ -418,13 +418,12 @@ public class IssueServiceImpl implements IssueService {
         return new IssueStatisticInfo(avgEliminatedTime/3600/24,maxAliveTime/3600/24);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void startMapping(String repo_id, String pre_commit_id, String current_commit_id,String category) {
         String committer="";
         JSONObject commitInfo=restInterfaceManager.getOneCommitByCommitId(current_commit_id);
         if(commitInfo!=null){
-            committer=commitInfo.getJSONArray("data").getJSONObject(0).getString("developer");
+            committer=commitInfo.getJSONObject("data").getString("developer");
         }
         if(category.equals("bug")){
             log.info("start bug mapping -> repo_id={},pre_commit_id={},current_commit_id={}",repo_id,pre_commit_id,current_commit_id);
