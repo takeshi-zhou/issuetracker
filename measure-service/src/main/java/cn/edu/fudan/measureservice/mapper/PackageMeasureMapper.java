@@ -14,4 +14,6 @@ public interface PackageMeasureMapper {
     int samePackageMeasureExist(@Param("repo_id")String repo_id,@Param("commit_id")String commit_id,@Param("name")String name);
 
     List<String> getModuleOfRepo(@Param("repo_id")String repo_id);
+
+    List<Package> getPackageMeasureByRepoIdNameAndPackageName(@Param("repo_id")String repo_id,@Param("name")String name,@Param("since")String since,@Param("until")String util);
 }

@@ -1,6 +1,7 @@
 package cn.edu.fudan.measureservice.service;
 
 import cn.edu.fudan.measureservice.domain.*;
+import cn.edu.fudan.measureservice.domain.Package;
 
 import java.util.List;
 
@@ -30,6 +31,17 @@ public interface MeasureService {
      * @return 项目的所有模块的名字
      */
     List<String> getModulesOfRepo(String repoId);
+
+    /**
+     * 获取一个项目在某个时间段特定时间单位的某个包的所有度量信息
+     * @param repoId repo的唯一标识
+     * @param packageName 包名
+     * @param since  起始时间
+     * @param until  终止时间
+     * @param granularity 时间段的单位day,week,month
+     * @return 每个时间点上包的度量信息
+     */
+    List<Package> getPackageMeasureByRepoIdNameAndPackageName(String repoId,String packageName,String since,String until,Granularity granularity);
 
     List<ActiveMeasure> getActiveMeasureChange(String repoId, String since, String until,Granularity granularity);
 
