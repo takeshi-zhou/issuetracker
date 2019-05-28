@@ -28,18 +28,13 @@ public class RestInterfaceManager {
     }
 
     private String getAccountId(String userToken){
-        Map<String,String> urlParameters=new HashMap<>();
-        urlParameters.put("userToken",userToken);
-        return restTemplate.getForObject(accountServicePath+"/user/accountId?userToken={userToken}",String.class,urlParameters);
+        return restTemplate.getForObject(accountServicePath+"/user/accountId?userToken="+userToken,String.class);
     }
 
 
     public JSONArray getRepoIdsOfAccount(String userToken, String category){
-        Map<String,String> urlParameters=new HashMap<>();
         String accountId=getAccountId(userToken);
-        urlParameters.put("accountId",accountId);
-        urlParameters.put("type",category);
-        return restTemplate.getForObject(projectServicePath+"/inner/project/repo-ids?account_id={accountId}&type={type}",JSONArray.class,urlParameters);
+        return restTemplate.getForObject(projectServicePath+"/inner/project/repo-ids?account_id="+accountId+"&type="+category,JSONArray.class);
     }
 
 
