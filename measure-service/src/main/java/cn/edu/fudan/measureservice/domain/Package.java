@@ -7,6 +7,7 @@ public class Package {
     private int classes;
     private int functions;
     private int ncss;
+    private double ccn;
     private int javaDocs;
     private int javaDocsLines;
     private int singleCommentLines;
@@ -14,6 +15,14 @@ public class Package {
     private String commit_id;
     private String commit_time;
     private String repo_id;
+
+    public double getCcn() {
+        return ccn;
+    }
+
+    public void setCcn(double ccn) {
+        this.ccn = ccn;
+    }
 
     public String getUuid() {
         return uuid;

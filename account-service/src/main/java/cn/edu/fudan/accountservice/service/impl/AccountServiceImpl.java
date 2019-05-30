@@ -41,7 +41,7 @@ public class AccountServiceImpl implements AccountService {
         if (account != null) {
             String userToken = MD5Util.md5(encodePassword);
             stringRedisTemplate.opsForValue().set("login:" + userToken, username);
-            stringRedisTemplate.expire("login:" + userToken, 7, TimeUnit.DAYS);//token保存7天
+            stringRedisTemplate.expire("login:" + userToken, 30, TimeUnit.DAYS);//token保存7天
             return new ResponseBean(200, "登录成功!", new AccountInfo(username, userToken));
         } else {
             return new ResponseBean(401, "用户名或密码错误!", null);

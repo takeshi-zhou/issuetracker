@@ -1,7 +1,6 @@
 package cn.edu.fudan.measureservice.controller;
 
-import cn.edu.fudan.measureservice.domain.CommitWithTime;
-import cn.edu.fudan.measureservice.domain.Duration;
+import cn.edu.fudan.measureservice.domain.Granularity;
 import cn.edu.fudan.measureservice.domain.ResponseBean;
 import cn.edu.fudan.measureservice.service.MeasureService;
 import org.springframework.web.bind.annotation.*;
@@ -18,24 +17,73 @@ public class MeasureController {
         this.measureService = measureService;
     }
 
-    @GetMapping("/measure")
-    public ResponseBean getMeasureData(@RequestParam("duration")Duration duration, HttpServletRequest request){
+    @GetMapping("/measure/repository")
+    @CrossOrigin
+    public ResponseBean getMeasureDataByRepoId(@RequestParam("repo_id")String repo_id,
+                                               @RequestParam("since")String since,
+                                               @RequestParam("until")String until,
+                                               @RequestParam("duration") Granularity granularity){
+        try{
+            return new ResponseBean(200,"success",measureService.getRepoMeasureByRepoId(repo_id,since,until,granularity));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
+    @GetMapping("/measure/modules")
+    @CrossOrigin
+    public ResponseBean getModules(@RequestParam("repo_id")String repo_id){
+        try{
+            return new ResponseBean(200,"success",measureService.getModulesOfRepo(repo_id));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
+    @GetMapping("/measure/specific-module")
+    @CrossOrigin
+    public ResponseBean getModuleMeasure(@RequestParam("repo_id")String repo_id,
+                                         @RequestParam("package_name")String package_name,
+                                         @RequestParam("since")String since,
+                                         @RequestParam("until")String until,
+                                         @RequestParam("duration") Granularity granularity){
+        try{
+            return new ResponseBean(200,"success",measureService.getPackageMeasureByRepoIdNameAndPackageName(repo_id,package_name,since,until,granularity));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
+    @GetMapping("/measure/active")
+    @CrossOrigin
+    public ResponseBean getActiveMeasure(@RequestParam("repo_id")String repo_id,
+                                         @RequestParam("since")String since,
+                                         @RequestParam("until")String until){
+        try{
+            return new ResponseBean(200,"success",measureService.getOneActiveMeasure(repo_id, since, until));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
+    @GetMapping("/measure/repo-rank")
+    @CrossOrigin
+    public ResponseBean getMeasureData(@RequestParam("since")String since,
+                                       @RequestParam("until")String until,
+                                       HttpServletRequest request){
         try{
             String userToken=request.getHeader("token");
             if(userToken==null)
                 throw new Exception("need user token!");
-            return new ResponseBean(200,"success",measureService.getMeasureDataChange(userToken,duration));
+            return new ResponseBean(200,"success",measureService.getRepoRankByCommit(userToken,since,until));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",null);
         }
 
     }
-
-    @PostMapping("/measure")
-    public ResponseBean saveMeasureData(@RequestBody CommitWithTime commits){
-         measureService.saveMeasureData(commits.getRepoId(),commits.getCommitId(),commits.getCommitTime());
-         return new ResponseBean(200,"success","");
-    }
-
 }

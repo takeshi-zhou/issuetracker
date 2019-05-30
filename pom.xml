@@ -21,8 +21,6 @@
         <module>tag-service</module>
         <module>event-service</module>
         <module>measure-service</module>
-        <module>recommendation</module>
-        <module>clone-visual-service</module>
     </modules>
 
     <parent>

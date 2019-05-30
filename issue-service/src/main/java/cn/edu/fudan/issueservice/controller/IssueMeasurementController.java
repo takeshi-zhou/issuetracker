@@ -69,7 +69,6 @@ public class IssueMeasurementController {
         return issueRankService.rankOfFileBaseDeveloperQuantity(repoId, duration, spaceType, detail);
     }
 
-    // done
     @GetMapping(value = {"/measurement/rankOfFileBaseIssueQuantity/{repoId}"})
     public Object getRankOfFileBaseIssueQuantity(@PathVariable("repoId") String repoId, @RequestParam("commitId") String commitId) {
 

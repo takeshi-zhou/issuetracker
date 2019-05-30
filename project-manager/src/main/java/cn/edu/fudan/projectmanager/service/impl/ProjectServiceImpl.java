@@ -208,7 +208,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     private void deleteCloneResPreFile(String repoId) {
         JSONObject currentRepo = restInterfaceManager.getRepoById(repoId);
-        String repoName = currentRepo.getJSONObject("data").getString("repo_name");
+        String localAddress=currentRepo.getJSONObject("data").getString("local_addr");
+        String repoName = localAddress.substring(localAddress.lastIndexOf("/")+1);
         String filePath=cloneResPreHome+repoName+"_A.csv";
         File file=new File(filePath);
         if(file.exists()){

@@ -10,7 +10,9 @@ import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.service.IssueRankService;
 import cn.edu.fudan.issueservice.util.ExecuteShellUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -132,8 +134,14 @@ public class IssueRankServiceImpl implements IssueRankService {
 
         //得到用户的所有项目目前的代码函数
         JSONArray jsonArray = restInterfaceManager.getProjectList(userId);
-        List repoList = jsonArray.toJavaList(ArrayList.class);
-        Map repoCommit = restInterfaceManager.getRepoAndLatestCommit(repoList);
+        Map<String, String> repoIDName = new ConcurrentHashMap<>(10);
+        for(Object json : jsonArray ) {
+            Map<String, String> map = (LinkedHashMap)json;
+            if ("bug".equals(map.get("type"))) {
+                repoIDName.put(map.get("repo_id"), map.get("name"));
+            }
+        }
+        Map repoCommit = restInterfaceManager.getRepoAndLatestScannedCommit(repoIDName.keySet());
         Map<String, Integer> repoCodeLine = restInterfaceManager.getRepoAndCodeLine(repoCommit);
 
         //得到项目所对应的剩余issue数量

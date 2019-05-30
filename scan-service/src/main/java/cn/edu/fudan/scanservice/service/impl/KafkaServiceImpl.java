@@ -1,6 +1,7 @@
 package cn.edu.fudan.scanservice.service.impl;
 
 
+import cn.edu.fudan.scanservice.component.CommitFilterStrategy;
 import cn.edu.fudan.scanservice.component.RestInterfaceManager;
 import cn.edu.fudan.scanservice.domain.ScanMessage;
 import cn.edu.fudan.scanservice.domain.ScanMessageWithTime;
@@ -15,6 +16,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -50,6 +52,14 @@ public class KafkaServiceImpl implements KafkaService {
         this.cloneScanTask = cloneScanTask;
         this.restInterfaceManager=restInterfaceManager;
         this.kafkaTemplate=kafkaTemplate;
+    }
+
+    private CommitFilterStrategy<ScanMessageWithTime> commitFilter;
+
+    @Autowired
+    @Qualifier("EVERYDAY")
+    public void setCommitFilter(CommitFilterStrategy<ScanMessageWithTime> commitFilter) {
+        this.commitFilter = commitFilter;
     }
 
     //初始化project的一些状态,表示目前正在scan
@@ -136,7 +146,6 @@ public class KafkaServiceImpl implements KafkaService {
      * @author WZY
      */
     @Override
-    @SuppressWarnings("unchecked")
     @KafkaListener(id = "projectScan", topics = {"Scan"}, groupId = "scan")
     public void scanByMQ(ConsumerRecord<String, String> consumerRecord) {
         String msg = consumerRecord.value();
@@ -144,18 +153,36 @@ public class KafkaServiceImpl implements KafkaService {
         ScanMessage scanMessage = JSONObject.parseObject(msg, ScanMessage.class);
         String repoId = scanMessage.getRepoId();
         String commitId = scanMessage.getCommitId();
-        //串行扫
-        if(existProject(repoId,"bug",false))
-            findBugScanTask.runSynchronously(repoId, commitId,"bug");
-        if(existProject(repoId,"clone",false))
-            cloneScanTask.runSynchronously(repoId,commitId,"clone");
         List<ScanMessageWithTime> list=new ArrayList<>();
         ScanMessageWithTime scanMessageWithTime=new ScanMessageWithTime(repoId,commitId);
         scanMessageWithTime.setCommitTime(restInterfaceManager.getCommitTime(commitId).getJSONObject("data").getString("commit_time"));
         list.add(scanMessageWithTime);
+        //串行扫
+        if(existProject(repoId,"bug",false)){
+            findBugScanTask.runSynchronously(repoId, commitId,"bug");
+             sendMessageToMeasure(repoId,list);
+        }
+        if(existProject(repoId,"clone",false)){
+            cloneScanTask.runSynchronously(repoId,commitId,"clone");
+            sendMessageToClone(repoId,list);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void sendMessageToMeasure(String repoId,List<ScanMessageWithTime> list){
         //发送消息给度量服务，将度量信息保存
         kafkaTemplate.send("Measure",JSONArray.toJSONString(list));
         logger.info("message has been send to topic Measure -> {}",repoId);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void sendMessageToClone(String repoId,List<ScanMessageWithTime> list){
+        JSONObject cloneInfo =new JSONObject();
+        cloneInfo.put("repoId",repoId);
+        cloneInfo.put("commitList",list.stream().map(ScanMessageWithTime::getCommitId).collect(Collectors.toList()));
+        //发送消息给clone服务，将度量信息保存
+        kafkaTemplate.send("CloneZNJ",JSONObject.toJSONString(cloneInfo));
+        logger.info("message has been send to topic Clone -> {}",repoId);
     }
 
     @KafkaListener(id = "updateCommit", topics = {"UpdateCommit"}, groupId = "updateCommit")
@@ -179,14 +206,13 @@ public class KafkaServiceImpl implements KafkaService {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void firstAutoScan(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        List<ScanMessageWithTime> filteredCommits=getFilteredList(map,dates);
+        List<ScanMessageWithTime> filteredCommits=commitFilter.filter(map,dates);
         String repoId=filteredCommits.get(0).getRepoId();
         logger.info("{} need to auto scan!",repoId);
         logger.info(filteredCommits.size()+" commits need to scan after filtered!");
@@ -202,6 +228,7 @@ public class KafkaServiceImpl implements KafkaService {
                 findBugScanTask.runSynchronously(repoId,commitId,"bug");
             }
             restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
+            sendMessageToMeasure(repoId,filteredCommits);
         }else{
             logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
@@ -212,12 +239,10 @@ public class KafkaServiceImpl implements KafkaService {
                 cloneScanTask.runSynchronously(repoId,commitId,"clone");
             }
             restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
+            sendMessageToClone(repoId,filteredCommits);
         }else{
             logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
-        //发送消息给度量服务，将度量信息保存
-        kafkaTemplate.send("Measure",JSONArray.toJSONString(filteredCommits));
-        logger.info("message has been send to topic Measure -> {}",repoId);
     }
 
     private boolean existProject(String repoId,String category,boolean isFirst){
@@ -229,40 +254,6 @@ public class KafkaServiceImpl implements KafkaService {
             logger.info("response is null");
             return false;
         }
-    }
-
-    private List<ScanMessageWithTime> getFilteredList(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
-        int sourceSize=dates.size();
-        LocalDate oneMonthPoint=dates.get(sourceSize-1).minusMonths(1);
-        LocalDate sixMonthsPoint=dates.get(sourceSize-1).minusMonths(6);
-        LocalDate nextTimeLimit1=oneMonthPoint;
-        LocalDate nextTimeLimit2=sixMonthsPoint;
-        LinkedList<ScanMessageWithTime> result=new LinkedList<>();
-        int i=0;
-        while(i<sourceSize){
-            LocalDate date=dates.get(sourceSize-1-i);
-            if(date.isAfter(oneMonthPoint)){
-                //一个月以内
-                List<ScanMessageWithTime> list=map.get(date);
-                result.addFirst(list.get(list.size()-1));
-            }else if(date.isAfter(sixMonthsPoint)){
-                //一个月后，6个月之前
-                if(date.isBefore(nextTimeLimit1)){
-                    List<ScanMessageWithTime> list=map.get(date);
-                    result.addFirst(list.get(list.size()-1));
-                    nextTimeLimit1=date.minusWeeks(1);
-                }
-            }else{
-                //6个月之后
-                if(date.isBefore(nextTimeLimit2)){
-                    List<ScanMessageWithTime> list=map.get(date);
-                    result.addFirst(list.get(list.size()-1));
-                    nextTimeLimit2=date.minusMonths(1);
-                }
-            }
-            i++;
-        }
-        return result;
     }
 
     /**

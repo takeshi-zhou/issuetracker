@@ -64,7 +64,8 @@ public class ScanOperationAdapter implements ScanOperation {
             return new ScanInitialInfo(false);
         Date startTime = new Date();
         JSONObject currentRepo = restInterfaceManager.getRepoById(repoId);
-        String repoName = currentRepo.getJSONObject("data").getString("repo_name");
+        String localAddress=currentRepo.getJSONObject("data").getString("local_addr");
+        String repoName = localAddress.substring(localAddress.lastIndexOf("/")+1);
         logger.info("repo_name ->{} ,repo local address -> {}",repoName,repoPath);
         //新建一个Scan对象
         Scan scan = new Scan();

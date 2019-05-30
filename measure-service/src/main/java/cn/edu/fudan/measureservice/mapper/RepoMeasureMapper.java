@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.List;
 
 @Repository
 public interface RepoMeasureMapper {
@@ -16,4 +17,6 @@ public interface RepoMeasureMapper {
     RepoMeasure getLatestMeasureData(@Param("repo_id")String repo_id);
 
     RepoMeasure getFirstMeasureDataAfterDuration(@Param("repo_id")String repo_id,@Param("time_line") Date time_line);
+
+    List<RepoMeasure> getRepoMeasureBetween(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String util);
 }
