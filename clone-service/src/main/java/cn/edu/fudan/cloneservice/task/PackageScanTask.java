@@ -80,15 +80,27 @@ public class PackageScanTask {
     }
 
     private boolean freeRepoUrl(String repoId, String repoUrl){
-        JSONObject nj = restInterfaceManager.freeRepoPath(repoId,repoUrl);
-        JSONObject njdata = nj.getJSONObject("data");
-        String s = njdata.get("status").toString();
-        if(s.equals("Successful")){
-            logger.info("free repo successful");
-            return true;
-        }{
+        try{
+            JSONObject nj = restInterfaceManager.freeRepoPath(repoId,repoUrl);
+            JSONObject njdata = nj.getJSONObject("data");
+            String s = njdata.get("status").toString();
+            if(s.equals("Successful")){
+                logger.info("free repo successful");
+                return true;
+            }else
+            {
+                logger.info("free repo failed");
+                logger.info("error:" + repoId + "," + repoUrl);
+                return false;
+            }
+        }
+        catch (Exception e){
+            logger.info("free repo exception");
+            logger.info(e.getMessage());
+            logger.info("error:" + repoId + "," + repoUrl);
             return false;
         }
+
     }
     @SuppressWarnings("unchecked")
     private void send(String repoId, String commitId ,String status, String description) {
@@ -139,6 +151,18 @@ public class PackageScanTask {
 
     }
 
+    private void updateScan(String repo_id, String commit_id){
+        logger.info("method updateScan" + repo_id+"  : "+commit_id);
+
+        String repoId = repo_id;
+        String commitId = commit_id;
+        List<CloneInfo> lci = cloneInfoDao.getCloneInfoByRepoIdAndCommitId(repoId, commit_id);
+        List<Map> list_distr = getCloneDistriMap(lci);
+        logger.info("updateScan-->start to get URL " + repoId + commitId);
+
+
+    }
+
     public void run(String repoId, List<String> commit_list){        //对外启动接口
 
         for(String commit_id:commit_list){
@@ -150,6 +174,13 @@ public class PackageScanTask {
                 packageScanStatusDao.insertPackageScanStatusByRepoIdAndCommitId(repoId, commit_id);
             }
 
+        }
+
+    }
+    public void runRe(String repoId, List<String> commit_list){        //对外启动接口
+
+        for(String commit_id:commit_list){
+            updateScan(repoId, commit_id);
         }
 
     }

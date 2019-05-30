@@ -77,4 +77,23 @@ public class CloneServiceApplicationTests {
 
     }
 
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testPackageReScan()throws Exception{
+        //ScanInitialInfo scanInitialInfo = new ScanInitialInfo("happy", "123", "here");
+//        String urlPrefix = "/home/fdse/user/issueTracker/repo";
+        List<String> commitList = new ArrayList<>();
+        commitList.add("9e2d737a785863f7cd38913ffc2b559176aa5cf4");
+
+
+        ScanInitialInfo scanInitialInfo = new ScanInitialInfo(
+                "f5f331a2-5f25-11e9-bd27-77953a60dffa",
+                commitList);
+        System.out.println(JSONObject.toJSONString(scanInitialInfo));
+        kafkaTemplate.send("CloneZNJReScan", JSONObject.toJSONString(scanInitialInfo));
+
+
+
+    }
 }
