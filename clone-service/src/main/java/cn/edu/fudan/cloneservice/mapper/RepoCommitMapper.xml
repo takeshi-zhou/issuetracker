@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.fudan.cloneservice.mapper.RepoCommitMapper">
+    <resultMap id="commit_map" type="cn.edu.fudan.cloneservice.domain.Commit">
+        <id property="uuid" column="uuid"/>
+        <result property="repo_id" column="repo_id"/>
+        <result property="commit_id" column="commit_id"/>
+        <result property="commit_time" column="commit_time"/>
+    </resultMap>
+    <select id="selectCommitByRepoId" parameterType="String" resultMap="commit_map">
+        SELECT `commit`.uuid, `commit`.repo_id, `commit`.commit_id, `commit`.commit_time from
+ce_scan_status INNER JOIN `commit` ON ce_scan_status.repo_id=`commit`.repo_id AND ce_scan_status.commit_id=`commit`.commit_id
+WHERE ce_scan_status.`status`='Scanned' AND ce_scan_status.repo_id=#{repoId}
+ORDER BY commit_time
+    </select>
+</mapper>

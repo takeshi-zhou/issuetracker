@@ -4,8 +4,10 @@ package cn.edu.fudan.cloneservice;
 
 import cn.edu.fudan.cloneservice.component.RestInterfaceManager;
 import cn.edu.fudan.cloneservice.dao.CloneInfoDao;
+import cn.edu.fudan.cloneservice.dao.CommitDao;
 import cn.edu.fudan.cloneservice.dao.PackageNameDao;
 import cn.edu.fudan.cloneservice.domain.CloneInfo;
+import cn.edu.fudan.cloneservice.domain.Commit;
 import cn.edu.fudan.cloneservice.domain.PackageInfo;
 import cn.edu.fudan.cloneservice.domain.ScanInitialInfo;
 import cn.edu.fudan.cloneservice.mapper.PackageNameMapper;
@@ -17,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
@@ -31,15 +34,15 @@ public class CloneServiceApplicationTests {
     private RestInterfaceManager restInterfaceManager;
     @Autowired
     private CloneInfoDao cloneInfoDao;
-
+    @Autowired
+    private CommitDao commitDao;
     @Test
     @SuppressWarnings("unchecked")
     public void testDao(){
         String test = "test";
-        PackageInfo packageInfo = new PackageInfo(test, test,test,test,1,1,1,1,1);
-
-//        packageNameMapper.insertPackageNameSetByRepoIdAndCommitId(packageInfo);
-
+        String repo_id =  "4f696ccc-65ef-11e9-9ddc-f93dfaa9da61";
+        List<String> lc = new ArrayList<>();
+        lc=        commitDao.getCommitList(repo_id);
 
     }
     @Test
