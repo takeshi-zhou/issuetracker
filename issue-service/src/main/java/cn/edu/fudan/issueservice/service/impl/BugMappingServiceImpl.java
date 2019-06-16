@@ -134,7 +134,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         rawIssue.setIssue_id(new_IssueId);
         String targetFiles = rawIssue.getFile_name();
         boolean hasDisplayId=issueDao.getMaxIssueDisplayId(repo_id) != null;
-        if (hasDisplayId||isDefaultDisplayId){
+        if (isDefaultDisplayId){
              currentDisplayId = hasDisplayId ? issueDao.getMaxIssueDisplayId(repo_id) : 0;
             isDefaultDisplayId = false;
         }
