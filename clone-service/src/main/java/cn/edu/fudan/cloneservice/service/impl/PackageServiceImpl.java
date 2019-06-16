@@ -12,6 +12,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -54,5 +55,26 @@ public class PackageServiceImpl implements PackageService {
 
     }
 
+
+    @SuppressWarnings("unchecked")
+    @Override
+    @KafkaListener(id = "rePackageScan", topics = {"CloneZNJReScan"}, groupId = "clone")
+    public void ReCloneMessageListener(ConsumerRecord<String, String> consumerRecord) {
+        String msg = consumerRecord.value();
+//        System.out.println(msg);
+//        logger.info("received message from topic -> " + consumerRecord.topic() + " : " + msg);
+        ScanInitialInfo scanInitialInfo = JSONObject.parseObject(msg, ScanInitialInfo.class);
+
+        //#0 收到要扫描的项目信息
+        //1 repo id
+        //2 repo 名字
+        //3 repo 路径
+        String repoId=scanInitialInfo.getRepoId();
+        List<String> commitList = scanInitialInfo.getCommitList();//从数据库拉取commit列表
+        //#1 只更新克隆检测信息 包信息已经全了
+
+        packageScanTask.runRe(repoId,commitList);
+
+    }
 
 }
