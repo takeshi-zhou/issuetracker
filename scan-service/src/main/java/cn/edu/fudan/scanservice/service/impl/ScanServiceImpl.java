@@ -60,6 +60,7 @@ public class ScanServiceImpl implements ScanService {
                 for (int i = 0; i < commitArray.size(); i++) {
                     JSONObject commit = commitArray.getJSONObject(i);
                     commit.put("isScanned", false);
+
                 }
                 is_whole = true;
             } else {

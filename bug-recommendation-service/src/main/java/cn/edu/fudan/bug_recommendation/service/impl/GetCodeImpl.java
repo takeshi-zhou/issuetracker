@@ -57,12 +57,6 @@ public class GetCodeImpl implements GetCode {
         String repoHome = null;
         String[] paths = location.split("/");
         String file_path = location;
-//        for (int i = 2; i<paths.length ;i++){
-//            file_path += paths[i];
-//            if(i!=paths.length-1){
-//                file_path += "/";
-//            }
-//        }
 
         System.out.println("file_path: " + file_path);
         try{
@@ -73,10 +67,11 @@ public class GetCodeImpl implements GetCode {
                 System.out.println("file_path: "+repoHome+"/" +file_path);
                 code = getFileContent(repoHome+"/" +file_path);
             } else {
-                code = "";
+                code = null;
             }
+            //System.out.println("code: "+code);
         }catch (Exception e){
-            System.out.println("errormsg"+e.getMessage());
+            System.out.println("errormsg: "+e.getMessage());
         }finally {
             if(repoHome!=null){
                 JSONObject response = freeRepoPath(repoId,repoHome);

@@ -20,6 +20,35 @@ public class Recommendation implements Serializable {
     private String modification_method;
     private String reponame;
     private String filename;
+    private String class_name;
+    private String method_name;
+    private Integer appear_num;
+
+    public String getClass_name() {
+        return class_name;
+    }
+
+    public void setClass_name(String class_name) {
+        this.class_name = class_name;
+    }
+
+    public String getMethod_name() {
+        return method_name;
+    }
+
+    public void setMethod_name(String method_name) {
+        this.method_name = method_name;
+    }
+
+    public Integer getAppear_num() {
+        return appear_num;
+    }
+
+    public void setAppear_num(Integer appear_num) {
+        this.appear_num = appear_num;
+    }
+
+
 
     public String getReponame() {
         return reponame;

@@ -78,7 +78,12 @@ public class RecommendationController {
     }
     @GetMapping("/get-bug-recommendation")
     @CrossOrigin
-    public Object getBugRecommendation(@RequestParam("type") String type){
-        return new ResponseBean(200,"success",recommendationService.getRecommendationsByType(type));
+//    public Object getBugRecommendation(@RequestParam("type") String type){
+//        return new ResponseBean(200,"success",recommendationService.getRecommendationsByType(type));
+//    }
+    public Object getBugRecommendation(@RequestParam("type") String type,
+                                       @RequestParam("page") Integer page,
+                                       @RequestParam("size") Integer size){
+        return new ResponseBean(200,"success",recommendationService.getRecommendationsByType(type,page,size));
     }
 }

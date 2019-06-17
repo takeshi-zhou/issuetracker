@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class RecommendationDao {
@@ -27,8 +28,8 @@ public class RecommendationDao {
         return getRecommendationsByLocation(location).size() != 0;
     }
 
-    public boolean isTypeExist(String type){
-        return getRecommendationsByType(type).size()!=0;
+    public boolean isTypeExist(Map<String, Object> map){
+        return getRecommendationsByType(map).size()!=0;
     }
 
     public boolean isBuglinesExist(String bug_lines){
@@ -70,11 +71,13 @@ public class RecommendationDao {
     }
 
 
-    public List<Recommendation> getRecommendationsByType(String type) {
-        List<Recommendation> recommendations = recommendationMapper.getRecommendationsByType(type);
+    public List<Recommendation> getRecommendationsByType(Map<String, Object> map) {
+        List<Recommendation> recommendations = recommendationMapper.getRecommendationsByType(map);
         List<Recommendation> list = new ArrayList<>();
         for (Recommendation recommendation : recommendations) {
-            list.add(recommendation);
+            if (recommendation.getModification_method().equals("modify")) {
+                list.add(recommendation);
+            }
         }
         return list;
     }
@@ -95,5 +98,19 @@ public class RecommendationDao {
             list.add(recommendation);
         }
         return list;
+    }
+    public List<Recommendation> getRecommendationsSameTypeFile(String type,String filename){
+        List<Recommendation> recommendations = recommendationMapper.getRecommendationsSameTypeFile(type,filename);
+        List<Recommendation> list = new ArrayList<>();
+        for (Recommendation recommendation : recommendations) {
+            list.add(recommendation);
+        }
+        return list;
+    }
+    public Integer getRecommendationsByTypeCount(String type){
+        return recommendationMapper.getRecommendationsByTypeCount(type);
+    }
+    public void updateRecommendationsAppearNum(Integer appear_num,String uuid){
+        recommendationMapper.updateRecommendationsAppearNum(appear_num,uuid);
     }
 }
