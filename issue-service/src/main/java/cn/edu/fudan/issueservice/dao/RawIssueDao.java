@@ -78,4 +78,12 @@ public class RawIssueDao {
     public int getNumberOfRemainingIssueBasePackage(String repoId, String commit, String packageName) {
         return rawIssueMapper.getNumberOfRemainingIssueBasePackage(repoId, commit, packageName);
     }
+
+    public int getNumberOfRawIssuesByIssueId(String issueId) {
+        return rawIssueMapper.getNumberOfRawIssuesByIssueId(issueId);
+    }
+
+    public List<RawIssue> getRawIssueListByIssueId(Map<String, Object> map) {
+        return rawIssueMapper.getRawIssueListByIssueId(map);
+    }
 }

@@ -150,4 +150,21 @@ public class RawIssueServiceImpl implements RawIssueService {
 
         return rawIssueDao.getRawIssueByCommitIDAndFile(repo_id,commit_id, category, filePath);
     }
+
+    @Override
+    public Object getRawIssueList(String issue_id,Integer page,Integer size){
+        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> param = new HashMap<>();
+        param.put("issue_id",issue_id);
+        param.put("page",page);
+        param.put("size",size);
+        /*获取总页数*/
+        int count = rawIssueDao.getNumberOfRawIssuesByIssueId(issue_id);
+        param.put("start", (page - 1) * size);
+        result.put("totalPage", count % size == 0 ? count / size : count / size + 1);
+        result.put("totalCount", count);
+        List<RawIssue> rawIssues = rawIssueDao.getRawIssueListByIssueId(param);
+        result.put("rawIssueList",rawIssues);
+        return result;
+    }
 }

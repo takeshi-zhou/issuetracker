@@ -27,6 +27,15 @@ public class RawIssueController {
         return rawIssueService.getRawIssueByIssueId(issue_id);
     }
 
+    @GetMapping(value = {"/raw-issueList"})
+    public Object getOnePageRawIssueList(
+                        @RequestParam("issue_id") String issue_id ,
+                        @RequestParam("page") Integer page,
+                        @RequestParam("size") Integer size
+                        ) {
+        return rawIssueService.getRawIssueList(issue_id,page,size);
+    }
+
     @GetMapping(value = {"/raw-issue/code"})
     public Object getCode(@RequestParam("project_id") String project_id,
                           @RequestParam("commit_id") String commit_id,
