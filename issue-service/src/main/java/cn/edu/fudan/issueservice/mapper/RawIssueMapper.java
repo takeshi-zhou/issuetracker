@@ -43,4 +43,8 @@ public interface RawIssueMapper {
 
     Integer getNumberOfRemainingIssueBasePackage(@Param("repo_id")String repoId, @Param("commit_id")String commitId,@Param("package_name") String packageName);
 
+    Integer getNumberOfRawIssuesByIssueId(@Param("issueId") String issueId);
+
+    List<RawIssue> getRawIssueListByIssueId(Map<String, Object> map);
+
 }
