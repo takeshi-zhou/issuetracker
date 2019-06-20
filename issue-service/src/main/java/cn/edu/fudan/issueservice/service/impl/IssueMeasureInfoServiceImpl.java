@@ -9,6 +9,10 @@ import cn.edu.fudan.issueservice.component.RestInterfaceManager;
 import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.dao.LocationDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
+import cn.edu.fudan.issueservice.dao.ScanResultDao;
+import cn.edu.fudan.issueservice.domain.IssueCountDeveloper;
+import cn.edu.fudan.issueservice.domain.IssueCountMeasure;
+import cn.edu.fudan.issueservice.domain.IssueCountPo;
 import cn.edu.fudan.issueservice.domain.SpaceType;
 import cn.edu.fudan.issueservice.service.IssueMeasureInfoService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,22 +28,17 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
     private RawIssueDao rawIssueDao;
     private IssueDao issueDao;
     private RestInterfaceManager restInterfaceManager;
+    private ScanResultDao scanResultDao;
 
-    @Autowired
-    public void  setRawIssueDao(RawIssueDao rawIssueDao) {
+    public IssueMeasureInfoServiceImpl(RawIssueDao rawIssueDao,
+                                       IssueDao issueDao,
+                                       RestInterfaceManager restInterfaceManager,
+                                       ScanResultDao scanResultDao) {
         this.rawIssueDao = rawIssueDao;
-    }
-
-    @Autowired
-    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
-        this.restInterfaceManager = restInterfaceManager;
-    }
-
-    @Autowired
-    public void setIssueDao(IssueDao issueDao) {
         this.issueDao = issueDao;
+        this.restInterfaceManager = restInterfaceManager;
+        this.scanResultDao = scanResultDao;
     }
-
 
     @Override
     public int numberOfRemainingIssue(String repoId, String commit, String spaceType, String detail) {
@@ -104,5 +103,23 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
         }*/
 
         return -1;
+    }
+
+    @Override
+    public List<IssueCountPo> getIssueCountEachCommit(String repoId,String category, String since, String until) {
+        return scanResultDao.getScanResultsEachCommit(repoId,category,since,until);
+    }
+
+    @Override
+    public IssueCountMeasure getIssueCountMeasureByRepo(String repoId, String category, String since, String until) {
+        IssueCountMeasure issueCountMeasure=new IssueCountMeasure();
+        issueCountMeasure.setNewIssueCount(issueDao.getNumberOfNewIssueByDuration(repoId, since, until));
+        issueCountMeasure.setEliminatedIssueCount(issueDao.getNumberOfEliminateIssueByDuration(repoId, since, until));
+        return issueCountMeasure;
+    }
+
+    @Override
+    public List<IssueCountDeveloper> getIssueCountMeasureByDeveloper(String repoId, String category, String since, String until) {
+        return scanResultDao.getScanResultsEachDeveloper(repoId, category, since, until);
     }
 }

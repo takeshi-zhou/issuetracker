@@ -5,6 +5,7 @@
  **/
 package cn.edu.fudan.issueservice.controller;
 
+import cn.edu.fudan.issueservice.domain.ResponseBean;
 import cn.edu.fudan.issueservice.service.IssueMeasureInfoService;
 import cn.edu.fudan.issueservice.service.IssueRankService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 
 @RestController
 @EnableAutoConfiguration
@@ -56,6 +58,45 @@ public class IssueMeasurementController {
                 @RequestParam("spaceType") String spaceType,@RequestParam("detail") String detail) {
 
         return issueMeasureInfoService.numberOfEliminateIssue(duration, spaceType, detail);
+    }
+
+    @GetMapping(value = {"/measurement/issue/commit"})
+    public ResponseBean getIssueCountEachCommit(@RequestParam("repo_id")String repo_id,
+                                                      @RequestParam("category")String category,
+                                                      @RequestParam("since")String since,
+                                                      @RequestParam("until")String until){
+        try {
+            return new ResponseBean(200, "success!", issueMeasureInfoService.getIssueCountEachCommit(repo_id, category, since, until));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "failed!", Collections.emptyList());
+        }
+    }
+
+    @GetMapping(value = {"/measurement/issue/repository"})
+    public ResponseBean getIssueCountMeasureByRepo(@RequestParam("repo_id")String repo_id,
+                                                        @RequestParam("category")String category,
+                                                        @RequestParam("since")String since,
+                                                        @RequestParam("until")String until){
+        try {
+            return new ResponseBean(200, "success!", issueMeasureInfoService.getIssueCountMeasureByRepo(repo_id, category, since, until));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "failed!", null);
+        }
+    }
+
+    @GetMapping(value = {"/measurement/issue/developer"})
+    public ResponseBean getIssueCountMeasureByDeveloper(@RequestParam("repo_id")String repo_id,
+                                                        @RequestParam("category")String category,
+                                                        @RequestParam("since")String since,
+                                                        @RequestParam("until")String until){
+        try {
+            return new ResponseBean(200, "success!", issueMeasureInfoService.getIssueCountMeasureByDeveloper(repo_id, category, since, until));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "failed!", Collections.emptyList());
+        }
     }
 
 

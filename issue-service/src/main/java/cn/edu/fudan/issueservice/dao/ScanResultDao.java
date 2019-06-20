@@ -1,5 +1,6 @@
 package cn.edu.fudan.issueservice.dao;
 
+import cn.edu.fudan.issueservice.domain.IssueCountDeveloper;
 import cn.edu.fudan.issueservice.domain.IssueCountPo;
 import cn.edu.fudan.issueservice.domain.ScanResult;
 import cn.edu.fudan.issueservice.mapper.ScanResultMapper;
@@ -48,6 +49,24 @@ public class ScanResultDao {
     public IssueCountPo getMergedScanResult(List<String> repoIds, String category, String start, String end){
         try{
             return scanResultMapper.getMergedScanResult(repoIds, category, start, end);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+    public List<IssueCountPo> getScanResultsEachCommit(String repo_id,String category, String start,String end){
+        try{
+            return scanResultMapper.getScanResultsEachCommit(repo_id, category, start, end);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+    public List<IssueCountDeveloper> getScanResultsEachDeveloper(String repo_id, String category, String start, String end){
+        try{
+            return scanResultMapper.getScanResultsEachDeveloper(repo_id, category, start, end);
         }catch (Exception e){
             log.error(e.getMessage());
             return null;
