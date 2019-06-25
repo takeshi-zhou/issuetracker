@@ -10,7 +10,7 @@ servers:
 - url: http://10.141.221.84:8102
   description: "/repository"
 - url: http://10.141.221.85:8102
-  description: "others"
+  description: "思聪"
 
 tags:
 - name: "repository-service"
@@ -86,7 +86,7 @@ paths:
   /commit/{commit_id}:
     get:
       tags:
-      - "commit"
+      - "commit-service"
       operationId: "get_one_commit"
       summary: "查询一条commit的信息"
       description: "给定commit sha值，返回该条commit的信息"
@@ -106,13 +106,13 @@ paths:
   /commit/developer-lists-by-commits:
     post:
       tags:
-      - "commit"
+      - "commit-service"
       operationId: "get_developer_email_by_commit"
       requestBody:
         description: "由commit sha值得到开发者的信息（现在只有邮箱）"
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: "#/components/schemas/commit_id_list"
       responses:
@@ -124,7 +124,7 @@ paths:
   /commit/commit-time:
     get:
       tags:
-      - "commit"
+      - "commit-service"
       operationId: "commit_time"
       summary: "查询一条commit的时间"
       description: "给定commit sha值，返回该条commit的提交时间"
@@ -232,12 +232,14 @@ components:
           format: int32
         field_list:
           type: "array"
+          description: "指定返回的repo所需要的字段"
           items:
             type: "string"
       example:
         query: "stars_count > 50 and pushed_at > '2010-01-01 00:00:00'"
         page: 1
         per_page: 2
+        field_list: ["uuid","local_addr","stars_count"]
 
     release_generator_arg:
       type: object
@@ -249,9 +251,12 @@ components:
           description: "repo的uuid list"
 
     commit_id_list:
-      type: "array"
-      items:
-        type: "string"
+      type: "object"
+      properties:
+        key_set:
+          type: "array"
+          items:
+            type: "string"
 
     repository_response:
       type: object
@@ -319,13 +324,11 @@ components:
       type: object
       properties:
         data:
-          type: object
-          properties:
-            commit_id:
-              type: object
-              properties:
-                developer_email:
-                  type: "string"
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
         status:
           type: "string"
       example:
