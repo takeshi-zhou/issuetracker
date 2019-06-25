@@ -33,7 +33,9 @@
               category,
               repo_id,
               scan_date,
+              commit_id,
               commit_date,
+              developer,
               new_count,
               eliminated_count,
               remaining_count
@@ -43,7 +45,9 @@
               #{category},
               #{repo_id},
               #{scan_date},
+              #{commit_id},
               #{commit_date},
+              #{developer},
               #{new_count},
               #{eliminated_count},
               #{remaining_count}
