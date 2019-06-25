@@ -241,47 +241,17 @@ public class MeasureServiceImpl implements MeasureService {
         return result;
     }
 
-    @Override
-    public List<String> getModulesOfRepo(String repoId) {
-        List<String> modules= packageMeasureMapper.getModuleOfRepo(repoId);
-        if(modules!=null&&!modules.isEmpty())
-            return modules;
-        return Collections.emptyList();
-    }
-
 
     @Override
-    public List<Package> getPackageMeasureByRepoIdNameAndPackageName(String repoId, String packageName, String since, String until, Granularity granularity) {
-        List<Package> result=new ArrayList<>();
-        List<Package> packageMeasures=packageMeasureMapper.getPackageMeasureByRepoIdNameAndPackageName(repoId,packageName,since,until);
+    public Map<String,List<Package>> getPackageMeasureByRepoIdNameAndPackageName(String repoId, String since, String until) {
+
+        List<Package> packageMeasures=packageMeasureMapper.getPackageMeasureByRepoIdAndDuration(repoId,since,until);
         if(packageMeasures==null||packageMeasures.isEmpty())
-            return Collections.emptyList();
-        packageMeasures=packageMeasures.stream().map(packageMeasure->{
-            String date=packageMeasure.getCommit_time();
-            packageMeasure.setCommit_time(date.split(" ")[0]);
-            return packageMeasure;
-        }).collect(Collectors.toList());
-        LocalDate nextTimeLimit= DateTimeUtil.parse(since);
-        switch (granularity){
-            case week:
-                for(Package packageMeasure:packageMeasures){
-                    LocalDate current=DateTimeUtil.parse(packageMeasure.getCommit_time());
-                    if(current.isAfter(nextTimeLimit)){
-                        result.add(packageMeasure);
-                        nextTimeLimit=nextTimeLimit.plusWeeks(1);
-                    }
-                }
-                break;
-            case month:
-                for(Package packageMeasure:packageMeasures){
-                    LocalDate current=DateTimeUtil.parse(packageMeasure.getCommit_time());
-                    if(current.isAfter(nextTimeLimit)){
-                        result.add(packageMeasure);
-                        nextTimeLimit=nextTimeLimit.plusMonths(1);
-                    }
-                }
-                break;
-        }
+            return new HashMap<>();
+        Map<String,List<Package>> result=packageMeasures.stream().collect(Collectors.groupingBy(Package::getName));
+        result.forEach((name,measures)->{
+            measures.sort(Comparator.comparing(Package::getCommit_time));
+        });
         return result;
     }
 

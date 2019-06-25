@@ -10,10 +10,10 @@
         <result property="functions" column="functions"/>
         <result property="ncss" column="ncss"/>
         <result property="ccn" column="ccn"/>
-        <result property="java_docs" column="java_docs"/>
-        <result property="java_docs_lines" column="java_docs_lines"/>
-        <result property="single_comment_lines" column="single_comment_lines"/>
-        <result property="multi_comment_lines" column="multi_comment_lines"/>
+        <result property="javaDocs" column="java_docs"/>
+        <result property="javaDocsLines" column="java_docs_lines"/>
+        <result property="singleCommentLines" column="single_comment_lines"/>
+        <result property="multiCommentLines" column="multi_comment_lines"/>
         <result property="commit_id" column="commit_id"/>
         <result property="commit_time" column="commit_time"/>
         <result property="repo_id" column="repo_id"/>
@@ -61,13 +61,11 @@
         select count(*) from package_measure where commit_id = #{commit_id} and repo_id = #{repo_id} and name = #{name}
     </select>
 
-    <select id="getModuleOfRepo" resultType="string">
-        select distinct (name) from package_measure where repo_id = #{repo_id} order by name
-    </select>
 
-    <select id="getPackageMeasureByRepoIdNameAndPackageName" resultMap="package">
+    <select id="getPackageMeasureByRepoIdAndDuration" resultMap="package">
         select * from package_measure
-        where repo_id = #{repo_id} and name = #{name} and commit_time &gt; #{since} and commit_time &lt; #{until}
+        where repo_id = #{repo_id} and commit_time &gt; #{since} and commit_time &lt; #{until}
         order by commit_time;
     </select>
+
 </mapper>

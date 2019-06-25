@@ -31,26 +31,13 @@ public class MeasureController {
         }
     }
 
-    @GetMapping("/measure/modules")
-    @CrossOrigin
-    public ResponseBean getModules(@RequestParam("repo_id")String repo_id){
-        try{
-            return new ResponseBean(200,"success",measureService.getModulesOfRepo(repo_id));
-        }catch (Exception e){
-            e.printStackTrace();
-            return new ResponseBean(401,"failed",null);
-        }
-    }
-
-    @GetMapping("/measure/specific-module")
+    @GetMapping("/measure/module")
     @CrossOrigin
     public ResponseBean getModuleMeasure(@RequestParam("repo_id")String repo_id,
-                                         @RequestParam("package_name")String package_name,
                                          @RequestParam("since")String since,
-                                         @RequestParam("until")String until,
-                                         @RequestParam("duration") Granularity granularity){
+                                         @RequestParam("until")String until){
         try{
-            return new ResponseBean(200,"success",measureService.getPackageMeasureByRepoIdNameAndPackageName(repo_id,package_name,since,until,granularity));
+            return new ResponseBean(200,"success",measureService.getPackageMeasureByRepoIdNameAndPackageName(repo_id,since,until));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",null);
