@@ -24,6 +24,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         List<JSONObject> tags = new ArrayList<>();
         Date date= new Date();//当前时间
         Date commitDate=getCommitDate(current_commit_id);
+        String developer=getDeveloper(current_commit_id);
         JSONArray ignoreTypes=restInterfaceManager.getIgnoreTypesOfRepo(repo_id);//获取该项目ignore的issue类型
         if (pre_commit_id.equals(current_commit_id)) {
             //当前project第一次扫描，所有的rawIssue都是issue
@@ -43,7 +44,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
             log.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(rawIssues);
-            scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
+            scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,current_commit_id,commitDate,developer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
         } else {
             //不是第一次扫描，需要和前一次的commit进行mapping
             List<RawIssue> preRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,pre_commit_id);
@@ -112,7 +113,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             log.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(currentRawIssues);
             modifyToSolvedTag(repo_id, category,pre_commit_id,EventType.ELIMINATE_BUG,committer,commitDate);
-            scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
+            scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,current_commit_id,commitDate,developer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
         }
         //新的issue
         if (!insertIssueList.isEmpty()) {

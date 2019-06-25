@@ -20,6 +20,12 @@
         <result property="remainingIssueCount" column="remaining_count"/>
     </resultMap>
 
+    <resultMap id="issueCountDeveloper" type="IssueCountDeveloper">
+        <result property="developer" column="developer"/>
+        <result property="newIssueCount" column="new_count"/>
+        <result property="eliminatedIssueCount" column="eliminated_count"/>
+    </resultMap>
+
 
     <insert id="addOneScanResult" parameterType="ScanResult">
         insert into scan_result
@@ -119,5 +125,18 @@
         delete from scan_result where repo_id = #{repo_id} and category = #{category}
     </delete>
 
+    <select id="getScanResultsEachCommit" resultMap="issueCount">
+        select * from scan_result
+        where repo_id = #{repo_id} and category = #{category} and commit_date between #{start} and #{end}
+        order by commit_date
+    </select>
+
+    <select id="getScanResultsEachDeveloper" resultMap="issueCountDeveloper">
+        select developer,sum(new_count) as new_count,sum(eliminated_count)as eliminated_count
+        from  scan_result
+        where repo_id = #{repo_id} and category = #{category} and commit_date between #{start} and #{end}
+        group by developer
+        order by new_count desc,eliminated_count desc
+    </select>
 
 </mapper>

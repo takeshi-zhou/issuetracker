@@ -20,7 +20,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
 
 
     //每一次映射完产生的所有的新的clone group
-    private int newCloneInsert(boolean isFirst,Map<String,List<RawIssue>> map,Set<String> groupsNeedInsert,String repo_id,String current_commit_id,Date commitDate,String category,String committer,Date date){
+    private int newCloneInsert(boolean isFirst,Map<String,List<RawIssue>> map,Set<String> groupsNeedInsert,String repo_id,String developer,String current_commit_id,Date commitDate,String category,String committer,Date date){
         List<Issue> insertIssueList = new ArrayList<>();
         List<JSONObject> tags = new ArrayList<>();
         JSONArray ignoreTypes=restInterfaceManager.getIgnoreTypesOfRepo(repo_id);//获取该项目ignore的issue类型
@@ -69,7 +69,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             int eliminatedIssueCount = 0;
             log.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
-            scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
+            scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,current_commit_id,commitDate,developer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
             log.info("dashboard info update success!");
         }
         return  ignoreCountInNewIssues;
@@ -79,6 +79,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
     public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category, String committer) {
         Date date=new Date();
         Date commitDate = getCommitDate(current_commit_id);
+        String developer=getDeveloper(current_commit_id);
         if (pre_commit_id.equals(current_commit_id)) {
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,current_commit_id);
             if (rawIssues == null || rawIssues.isEmpty())
@@ -86,7 +87,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             log.info("first scan mapping!");
             Map<String,List<RawIssue>> map=rawIssues.stream().collect(Collectors.groupingBy(RawIssue::getType));
             //对于第一次而言所有的group都是新增的
-            newCloneInsert(true,map,map.keySet(),repo_id,current_commit_id,commitDate,category,committer,date);
+            newCloneInsert(true,map,map.keySet(),repo_id,developer,current_commit_id,commitDate,category,committer,date);
             rawIssueDao.batchUpdateIssueId(rawIssues);
         }else{
             //不是第一次扫描，需要和前一次的commit进行mapping
@@ -136,7 +137,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
                 }
             }
             //group映射完成,新的group作为新的issue插进去
-           int ignoreCountInNewIssues=newCloneInsert(false,map2,newGroups,repo_id,current_commit_id,commitDate,category,committer,date);
+           int ignoreCountInNewIssues=newCloneInsert(false,map2,newGroups,repo_id,developer,current_commit_id,commitDate,category,committer,date);
             if (!issues.isEmpty()) {
                 //更新issue
                 issueDao.batchUpdateIssue(issues);
@@ -151,7 +152,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             int newIssueCount = currentGroups.size() - equalsCount-ignoreCountInNewIssues;
             log.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
-            scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,commitDate,newIssueCount,eliminatedIssueCount,remainingIssueCount));
+            scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,current_commit_id,commitDate,developer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
             log.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(rawIssues2);
             modifyToSolvedTag(repo_id,category, pre_commit_id,EventType.REMOVE_CLONE_CLASS,committer,commitDate);

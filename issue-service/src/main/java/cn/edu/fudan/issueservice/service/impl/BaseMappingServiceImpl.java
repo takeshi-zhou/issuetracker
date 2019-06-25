@@ -145,6 +145,14 @@ public class BaseMappingServiceImpl implements MappingService {
         return null;
     }
 
+    String getDeveloper(String commitId){
+        JSONObject response=restInterfaceManager.getOneCommitByCommitId(commitId);
+        if(response!=null){
+            return response.getJSONObject("data").getString("developer");
+        }
+        return null;
+    }
+
     @Override
     public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category,String committer) {
         throw new UnsupportedOperationException();
