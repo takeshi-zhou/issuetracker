@@ -57,11 +57,13 @@ public class GetCodeImpl implements GetCode {
         String repoHome = null;
         String[] paths = location.split("/");
         String file_path = location;
+        String status ="";
 
         System.out.println("file_path: " + file_path);
         try{
             JSONObject response = getRepoPath(repoId,commit_id).getJSONObject("data");
             if (response != null && response.getString("status").equals("Successful")) {
+                status = response.getString("status");
                 repoHome=response.getString("content");
                 System.out.println("repohome: "+repoHome);
                 System.out.println("file_path: "+repoHome+"/" +file_path);
@@ -73,7 +75,7 @@ public class GetCodeImpl implements GetCode {
         }catch (Exception e){
             System.out.println("errormsg: "+e.getMessage());
         }finally {
-            if(repoHome!=null){
+            if(repoHome!=null||status.equals("Successful")){
                 JSONObject response = freeRepoPath(repoId,repoHome);
                 if (response != null && response.getJSONObject("data").getString("status").equals("Successful"))
                     System.out.println(("free success: "+repoHome));
@@ -109,6 +111,7 @@ public class GetCodeImpl implements GetCode {
         return curr_code_isExist;
     }
 
+    //不用了的
     //repopath前两块/nextscan/curr/commitid/repo剩下的  next的
     //repopath前两块/nextscan/prev/commitid/repo剩下的  bug的
     public String getCodePrev(String repopath,String commitid,String nextcommitid,int startline,int endline){

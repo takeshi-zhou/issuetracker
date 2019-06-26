@@ -54,63 +54,63 @@ public class RecommendationDao {
 //    }
     public List<Recommendation> getRecommendationsEnd_line(Integer end_line){
         List<Recommendation> recommendations = recommendationMapper.getRecommendationsByEnd_line(end_line);
-        List<Recommendation> list = new ArrayList<>();
-        for (Recommendation recommendation : recommendations) {
-            list.add(recommendation);
-        }
-        return list;
+//        List<Recommendation> list = new ArrayList<>();
+//        for (Recommendation recommendation : recommendations) {
+//            list.add(recommendation);
+//        }
+        return recommendations;
     }
 
     public List<Recommendation> getRecommendationsStart_line(Integer start_line){
         List<Recommendation> recommendations = recommendationMapper.getRecommendationsByStart_line(start_line);
-        List<Recommendation> list = new ArrayList<>();
-        for (Recommendation recommendation : recommendations) {
-            list.add(recommendation);
-        }
-        return list;
+//        List<Recommendation> list = new ArrayList<>();
+//        for (Recommendation recommendation : recommendations) {
+//            list.add(recommendation);
+//        }
+        return recommendations;
     }
 
 
     public List<Recommendation> getRecommendationsByType(Map<String, Object> map) {
         List<Recommendation> recommendations = recommendationMapper.getRecommendationsByType(map);
-        List<Recommendation> list = new ArrayList<>();
-        for (Recommendation recommendation : recommendations) {
-            if (recommendation.getModification_method().equals("modify")) {
-                list.add(recommendation);
-            }
-        }
-        return list;
+        return recommendations;
     }
 
     public List<Recommendation> getRecommendationsByBuglines(String bug_lines) {
         List<Recommendation> recommendations = recommendationMapper.getRecommendationsByBug_lines(bug_lines);
-        List<Recommendation> list = new ArrayList<>();
-        for (Recommendation recommendation : recommendations) {
-            list.add(recommendation);
-        }
-        return list;
+//        List<Recommendation> list = new ArrayList<>();
+//        for (Recommendation recommendation : recommendations) {
+//            list.add(recommendation);
+//        }
+        return recommendations;
     }
 
     public List<Recommendation> getRecommendationsByLocation(String location){
         List<Recommendation> recommendations = recommendationMapper.getRecommendationsByLocation(location);
-        List<Recommendation> list = new ArrayList<>();
-        for (Recommendation recommendation : recommendations) {
-            list.add(recommendation);
-        }
-        return list;
+//        List<Recommendation> list = new ArrayList<>();
+//        for (Recommendation recommendation : recommendations) {
+//            list.add(recommendation);
+//        }
+        return recommendations;
     }
     public List<Recommendation> getRecommendationsSameTypeFile(String type,String filename){
         List<Recommendation> recommendations = recommendationMapper.getRecommendationsSameTypeFile(type,filename);
-        List<Recommendation> list = new ArrayList<>();
-        for (Recommendation recommendation : recommendations) {
-            list.add(recommendation);
-        }
-        return list;
+//        List<Recommendation> list = new ArrayList<>();
+//        for (Recommendation recommendation : recommendations) {
+//            list.add(recommendation);
+//        }
+        return recommendations;
     }
     public Integer getRecommendationsByTypeCount(String type){
         return recommendationMapper.getRecommendationsByTypeCount(type);
     }
     public void updateRecommendationsAppearNum(Integer appear_num,String uuid){
         recommendationMapper.updateRecommendationsAppearNum(appear_num,uuid);
+    }
+    public void addUsefulCount(String uuid,Integer useful_count){
+        recommendationMapper.addUsefulCount(uuid,useful_count);
+    }
+    public void deleteBugRecommendationByRepoId(String repoid){
+        recommendationMapper.deleteBugRecommendationByRepoId(repoid);
     }
 }

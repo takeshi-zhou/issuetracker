@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -58,27 +60,23 @@ public class KafkaConsumerService {
             * 通过codeservice拿到code
             * 通过location表拿到method_name
             */
+            Date date = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd hh:mm:ss");
             List<Recommendation> list = JSONObject.parseArray(msg, Recommendation.class);
             if (list != null) {
                 for (Recommendation info : list) {
-                    info.setAppear_num(1);
+                    info.setAppear_num(1);//假定此种修改方式是第一次出现
+                    info.setUseful_count(0);
+                    System.out.println("现在的时间是："+sdf.format(date));
                     completeReco.completeCode(info);//补全prev_code,curr_code
                     String repoName = getCode.getRepoName(info.getRepoid());//补全reponame
                     String fileName = getCode.getFileName(info.getLocation());//补全filename
                     info.setReponame(repoName);
                     info.setFilename(fileName);
 
-                    //System.out.println("repoName: " + repoName);
-//                JSONObject json = analyzeDiffFile.getDiffRange(newInfo.getLocation(),newInfo.getNext_commitid(),newInfo.getCurr_commitid(),newInfo.getBug_lines());
-//                if(json.getInteger("nextstart_line")!=0){
-//                    newInfo.setStart_line(json.getInteger("start_line"));
-//                    newInfo.setEnd_line(json.getInteger("end_line"));
-//                    newInfo.setNextstart_line(json.getInteger("nextstart_line"));
-//                    newInfo.setNextend_line(json.getInteger("nextend_line"));
-//                    newInfo.setDescription(json.getString("description"));
-//                }
                     if (repoName != null) {//reponame非空，则添加到数据库
                         try{
+                            System.out.println("现在的时间是："+sdf.format(date));
                             recommendationService.addBugRecommendation(info);
                             System.out.println("add reco success!!!");
                         }catch (Exception e){

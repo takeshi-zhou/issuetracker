@@ -5,14 +5,20 @@ import cn.edu.fudan.bug_recommendation.domain.Recommendation;
 import cn.edu.fudan.bug_recommendation.service.FunctionSimilarity;
 import cn.edu.fudan.bug_recommendation.service.RecommendationService;
 import cn.edu.fudan.bug_recommendation.service.FunctionSimilarity;
+import lombok.extern.slf4j.Slf4j;
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class RecommendationServiceImpl implements RecommendationService {
 
@@ -61,22 +67,59 @@ public class RecommendationServiceImpl implements RecommendationService {
         param.put("size",size);
         int count = recommendationDao.getRecommendationsByTypeCount(type);
         param.put("start", (page - 1) * size);
-        result.put("totalPage", count % size == 0 ? count / size : count / size + 1);
-        result.put("totalCount", count);
+        result.put("modifyTotalPage", count % size == 0 ? count / size : count / size + 1);
+        result.put("modifyTotalCount", count);
         List<Recommendation> recommendationsList = recommendationDao.getRecommendationsByType(param);
         result.put("recommendationsList",recommendationsList);
         return result;
     }
 
     @Override
-    public boolean isBugRecommendationExist(String codeprev,String codecurr,String filename,String type){
+    //对于prevcode只比较startline到endline就知道出现的问题是否一样
+    public String getPrevBugContent(Integer startLine,Integer endLine,String sFile){
+        StringReader sReader = new StringReader(sFile);
+        BufferedReader bReader = new BufferedReader(sReader);
+        StringBuilder sb = new StringBuilder();
+        String txt ="";
+        try {
+            int i=0;
+            while((txt = bReader.readLine())!=null) {
+                i++;
+                if(i>=startLine && i<=endLine) {
+                    sb.append(txt);
+                }
+            }
+
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+        return sb.toString();
+    }
+    @Override
+    public String getCurrBugContent(Recommendation recommendation){
+        StringBuilder sb=new StringBuilder();
+        CompilationUnit compilationUnit = JavaParser.parse(recommendation.getCurr_code());
+        List<MethodDeclaration> methods = compilationUnit.getNodesByType(MethodDeclaration.class);
+        for (MethodDeclaration mtn : methods) {
+            if (mtn.getName().getIdentifier().equals(recommendation.getMethod_name())) {
+                sb.append(mtn.getBody());
+            }
+        }
+        return sb.toString();
+    }
+    @Override
+    public boolean isBugRecommendationExist(Recommendation recommendation){
+        String type = recommendation.getType();
+        String filename = recommendation.getFilename();
         List<Recommendation> filegroup = recommendationDao.getRecommendationsSameTypeFile(type,filename);
         float similarityPrev=0;
         float similarityCurr=0;
         for(Recommendation reco:filegroup){
-            similarityPrev = functionSimilarity.getFunctionSimilarity(codeprev,reco.getPrev_code());
-            similarityCurr = functionSimilarity.getFunctionSimilarity(codecurr,reco.getCurr_code());
-            if(similarityPrev>0.9 && similarityCurr>0.9){
+            similarityPrev = functionSimilarity.getFunctionSimilarity(getPrevBugContent(recommendation.getStart_line(),recommendation.getEnd_line(),recommendation.getPrev_code()),getPrevBugContent(reco.getStart_line(),reco.getEnd_line(),reco.getPrev_code()));
+            similarityCurr = functionSimilarity.getFunctionSimilarity(getCurrBugContent(recommendation),getCurrBugContent(reco));
+            if(similarityPrev>0.99 && similarityCurr>0.99){
                 int tmp = reco.getAppear_num()+1;
                 recommendationDao.updateRecommendationsAppearNum(tmp,reco.getUuid());
                 System.out.println("tmp: "+tmp);
@@ -104,12 +147,17 @@ public class RecommendationServiceImpl implements RecommendationService {
 //        if (isLocationExist(recommendation.getLocation()) && isTypeExist(param) && isStart_lineExist(recommendation.getStart_line())
 //               && isEnd_lineExist(recommendation.getEnd_line()) && isBuglinesExit(recommendation.getBug_lines()))
 //           throw new RuntimeException("This error message already exists");
-        float sim = functionSimilarity.getFunctionSimilarity(recommendation.getPrev_code(),recommendation.getCurr_code());
-        if(sim>=0.95){
-            throw new Exception("The code before and after this record has not been modified.");
+        if(recommendation.getPrev_code()!=null){
+            float sim = functionSimilarity.getFunctionSimilarity(recommendation.getPrev_code(),recommendation.getCurr_code());
+            if(sim>=0.995){
+                throw new Exception("The code before and after this record has not been modified.");
+            }
+        }else {
+            throw new Exception("The Prev_code is null.");
         }
-        boolean istrue = isBugRecommendationExist(recommendation.getPrev_code(),recommendation.getCurr_code(),recommendation.getFilename(),recommendation.getType());
-        if(istrue){
+
+        boolean isExist = isBugRecommendationExist(recommendation);
+        if(isExist){
             System.out.println("SameReco had add one");
             throw new Exception("SameReco had add one");
         }
@@ -121,6 +169,15 @@ public class RecommendationServiceImpl implements RecommendationService {
         recommendationDao.addBugRecommendation(recommendation);
 
     }
-
+    @Override
+    public void addUsefulCount(String uuid,Integer useful_count){
+        recommendationDao.addUsefulCount(uuid,useful_count);
+    }
+    @Override
+    public void deleteBugRecommendationByRepoId(String repoId){
+        log.info("start to delete issue -> repoId={}",repoId);
+        recommendationDao.deleteBugRecommendationByRepoId(repoId);
+        log.info("issue delete success!");
+    }
 
 }
