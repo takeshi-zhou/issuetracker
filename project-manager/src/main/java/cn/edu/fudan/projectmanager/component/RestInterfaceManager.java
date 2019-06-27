@@ -28,6 +28,8 @@ public class RestInterfaceManager {
     private String repoServicePath;
     @Value("${tag.service.path}")
     private String tagServicePath;
+    @Value("${bug.recommendation.service.path}")
+    private String bugRecommendationServicePath;
 
     private RestTemplate restTemplate;
 
@@ -61,6 +63,12 @@ public class RestInterfaceManager {
 
     public void deleteScanResultOfRepo(String repoId,String category){
         restTemplate.delete(issueServicePath + "/inner/issue/scan-results/" +category+"/"+ repoId);
+    }
+
+    //------------------------------------bug-recommendation service-------------------------------------------
+
+    public void deleteBugRecommendationOfRepo(String repoId){
+        restTemplate.delete(bugRecommendationServicePath + "/inner/bugRecommendation/" +repoId);
     }
 
     //-------------------------------scan service--------------------------------------------------------------

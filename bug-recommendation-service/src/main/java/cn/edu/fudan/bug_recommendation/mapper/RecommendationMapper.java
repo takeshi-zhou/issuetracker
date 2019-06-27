@@ -34,4 +34,7 @@ public interface RecommendationMapper {
 
     void updateRecommendationsAppearNum(@Param("appear_num")Integer appear_num,@Param("uuid")String uuid);
 
+    void addUsefulCount(@Param("uuid")String uuid,@Param("useful_count") Integer useful_count);
+
+    void deleteBugRecommendationByRepoId(@Param("repoid")String repoid);
 }

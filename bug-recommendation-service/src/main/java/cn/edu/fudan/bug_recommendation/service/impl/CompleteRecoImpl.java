@@ -36,8 +36,16 @@ public class CompleteRecoImpl implements CompleteReco {
         String currCode = getCode.getCode(info.getRepoid(),info.getNext_commitid(),info.getLocation());
         //String currCode = getCode.getFileContent("C:/Users/LiuShuang/Desktop/b.java");
         info.setCurr_code(currCode);
-        System.out.println("prevcode: "+prevCode.length());
-        System.out.println("currCode: "+currCode.length());
+        if(prevCode!=null){
+            System.out.println("prevcode: "+prevCode.length());
+        }else {
+            System.out.println("prevcode: is null");
+        }
+        if(currCode!=null){
+            System.out.println("currCode: "+currCode.length());
+        }else {
+            System.out.println("currCode: is null");
+        }
         String modification_method = getCode.getModification_method();
         //String modification_method = "test";
         System.out.println(modification_method);

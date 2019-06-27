@@ -24,6 +24,7 @@
         <result property="class_name" column="class_name"/>
         <result property="method_name" column="method_name"/>
         <result property="appear_num" column="appear_num"/>
+        <result property="useful_count" column="useful_count"/>
     </resultMap>
 
     <insert id="addBugRecommendation" parameterType="Recommendation">
@@ -48,7 +49,8 @@
         filename,
         class_name,
         method_name,
-        appear_num
+        appear_num,
+        useful_count
         )
         values
         (
@@ -71,7 +73,8 @@
         #{filename},
         #{class_name},
         #{method_name},
-        #{appear_num}
+        #{appear_num},
+        #{useful_count}
         )
     </insert>
 
@@ -79,21 +82,25 @@
         UPDATE bug_recommendation SET appear_num = #{appear_num} WHERE uuid = #{uuid}
     </update>
 
+    <update id="addUsefulCount">
+        UPDATE bug_recommendation SET useful_count = #{useful_count} WHERE uuid = #{uuid}
+    </update>
+
     <select id="getRecommendationsByLocation" parameterType="String" resultMap="recommendation">
         select * from bug_recommendation where location = #{location}
     </select>
 
     <select id="getRecommendationsByType" parameterType="Map" resultMap="recommendation">
-        select * from bug_recommendation
-        <where>
-                <if test="type!=null">
-                        type = #{type}
-                </if>
-        </where>
-        order by start_line
-        <if test="start != null and size != null">
-            limit #{start},#{size}
-        </if>
+        select * from bug_recommendation where type = #{type} and modification_method = "modify" order by appear_num,useful_count,start_line limit #{start},#{size}
+        <!--<where>-->
+                <!--<if test="type!=null">-->
+                        <!--type = #{type}-->
+                <!--</if>-->
+        <!--</where>-->
+        <!--order by appear_num,start_line-->
+        <!--<if test="start != null and size != null">-->
+            <!--limit #{start},#{size}-->
+        <!--</if>-->
     </select>
 
     <select id="getRecommendationsByStart_line" parameterType="Integer" resultMap="recommendation">
@@ -109,7 +116,7 @@
     </select>
 
     <select id="getRepoNameByRepoId" resultType="String">
-        select name from project where repo_id = #{repoid};
+        select name from project where repoid = #{repoid};
     </select>
 
     <select id="getRecommendationsByBug_lines" parameterType="String" resultMap="recommendation">
@@ -117,11 +124,15 @@
     </select>
 
     <select id="getRecommendationsByTypeCount" parameterType="String" resultType="Integer">
-        select count(*) from bug_recommendation where type = #{type};
+        select count(*) from bug_recommendation where type = #{type} and modification_method = "modify";
     </select>
 
     <select id="getRecommendationsSameTypeFile" parameterType="String" resultMap="recommendation">
         select * from bug_recommendation where type = #{type} and filename = #{filename};
     </select>
+
+    <delete id="deleteBugRecommendationByRepoId" parameterType="String">
+        delete from bug_recommendation where repoid = #{repoid}
+    </delete>
 
 </mapper>

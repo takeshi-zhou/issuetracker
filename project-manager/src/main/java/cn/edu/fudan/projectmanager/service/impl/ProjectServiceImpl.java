@@ -172,6 +172,7 @@ public class ProjectServiceImpl implements ProjectService {
             //否则还有其他project与当前repoId和type对应，该repo的相关内容就不删
             if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type)) {
                 restInterfaceManager.deleteIssuesOfRepo(repoId, type);
+                restInterfaceManager.deleteBugRecommendationOfRepo(repoId);
                 restInterfaceManager.deleteRawIssueOfRepo(repoId, type);
                 restInterfaceManager.deleteScanOfRepo(repoId, type);
                 restInterfaceManager.deleteEventOfRepo(repoId, type);

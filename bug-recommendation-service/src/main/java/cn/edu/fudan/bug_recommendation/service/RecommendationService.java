@@ -17,7 +17,14 @@ public interface RecommendationService {
 
 //    List<Recommendation> getRecommendationsByType(String type);
     Object getRecommendationsByType(String type,Integer page,Integer size);
-    boolean isBugRecommendationExist(String code1,String code2,String filename,String type);
 
+    boolean isBugRecommendationExist(Recommendation recommendation);
 
+    String getPrevBugContent(Integer startLine,Integer endLine,String sFile);
+
+    String getCurrBugContent(Recommendation recommendation);
+
+    void addUsefulCount(String uuid,Integer useful_count);
+
+    void deleteBugRecommendationByRepoId(String repoId);
 }

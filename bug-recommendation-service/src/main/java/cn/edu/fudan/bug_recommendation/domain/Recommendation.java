@@ -23,6 +23,16 @@ public class Recommendation implements Serializable {
     private String class_name;
     private String method_name;
     private Integer appear_num;
+    private Integer useful_count;
+
+    public Integer getUseful_count() {
+        return useful_count;
+    }
+
+    public void setUseful_count(Integer useful_count) {
+        this.useful_count = useful_count;
+    }
+
 
     public String getClass_name() {
         return class_name;

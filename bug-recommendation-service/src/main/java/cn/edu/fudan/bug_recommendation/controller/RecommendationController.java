@@ -86,4 +86,25 @@ public class RecommendationController {
                                        @RequestParam("size") Integer size){
         return new ResponseBean(200,"success",recommendationService.getRecommendationsByType(type,page,size));
     }
-}
+    @PostMapping("/add-useful-count")
+    @CrossOrigin
+    public Object addUsefulCount(@RequestBody Map<String,String> map) {
+        try {
+                recommendationService.addUsefulCount(map.get("uuid"),Integer.valueOf(map.get("usefulcount")));
+                return new ResponseBean(200, "Congratulations！successful add useful count.", null);
+        }catch (Exception e) {
+            return new ResponseBean(401, "failed! " + e.getMessage(), null);
+            }
+        }
+    @DeleteMapping(value = {"inner/bugRecommendation/{repoId}"})
+    public Object deleteBugRecommendation(@PathVariable("repoId") String repoId){
+        try {
+            recommendationService.deleteBugRecommendationByRepoId(repoId);
+            return new ResponseBean(200,"bugRecommendation delete success!",null);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"bugRecommendation delete failed!",null);
+        }
+    }
+
+    }
