@@ -22,7 +22,7 @@ public class MeasureController {
     public ResponseBean getMeasureDataByRepoId(@RequestParam("repo_id")String repo_id,
                                                @RequestParam("since")String since,
                                                @RequestParam("until")String until,
-                                               @RequestParam("duration") Granularity granularity){
+                                               @RequestParam("granularity") Granularity granularity){
         try{
             return new ResponseBean(200,"success",measureService.getRepoMeasureByRepoId(repo_id,since,until,granularity));
         }catch (Exception e){
@@ -34,10 +34,9 @@ public class MeasureController {
     @GetMapping("/measure/module")
     @CrossOrigin
     public ResponseBean getModuleMeasure(@RequestParam("repo_id")String repo_id,
-                                         @RequestParam("since")String since,
-                                         @RequestParam("until")String until){
+                                         @RequestParam("commit_id")String commit_id){
         try{
-            return new ResponseBean(200,"success",measureService.getPackageMeasureByRepoIdNameAndPackageName(repo_id,since,until));
+            return new ResponseBean(200,"success",measureService.getPackageMeasureUnderSpecificCommit(repo_id,commit_id));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",null);

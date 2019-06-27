@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
@@ -119,12 +120,14 @@ public class MeasureServiceImpl implements MeasureService {
 
     //监听项目的commit列表的消息,保存度量信息
     @KafkaListener(id = "measure", topics = {"Measure"}, groupId = "measure")
-    public void commitInfoListener(ConsumerRecord<String, String> consumerRecord) {
+    public void commitInfoListener(ConsumerRecord<String, String> consumerRecord, Acknowledgment ack) {
         List<CommitWithTime> commits=JSONArray.parseArray(consumerRecord.value(),CommitWithTime.class);
         log.info("received message from topic -> " + consumerRecord.topic() + " : " + commits.size()+" commits need to scan!");
+        ack.acknowledge();
         for(CommitWithTime commit:commits){
             saveMeasureData(commit.getRepoId(),commit.getCommitId(),commit.getCommitTime());
         }
+        log.info("all complete!!!");
     }
 
     //保存某个项目某个commit的度量信息
@@ -134,7 +137,7 @@ public class MeasureServiceImpl implements MeasureService {
             saveRepoLevelMeasureData(measure,repoId,commitId,commitTime);
             savePackageMeasureData(measure,repoId,commitId,commitTime);
         }catch (Exception e){
-            log.error(e.getMessage());
+            e.printStackTrace();
         }
     }
     //获取单个项目某个commit的度量值
@@ -169,14 +172,20 @@ public class MeasureServiceImpl implements MeasureService {
                 continue;
             String packageName=p.getName();
             int count=0;
-            double ccn=0.0;
+            int ccn=0;
             for(Function function:measure.getFunctions().getFunctions()){
                 if(function.getName().startsWith(packageName)){
                     count++;
                     ccn+=function.getCcn();
                 }
             }
-            p.setCcn(Double.valueOf(df.format(ccn/count)));
+           // log.info("count -> {} , ccn -> {}",count,ccn);
+            if(count==0)
+                p.setCcn(0.00);
+            else{
+                double result=(double)ccn/count;
+                p.setCcn(Double.valueOf(df.format(result)));
+            }
             packages.add(p);
         }
         if(!packages.isEmpty()){
@@ -243,16 +252,16 @@ public class MeasureServiceImpl implements MeasureService {
 
 
     @Override
-    public Map<String,List<Package>> getPackageMeasureByRepoIdNameAndPackageName(String repoId, String since, String until) {
+    public List<Package> getPackageMeasureUnderSpecificCommit(String repoId, String commit) {
 
-        List<Package> packageMeasures=packageMeasureMapper.getPackageMeasureByRepoIdAndDuration(repoId,since,until);
+        List<Package> packageMeasures=packageMeasureMapper.getPackageMeasureByRepoIdAndCommit(repoId,commit);
         if(packageMeasures==null||packageMeasures.isEmpty())
-            return new HashMap<>();
-        Map<String,List<Package>> result=packageMeasures.stream().collect(Collectors.groupingBy(Package::getName));
-        result.forEach((name,measures)->{
-            measures.sort(Comparator.comparing(Package::getCommit_time));
-        });
-        return result;
+            return Collections.emptyList();
+//        Map<String,List<Package>> result=packageMeasures.stream().collect(Collectors.groupingBy(Package::getName));
+//        result.forEach((name,measures)->{
+//            measures.sort(Comparator.comparing(Package::getCommit_time));
+//        });
+        return packageMeasures;
     }
 
     @Override

@@ -62,10 +62,10 @@
     </select>
 
 
-    <select id="getPackageMeasureByRepoIdAndDuration" resultMap="package">
+    <select id="getPackageMeasureByRepoIdAndCommit" resultMap="package">
         select * from package_measure
-        where repo_id = #{repo_id} and commit_time &gt; #{since} and commit_time &lt; #{until}
-        order by commit_time;
+        where repo_id = #{repo_id} and commit_id = #{commit_id}
+        order by name;
     </select>
 
 </mapper>

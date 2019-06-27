@@ -27,13 +27,12 @@ public interface MeasureService {
     List<RepoMeasure> getRepoMeasureByRepoId(String repoId,String since,String until,Granularity granularity);
 
     /**
-     * 获取一个项目在某个时间段特定时间单位的存在包的所有度量信息
+     * 获取一个项目在某个特定commit快照下的存在包的所有度量信息
      * @param repoId repo的唯一标识
-     * @param since  起始时间
-     * @param until  终止时间
+     * @param commit  commit
      * @return 每个时间点上包的度量信息
      */
-    Map<String,List<Package>> getPackageMeasureByRepoIdNameAndPackageName(String repoId, String since, String until);
+    List<Package> getPackageMeasureUnderSpecificCommit(String repoId, String commit);
 
     List<ActiveMeasure> getActiveMeasureChange(String repoId, String since, String until,Granularity granularity);
 
