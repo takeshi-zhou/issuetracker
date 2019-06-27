@@ -88,12 +88,8 @@ public class IssueRankServiceImpl implements IssueRankService {
     // 开发人员在某段时间内贡献的代码行数 除以 产生的新Issue数量
     // 平均每多少行代码会产生一个新的Issue
     @Override
-    public Map rankOfDeveloper(String repoId, String duration) {
+    public Map rankOfDeveloper(String repoId, String start,String end) {
         // duration: 2018.01.01-2018.12.12
-        if (duration.length() < 21)
-            throw new RuntimeException("duration error!");
-        String start = duration.substring(0,10);
-        String end = duration.substring(11,21);
         String repoPath = restInterfaceManager.getRepoPath(repoId);
         //commitId 单个commit所对应的引入Issue数量
         Map<String, Integer> commitNewIssue = issueDao.getCommitNewIssue(start, end, repoId);

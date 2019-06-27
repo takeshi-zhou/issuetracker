@@ -124,9 +124,11 @@ public class IssueMeasurementController {
     }
 
     @GetMapping(value = {"/measurement/rankOfDeveloper/{repoId}"})
-    public Object getRankOfDeveloper(@PathVariable("repoId") String repoId, @RequestParam("duration") String duration) {
+    public Object getRankOfDeveloper(@PathVariable("repoId") String repoId,
+                                     @RequestParam("since") String since,
+                                     @RequestParam("until")String until) {
 
-        return issueRankService.rankOfDeveloper(repoId, duration);
+        return issueRankService.rankOfDeveloper(repoId, since,until);
     }
 
     @GetMapping(value = {"/measurement/rankOfRepoBaseDensity"})
