@@ -168,7 +168,7 @@ public class IssueRankServiceImpl implements IssueRankService {
         Map<K, V> result = new LinkedHashMap<>();
         Stream<Map.Entry<K, V>> st = map.entrySet().stream();
         //st.sorted(Comparator.comparing(Map.Entry::getValue)).forEach(e -> result.put(e.getKey(), e.getValue()));
-        st.sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue())).forEach(e -> result.put(e.getKey(), e.getValue()));
+        st.sorted((e1, e2) -> e1.getValue().compareTo(e2.getValue())).forEach(e -> result.put(e.getKey(), e.getValue()));
         return result;
     }
 

@@ -28,7 +28,7 @@ public class IssueTrackerApplicationTests {
 	@Test
 	public void test(){
 		JSONArray array=new JSONArray();
-        for(Scan scan:scanMapper.getScannedCommits("29a3b12e-653f-11e9-9ddc-f93dfaa9da61","bug")){
+        for(Scan scan:scanMapper.getScannedCommits("978765fc-8db5-11e9-b260-3f97950d3532","bug")){
 			JSONObject jsonObject=new JSONObject();
 			jsonObject.put("repoId",scan.getRepo_id());
 			jsonObject.put("commitId",scan.getCommit_id());
