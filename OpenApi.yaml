@@ -267,12 +267,23 @@ components:
             uuid:
               type: "string"
               description: "repo的uuid"
+            id:
+              type: "integer"
+              format: int32
+            repos_name:
+              type: "string"
             local_addr:
               type: "string"
               description: "repo的本地存储地址"
-            is_priviate:
-              type: "boolean"
-              description: "repo是否为私有库"
+            stars_count:
+              type: "integer"
+              format: int32
+            created_at:
+              type: "string"
+              format: date-time
+            updated_at:
+              type: "string"
+              format: date-time
         count:
           type: "integer"
           format: int64
