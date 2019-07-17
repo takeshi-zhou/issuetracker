@@ -116,7 +116,7 @@
     </select>
 
     <select id="getRepoNameByRepoId" resultType="String">
-        select name from project where repoid = #{repoid};
+        select name from project where repo_id = #{repoid};
     </select>
 
     <select id="getRecommendationsByBug_lines" parameterType="String" resultMap="recommendation">

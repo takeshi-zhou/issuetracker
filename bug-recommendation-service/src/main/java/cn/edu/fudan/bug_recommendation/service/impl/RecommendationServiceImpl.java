@@ -119,7 +119,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         for(Recommendation reco:filegroup){
             similarityPrev = functionSimilarity.getFunctionSimilarity(getPrevBugContent(recommendation.getStart_line(),recommendation.getEnd_line(),recommendation.getPrev_code()),getPrevBugContent(reco.getStart_line(),reco.getEnd_line(),reco.getPrev_code()));
             similarityCurr = functionSimilarity.getFunctionSimilarity(getCurrBugContent(recommendation),getCurrBugContent(reco));
-            if(similarityPrev>0.99 && similarityCurr>0.99){
+            if(similarityPrev>0.998 && similarityCurr>0.998){
                 int tmp = reco.getAppear_num()+1;
                 recommendationDao.updateRecommendationsAppearNum(tmp,reco.getUuid());
                 System.out.println("tmp: "+tmp);
@@ -149,7 +149,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 //           throw new RuntimeException("This error message already exists");
         if(recommendation.getPrev_code()!=null){
             float sim = functionSimilarity.getFunctionSimilarity(recommendation.getPrev_code(),recommendation.getCurr_code());
-            if(sim>=0.995){
+            if(sim>=0.999){
                 throw new Exception("The code before and after this record has not been modified.");
             }
         }else {
