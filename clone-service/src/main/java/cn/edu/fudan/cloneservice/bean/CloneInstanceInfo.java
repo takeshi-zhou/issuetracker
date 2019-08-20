@@ -6,13 +6,23 @@ public class CloneInstanceInfo {
     private int end_line;
     private String class_name;
     private String method_name;
+    private String file_path;
 
-    public CloneInstanceInfo(int groupID, int start_line, int end_line, String class_name, String method_name) {
+    public CloneInstanceInfo(int groupID, int start_line, int end_line, String class_name, String method_name, String file_path) {
         this.groupID = groupID;
         this.start_line = start_line;
         this.end_line = end_line;
         this.class_name = class_name;
         this.method_name = method_name;
+        this.file_path = file_path;
+    }
+
+    public String getFile_path() {
+        return file_path;
+    }
+
+    public void setFile_path(String file_path) {
+        this.file_path = file_path;
     }
 
     public String getPackageName(){

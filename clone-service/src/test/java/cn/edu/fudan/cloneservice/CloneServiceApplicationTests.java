@@ -45,31 +45,7 @@ public class CloneServiceApplicationTests {
         lc=        commitDao.getCommitList(repo_id);
 
     }
-    @Test
-    public void testRestful() {
-        String repo_id = "700f4bf2-5f25-11e9-bd27-77953a60dffa";
-        String commit_id = "922dc95453760d98b0ccb00a08239f0a5b695bf0";
 
-        JSONObject jsonObject=  restInterfaceManager.getURL(repo_id, commit_id);
-        JSONObject data= jsonObject.getJSONObject("data");
-        String status = data.get("status").toString();
-        String content = data.get("content").toString();
-        if(status.equals("Successful")){
-            System.out.println(content);
-
-            JSONObject nj =restInterfaceManager.freeRepoPath(repo_id,content);
-            JSONObject njdata = nj.getJSONObject("data");
-            String s = njdata.get("status").toString();
-            if(s.equals("Successful")){
-
-            }
-
-        }else {
-
-            System.out.println("Error");
-        }
-
-    }
 
     @Test
     public void testCloneInfo(){

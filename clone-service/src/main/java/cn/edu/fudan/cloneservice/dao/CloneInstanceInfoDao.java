@@ -22,6 +22,18 @@ public class CloneInstanceInfoDao {
         this.cloneInstanceInfoMapper = cloneInstanceInfoMapper;
     }
 
+    public List<CloneInstanceInfo> getCloneInsListByRepoIdAndCommitId(String repo_id, String commit_id){
+        List<CloneInstanceInfo> lci = new ArrayList<>();
+        try{
+            lci = cloneInstanceInfoMapper.selectInfoByCommitIdAndRepoId(repo_id, commit_id);
+            return lci;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
     public ProjectInfo getCloneInfoByRepoIdAndCommitId(String repo_id, String commit_id){
         List<CloneInstanceInfo> lci = new ArrayList<>();
         try{
