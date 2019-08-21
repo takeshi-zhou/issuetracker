@@ -1,20 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
-    <!--注意logback.xml的加载是在spring的上下文配置application***.properties之前
-        所以，需要将logback.xml重命名，比如logback-spring.xml。
-        使用springProperty读取application.properties里的配置
-    -->
-
-    <springProfile name="develop">
-        <!-- 开发环境时激活 -->
-    </springProfile>
-
-    <springProfile name="product">
-        <!-- 生产环境时激活 -->
-    </springProfile>
-
     <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
-    <springProperty name="LOG_HOME" source="/var/log/issueTracker/clone-service/"/>
+    <property name="LOG_HOME" value="/var/log/issueTracker/measure-service"/>
 
     <!--控制台输出-->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">

@@ -62,21 +62,15 @@ public class PackageScanTask {
 
 
     private String getRepoUrl(String repoId, String commitId) {
-//        JSONObject response = restInterfaceManager.checkOut(repoId, commitId);
-//        return response != null && response.getJSONObject("data").getString("status").equals("Successful");
-
-        JSONObject jsonObject=  restInterfaceManager.getURL(repoId, commitId);
-        JSONObject data= jsonObject.getJSONObject("data");
-        String status = data.get("status").toString();
-        String content = data.get("content").toString();
-        if(status.equals("Successful")){
-            logger.info("get url successful:" + content);
-            logger.info("get repo url complete -> start the package scan operation......");
-            return content;
-        }else {
-            logger.info("get url failed " + status + content);
-            return "error";
+        String repo_url = null;
+        try{
+            repo_url =  restInterfaceManager.getRepoPath(repoId, commitId);
+        }catch (Exception e){
+            e.printStackTrace();
         }
+        return repo_url;
+
+
     }
 
     private boolean freeRepoUrl(String repoId, String repoUrl){
