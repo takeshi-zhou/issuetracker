@@ -53,4 +53,13 @@ public interface MeasureService {
      * @return 提交次数最多的项目排名
      */
     List<RepoRank> getRepoRankByCommit(String token,String since,String until);
+
+    /**
+     * 一个项目的所有详细信息
+     * @param repo_id repo的唯一标识
+     * @param since 起始时间
+     * @param until 终止时间
+     * @return repo的快照所有信息
+     */
+    RepoAllInformations getOneRepoAllInformations(String repo_id,String since,String until);
 }

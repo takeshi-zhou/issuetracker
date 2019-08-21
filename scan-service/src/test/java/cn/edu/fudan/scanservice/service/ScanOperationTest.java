@@ -92,6 +92,7 @@ public class ScanOperationTest {
     }
 
     @Test
+    @Ignore
     public void initialScan() {
         /*
             预设 数据

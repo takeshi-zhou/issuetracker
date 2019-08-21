@@ -12,6 +12,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class PackageScanStatusDaoTests {
 
     PackageScanStatusDao packageScanStatusDao;
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testScanDao(){
 
+
+    }
 
 }

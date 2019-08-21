@@ -72,4 +72,21 @@ public class MeasureController {
         }
 
     }
+
+
+    @GetMapping("/measure/repo-information")
+    @CrossOrigin
+    public ResponseBean getRepoAllInformations(@RequestParam("repo_id")String repo_id,
+                                                @RequestParam("since")String since,
+                                                @RequestParam("until")String until
+                                               ){
+        try{
+
+            return new ResponseBean(200,"success",measureService.getOneRepoAllInformations(repo_id,since,until));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+
+    }
 }

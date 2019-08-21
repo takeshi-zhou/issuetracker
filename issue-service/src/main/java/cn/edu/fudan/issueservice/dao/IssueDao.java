@@ -102,6 +102,10 @@ public class IssueDao {
         return issueMapper.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
     }
 
+    public List<Issue> getNotSolvedIssueAllListByCategoryAndRepoId(String repoId, String category) {
+        return issueMapper.getNotSolvedIssueAllListByCategoryAndRepoId(repoId, category);
+    }
+
     public void batchUpdateIssueListPriority(List issueUuid, int priority) {
         issueMapper.batchUpdateIssueListPriority(issueUuid, priority);
     }

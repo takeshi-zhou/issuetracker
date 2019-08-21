@@ -2,6 +2,7 @@ package cn.edu.fudan.measureservice.util;
 
 
 import cn.edu.fudan.measureservice.domain.CommitInfo;
+import cn.edu.fudan.measureservice.domain.Developer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -100,4 +101,64 @@ public class GitUtil {
         }
         return 0;
     }
+
+
+    public int[] getRepoLineChanges(String repoPath,String since,String until){
+        int[] result = new int[3];
+        String out;
+        try{
+            Runtime runtime=Runtime.getRuntime();
+            String command = binHome+ "repoLinesChangesCount.sh "+repoPath+" "+since+" "+until;
+            Process process=runtime.exec(command);
+            process.waitFor();
+            try(BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(process.getInputStream()))){
+                out=bufferedReader.readLine();
+                if(!out.isEmpty()){
+                    String[] args = out.trim().split(" ");
+                    result[0] = Integer.valueOf(args[0]);
+                    result[1] = Integer.valueOf(args[1]);
+                    result[2] = Integer.valueOf(args[2]);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+    public List<Developer> getRepoDevelopers(String repoPath, String since, String until){
+        List<Developer> developers = new ArrayList<>();
+        String out;
+        try{
+            Runtime runtime=Runtime.getRuntime();
+            String command = binHome+ "getRepoDevelopers.sh "+repoPath+" "+since+" "+until;
+            Process process=runtime.exec(command);
+            process.waitFor();
+            try(BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(process.getInputStream()))){
+
+
+                while((out=bufferedReader.readLine())!=null){
+                    out=out.trim();
+                    if(!out.isEmpty()) {
+                        Developer developer = new Developer();
+                        String []args=out.split("[\\s\\t]+");
+//                       int commitTimes=Integer.valueOf(args[0]);
+                        developer.setName(args[1]);
+                        developer.setEmail(args[2]);
+                        developers.add(developer);
+                    }
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return developers;
+    }
+
+
 }

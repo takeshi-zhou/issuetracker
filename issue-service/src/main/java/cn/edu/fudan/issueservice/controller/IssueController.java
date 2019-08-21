@@ -196,5 +196,8 @@ public class IssueController {
         return issueService.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
     }
 
-
+    @GetMapping(value = "/inner/issue/counts")
+    public Object getIssueTypeCountsByCategoryAndRepoId(@RequestParam("repo-id") String repoId,@RequestParam("category") String category) {
+        return issueService.getNotSolvedIssueCountByCategoryAndRepoId(repoId, category);
+    }
 }
