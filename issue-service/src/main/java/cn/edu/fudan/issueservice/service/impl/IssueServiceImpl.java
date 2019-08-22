@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * @author WZY
  * @version 1.0
@@ -505,5 +507,25 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type) {
         return issueDao.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
+    }
+
+    @Override
+    public Object getNotSolvedIssueCountByCategoryAndRepoId(String repoId, String category) {
+        List<Issue> issues = issueDao.getNotSolvedIssueAllListByCategoryAndRepoId(repoId,category);
+        Map<String,Integer> issueCount = new HashMap<>();
+        Map<String,Integer> result = new LinkedHashMap<>();
+        for (Issue issue:
+             issues) {
+            String issueType = issue.getType();
+            int count = issueCount.get(issueType) != null ? issueCount.get(issueType) : 0;
+            issueCount.put(issueType,++count);
+        }
+
+        List<Map.Entry<String,Integer>> list = new ArrayList<Map.Entry<String,Integer>>(issueCount.entrySet());
+        Collections.sort(list,(o1, o2) -> o1.getValue().compareTo(o2.getValue()));
+        for(Map.Entry<String,Integer> entry : list){
+            result.put(entry.getKey(),entry.getValue());
+        }
+        return result;
     }
 }

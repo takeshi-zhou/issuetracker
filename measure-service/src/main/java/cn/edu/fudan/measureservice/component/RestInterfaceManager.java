@@ -24,6 +24,9 @@ public class RestInterfaceManager {
     private String commitServicePath;
     @Value("${project.service.path}")
     private String projectServicePath;
+    @Value("${issue.service.path}")
+    private String issueServicePath;
+
 
     private RestTemplate restTemplate;
 
@@ -52,6 +55,10 @@ public class RestInterfaceManager {
 
     public JSONArray getProjectList(String account_id) {
         return restTemplate.getForObject(projectServicePath + "/inner/projects?account_id=" + account_id,JSONArray.class);
+    }
+
+    public JSONArray getProjectsOfRepo(String repoId){
+        return restTemplate.getForObject(projectServicePath + "/inner/project?repo_id=" + repoId,JSONArray.class);
     }
 
     //---------------------------------------------code service---------------------------------------------------------
@@ -84,4 +91,23 @@ public class RestInterfaceManager {
     public JSONObject getRepoById(String repoId){
         return restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
     }
+
+    public JSONObject getIssueCountByCategoryAndRepoId(String repoId,String category){
+        return restTemplate.getForObject(issueServicePath  + "/inner/issue/counts" + "?repo-id=" + repoId + "&category=" + category, JSONObject.class);
+    }
+
+    public JSONObject getNumberOfNewIssue(String repoId,String since,String until,String spaceType){
+        String duration = since + "-" + until;
+        return restTemplate.getForObject(issueServicePath  + "/measurement/newIssue" + "?duration=" + duration + "&spaceType=" + spaceType +"&detail=" + repoId, JSONObject.class);
+    }
+
+    public JSONObject getNumberOfEliminateIssue(String repoId,String since,String until,String spaceType){
+        String duration = since + "-" + until;
+        return restTemplate.getForObject(issueServicePath  + "/measurement/eliminateIssue" + "?duration=" + duration + "&spaceType=" + spaceType +"&detail=" + repoId, JSONObject.class);
+    }
+
+    public JSONObject getNumberOfRemainingIssue(String repoId,String commit,String spaceType ,String detail){
+        return restTemplate.getForObject(issueServicePath  + "/measurement/remainingIssue/"+ repoId + "/" + commit + "?spaceType=" + spaceType , JSONObject.class);
+    }
+
 }

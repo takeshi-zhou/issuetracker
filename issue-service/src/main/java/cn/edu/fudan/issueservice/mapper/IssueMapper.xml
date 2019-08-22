@@ -331,6 +331,10 @@
         select uuid from issue where repo_id = #{repo_id} and type = #{type} and priority != 6
     </select>
 
+    <select id="getNotSolvedIssueAllListByCategoryAndRepoId" parameterType="String" resultType="Issue">
+        select * from issue where repo_id = #{repo_id} and category = #{type} and priority != 6
+    </select>
+
     <update id="batchUpdateIssueListPriority" >
         update issue set priority = #{priority}
         <if test="list != null">
