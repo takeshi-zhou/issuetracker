@@ -21,13 +21,14 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class CloneMeasureServiceImplTest {
-    String repo_id = "4f696ccc-65ef-11e9-9ddc-f93dfaa9da61";
-    String commit_id = "03f353e39d23c71825405acd22db94428323997b";
+    String repo_id = "14209e64-9197-11e9-be7f-7f225df07fc5";
+    String commit_id = "b927741b28aa9eb4f919df2e0b6a8dafb99f67ea";
 
     @Autowired
     CloneMeasureService cloneMeasureService;
     @Test
     public void getRepoMeasureCloneDataByRepoIdCommitId() {
+
     }
 
     @Test

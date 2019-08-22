@@ -6,11 +6,17 @@ import cn.edu.fudan.cloneservice.dao.CloneInstanceInfoDao;
 import cn.edu.fudan.cloneservice.domain.DeveloperCloneMeasureData;
 import cn.edu.fudan.cloneservice.domain.RepoCloneMeasureData;
 import cn.edu.fudan.cloneservice.service.CloneMeasureService;
+import cn.edu.fudan.cloneservice.util.JGitUtil;
 import org.eclipse.jgit.api.BlameCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.blame.BlameResult;
+import org.eclipse.jgit.diff.RawText;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -56,19 +62,12 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
         try {
             repoPath=restInterfaceManager.getRepoPath(repo_id,commit_id);
             if(repoPath != null){
-                List<CloneInstanceInfo> lci =  cloneInstanceInfoDao.getCloneInsListByRepoIdAndCommitId(repo_id, commit_id);
-                File RepoGitDir = new File(repoPath + "/.git");
-                Repository repo = null;
-                repo = new FileRepository(RepoGitDir.getAbsolutePath());
-                Git git = new Git(repo);
-                BlameCommand blameCommand = git.blame();
-
-                Integer sum = 0;
-                for (CloneInstanceInfo cloneInstanceInfo: lci){
-
-                    BlameResult blameResult = blameCommand.setFilePath(cloneInstanceInfo.getFile_path()).call();
-                    System.out.println(blameResult.toString());
+                int line_id = 0;
+                PersonIdent personIdent =  JGitUtil.getPersonIdentByRepoIdAndCommitId(repoPath, commit_id, line_id);
+                if(personIdent != null){
+                    //get result
                 }
+
             }
 
         }catch (Exception e){
