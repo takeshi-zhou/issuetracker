@@ -20,7 +20,7 @@
 
 
 
-    <select id="getLocations" parameterType="Location" resultMap="location">
+    <select id="getLocations" resultMap="location">
         select * from location where rawIssue_id =#{uuid}
     </select>
 

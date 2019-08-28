@@ -1,5 +1,7 @@
 package cn.edu.fudan.cloneservice.service.impl;
 
+import cn.edu.fudan.cloneservice.domain.RepoCloneMeasureData;
+import cn.edu.fudan.cloneservice.domain.RepoCloneRatio;
 import cn.edu.fudan.cloneservice.service.CloneMeasureService;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.junit.Test;
@@ -31,19 +33,14 @@ public class CloneMeasureServiceImplTest {
     CloneMeasureService cloneMeasureService;
     @Test
     public void getRepoMeasureCloneDataByRepoIdCommitId() {
-
+        String repo_id = "14209e64-9197-11e9-be7f-7f225df07fc5";
+        String commit_id = "b927741b28aa9eb4f919df2e0b6a8dafb99f67ea";
+        RepoCloneMeasureData repoCloneMeasureData =  cloneMeasureService.getRepoMeasureCloneDataByRepoIdCommitId(repo_id, commit_id);
+        RepoCloneRatio repoCloneRatio =  cloneMeasureService.getRepoCloneRatioByRepoIdCommitId(repo_id, commit_id);
+        System.out.println();
     }
 
-    @Test
-    public void getDeveloperMeasureCloneDataByRepoIdCommitId() {
-        cloneMeasureService.getDeveloperMeasureCloneDataByRepoIdCommitId(repo_id, commit_id, "happy");
-    }
 
-    @Test
-    public void getDeveloperList(){
-        Set<PersonIdent> set = cloneMeasureService.getDeveloperListByRepoId(repo_id, commit_id);
-        for (PersonIdent personIdent: set){
-            System.out.println(personIdent.getName());
-        }
-    }
+
+
 }

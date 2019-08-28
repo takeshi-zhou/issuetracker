@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.fudan.cloneservice.mapper.RepoMeasureMapper">
+
+    <resultMap id="repoMeasure" type="cn.edu.fudan.cloneservice.domain.RepoMeasure">
+        <result property="files" column="files"/>
+        <result property="ncss" column="ncss"/>
+        <result property="classes" column="classes"/>
+        <result property="functions" column="functions"/>
+        <result property="ccn" column="ccn"/>
+        <result property="java_docs" column="java_docs"/>
+        <result property="java_doc_lines" column="java_doc_lines"/>
+        <result property="single_comment_lines" column="single_comment_lines"/>
+        <result property="multi_comment_lines" column="multi_comment_lines"/>
+    </resultMap>
+
+
+
+
+
+    <select id="getMeasureDataByRepoIdCommitId" resultMap="repoMeasure">
+        select
+            files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines
+        from
+            repo_measure
+        where
+            repo_id = #{repo_id}
+            and commit_id = #{commit_id}
+        limit 1
+    </select>
+
+</mapper>
