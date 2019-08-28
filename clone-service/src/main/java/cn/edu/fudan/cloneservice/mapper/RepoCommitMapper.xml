@@ -15,4 +15,8 @@ ce_scan_status INNER JOIN `commit` ON ce_scan_status.repo_id=`commit`.repo_id AN
 WHERE ce_scan_status.`status`='Scanned' AND ce_scan_status.repo_id=#{repoId}
 ORDER BY commit_time
     </select>
+    <select id="selectScannedCommitByRepoIdAndDuration" resultMap="commit_map">
+        select uuid, repo_id, commit_id, commit_time
+        from scan where repo_id=#{repo_id} and commit_time between #{since} and #{until} order by commit_time
+    </select>
 </mapper>

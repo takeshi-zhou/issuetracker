@@ -8,4 +8,10 @@ import java.util.List;
 public interface RepoCommitMapper {
     List<Commit> selectCommitByRepoId(@Param("repoId")  String repo_id);
 
+    List<Commit> selectScannedCommitByRepoIdAndDuration(
+            @Param("repo_id") String repo_id,
+            @Param("since") String since,
+            @Param("until") String until
+    );
+
 }

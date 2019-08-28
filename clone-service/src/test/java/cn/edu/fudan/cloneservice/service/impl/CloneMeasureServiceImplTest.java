@@ -1,11 +1,14 @@
 package cn.edu.fudan.cloneservice.service.impl;
 
 import cn.edu.fudan.cloneservice.service.CloneMeasureService;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -34,5 +37,13 @@ public class CloneMeasureServiceImplTest {
     @Test
     public void getDeveloperMeasureCloneDataByRepoIdCommitId() {
         cloneMeasureService.getDeveloperMeasureCloneDataByRepoIdCommitId(repo_id, commit_id, "happy");
+    }
+
+    @Test
+    public void getDeveloperList(){
+        Set<PersonIdent> set = cloneMeasureService.getDeveloperListByRepoId(repo_id, commit_id);
+        for (PersonIdent personIdent: set){
+            System.out.println(personIdent.getName());
+        }
     }
 }

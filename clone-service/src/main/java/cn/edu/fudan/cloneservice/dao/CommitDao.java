@@ -27,4 +27,17 @@ public class CommitDao {
         return ls;
     }
 
+    public List<Commit> getScannedCommmit(String repo_id, String since, String until){
+        return repoCommitMapper.selectScannedCommitByRepoIdAndDuration(repo_id, since, until);
+    }
+    public List<Commit> getTwoScannedCommmit(String repo_id, String since, String until){
+        List<Commit> lc = repoCommitMapper.selectScannedCommitByRepoIdAndDuration(repo_id, since, until);
+        List<Commit> reslist = new ArrayList<>();
+        reslist.add(lc.get(0));
+        if(lc.size() > 1){
+            reslist.add(lc.get(lc.size() - 1));
+        }
+        return reslist;
+    }
+
 }
