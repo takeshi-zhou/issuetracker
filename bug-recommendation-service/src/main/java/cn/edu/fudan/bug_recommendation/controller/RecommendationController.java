@@ -41,51 +41,36 @@ public class RecommendationController {
     @PostMapping("/add-bug-recommendation")
     @CrossOrigin
     public void addBugRecommendation(@RequestBody List<Recommendation> list){
-//        System.out.println("diffPostInfo: "+diffPostInfo);
-//        List<Recommendation> list = completeReco.getAllReco(diffPostInfo);
-//        System.out.println("list size: "+list.size());
-//        for (Recommendation reco:list) {
-//            System.out.println("type: "+reco.getType());
-//            String repopath = reco.getLocation();
-//            String bug_lines = reco.getBug_lines();
-//            String nextcommitid = reco.getNext_commitid();
-//            String commitid = reco.getCurr_commitid();
-//            JSONObject json = analyzeDiffFile.getDiffRange(repopath,nextcommitid,commitid,bug_lines);
-//            if(json.getInteger("nextstart_line")!=0){
-//                reco.setStart_line(json.getInteger("start_line"));
-//                reco.setEnd_line(json.getInteger("end_line"));
-//                reco.setNextstart_line(json.getInteger("nextstart_line"));
-//                reco.setNextend_line(json.getInteger("nextend_line"));
-//                reco.setDescription(json.getString("description"));
-//                String prevcode = getCode.getCodePrev(repopath,commitid,nextcommitid,json.getInteger("start_line"),json.getInteger("end_line"));
-//                String currcode = getCode.getCodeCurr(repopath,commitid,nextcommitid,json.getInteger("nextstart_line"),json.getInteger("nextend_line"));
-//                reco.setPrev_code(prevcode);
-//                reco.setCurr_code(currcode);
-//                recommendationService.addBugRecommendation(reco);
-//            }
-//        }
-
-//        try {
-//            for (Recommendation info: list){
-//                Recommendation newInfo = completeReco.completeCode(info);
-//                recommendationService.addBugRecommendation(newInfo);
-//            }
-//            return new ResponseBean(200, "Congratulations！successful add.", null);
-//        }catch (Exception e) {
-//            return new ResponseBean(401, "add failed! " + e.getMessage(), null);
-//       }
-
     }
-    @GetMapping("/get-bug-recommendation")
-    @CrossOrigin
-//    public Object getBugRecommendation(@RequestParam("type") String type){
-//        return new ResponseBean(200,"success",recommendationService.getRecommendationsByType(type));
+//    @GetMapping("/get-bug-recommendation")
+//    @CrossOrigin
+//
+//    public Object getBugRecommendation(@RequestParam("type") String type,
+//                                       @RequestParam("page") Integer page,
+//                                       @RequestParam("size") Integer size){
+//        return new ResponseBean(200,"success",recommendationService.getRecommendationsByType(type,page,size));
 //    }
-    public Object getBugRecommendation(@RequestParam("type") String type,
+    @GetMapping("/get-bug-recommendation-OrderBySimilarity")
+    @CrossOrigin
+    //给我codeUrl
+    public Object getBugRecommendationOrderBySimilarity(@RequestParam("type") String type,
                                        @RequestParam("page") Integer page,
-                                       @RequestParam("size") Integer size){
-        return new ResponseBean(200,"success",recommendationService.getRecommendationsByType(type,page,size));
+                                       @RequestParam("size") Integer size,
+                                       @RequestParam("repoId") String repoId,
+                                       @RequestParam("commit_id") String commit_id,
+                                       @RequestParam("location") String location,
+                                       @RequestParam("start_line") Integer start_line,
+                                       @RequestParam("end_line") Integer end_line){
+        return new ResponseBean(200,"success",recommendationService.getBugRecommendationOrderBySimilarity(type,page,size,repoId,commit_id,location,start_line,end_line));
     }
+//    public Object getBugRecommendationOrderBySimilarity(@RequestParam("type") String type,
+//                                                        @RequestParam("page") Integer page,
+//                                                        @RequestParam("size") Integer size,
+//                                                        @RequestParam("codeUrl") String codeUrl,
+//                                                        @RequestParam("start_line") Integer start_line,
+//                                                        @RequestParam("end_line") Integer end_line){
+//        return new ResponseBean(200,"success",recommendationService.getBugRecommendationOrderBySimilarity(type,page,size,codeUrl,start_line,end_line));
+//    }
     @PostMapping("/add-useful-count")
     @CrossOrigin
     public Object addUsefulCount(@RequestBody Map<String,String> map) {
