@@ -91,7 +91,8 @@
     </select>
 
     <select id="getRecommendationsByType" parameterType="Map" resultMap="recommendation">
-        select * from bug_recommendation where type = #{type} and modification_method = "modify" order by appear_num,useful_count,start_line limit #{start},#{size}
+        select * from bug_recommendation where type = #{type} and modification_method = "modify" limit #{start},#{size}
+        <!--order by appear_num,useful_count,start_line-->
         <!--<where>-->
                 <!--<if test="type!=null">-->
                         <!--type = #{type}-->

@@ -1,22 +1,25 @@
 package cn.edu.fudan.bug_recommendation.service.impl;
-
 import cn.edu.fudan.bug_recommendation.dao.RecommendationDao;
 import cn.edu.fudan.bug_recommendation.domain.Recommendation;
 import cn.edu.fudan.bug_recommendation.service.FunctionSimilarity;
+import cn.edu.fudan.bug_recommendation.service.GetCode;
 import cn.edu.fudan.bug_recommendation.service.RecommendationService;
 import cn.edu.fudan.bug_recommendation.service.FunctionSimilarity;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -24,6 +27,17 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     private RecommendationDao recommendationDao;
     private FunctionSimilarity functionSimilarity;
+    private GetCode getCode;
+
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    public void setStringRedisTemplate(StringRedisTemplate stringRedisTemplate) {
+        this.stringRedisTemplate = stringRedisTemplate;
+    }
+
+    @Autowired
+    public void setGetCode(GetCode getCode){this.getCode=getCode;}
 
     @Autowired
     public void setRecommendationDao(RecommendationDao recommendationDao){
@@ -54,10 +68,6 @@ public class RecommendationServiceImpl implements RecommendationService {
         return recommendationDao.isBuglinesExist(bug_lines);
     }
 
-//    public List<Recommendation> getRecommendationsByType(String type){
-//        List<Recommendation> recommendationsList = recommendationDao.getRecommendationsByType(type);
-//        return recommendationsList;
-//    }
     @Override
     public Object getRecommendationsByType(String type,Integer page,Integer size){
         //获取此type的Recommendations的条数，计算每一页的list
@@ -71,8 +81,142 @@ public class RecommendationServiceImpl implements RecommendationService {
         result.put("modifyTotalCount", count);
         List<Recommendation> recommendationsList = recommendationDao.getRecommendationsByType(param);
         result.put("recommendationsList",recommendationsList);
+        log.info("use getRecommendationsByType!");
         return result;
     }
+
+    @Override
+    public Object getBugRecommendationOrderBySimilarity(String type, Integer page, Integer size, String repoId, String commit_id,String location,Integer start_line,Integer end_line){
+        //在数据库设置两个包
+        log.info("use getBugRecommendationOrderBySimilarity!");
+        String selectCode = stringRedisTemplate.opsForValue().get("code:"+type+repoId+location);
+        if(selectCode==null){
+            selectCode = getCode.getCode(repoId,commit_id,location);
+            stringRedisTemplate.opsForValue().set("code:"+type+repoId+location,selectCode,300, TimeUnit.SECONDS);
+        }else {
+            stringRedisTemplate.opsForValue().set("code:"+type+repoId+location,selectCode,300, TimeUnit.SECONDS);
+        }
+        //根据type,repoId,location在redis里查找有没有相应的代码
+        //有就取出来；没有就访问code接口，然后把代码放redis里，并设置过期时间
+        //有了代码之后，根据type,code的hash在redis里查找有没有排序
+        //有就直接拿，没有就进行计算，并把计算结果放redis里，设置过期时间
+        //redis里没有code
+        List<Recommendation> resultlist = new ArrayList<>();
+        int start = (page - 1) * size;
+        int end = start+size-1;
+        List<String> sortList = stringRedisTemplate.opsForList().range("sort:"+type+repoId+location,start,end);
+        if(sortList!=null && sortList.size()!=0){
+            for(String sort:sortList){
+                Recommendation reco = JSON.parseObject(sort,Recommendation.class);
+                resultlist.add(reco);
+            }
+            return resultlist;
+        }else{
+            //redis里没有排序结果
+            Map<String, Object> param = new HashMap<>();
+            int count = recommendationDao.getRecommendationsByTypeCount(type);
+            log.info("recos by same type -> count={}",count);
+            //redis插入所有行
+            param.put("type",type);
+            param.put("size",count);
+            param.put("start",0);
+            List<Recommendation> recommendationsList = recommendationDao.getRecommendationsByType(param);
+            //对所有查询到的reco按相似度进行比较
+            TreeMap<Float,Recommendation> treeMap = new TreeMap<>(new Comparator<Float>() {
+                @Override
+                public int compare(Float o1, Float o2) {
+                    return o2.compareTo(o1);
+                }
+            });
+            for(Recommendation reco:recommendationsList){
+                Float simi = functionSimilarity.getFunctionSimilarity(getPrevBugContent(start_line,end_line,selectCode),getPrevBugContent(reco.getStart_line(),reco.getEnd_line(),reco.getPrev_code()));
+                treeMap.put(simi,reco);
+            }
+            List<Float> simiList = new ArrayList<>(treeMap.keySet());
+            for(Float f:simiList){
+                System.out.println("simi: "+f);
+            }
+            //为什么少了呢，treemap的key不能重复
+            //实际的排序条数少于count
+            int factCount = treeMap.size();
+            log.info("factCount -> factCount={}",factCount);
+            stringRedisTemplate.opsForValue().set("sort:count:"+type+repoId+location,Integer.toString(factCount));
+            List<Recommendation> valuelist = new ArrayList<>(treeMap.values());
+            for(int i=start;i<=end&&i<valuelist.size();i++){
+                if(start>factCount){
+                    return new ArrayList<Recommendation>(0);
+                }
+                resultlist.add(valuelist.get(i));
+            }
+
+            for(Recommendation reco:valuelist){
+                try {
+                    //在key里面设置，那么如何初始化key
+                    stringRedisTemplate.opsForList().rightPush("sort:"+type+repoId+location,JSON.toJSONString(reco));
+                    //stringRedisTemplate.opsForList().set("sort:"+type+repoId+location,rediscnt,JSON.toJSONString(reco));
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+            //stringRedisTemplate.opsForList().set("sort:"+type+repoId+location,0,JSON.toJSONString(valuelist));
+            return resultlist;
+        }
+
+    }
+//@Override
+//public Object getBugRecommendationOrderBySimilarity(String type, Integer page, Integer size, String codeUrl,Integer start_line,Integer end_line){
+//    //在数据库设置两个包
+//    String selectCode = stringRedisTemplate.opsForValue().get(type+repoId+location);
+//    if(selectCode==null){
+//        selectCode = getCode.getCode(repoId,commit_id,location);
+//        stringRedisTemplate.opsForValue().set(type+repoId+location,selectCode,300, TimeUnit.SECONDS);
+//    }else {
+//        stringRedisTemplate.opsForValue().set(type+repoId+location,selectCode,300, TimeUnit.SECONDS);
+//    }
+//    //根据type,repoId,location在redis里查找有没有相应的代码
+//    //有就取出来；没有就访问code接口，然后把代码放redis里，并设置过期时间
+//    //有了代码之后，根据type,code的hash在redis里查找有没有排序
+//    //有就直接拿，没有就进行计算，并把计算结果放redis里，设置过期时间
+//    //redis里没有code
+//    List<Recommendation> resultlist = new ArrayList<>();
+//    int start = (page - 1) * size;
+//    int end = start+size-1;
+//    List<String> sortList = stringRedisTemplate.opsForList().range(type+repoId+location,start,end);
+//    if(sortList!=null && sortList.size()!=0){
+//        for(String sort:sortList){
+//            Recommendation reco = JSON.parseObject(sort,Recommendation.class);
+//            resultlist.add(reco);
+//        }
+//        return resultlist;
+//    }else{
+//        //redis里没有排序结果
+//        Map<String, Object> param = new HashMap<>();
+//        int count = recommendationDao.getRecommendationsByTypeCount(type);
+//        param.put("type",type);
+//        param.put("size",count);
+//        param.put("start", 0);
+//        List<Recommendation> recommendationsList = recommendationDao.getRecommendationsByType(param);
+//        //对所有查询到的reco按相似度进行比较
+//        TreeMap<Float,Recommendation> treeMap = new TreeMap<>(new Comparator<Float>() {
+//            @Override
+//            public int compare(Float o1, Float o2) {
+//                return o2.compareTo(o1);
+//            }
+//        });
+//        for(Recommendation reco:recommendationsList){
+//            Float simi = functionSimilarity.getFunctionSimilarity(getPrevBugContent(start_line,end_line,selectCode),getPrevBugContent(reco.getStart_line(),reco.getEnd_line(),reco.getPrev_code()));
+//            treeMap.put(simi,reco);
+//        }
+//        List<Recommendation> valuelist = new ArrayList<>(treeMap.values());
+//        for(int i=start;i<=end;i++){
+//            resultlist.add(valuelist.get(i));
+//        }
+//        stringRedisTemplate.opsForList().set(type+repoId+location,0,JSON.toJSONString(valuelist));
+//        return resultlist;
+//    }
+//
+//}
 
     @Override
     //对于prevcode只比较startline到endline就知道出现的问题是否一样
@@ -97,6 +241,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         return sb.toString();
     }
+    //对于currcode拿到所有方法名相同的方法并累加
     @Override
     public String getCurrBugContent(Recommendation recommendation){
         StringBuilder sb=new StringBuilder();

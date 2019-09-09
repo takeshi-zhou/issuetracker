@@ -49,24 +49,13 @@ public class RecommendationDao {
         return reponame;
     }
 
-//    public Recommendation getRecommendationByType(String type){
-//        return recommendationMapper.getRecommendationByType(type);
-//    }
     public List<Recommendation> getRecommendationsEnd_line(Integer end_line){
         List<Recommendation> recommendations = recommendationMapper.getRecommendationsByEnd_line(end_line);
-//        List<Recommendation> list = new ArrayList<>();
-//        for (Recommendation recommendation : recommendations) {
-//            list.add(recommendation);
-//        }
         return recommendations;
     }
 
     public List<Recommendation> getRecommendationsStart_line(Integer start_line){
         List<Recommendation> recommendations = recommendationMapper.getRecommendationsByStart_line(start_line);
-//        List<Recommendation> list = new ArrayList<>();
-//        for (Recommendation recommendation : recommendations) {
-//            list.add(recommendation);
-//        }
         return recommendations;
     }
 
@@ -78,27 +67,15 @@ public class RecommendationDao {
 
     public List<Recommendation> getRecommendationsByBuglines(String bug_lines) {
         List<Recommendation> recommendations = recommendationMapper.getRecommendationsByBug_lines(bug_lines);
-//        List<Recommendation> list = new ArrayList<>();
-//        for (Recommendation recommendation : recommendations) {
-//            list.add(recommendation);
-//        }
         return recommendations;
     }
 
     public List<Recommendation> getRecommendationsByLocation(String location){
         List<Recommendation> recommendations = recommendationMapper.getRecommendationsByLocation(location);
-//        List<Recommendation> list = new ArrayList<>();
-//        for (Recommendation recommendation : recommendations) {
-//            list.add(recommendation);
-//        }
         return recommendations;
     }
     public List<Recommendation> getRecommendationsSameTypeFile(String type,String filename){
         List<Recommendation> recommendations = recommendationMapper.getRecommendationsSameTypeFile(type,filename);
-//        List<Recommendation> list = new ArrayList<>();
-//        for (Recommendation recommendation : recommendations) {
-//            list.add(recommendation);
-//        }
         return recommendations;
     }
     public Integer getRecommendationsByTypeCount(String type){

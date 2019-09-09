@@ -18,6 +18,9 @@ public interface RecommendationService {
 //    List<Recommendation> getRecommendationsByType(String type);
     Object getRecommendationsByType(String type,Integer page,Integer size);
 
+    Object getBugRecommendationOrderBySimilarity(String type, Integer page, Integer size, String repoId, String commit_id,String location,Integer start_line,Integer end_line);
+//Object getBugRecommendationOrderBySimilarity(String type, Integer page, Integer size, String codeUrl,Integer start_line,Integer end_line);
+
     boolean isBugRecommendationExist(Recommendation recommendation);
 
     String getPrevBugContent(Integer startLine,Integer endLine,String sFile);
