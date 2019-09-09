@@ -12,12 +12,14 @@ package cn.edu.fudan.cloneservice.domain;
 public class RepoCloneMeasureData {
     String repo_id;
     String commit_id;
-    Integer clone_line;
+    long clone_line;
+    long total_line;
 
-    public RepoCloneMeasureData(String repo_id, String commit_id, Integer clone_line) {
+    public RepoCloneMeasureData(String repo_id, String commit_id, long clone_line, long total_line) {
         this.repo_id = repo_id;
         this.commit_id = commit_id;
         this.clone_line = clone_line;
+        this.total_line = total_line;
     }
 
     public String getRepo_id() {
@@ -36,15 +38,19 @@ public class RepoCloneMeasureData {
         this.commit_id = commit_id;
     }
 
-    public Integer getClone_line() {
+    public long getClone_line() {
         return clone_line;
     }
 
-    public void setClone_line(Integer clone_line) {
+    public void setClone_line(long clone_line) {
         this.clone_line = clone_line;
     }
 
+    public long getTotal_line() {
+        return total_line;
+    }
 
-
-
+    public void setTotal_line(long total_line) {
+        this.total_line = total_line;
+    }
 }

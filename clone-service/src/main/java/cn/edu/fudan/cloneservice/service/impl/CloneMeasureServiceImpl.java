@@ -6,18 +6,7 @@ import cn.edu.fudan.cloneservice.dao.*;
 import cn.edu.fudan.cloneservice.domain.*;
 import cn.edu.fudan.cloneservice.service.CloneMeasureService;
 import cn.edu.fudan.cloneservice.util.JGitUtil;
-import org.eclipse.jgit.api.BlameCommand;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.LogCommand;
-import org.eclipse.jgit.blame.BlameResult;
-import org.eclipse.jgit.diff.*;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
-import org.eclipse.jgit.lib.*;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.eclipse.jgit.treewalk.CanonicalTreeParser;
-import org.eclipse.jgit.util.io.DisabledOutputStream;
+import cn.edu.fudan.cloneservice.util.LineNumUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -57,13 +46,13 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
     @Autowired
     RepoMeasureDao repoMeasureDao;
 
-//    @Autowired
-//    private RestInterfaceManager restInterfaceManager;
+    @Autowired
+    private RestInterfaceManager restInterfaceManager;
     @Value("${repoHome}")
     private String repoHome;
 
-    private Integer getCloneLine(List<CloneInstanceInfo> lci){
-        Integer res = 0;
+    private long getCloneLine(List<CloneInstanceInfo> lci){
+        long res = 0;
         Map<String, Set<Integer>> file_map = new HashMap<>();
         for (CloneInstanceInfo ci:lci){
             if(!file_map.containsKey( ci.getFile_path()) ){
@@ -87,8 +76,9 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
 //        for (CloneInstanceInfo cloneInstanceInfo: lci){
 //            sum += (cloneInstanceInfo.getEnd_line() - cloneInstanceInfo.getStart_line() + 1);
 //        }
-        Integer sum =  getCloneLine(lci);
-        RepoCloneMeasureData repoCloneMeasureData = new RepoCloneMeasureData(repo_id, commit_id, sum);
+        long sum =  getCloneLine(lci);
+        long total_line = getRepoTotalLine(repo_id, commit_id);
+        RepoCloneMeasureData repoCloneMeasureData = new RepoCloneMeasureData(repo_id, commit_id, sum, total_line);
 
         return repoCloneMeasureData;
     }
@@ -96,16 +86,32 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
     @Override
     public RepoCloneRatio getRepoCloneRatioByRepoIdCommitId(String repo_id, String commit_id) {
         List<CloneInstanceInfo> lci =  cloneInstanceInfoDao.getCloneInsListByRepoIdAndCommitId(repo_id, commit_id);
-        Integer clone_line = 0;
-        for (CloneInstanceInfo cloneInstanceInfo: lci){
-            clone_line += (cloneInstanceInfo.getEnd_line() - cloneInstanceInfo.getStart_line() + 1);
-        }
+        long clone_line =  getCloneLine(lci);
+
         //get total line
-        Integer total_line = repoMeasureDao.getTotalLineByRepoIdCommitId(repo_id, commit_id);
+        long total_line = getRepoTotalLine(repo_id, commit_id);
         Double ratio = 1.0 * clone_line / total_line;
         return new RepoCloneRatio(repo_id, commit_id, ratio);
     }
 
+    public long getRepoTotalLine(String repo_id, String commit_id){
+        String repoPath=null;
+        try {
+            repoPath = restInterfaceManager.getRepoPath(repo_id, commit_id);
+            if (repoPath != null) {
+                LineNumUtil lineNumUtil = new LineNumUtil();
+                long repo_line = lineNumUtil.getRepoLineNumber(repoPath);
+                return repo_line;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        finally {
+            if(repoPath!=null)
+                restInterfaceManager.freeRepoPath(repo_id,repoPath);
+        }
+        return -1;
+    }
 
 //    //这个commit中，某个开发者的克隆代码行数
 //    @Override

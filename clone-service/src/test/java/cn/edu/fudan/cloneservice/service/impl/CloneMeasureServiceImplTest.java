@@ -35,6 +35,7 @@ public class CloneMeasureServiceImplTest {
     public void getRepoMeasureCloneDataByRepoIdCommitId() {
         String repo_id = "14209e64-9197-11e9-be7f-7f225df07fc5";
         String commit_id = "b927741b28aa9eb4f919df2e0b6a8dafb99f67ea";
+//        String commit_id = "a88e6d8a4674f8ab5dffa36cc6bab1bbb8c1c643";
         RepoCloneMeasureData repoCloneMeasureData =  cloneMeasureService.getRepoMeasureCloneDataByRepoIdCommitId(repo_id, commit_id);
         RepoCloneRatio repoCloneRatio =  cloneMeasureService.getRepoCloneRatioByRepoIdCommitId(repo_id, commit_id);
         System.out.println();
