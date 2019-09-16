@@ -11,29 +11,30 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
 tags:
-- name: "account-service"
-- name: "project-service"
-- name: "scan-service"
-- name: "issue-service"
-- name: "commit-service"
-- name: "tag-service"
+  - name: "account-service"
+  - name: "project-service"
+  - name: "scan-service"
+  - name: "issue-service"
+  - name: "commit-service"
+  - name: "tag-service"
+  - name: "clone-service"
 schemes:
-- "http"
+  - "http"
 paths:
   /user/account-name/check:
     get:
       tags:
-      - "account-service"
+        - "account-service"
       summary: "Check Account Name"
       operationId: "check_account_name"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - name: "accountName"
-        in: "query"
-        description: "The account name for register"
-        required: true
-        type: "string"
+        - name: "accountName"
+          in: "query"
+          description: "The account name for register"
+          required: true
+          type: "string"
       responses:
         200:
           description : "succsss"
@@ -42,17 +43,17 @@ paths:
   /user/email/check:
     get:
       tags:
-      - "account-service"
+        - "account-service"
       summary: "Check Email"
       operationId: "check_email"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - name: "email"
-        in: "query"
-        description: "The emailfor register"
-        required: true
-        type: "string"
+        - name: "email"
+          in: "query"
+          description: "The emailfor register"
+          required: true
+          type: "string"
       responses:
         200:
           description : "succsss"
@@ -61,17 +62,17 @@ paths:
   /user/nick-name/check:
     get:
       tags:
-      - "account-service"
+        - "account-service"
       summary: "Check Nick Name"
       operationId: "check_nick_name"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - name: "nickName"
-        in: "query"
-        description: "The nickName for register"
-        required: true
-        type: "string"
+        - name: "nickName"
+          in: "query"
+          description: "The nickName for register"
+          required: true
+          type: "string"
       responses:
         200:
           description : "succsss"
@@ -80,19 +81,19 @@ paths:
   /user/register:
     post:
       tags:
-      - "account-service"
+        - "account-service"
       summary: "Create user"
       description: "This can only be done by the logged in user."
       operationId: "createUser"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "account"
-        description: "Created user object"
-        required: true
-        schema:
-          $ref: "#/definitions/User"
+        - in: "body"
+          name: "account"
+          description: "Created user object"
+          required: true
+          schema:
+            $ref: "#/definitions/User"
       responses:
         200:
           description: "successful operation"
@@ -101,22 +102,22 @@ paths:
   /user/login:
     get:
       tags:
-      - "account-service"
+        - "account-service"
       summary: "Logs user into the system"
       operationId: "login"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - name: "username"
-        in: "query"
-        description: "The user name for login"
-        required: true
-        type: "string"
-      - name: "password"
-        in: "query"
-        description: "The password for login in clear text"
-        required: true
-        type: "string"
+        - name: "username"
+          in: "query"
+          description: "The user name for login"
+          required: true
+          type: "string"
+        - name: "password"
+          in: "query"
+          description: "The password for login in clear text"
+          required: true
+          type: "string"
       responses:
         200:
           description : "succsssful login"
@@ -133,17 +134,17 @@ paths:
   /user/auth/{userToken}:
     get:
       tags:
-      - "account-service"
+        - "account-service"
       summary: "Logs user into the system"
       operationId: "auth"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - name: "userToken"
-        in: "path"
-        description: "token of user that needs to be fetched"
-        required: true
-        type: "string"
+        - name: "userToken"
+          in: "path"
+          description: "token of user that needs to be fetched"
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -158,17 +159,17 @@ paths:
   /user/accountId:
     get:
       tags:
-      - "account-service"
+        - "account-service"
       summary: "get AccountID By userToken"
       operationId: "getAccountID"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - name: "userToken"
-        in: "query"
-        description: "token of user for get accountID"
-        required: true
-        type: "string"
+        - name: "userToken"
+          in: "query"
+          description: "token of user for get accountID"
+          required: true
+          type: "string"
       responses:
         200:
           description : "succsssful"
@@ -181,11 +182,11 @@ paths:
   /user/accountIds:
     get:
       tags:
-      - "account-service"
+        - "account-service"
       summary: "get AccountIDs"
       operationId: "getAccountIds"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description : "succsssful"
@@ -200,24 +201,24 @@ paths:
   /project:
     post:
       tags:
-      - "project-service"
+        - "project-service"
       summary: "add a project"
       description: "This can only be done by logged in user"
       operationId: "addProject"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "project"
-        description: "project that user want to add"
-        required: true
-        schema:
-          $ref: "#/definitions/AddProjectJson"
-      - in: "header"
-        name: "token"
-        description: "get userToken from Header"
-        required: true
-        type: "string"
+        - in: "body"
+          name: "project"
+          description: "project that user want to add"
+          required: true
+          schema:
+            $ref: "#/definitions/AddProjectJson"
+        - in: "header"
+          name: "token"
+          description: "get userToken from Header"
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -229,21 +230,21 @@ paths:
             $ref: "#/definitions/ResponseBean"
     get:
       tags:
-      - "project-service"
+        - "project-service"
       summary: "query Project list By userToken"
       operationId: "query"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "header"
-        name: "token"
-        description: "get userToken from Header"
-        required: true
-        type: "string"
-      - in: "query"
-        name: "type"
-        required: true
-        type: "string"
+        - in: "header"
+          name: "token"
+          description: "get userToken from Header"
+          required: true
+          type: "string"
+        - in: "query"
+          name: "type"
+          required: true
+          type: "string"
       responses:
         200:
           description : "succsssful"
@@ -256,18 +257,18 @@ paths:
   /project/{projectId}:
     delete:
       tags:
-      - "project-service"
+        - "project-service"
       summary: "delet a project"
       description: "delet a project by projectId"
       operationId: "delete"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "path"
-        name: "projectId"
-        description: "project that user want to delet"
-        required: true
-        type : "string"
+        - in: "path"
+          name: "projectId"
+          description: "project that user want to delet"
+          required: true
+          type : "string"
       responses:
         200:
           description: "successful operation"
@@ -280,21 +281,21 @@ paths:
   /project/filter:
     get:
       tags:
-      - "project-service"
+        - "project-service"
       summary: "query Project list By userToken"
       operationId: "filter"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "header"
-        name: "token"
-        description: "get userToken from Header"
-        required: true
-        type: "string"
-      - in: "query"
-        name: "keyWord"
-        required: true
-        type: "string"
+        - in: "header"
+          name: "token"
+          description: "get userToken from Header"
+          required: true
+          type: "string"
+        - in: "query"
+          name: "keyWord"
+          required: true
+          type: "string"
       responses:
         200:
           description : "succsssful"
@@ -307,18 +308,18 @@ paths:
   /inner/project:
     put:
       tags:
-      - "project-service"
+        - "project-service"
       summary: "update Project "
       operationId: "updateProject"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "project"
-        description: " message about project "
-        required: true
-        schema:
-          $ref: '#/definitions/Project'
+        - in: "body"
+          name: "project"
+          description: " message about project "
+          required: true
+          schema:
+            $ref: '#/definitions/Project'
       responses:
         200:
           description : "succsssful"
@@ -330,18 +331,18 @@ paths:
             $ref: "#/definitions/ResponseBean"
     get:
       tags:
-      - "project-service"
+        - "project-service"
       summary: "get project by  repo_id"
       description: "get project by  repo_id"
       operationId: "get project by  repo_id"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "path"
-        name: "repo_id"
-        description: "repo id"
-        required: true
-        type : "string"
+        - in: "path"
+          name: "repo_id"
+          description: "repo id"
+          required: true
+          type : "string"
       responses:
         200:
           description: "successful operation"
@@ -352,18 +353,18 @@ paths:
   /inner/project/repo-id:
     get:
       tags:
-      - "project-service"
+        - "project-service"
       summary: "get Repo id"
       description: "get Repo id by project_id"
       operationId: "getRepoId"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "query"
-        name: "project-id"
-        description: "project id"
-        required: true
-        type : "string"
+        - in: "query"
+          name: "project-id"
+          description: "project id"
+          required: true
+          type : "string"
       responses:
         200:
           description: "successful operation"
@@ -374,18 +375,18 @@ paths:
   /inner/project/{project-id}:
     get:
       tags:
-      - "project-service"
+        - "project-service"
       summary: "get a project"
       description: "get a project by projectId"
       operationId: "getProject"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "path"
-        name: "project-id"
-        description: "project that user want to get"
-        required: true
-        type : "string"
+        - in: "path"
+          name: "project-id"
+          description: "project that user want to get"
+          required: true
+          type : "string"
       responses:
         200:
           description: "successful operation"
@@ -396,18 +397,18 @@ paths:
   /inner/projects:
     get:
       tags:
-      - "project-service"
+        - "project-service"
       summary: "get  project object List by account id"
       description: "get  projectId List by account id"
       operationId: "getProjects"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "query"
-        name: "account_id"
-        description: "account_id that user want to get"
-        required: false
-        type : "string"
+        - in: "query"
+          name: "account_id"
+          description: "account_id that user want to get"
+          required: false
+          type : "string"
       responses:
         200:
           description: "successful operation"
@@ -421,19 +422,19 @@ paths:
   /scan:
     post:
       tags:
-      - "scan-service"
+        - "scan-service"
       summary: "Send Scan Message"
       description: " "
       operationId: "addScan"
       parameters:
-      - in: "body"
-        name: "requestParam"
-        description: "get projectId and commitId from  JSONObject"
-        required: true
-        schema:
-          $ref: "#/definitions/ScanJSONObject"
+        - in: "body"
+          name: "requestParam"
+          description: "get projectId and commitId from  JSONObject"
+          required: true
+          schema:
+            $ref: "#/definitions/ScanJSONObject"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "successful operation"
@@ -446,41 +447,41 @@ paths:
   /scan/commits:
     get:
       tags:
-      - "scan-service"
+        - "scan-service"
       summary: "get Commits"
       description: " "
       operationId: "getCommits"
       parameters:
-      - in: "query"
-        name: "project_id"
-        description: ""
-        required: true
-        type: "string"
-      - in: "query"
-        name: "page"
-        description: ""
-        type: "string"
-        required: false
-        default: "1"
-      - in: "query"
-        name: "size"
-        description: ""
-        type: "string"
-        required: false
-        default: "10"
-      - in: "query"
-        name: "is_whole"
-        description: ""
-        type: "string"
-        required: false
-        default: "false"
-      - in: "query"
-        name: "category"
-        description: ""
-        type: "string"
-        required: true
+        - in: "query"
+          name: "project_id"
+          description: ""
+          required: true
+          type: "string"
+        - in: "query"
+          name: "page"
+          description: ""
+          type: "string"
+          required: false
+          default: "1"
+        - in: "query"
+          name: "size"
+          description: ""
+          type: "string"
+          required: false
+          default: "10"
+        - in: "query"
+          name: "is_whole"
+          description: ""
+          type: "string"
+          required: false
+          default: "false"
+        - in: "query"
+          name: "category"
+          description: ""
+          type: "string"
+          required: true
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "successful operation"
@@ -492,19 +493,19 @@ paths:
   /inner/scan:
     put:
       tags:
-      - "scan-service"
+        - "scan-service"
       summary: "update a Scan"
       description: "update a Scan record"
       operationId: "updateScan"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "scan"
-        description: "a scan object"
-        required: true
-        schema:
-          $ref: "#/definitions/Scan"
+        - in: "body"
+          name: "scan"
+          description: "a scan object"
+          required: true
+          schema:
+            $ref: "#/definitions/Scan"
       responses:
         200:
           description: "successful operation"
@@ -516,18 +517,18 @@ paths:
             $ref: "#/definitions/ResponseBean"
     post:
       tags:
-      - "scan-service"
+        - "scan-service"
       summary: "add one scan"
       operationId: "addscan"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "scan"
-        description: "scan json object"
-        required: true
-        schema:
-          $ref: "#/definitions/Scan"
+        - in: "body"
+          name: "scan"
+          description: "scan json object"
+          required: true
+          schema:
+            $ref: "#/definitions/Scan"
       responses:
         200:
           description: "successful operation"
@@ -538,17 +539,17 @@ paths:
   /inner/scan/{repoId}:
     delete:
       tags:
-      - "scan-service"
+        - "scan-service"
       summary: "delet  Scans by repoId"
       operationId: "deleteScans"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "path"
-        name: "repoId"
-        description: "a repo id"
-        required: true
-        type: "string"
+        - in: "path"
+          name: "repoId"
+          description: "a repo id"
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -561,22 +562,22 @@ paths:
   /inner/scan/last-commit:
     get:
       tags:
-      - "scan-service"
+        - "scan-service"
       summary: "get Latest Scanned CommitId"
       operationId: "getLatestScannedCommitId"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "query"
-        name: "repo_id"
-        description: "a repo_id id"
-        required: true
-        type: "string"
-      - in: "query"
-        name: "category"
-        description: "category"
-        required: true
-        type: "string"
+        - in: "query"
+          name: "repo_id"
+          description: "a repo_id id"
+          required: true
+          type: "string"
+        - in: "query"
+          name: "category"
+          description: "category"
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -587,17 +588,17 @@ paths:
   /inner/scan/commits:
     get:
       tags:
-      - "scan-service"
+        - "scan-service"
       summary: "get commits that have been scanned"
       operationId: "getScannedCommits"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "query"
-        name: "repo_id"
-        description: "a repo id"
-        required: true
-        type: "string"
+        - in: "query"
+          name: "repo_id"
+          description: "a repo id"
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -609,32 +610,32 @@ paths:
   /issue:
     get:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "get Issues by project_id,page and size"
       operationId: "getIssues"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "query"
-        name: "project-id"
-        description: "a project id"
-        required: true
-        type: "string"
-      - in: "query"
-        name: "page"
-        description: " "
-        required: true
-        type: "string"
-      - in: "query"
-        name: "size"
-        description: " "
-        required: true
-        type: "string"
-      - in: "query"
-        name: "category"
-        description: "category"
-        required: true
-        type: "string"
+        - in: "query"
+          name: "project-id"
+          description: "a project id"
+          required: true
+          type: "string"
+        - in: "query"
+          name: "page"
+          description: " "
+          required: true
+          type: "string"
+        - in: "query"
+          name: "size"
+          description: " "
+          required: true
+          type: "string"
+        - in: "query"
+          name: "category"
+          description: "category"
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -646,11 +647,11 @@ paths:
   /issue/issue-types:
     get:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "get Exist IssueTypes"
       operationId: "getExistIssueTypes"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "successful operation"
@@ -664,18 +665,18 @@ paths:
   /issue/filter:
     post:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "filter of issues"
       operationId: "filterIssues"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "requestParam"
-        description: ""
-        required: true
-        schema:
-          $ref: '#/definitions/IssueFilterRequestParam'
+        - in: "body"
+          name: "requestParam"
+          description: ""
+          required: true
+          schema:
+            $ref: '#/definitions/IssueFilterRequestParam'
       responses:
         200:
           description: "successful operation"
@@ -698,25 +699,25 @@ paths:
   /issue/dashboard:
     get:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "get dashboard info "
       operationId: "getDashBoardInfo"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "header"
-        name: "token"
-        description: "get userToken from Header"
-        required: true
-        type: "string"
-      - in: "query"
-        name: "duration"
-        required: true
-        type: "string"
-      - in: "query"
-        name: "project_id"
-        required: false
-        type: "string"
+        - in: "header"
+          name: "token"
+          description: "get userToken from Header"
+          required: true
+          type: "string"
+        - in: "query"
+          name: "duration"
+          required: true
+          type: "string"
+        - in: "query"
+          name: "project_id"
+          required: false
+          type: "string"
       responses:
         200:
           description: "succsssful"
@@ -738,25 +739,25 @@ paths:
   /issue/statistical-results:
     get:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "get Statistical Results "
       operationId: "getStatisticalResults"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "header"
-        name: "token"
-        description: "get userToken from Header"
-        required: true
-        type: "string"
-      - in: "query"
-        name: "month"
-        required: true
-        type: "string"
-      - in: "query"
-        name: "project_id"
-        required: false
-        type: "string"
+        - in: "header"
+          name: "token"
+          description: "get userToken from Header"
+          required: true
+          type: "string"
+        - in: "query"
+          name: "month"
+          required: true
+          type: "string"
+        - in: "query"
+          name: "project_id"
+          required: false
+          type: "string"
       responses:
         200:
           description: "succsssful"
@@ -778,18 +779,18 @@ paths:
   /inner/issue:
     post:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "add Issues"
       operationId: "addIssues"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "issueList"
-        description: ""
-        required: true
-        schema:
-          $ref: "#/definitions/IssueList"
+        - in: "body"
+          name: "issueList"
+          description: ""
+          required: true
+          schema:
+            $ref: "#/definitions/IssueList"
       responses:
         200:
           description: "successful operation"
@@ -802,18 +803,18 @@ paths:
 
     put:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "update Issues"
       operationId: "updateIssues"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "issueList"
-        description: ""
-        required: true
-        schema:
-          $ref: "#/definitions/IssueList"
+        - in: "body"
+          name: "issueList"
+          description: ""
+          required: true
+          schema:
+            $ref: "#/definitions/IssueList"
       responses:
         200:
           description: "successful operation"
@@ -828,22 +829,22 @@ paths:
   /inner/issue/{category}/{repoId}:
     delete:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "delete Issues by repoId"
       operationId: "deleteIssues"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "path"
-        name: "category"
-        description: ""
-        required: true
-        type: "string"
-      - in: "path"
-        name: "repoId"
-        description: ""
-        required: true
-        type: "string"
+        - in: "path"
+          name: "category"
+          description: ""
+          required: true
+          type: "string"
+        - in: "path"
+          name: "repoId"
+          description: ""
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -857,18 +858,18 @@ paths:
   /inner/issue/mapping:
     post:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "mapping"
       operationId: "mapping"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "requestParam"
-        description: ""
-        required: true
-        schema:
-          $ref: "#/definitions/IssueJSONObject"
+        - in: "body"
+          name: "requestParam"
+          description: ""
+          required: true
+          schema:
+            $ref: "#/definitions/IssueJSONObject"
       responses:
         200:
           description: "successful operation"
@@ -882,17 +883,17 @@ paths:
   /raw-issue:
     get:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "get RawIssueList by issue_id"
       operationId: "getRawIssueList"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "query"
-        name: "issue_id"
-        description: " "
-        required: true
-        type: "string"
+        - in: "query"
+          name: "issue_id"
+          description: " "
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -904,27 +905,27 @@ paths:
   /raw-issue/code:
     get:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "get LocationList by raw_issue_id"
       operationId: "getLocationList"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "query"
-        name: "project_id"
-        description: " "
-        required: true
-        type: "string"
-      - in: "query"
-        name: "commit_id"
-        description: " "
-        required: true
-        type: "string"
-      - in: "query"
-        name: "file_path"
-        description: " "
-        required: true
-        type: "string"
+        - in: "query"
+          name: "project_id"
+          description: " "
+          required: true
+          type: "string"
+        - in: "query"
+          name: "commit_id"
+          description: " "
+          required: true
+          type: "string"
+        - in: "query"
+          name: "file_path"
+          description: " "
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -939,18 +940,18 @@ paths:
   /inner/raw-issue:
     post:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "add RawIssues"
       operationId: "addRawIssues"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "list"
-        description: " "
-        required: true
-        schema:
-          $ref: "#/definitions/RawIssueList"
+        - in: "body"
+          name: "list"
+          description: " "
+          required: true
+          schema:
+            $ref: "#/definitions/RawIssueList"
       responses:
         200:
           description: "successful operation"
@@ -963,18 +964,18 @@ paths:
 
     put:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "update RawIssues"
       operationId: "updateRawIssues"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "list"
-        description: " "
-        required: true
-        schema:
-          $ref: "#/definitions/RawIssueList"
+        - in: "body"
+          name: "list"
+          description: " "
+          required: true
+          schema:
+            $ref: "#/definitions/RawIssueList"
       responses:
         200:
           description: "successful operation"
@@ -988,22 +989,22 @@ paths:
   /inner/raw-issue/{category}/{repoId}:
     delete:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "delete RawIssues"
       operationId: "deleteRawIssue"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "path"
-        name: "category"
-        description: " "
-        required: true
-        type: "string"
-      - in: "path"
-        name: "repoId"
-        description: " "
-        required: true
-        type: "string"
+        - in: "path"
+          name: "category"
+          description: " "
+          required: true
+          type: "string"
+        - in: "path"
+          name: "repoId"
+          description: " "
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -1017,22 +1018,22 @@ paths:
   /inner/raw-issue/list-by-commit:
     get:
       tags:
-      - "issue-service"
+        - "issue-service"
       summary: "get RawIssues by commit_id"
       operationId: "getRawIssues"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "query"
-        name: "commit_id"
-        description: " "
-        required: true
-        type: "string"
-      - in: "query"
-        name: "category"
-        description: " "
-        required: true
-        type: "string"
+        - in: "query"
+          name: "commit_id"
+          description: " "
+          required: true
+          type: "string"
+        - in: "query"
+          name: "category"
+          description: " "
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -1044,11 +1045,11 @@ paths:
   /tags/default:
     get:
       tags:
-      - "tag-service"
+        - "tag-service"
       summary: "get all default tags"
       operationId: "getAllDefaultTags"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "successful operation"
@@ -1060,22 +1061,22 @@ paths:
   /tags/{tag-id}:
     delete:
       tags:
-      - "tag-service"
+        - "tag-service"
       summary: "delete Tag"
       operationId: "deleteTag"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "path"
-        name: "tag-id"
-        description: " "
-        required: true
-        type: "string"
-      - in: "query"
-        name: "item-id"
-        description: " "
-        required: true
-        type: "string"
+        - in: "path"
+          name: "tag-id"
+          description: " "
+          required: true
+          type: "string"
+        - in: "query"
+          name: "item-id"
+          description: " "
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -1089,27 +1090,27 @@ paths:
   /tags:
     post:
       tags:
-      - "tag-service"
+        - "tag-service"
       summary: "add Tag"
       operationId: "addTag"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "requestBody"
-        description: " "
-        required: true
-        schema:
-          type: "object"
-          properties:
-            name:
-              type: "string"
-            scope:
-              type: "string"
-            itemId:
-              type: "string"
-            isDefault:
-              type: "boolean"
+        - in: "body"
+          name: "requestBody"
+          description: " "
+          required: true
+          schema:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+              scope:
+                type: "string"
+              itemId:
+                type: "string"
+              isDefault:
+                type: "boolean"
       responses:
         200:
           description: "successful operation"
@@ -1122,29 +1123,29 @@ paths:
 
     put:
       tags:
-      - "tag-service"
+        - "tag-service"
       summary: "modify Tag"
       operationId: "modifyTag"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "requestBody"
-        description: " "
-        required: true
-        schema:
-          type: "object"
-          properties:
-            name:
-              type: "string"
-            scope:
-              type: "string"
-            itemId:
-              type: "string"
-            oldName:
-              type: "string"
-            isDefault:
-              type: "boolean"
+        - in: "body"
+          name: "requestBody"
+          description: " "
+          required: true
+          schema:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+              scope:
+                type: "string"
+              itemId:
+                type: "string"
+              oldName:
+                type: "string"
+              isDefault:
+                type: "boolean"
       responses:
         200:
           description: "successful operation"
@@ -1158,25 +1159,25 @@ paths:
   /inner/tags:
     post:
       tags:
-      - "tag-service"
+        - "tag-service"
       summary: "add multiTagged item"
       operationId: "addMultiTaggedItem"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "requestBody"
-        description: " "
-        required: true
-        schema:
-          type: "array"
-          items:
-            type: "object"
-            properties:
-              item_id:
-                type: "string"
-              tag_id:
-                type: "string"
+        - in: "body"
+          name: "requestBody"
+          description: " "
+          required: true
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                item_id:
+                  type: "string"
+                tag_id:
+                  type: "string"
       responses:
         200:
           description: "successful operation"
@@ -1189,17 +1190,17 @@ paths:
 
     get:
       tags:
-      - "tag-service"
+        - "tag-service"
       summary: "get tags by item id"
       operationId: "getTags"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "query"
-        name: "item-id"
-        description: " "
-        required: true
-        type: "string"
+        - in: "query"
+          name: "item-id"
+          description: " "
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -1210,17 +1211,17 @@ paths:
 
     delete:
       tags:
-      - "tag-service"
+        - "tag-service"
       summary: "delete tag by projectId"
       operationId: "deleteTagByProjectId"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "query"
-        name: "project-id"
-        description: " "
-        required: true
-        type: "string"
+        - in: "query"
+          name: "project-id"
+          description: " "
+          required: true
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -1234,20 +1235,20 @@ paths:
   /inner/tags/item-ids:
     post:
       tags:
-      - "tag-service"
+        - "tag-service"
       summary: "get item ids"
       operationId: "getItemIds"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "tagIds"
-        description: " "
-        required: true
-        schema:
-          type: "array"
-          items:
-            type: "string"
+        - in: "body"
+          name: "tagIds"
+          description: " "
+          required: true
+          schema:
+            type: "array"
+            items:
+              type: "string"
       responses:
         200:
           description: "successful operation"
@@ -1261,20 +1262,20 @@ paths:
   /inner/tags/tagged-delete:
     post:
       tags:
-      - "tag-service"
+        - "tag-service"
       summary: "delete Tagged"
       operationId: "deleteTagged"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "itemIds"
-        description: " "
-        required: true
-        schema:
-          type: "array"
-          items:
-            type: "string"
+        - in: "body"
+          name: "itemIds"
+          description: " "
+          required: true
+          schema:
+            type: "array"
+            items:
+              type: "string"
       responses:
         200:
           description: "successful operation"
@@ -1288,18 +1289,18 @@ paths:
   /event:
     post:
       tags:
-      - event-service
+        - event-service
       summary: "add some events"
       operationId: "addEvents"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "events"
-        description: "events to add"
-        required: true
-        schema:
-          $ref: "#/definitions/EventList"
+        - in: "body"
+          name: "events"
+          description: "events to add"
+          required: true
+          schema:
+            $ref: "#/definitions/EventList"
       responses:
         200:
           description: "successful operation"
@@ -1314,21 +1315,21 @@ paths:
   /event/current-events:
     get:
       tags:
-      - event-service
+        - event-service
       summary: "query current events list By userToken"
       operationId: "current-events"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "header"
-        name: "token"
-        description: "get userToken from Header"
-        required: true
-        type: "string"
-      - in: "query"
-        name: "category"
-        required: true
-        type: "string"
+        - in: "header"
+          name: "token"
+          description: "get userToken from Header"
+          required: true
+          type: "string"
+        - in: "query"
+          name: "category"
+          required: true
+          type: "string"
       responses:
         200:
           description : "succsssful"
@@ -1341,17 +1342,17 @@ paths:
   /commit:
     get:
       tags:
-      - commit-service
+        - commit-service
       summary: get the commitList by projectId
       operationId: getCommitList
       produces:
-      - application/json
+        - application/json
       parameters:
-      - in: query
-        name: projectId
-        description: ' '
-        required: true
-        type: string
+        - in: query
+          name: projectId
+          description: ' '
+          required: true
+          type: string
       responses:
         '200':
           description: successful operation
@@ -1369,22 +1370,22 @@ paths:
   '/commit/checkout/{projectId}/{commitId}':
     get:
       tags:
-      - commit-service
+        - commit-service
       summary: checkout the project into the certain version by projectId and commitId
       operationId: checkout
       produces:
-      - application/json
+        - application/json
       parameters:
-      - in: path
-        name: projectId
-        description: ' '
-        required: true
-        type: string
-      - in: path
-        name: commitId
-        description: ' '
-        required: true
-        type: string
+        - in: path
+          name: projectId
+          description: ' '
+          required: true
+          type: string
+        - in: path
+          name: commitId
+          description: ' '
+          required: true
+          type: string
       responses:
         '200':
           description: successful operation
@@ -1402,17 +1403,17 @@ paths:
   /commit/commit-time:
     get:
       tags:
-      - commit-service
+        - commit-service
       summary: get the time of commit by commitId
       operationId: getCommitTime
       produces:
-      - application/json
+        - application/json
       parameters:
-      - in: query
-        name: commitId
-        description: ' '
-        required: true
-        type: string
+        - in: query
+          name: commitId
+          description: ' '
+          required: true
+          type: string
       responses:
         '200':
           description: successful operation
@@ -1427,8 +1428,58 @@ paths:
           schema:
             $ref: '#/definitions/VoidResponse-Python'
 
-
-
+  /clonemeasure/repository:
+    get:
+      tags:
+        - clone-service
+      summary: get the clone measure data of a repo by repoId and commitId
+      operationId: getMeasureCloneData
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: projectId
+          description: ' '
+          required: true
+          type: string
+        - in: path
+          name: commitId
+          description: ' '
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: "#/definitions/ResponseBean"
+        '401':
+          description: failed
+          schema:
+            $ref: "#/definitions/ResponseBean"
+  /clonemeasure/repositoryratio:
+    get:
+      tags:
+        - clone-service
+      summary: get the clone measure ratio data of a repo by repoId and commitId
+      operationId: getMeasureCloneRatio
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: projectId
+          description: ' '
+          required: true
+          type: string
+        - in: path
+          name: commitId
+          description: ' '
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+        '401':
+          description: failed
 securityDefinitions:
   token:
     type: "apiKey"
