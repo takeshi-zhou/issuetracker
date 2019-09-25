@@ -1,6 +1,6 @@
 package cn.edu.fudan.measureservice.domain;
 
-public class CommitInfo {
+public class CommitInfo{
 
     private String author;
     private int commit;

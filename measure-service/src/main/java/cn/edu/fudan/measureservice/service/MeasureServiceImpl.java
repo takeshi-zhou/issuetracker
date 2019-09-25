@@ -33,6 +33,13 @@ public class MeasureServiceImpl implements MeasureService {
 
     @Value("${repoHome}")
     private String repoHome;
+    @Value("${inactive}")
+    private int inactive;
+    @Value("${lessActive}")
+    private int lessActive;
+    @Value("${relativelyActive}")
+    private int relativelyActive;
+
 
     private MeasureAnalyzer measureAnalyzer;
     private ResultHandler resultHandler;
@@ -252,6 +259,12 @@ public class MeasureServiceImpl implements MeasureService {
         return result;
     }
 
+    @Override
+    public RepoMeasure getRepoMeasureByRepoIdAndCommitId(String repoId, String commitId) {
+        RepoMeasure repoMeasure = repoMeasureMapper.getRepoMeasureByCommit(repoId,commitId);
+        return repoMeasure;
+    }
+
 
     @Override
     public List<Package> getPackageMeasureUnderSpecificCommit(String repoId, String commit) {
@@ -374,104 +387,153 @@ public class MeasureServiceImpl implements MeasureService {
         return repoRank;
     }
 
+
+
     @Override
-    public RepoAllInformations getOneRepoAllInformations(String repo_id,String since,String until){
-        String spaceType = "project";
-        //获取最新的repo度量信息
-        RepoMeasure measure=repoMeasureMapper.getLatestMeasureData(repo_id);
-        RepoAllInformations repoAllInformations = new RepoAllInformations(measure);
-        //获取repo的Name以及repo的地址以及分支
-        JSONArray projects = restInterfaceManager.getProjectsOfRepo(repo_id);
-        if (projects != null && !projects.isEmpty()) {
-            for (int i = 0; i < projects.size(); i++) {
-                JSONObject project=projects.getJSONObject(i);
-                String repo_url = project.getString("url");
-                String branch=project.getString("branch");
-                String repoName = repo_url.substring(repo_url.lastIndexOf("/")+1);
-                repoAllInformations.setRepoUrl(repo_url);
-                repoAllInformations.setBranch(branch);
-                repoAllInformations.setRepoName(repoName);
-            }
-        }
-        //获取repo一段时间内的commit次数
-        String repoPath=restInterfaceManager.getRepoPath(repo_id,"");
-        int commitCounts = gitUtil.getCommitCount(repoPath,since,until);
-        repoAllInformations.setCommitTimes(commitCounts);
-
-        //获取repo一段时间内行数变化值
-        int[] lineChanges = gitUtil.getRepoLineChanges(repoPath,since,until);
-        repoAllInformations.setCommitAdds(lineChanges[0]);
-        repoAllInformations.setCommitDels(lineChanges[1]);
-
-
-        //获取项目的Bug类型及其数量
-        Map<String,Integer> issueCount = new LinkedHashMap<>();
-        Map<String,Integer> issueCountSorted = new LinkedHashMap<>();
-        JSONObject issueCountJson =  restInterfaceManager.getIssueCountByCategoryAndRepoId(repo_id,Category.BUG.getMsg());
-
-        for (Map.Entry entry : issueCountJson.entrySet()) {
-
-            issueCount.put((String)entry.getKey(),(Integer)entry.getValue());
-        }
-
-        List<Map.Entry<String,Integer>> list = new ArrayList<Map.Entry<String,Integer>>(issueCount.entrySet());
-        Collections.sort(list,(o1, o2) -> o1.getValue().compareTo(o2.getValue()));
-        for(Map.Entry<String,Integer> entry : list){
-            issueCountSorted.put(entry.getKey(),entry.getValue());
-        }
-        repoAllInformations.setIssuesCounts(issueCountSorted);
-
-        //获取项目issue新增，消除，剩余情况
-        JSONObject newIssueCountJson = restInterfaceManager.getNumberOfNewIssue(repo_id,since,until,spaceType);
-        int newIssueCount = Integer.parseInt(newIssueCountJson.toString());
-
-        JSONObject eliminateIssueCountJson = restInterfaceManager.getNumberOfEliminateIssue(repo_id,since,until,spaceType);
-        int eliminateIssueCount = Integer.parseInt(eliminateIssueCountJson.toString());
-
-        String commitId = getLatestCommitId(repo_id,until);
-        JSONObject remainingIssueCountJson = restInterfaceManager.getNumberOfRemainingIssue(repo_id,commitId,spaceType,null);
-        int remainingIssueCount = Integer.parseInt(remainingIssueCountJson.toString());
-        repoAllInformations.setIssueRemainedCount(remainingIssueCount);
-        repoAllInformations.setIssueIncrements(newIssueCount);
-        repoAllInformations.setIssueEliminatedCount(eliminateIssueCount);
-
-
-        return repoAllInformations;
-    }
-
-
-    private String getLatestCommitId(String repo_id,String until){
-        String endDate = null;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    public CommitBase getCommitBaseInformation(String repo_id, String commit_id) {
+        String repoPath=null;
+        CommitBase commitBase = null;
         try{
-            Date date = simpleDateFormat.parse(until);
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
-            calendar.add(Calendar.DAY_OF_MONTH,1);
-            endDate = simpleDateFormat.format(calendar.getTime());
-        }catch(Exception e){
-            log.error(e.getMessage());
+            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
+            if(repoPath!=null){
+                commitBase = gitUtil.getOneCommitChanges(repoPath,commit_id);
+            }
+        }finally {
+            if(repoPath!=null)
+                restInterfaceManager.freeRepoPath(repo_id,repoPath);
         }
-        String latest_commit_time =null;
-        JSONArray commitsJson = restInterfaceManager.getCommitsOfRepo(repo_id);
-        String commitId = null;
-        if(commitsJson.size()>0){
-            for(int i=0;i<commitsJson.size();i++){
+        return commitBase;
+    }
 
-                JSONObject commit = commitsJson.getJSONObject(i);
-                String commitTime = commit.getString("commit_time");
-                if(commitTime.compareTo(endDate)<=0){
-                    if (latest_commit_time == null){
-                        latest_commit_time=commitTime;
-                        commitId = commit.getString("commit_id");
-                    }else if(commitTime.compareTo(latest_commit_time)>0){
-                        latest_commit_time = commitTime;
-                        commitId = commit.getString("commit_id");
-                    }
+    @Override
+    public CommitBase getCommitBaseInformationByDuration(String repo_id, String since, String until) {
+        String repoPath=null;
+        CommitBase commitBase = new CommitBase();
+        try{
+            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
+            System.out.println(repoPath);
+            if(repoPath!=null){
+
+                //获取repo一段时间内行数变化值
+                int[] lineChanges = gitUtil.getRepoLineChanges(repoPath,since,until);
+                commitBase.setAddLines(lineChanges[0]);
+                commitBase.setDelLines(lineChanges[1]);
+
+                //获取repo一段时间内开发者列表信息
+                List<Developer> developers = gitUtil.getRepoDevelopers(repoPath,since,until);
+                commitBase.setAuthors(developers);
+            }
+        }finally {
+            if(repoPath!=null)
+                restInterfaceManager.freeRepoPath(repo_id,repoPath);
+        }
+
+        return commitBase;
+    }
+
+    @Override
+    public int getCommitCountsByDuration(String repo_id, String since, String until) {
+        String repoPath=null;
+        int commitCounts = -1;
+        try{
+            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
+            if(repoPath!=null){
+
+            //获取repo一段时间内的commit次数
+            commitCounts = gitUtil.getCommitCount(repoPath,since,until);
+
+            }
+        }finally {
+            if(repoPath!=null)
+                restInterfaceManager.freeRepoPath(repo_id,repoPath);
+        }
+        return commitCounts;
+    }
+
+    @Override
+    public double getQuantityByCommitAndCategory(String repo_id, String commit_id, String category,String token ) {
+        double ratio = -1;
+
+        //获取代码行数
+        RepoMeasure repoMeasure = getRepoMeasureByRepoIdAndCommitId(repo_id,commit_id);
+        if(repoMeasure != null){
+            int lineCounts = repoMeasure.getNcss();
+            //获取缺陷数量
+            int remainIssues = restInterfaceManager.getNumberOfRemainingIssue(repo_id,commit_id,"project",null,token);
+
+            if(remainIssues != 0){
+                ratio = lineCounts/ remainIssues;
+            }
+
+        }
+        return ratio;
+    }
+
+    @Override
+    public Object getQuantityChangesByCommitAndCategory(String repo_id, String commit_id,String category,String token) {
+        String spaceType = "project";
+        category = "bug";
+        Map<String,Object> changes = new HashMap<>();
+        CommitBase commitBase = getCommitBaseInformation(repo_id,commit_id);
+        if(commitBase != null){
+            double changeLines = commitBase.getAddLines() + commitBase.getDelLines();
+
+            int addedIssues = restInterfaceManager.getNumberOfNewIssueByCommit(repo_id,commit_id,category,spaceType,token);
+            if(addedIssues!=-1){
+                if(addedIssues != 0 ){
+                    changes.put("addedQuantity",changeLines/addedIssues);
+                }else{
+                    changes.put("addedQuantity",-1);
                 }
+            }else{
+                log.error("ScanResult 未记录该commit");
+            }
+
+            int eliminatedIssues = restInterfaceManager.getNumberOfEliminateIssueByCommit(repo_id,commit_id,category,spaceType,token);
+
+            if(eliminatedIssues != 0){
+                changes.put("eliminatedQuantity",changeLines/eliminatedIssues);
+            }else{
+                changes.put("eliminatedQuantity",changeLines/eliminatedIssues);
+            }
+        }else {
+            log.error("not get repo path!");
+        }
+
+
+
+        return changes;
+    }
+
+    @Override
+    public String getActivityByRepoId(String repo_id) {
+        String active = null;
+        LocalDate nowDate = LocalDate.now();
+        int nowYear = nowDate.getYear();
+        int nowMonth = nowDate.getMonthValue();
+        int nowDay = nowDate.getDayOfMonth();
+        LocalDate startDate = nowDate.minusDays(90);
+        int startYear = startDate.getYear();
+        int startMonth = startDate.getMonthValue();
+        int startDay = startDate.getDayOfMonth();
+
+        String start = startYear+"."+startMonth+"."+startDay;
+        String now = nowYear+"."+nowMonth+"."+nowDay;
+
+        int commitCount = getCommitCountsByDuration(repo_id,start,now);
+        if(commitCount != -1){
+            if(commitCount <= inactive){
+                active = "inactive";
+            }else if(commitCount <= lessActive){
+                active = "lessActive";
+            }else if(commitCount <= relativelyActive){
+                active = "relativelyActive";
+            }else{
+                active = "active";
             }
         }
-        return commitId;
+        return active;
     }
+
 
 }

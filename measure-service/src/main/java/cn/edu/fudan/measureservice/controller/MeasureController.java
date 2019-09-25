@@ -74,19 +74,107 @@ public class MeasureController {
     }
 
 
-    @GetMapping("/measure/repo-information")
+    @GetMapping("/measure/repository/commit")
     @CrossOrigin
-    public ResponseBean getRepoAllInformations(@RequestParam("repo_id")String repo_id,
-                                                @RequestParam("since")String since,
-                                                @RequestParam("until")String until
-                                               ){
+    public ResponseBean getRepoMeasureByCommit(@RequestParam("repo_id")String repo_id,
+                                               @RequestParam("commit_id")String commit_id){
         try{
-
-            return new ResponseBean(200,"success",measureService.getOneRepoAllInformations(repo_id,since,until));
+            return new ResponseBean(200,"success",measureService.getCommitBaseInformation(repo_id, commit_id));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",null);
         }
 
+    }
+
+    @GetMapping("/measure/repository/duration")
+    @CrossOrigin
+    public ResponseBean getRepoMeasureByCommit(@RequestParam("repo_id")String repo_id,
+                                               @RequestParam("since")String since,
+                                               @RequestParam("until")String until){
+        try{
+            return new ResponseBean(200,"success",measureService.getCommitBaseInformationByDuration(repo_id, since,until));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+
+    }
+
+    @GetMapping("/measure/repository/commit-counts")
+    @CrossOrigin
+    public ResponseBean getRepoCommitCountsByCommit(@RequestParam("repo_id")String repo_id,
+                                               @RequestParam("since")String since,
+                                               @RequestParam("until")String until){
+        try{
+            return new ResponseBean(200,"success",measureService.getCommitCountsByDuration(repo_id, since,until));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+
+    }
+
+
+
+    @GetMapping("/measure/repo-information")
+    @CrossOrigin
+    public ResponseBean getRepoMeasureByAnalysis(@RequestParam("repo_id")String repo_id,
+                                                @RequestParam("commit_id")String commit_id
+                                               ){
+        try{
+            return new ResponseBean(200,"success",measureService.getRepoMeasureByRepoIdAndCommitId(repo_id,commit_id));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+
+    }
+
+    @GetMapping("/measure/repository/quality")
+    @CrossOrigin
+    public ResponseBean getRepoQualityByCommit(@RequestParam("repo_id")String repo_id,
+                                                 @RequestParam("commit_id")String commit_id,
+                                                      @RequestParam("category")String category,
+                                               HttpServletRequest request
+                                                      ){
+        try{
+            String token = request.getHeader("token");
+            return new ResponseBean(200,"success",measureService.getQuantityByCommitAndCategory(repo_id,commit_id,category,token));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+
+    }
+
+
+    @GetMapping("/measure/repository/quality-change")
+    @CrossOrigin
+    public ResponseBean getRepoQualityChangesByCommit(@RequestParam("repo_id")String repo_id,
+                                                      @RequestParam("commit_id")String commit_id,
+                                                      @RequestParam("category")String category,
+                                                      HttpServletRequest request
+    ){
+        try{
+            String token = request.getHeader("token");
+            return new ResponseBean(200,"success",measureService.getQuantityChangesByCommitAndCategory(repo_id,commit_id,category,token));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+
+    }
+
+    @GetMapping("/measure/repository/active")
+    @CrossOrigin
+    public ResponseBean getRepoActivityByCommit(@RequestParam("repo_id")String repo_id
+    ){
+        try{
+            return new ResponseBean(200,"success",measureService.getActivityByRepoId(repo_id));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
     }
 }

@@ -1,6 +1,7 @@
 package cn.edu.fudan.measureservice;
 
 
+import cn.edu.fudan.measureservice.domain.Developer;
 import com.alibaba.fastjson.JSONObject;
 import org.powermock.core.ListMap;
 
@@ -11,6 +12,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Test {
 
@@ -20,26 +23,38 @@ public class Test {
 //        System.out.println((double)a/b);
 //
 
-
-        String t1="2013-10-31 ";
-        String t2="2013-10-31 04:57:23";
-        int result = t1.compareTo(t2);
-
-        System.out.println(result);
-
-
-        String until = "2018-02-22";
-        String endDate = null;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        try{
-            Date date = simpleDateFormat.parse(until);
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
-            calendar.add(Calendar.DAY_OF_MONTH,1);
-            endDate = simpleDateFormat.format(calendar.getTime());
-        }catch(Exception e){
-
+        Developer developer =new Developer();
+        String out = "Author: linwangzai <957859199@qq.com>";
+        out = out.trim();
+        String name="";
+        String email="";
+        String[] aaab = out.split("[\\s]+");
+        for(int i= 1;i< aaab.length;i++){
+            if(aaab[i].startsWith("<") && aaab[i].endsWith(">")){
+                String judge;
+                judge = aaab[i].substring(1,aaab[i].length()-1);
+                Pattern pattern = Pattern.compile("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
+                Matcher matcher = pattern.matcher(judge);
+                if (!matcher.matches()) {
+                    throw new RuntimeException("invalid url!");
+                }
+                email = judge;
+            }else{
+                if("".equals(name)){
+                    name = aaab[i];
+                }else{
+                    name = name + " " +aaab[i];
+                }
+            }
         }
-        System.out.println(endDate);
+
+
+
+
+
+        String[] sssss = new String[3];
+        sssss = out.split("[\\s]+");
+        developer.setEmail(sssss[2].substring(1,sssss[2].length()-1));
+        System.out.println(sssss.toString());
     }
 }

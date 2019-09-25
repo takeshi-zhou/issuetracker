@@ -3,10 +3,21 @@ package cn.edu.fudan.measureservice.component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.header.Headers;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.RequestCallback;
+import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
+import javax.xml.ws.Response;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,22 +103,35 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
     }
 
-    public JSONObject getIssueCountByCategoryAndRepoId(String repoId,String category){
-        return restTemplate.getForObject(issueServicePath  + "/inner/issue/counts" + "?repo-id=" + repoId + "&category=" + category, JSONObject.class);
+
+    public int getNumberOfNewIssueByCommit(String repoId,String commit,String category,String spaceType,String token){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("token",token);
+        HttpEntity request = new HttpEntity(headers);
+
+        ResponseEntity responseEntity = restTemplate.exchange(issueServicePath  + "/measurement/newIssue/"+ repoId + "/" + commit + "?spaceType=" + spaceType + "&category=" + category ,HttpMethod.GET,request,Object.class);
+        int result = Integer.valueOf(responseEntity.getBody().toString());
+        return result;
     }
 
-    public JSONObject getNumberOfNewIssue(String repoId,String since,String until,String spaceType){
-        String duration = since + "-" + until;
-        return restTemplate.getForObject(issueServicePath  + "/measurement/newIssue" + "?duration=" + duration + "&spaceType=" + spaceType +"&detail=" + repoId, JSONObject.class);
+    public int getNumberOfEliminateIssueByCommit(String repoId,String commit,String category,String spaceType,String token){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("token",token);
+        HttpEntity request = new HttpEntity(headers);
+
+        ResponseEntity responseEntity = restTemplate.exchange(issueServicePath  + "/measurement/eliminateIssue/"+ repoId + "/" + commit + "?spaceType=" + spaceType + "&category=" + category ,HttpMethod.GET,request,Object.class);
+        int result = Integer.valueOf(responseEntity.getBody().toString());
+        return result;
     }
 
-    public JSONObject getNumberOfEliminateIssue(String repoId,String since,String until,String spaceType){
-        String duration = since + "-" + until;
-        return restTemplate.getForObject(issueServicePath  + "/measurement/eliminateIssue" + "?duration=" + duration + "&spaceType=" + spaceType +"&detail=" + repoId, JSONObject.class);
-    }
+    public int getNumberOfRemainingIssue(String repoId,String commit,String spaceType ,String detail,String token){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("token",token);
+        HttpEntity request = new HttpEntity(headers);
 
-    public JSONObject getNumberOfRemainingIssue(String repoId,String commit,String spaceType ,String detail){
-        return restTemplate.getForObject(issueServicePath  + "/measurement/remainingIssue/"+ repoId + "/" + commit + "?spaceType=" + spaceType , JSONObject.class);
+        ResponseEntity responseEntity = restTemplate.exchange(issueServicePath  + "/measurement/remainingIssue/"+ repoId + "/" + commit + "?spaceType=" + spaceType ,HttpMethod.GET,request,Object.class);
+        int result = Integer.valueOf(responseEntity.getBody().toString());
+        return result;
     }
 
 }
