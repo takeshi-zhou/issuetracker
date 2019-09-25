@@ -163,4 +163,11 @@
         from project
         where repo_id = #{repo_id} and type = #{type} and first_auto_scan = 0
     </select>
+
+    <select id="getProjectByRepoIdAndCategory" parameterType="String" resultMap="project">
+        select *
+        from project
+        where repo_id = #{repo_id} and type = #{category} and account_id = #{account_id}
+    </select>
+
 </mapper>

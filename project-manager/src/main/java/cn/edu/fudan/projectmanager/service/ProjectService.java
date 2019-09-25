@@ -32,4 +32,6 @@ public interface ProjectService {
     Object existProjectWithThisRepoIdAndType(String repoId,String type,boolean isFirst);
 
     void updateProjectFirstAutoScan(String repoId,String type);
+
+    Project getProjectByRepoIdAndCategory(String userToken,String repoId,String category);
 }

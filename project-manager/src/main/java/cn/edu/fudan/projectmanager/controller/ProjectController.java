@@ -62,6 +62,14 @@ public class ProjectController {
         }
     }
 
+    @GetMapping(value = {"/project/name"})
+    public Object getProjectName(HttpServletRequest request,
+                               @RequestParam("repoId") String repoId,
+                               @RequestParam(name = "category",required = false,defaultValue = "bug")String category) {
+        String userToken = request.getHeader("token");
+        return projectService.getProjectByRepoIdAndCategory(userToken, repoId,category).getName();
+    }
+
     //下面是其它服务调用的内部接口
 
     @PutMapping(value = {"/inner/project"})
