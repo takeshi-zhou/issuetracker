@@ -22,13 +22,23 @@ public interface IssueMeasureInfoService {
     //空间粒度  开发者，项目
     int numberOfNewIssue(String duration, String spaceType, String detail);
 
+    //时间粒度  快照（commit）
+    int numberOfNewIssueByCommit(String repoId,String commitId,String spaceType,String category);
+
     //时间粒度  日，周，月
     //空间粒度  开发者，项目
     int numberOfEliminateIssue(String duration, String spaceType, String detail);
+
+    //时间粒度  快照（commit）
+    int numberOfEliminateIssueByCommit(String repoId,String commitId,String spaceType,String category);
 
     List<IssueCountPo> getIssueCountEachCommit(String repoId,String category,String since,String until);
 
     IssueCountMeasure getIssueCountMeasureByRepo(String repoId,String category,String since,String until);
 
     List<IssueCountDeveloper> getIssueCountMeasureByDeveloper(String repoId,String category,String since,String until);
+
+    Object getNotSolvedIssueCountByCategoryAndRepoId(String repoId, String category,String commitId);
+
+
 }

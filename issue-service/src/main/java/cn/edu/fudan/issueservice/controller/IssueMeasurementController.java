@@ -46,11 +46,24 @@ public class IssueMeasurementController {
         return issueMeasureInfoService.numberOfRemainingIssue(repoId, commit, spaceType, detail);
     }
 
+    @GetMapping(value = {"/measurement/newIssue/{repoId}/{commit}"})
+    public Object getNumberOfNewIssueByCommit(@PathVariable("repoId") String repoId,@PathVariable("commit") String commit,
+                                            @RequestParam("spaceType") String spaceType,@RequestParam("category") String category) {
+        return issueMeasureInfoService.numberOfNewIssueByCommit(repoId, commit, spaceType,category);
+    }
+
+
     @GetMapping(value = {"/measurement/newIssue"})
     public Object getNumberOfNewIssue(@RequestParam("duration") String duration,
                                       @RequestParam("spaceType") String spaceType,@RequestParam("detail") String detail) {
 
         return issueMeasureInfoService.numberOfNewIssue(duration, spaceType, detail);
+    }
+
+    @GetMapping(value = {"/measurement/eliminateIssue/{repoId}/{commit}"})
+    public Object getNumberOfEliminateIssueByCommit(@PathVariable("repoId") String repoId,@PathVariable("commit") String commit,
+                                              @RequestParam("spaceType") String spaceType,@RequestParam("category") String category) {
+        return issueMeasureInfoService.numberOfEliminateIssueByCommit(repoId, commit, spaceType,category);
     }
 
     @GetMapping(value = {"/measurement/eliminateIssue"})
@@ -137,6 +150,11 @@ public class IssueMeasurementController {
         return issueRankService.rankOfRepoBaseDensity(userToken);
     }
 
+
+    @GetMapping(value = "/measurement/issueTypeCounts")
+    public Object getIssueTypeCountsByCategoryAndRepoId(@RequestParam("repoId") String repoId,@RequestParam("category") String category,@RequestParam(value="commitId",required = false) String commitId) {
+        return issueMeasureInfoService.getNotSolvedIssueCountByCategoryAndRepoId(repoId, category,commitId);
+    }
 
 
 }

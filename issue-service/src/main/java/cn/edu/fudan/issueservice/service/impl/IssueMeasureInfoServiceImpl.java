@@ -10,16 +10,13 @@ import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.dao.LocationDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.dao.ScanResultDao;
-import cn.edu.fudan.issueservice.domain.IssueCountDeveloper;
-import cn.edu.fudan.issueservice.domain.IssueCountMeasure;
-import cn.edu.fudan.issueservice.domain.IssueCountPo;
-import cn.edu.fudan.issueservice.domain.SpaceType;
+import cn.edu.fudan.issueservice.domain.*;
 import cn.edu.fudan.issueservice.service.IssueMeasureInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -64,6 +61,9 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
         return -1;
     }
 
+
+
+
     @Override
     public int numberOfNewIssue(String duration, String spaceType, String detail) {
         // duration: 2018.01.01-2018.12.12
@@ -87,6 +87,15 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
     }
 
     @Override
+    public int numberOfNewIssueByCommit(String repoId, String commitId, String spaceType,String category) {
+        // 项目某commit下的现有问题数
+        if (SpaceType.PROJECT.getLevel().equals(spaceType)) {
+            return scanResultDao.getNumberOfNewIssueByCommit(repoId, commitId,category);
+        }
+        return -1;
+    }
+
+    @Override
     public int numberOfEliminateIssue(String duration, String spaceType, String detail) {
         // duration: 2018.01.01-2018.12.12
         if (duration.length() < 21)
@@ -106,6 +115,15 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
     }
 
     @Override
+    public int numberOfEliminateIssueByCommit(String repoId, String commitId, String spaceType,String category) {
+        // 项目某commit下的现有问题数
+        if (SpaceType.PROJECT.getLevel().equals(spaceType)) {
+            return scanResultDao.getNumberOfEliminateIssueByCommit(repoId, commitId,category);
+        }
+        return -1;
+    }
+
+    @Override
     public List<IssueCountPo> getIssueCountEachCommit(String repoId,String category, String since, String until) {
         return scanResultDao.getScanResultsEachCommit(repoId,category,since,until);
     }
@@ -121,5 +139,38 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
     @Override
     public List<IssueCountDeveloper> getIssueCountMeasureByDeveloper(String repoId, String category, String since, String until) {
         return scanResultDao.getScanResultsEachDeveloper(repoId, category, since, until);
+    }
+
+    @Override
+    public Object getNotSolvedIssueCountByCategoryAndRepoId(String repoId, String category,String commitId) {
+        Map<String,Integer> issueCount = new HashMap<>();
+        Map<String,Integer> result = new LinkedHashMap<>();
+
+        if(commitId == null){
+            List<Issue> issues = issueDao.getNotSolvedIssueAllListByCategoryAndRepoId(repoId,category);
+
+            for (Issue issue:
+                    issues) {
+                String issueType = issue.getType();
+                int count = issueCount.get(issueType) != null ? issueCount.get(issueType) : 0;
+                issueCount.put(issueType,++count);
+            }
+        }else{
+            List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repoId,category,commitId);
+            for (RawIssue rawIssue:
+                    rawIssues) {
+                String rawIssueType = rawIssue.getType();
+                int count = issueCount.get(rawIssueType) != null ? issueCount.get(rawIssueType) : 0;
+                issueCount.put(rawIssueType,++count);
+            }
+        }
+
+        List<Map.Entry<String,Integer>> list = new ArrayList<Map.Entry<String,Integer>>(issueCount.entrySet());
+        Collections.sort(list,(o1, o2) -> o1.getValue().compareTo(o2.getValue()));
+        for(Map.Entry<String,Integer> entry : list){
+            result.put(entry.getKey(),entry.getValue());
+        }
+
+        return result;
     }
 }

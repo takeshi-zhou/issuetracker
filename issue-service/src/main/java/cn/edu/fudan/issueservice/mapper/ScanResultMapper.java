@@ -22,4 +22,8 @@ public interface ScanResultMapper {
     List<IssueCountDeveloper> getScanResultsEachDeveloper(@Param("repo_id")String repo_id, @Param("category") String category, @Param("start") String start, @Param("end") String end);
 
     IssueCountPo getMergedScanResult(@Param("list") List<String> repoIds, @Param("category") String category, @Param("start") String start, @Param("end") String end);
+
+    int getNewIssueCountByCommit(@Param("repo_id") String repo_id,@Param("commit_id") String commit_id,@Param("category") String category);
+
+    int getEliminateIssueCountByCommit(@Param("repo_id") String repo_id,@Param("commit_id") String commit_id,@Param("category") String category);
 }

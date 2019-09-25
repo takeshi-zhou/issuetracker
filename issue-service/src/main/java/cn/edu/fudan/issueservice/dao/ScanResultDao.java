@@ -72,4 +72,24 @@ public class ScanResultDao {
             return null;
         }
     }
+
+
+    public int getNumberOfNewIssueByCommit(String repo_id, String commit_id,String category){
+        try{
+            return scanResultMapper.getNewIssueCountByCommit(repo_id, commit_id,category);
+        }catch (Exception e){
+            e.printStackTrace();
+            log.error(e.getMessage());
+            return -1;
+        }
+    }
+
+    public int getNumberOfEliminateIssueByCommit(String repo_id, String commit_id,String category){
+        try{
+            return scanResultMapper.getEliminateIssueCountByCommit(repo_id, commit_id,category);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            return -1;
+        }
+    }
 }

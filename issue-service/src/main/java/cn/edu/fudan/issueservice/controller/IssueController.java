@@ -105,6 +105,7 @@ public class IssueController {
     }
 
 
+
     /**
      * 下面都是供其他服务调用的内部接口
      * */
@@ -196,8 +197,5 @@ public class IssueController {
         return issueService.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
     }
 
-    @GetMapping(value = "/inner/issue/counts")
-    public Object getIssueTypeCountsByCategoryAndRepoId(@RequestParam("repo-id") String repoId,@RequestParam("category") String category) {
-        return issueService.getNotSolvedIssueCountByCategoryAndRepoId(repoId, category);
-    }
+
 }
