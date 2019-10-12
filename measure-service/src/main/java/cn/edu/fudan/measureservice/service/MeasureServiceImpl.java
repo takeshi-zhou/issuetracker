@@ -379,7 +379,7 @@ public class MeasureServiceImpl implements MeasureService {
         String repoPath=null;
         try{
             repoPath=restInterfaceManager.getRepoPath(repoId,"");
-            repoRank.setCommitCount(gitUtil.getCommitCount(repoPath,since,until));
+            repoRank.setCommitCount(gitUtil.getCommitCount(repoPath,since,until,null));
         }finally {
             if(repoPath!=null)
                 restInterfaceManager.freeRepoPath(repoId,repoPath);
@@ -411,11 +411,10 @@ public class MeasureServiceImpl implements MeasureService {
         CommitBase commitBase = new CommitBase();
         try{
             repoPath=restInterfaceManager.getRepoPath(repo_id,"");
-            System.out.println(repoPath);
             if(repoPath!=null){
 
                 //获取repo一段时间内行数变化值
-                int[] lineChanges = gitUtil.getRepoLineChanges(repoPath,since,until);
+                int[] lineChanges = gitUtil.getRepoLineChanges(repoPath,since,until,null);
                 commitBase.setAddLines(lineChanges[0]);
                 commitBase.setDelLines(lineChanges[1]);
 
@@ -440,7 +439,7 @@ public class MeasureServiceImpl implements MeasureService {
             if(repoPath!=null){
 
             //获取repo一段时间内的commit次数
-            commitCounts = gitUtil.getCommitCount(repoPath,since,until);
+            commitCounts = gitUtil.getCommitCount(repoPath,since,until,null);
 
             }
         }finally {
@@ -533,6 +532,93 @@ public class MeasureServiceImpl implements MeasureService {
             }
         }
         return active;
+    }
+
+    @Override
+    public CommitBase getCodeChangesByDurationAndDeveloperName(String developer_name, String since, String until, String token, String category) {
+        String repoPath=null;
+        int[] lineChanges ;
+        CommitBase commitBase = new CommitBase();
+        int lineAdds = 0;
+        int lineDels = 0;
+        List<JSONObject> projectList = restInterfaceManager.getProjectListByCategory(token,category);
+        for(Object project:projectList){
+            JSONObject protectJson = (JSONObject)project;
+            String repo_id = protectJson.get("repo_id").toString();
+            try{
+                repoPath=restInterfaceManager.getRepoPath(repo_id,"");
+                if(repoPath!=null){
+
+                    //获取repo一段时间内行数变化值
+                    lineChanges = gitUtil.getRepoLineChanges(repoPath,since,until,developer_name);
+                    lineAdds += lineChanges[0];
+                    lineDels += lineChanges[1];
+
+                }
+            }finally {
+                if(repoPath!=null)
+                    restInterfaceManager.freeRepoPath(repo_id,repoPath);
+            }
+
+        }
+        commitBase.setAddLines(lineAdds);
+        commitBase.setDelLines(lineDels);
+
+        return commitBase;
+    }
+
+    @Override
+    public int getCommitCountByDurationAndDeveloperName(String developer_name, String since, String until, String token, String category) {
+        String repoPath=null;
+        int commitTotalCount = 0;
+        List<JSONObject> projectList = restInterfaceManager.getProjectListByCategory(token,category);
+        for(Object project:projectList){
+            JSONObject protectJson = (JSONObject)project;
+            String repo_id = protectJson.get("repo_id").toString();
+            try{
+                repoPath=restInterfaceManager.getRepoPath(repo_id,"");
+                if(repoPath!=null){
+                    int commitCount = gitUtil.getCommitCount(repoPath,since,until,developer_name);
+                    commitTotalCount += commitCount;
+
+                }
+            }finally {
+                if(repoPath!=null)
+                    restInterfaceManager.freeRepoPath(repo_id,repoPath);
+            }
+
+        }
+        return commitTotalCount;
+    }
+
+    @Override
+    public Object getRepoListByDeveloperName(String developer_name, String token, String category) {
+        String repoPath=null;
+        // 这里配合脚本的判断分支，将since以及until设置为值为null的字符串；
+        String since = "null";
+        String until = "null";
+        int commitCount ;
+        Map<String,String> result = new HashMap<>();
+        List<JSONObject> projectList = restInterfaceManager.getProjectListByCategory(token,category);
+        for(Object project:projectList){
+            JSONObject protectJson = (JSONObject)project;
+            String repo_id = protectJson.get("repo_id").toString();
+            String repo_name = protectJson.get("name").toString();
+            try{
+                repoPath=restInterfaceManager.getRepoPath(repo_id,"");
+                if(repoPath!=null){
+                    commitCount = gitUtil.getCommitCount(repoPath,since,until,developer_name);
+                    if(commitCount != 0){
+                        String active = getActivityByRepoId(repo_id);
+                        result.put(repo_name,active);
+                    }
+                }
+            }finally {
+                if(repoPath!=null)
+                    restInterfaceManager.freeRepoPath(repo_id,repoPath);
+            }
+        }
+        return result;
     }
 
 

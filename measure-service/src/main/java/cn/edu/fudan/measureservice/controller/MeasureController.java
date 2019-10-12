@@ -76,7 +76,7 @@ public class MeasureController {
 
     @GetMapping("/measure/repository/commit")
     @CrossOrigin
-    public ResponseBean getRepoMeasureByCommit(@RequestParam("repo_id")String repo_id,
+    public ResponseBean getCodeChangesByCommit(@RequestParam("repo_id")String repo_id,
                                                @RequestParam("commit_id")String commit_id){
         try{
             return new ResponseBean(200,"success",measureService.getCommitBaseInformation(repo_id, commit_id));
@@ -89,7 +89,7 @@ public class MeasureController {
 
     @GetMapping("/measure/repository/duration")
     @CrossOrigin
-    public ResponseBean getRepoMeasureByCommit(@RequestParam("repo_id")String repo_id,
+    public ResponseBean getCodeChangesByDuration(@RequestParam("repo_id")String repo_id,
                                                @RequestParam("since")String since,
                                                @RequestParam("until")String until){
         try{
@@ -168,7 +168,7 @@ public class MeasureController {
 
     @GetMapping("/measure/repository/active")
     @CrossOrigin
-    public ResponseBean getRepoActivityByCommit(@RequestParam("repo_id")String repo_id
+    public ResponseBean getRepoActivityByRepoId(@RequestParam("repo_id")String repo_id
     ){
         try{
             return new ResponseBean(200,"success",measureService.getActivityByRepoId(repo_id));
@@ -177,4 +177,58 @@ public class MeasureController {
             return new ResponseBean(401,"failed",null);
         }
     }
+
+    @GetMapping("/measure/developer/code-change")
+    @CrossOrigin
+    public ResponseBean getCodeChangesByDurationAndDeveloperName(
+                                                                 @RequestParam("developer_name")String developer_name,
+                                                                 @RequestParam("since")String since,
+                                                                 @RequestParam("until")String until,
+                                                                 @RequestParam("category")String category,
+                                                                 HttpServletRequest request
+    ){
+        try{
+            String token = request.getHeader("token");
+            return new ResponseBean(200,"success",measureService.getCodeChangesByDurationAndDeveloperName(developer_name,since,until,token,category));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
+
+    @GetMapping("/measure/developer/commit-count")
+    @CrossOrigin
+    public ResponseBean getCommitCountByDurationAndDeveloperName(
+                                                                 @RequestParam("developer_name")String developer_name,
+                                                                 @RequestParam("since")String since,
+                                                                 @RequestParam("until")String until,
+                                                                 @RequestParam("category")String category,
+                                                                 HttpServletRequest request
+    ){
+        try{
+            String token = request.getHeader("token");
+            return new ResponseBean(200,"success",measureService.getCommitCountByDurationAndDeveloperName(developer_name,since,until,token,category));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
+    @GetMapping("/measure/developer/repository-list")
+    @CrossOrigin
+    public ResponseBean getRepoListByDeveloperName(
+                                                    @RequestParam("developer_name")String developer_name,
+                                                    @RequestParam("category")String category,
+                                                    HttpServletRequest request
+    ){
+        try{
+            String token = request.getHeader("token");
+            return new ResponseBean(200,"success",measureService.getRepoListByDeveloperName(developer_name,token,category));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
 }

@@ -88,10 +88,16 @@ public class GitUtil {
     }
 
 
-    public int getCommitCount(String repoPath,String since,String until){
+    public int getCommitCount(String repoPath,String since,String until,String author){
         try{
+            String command ;
             Runtime runtime=Runtime.getRuntime();
-            String command = binHome+ "commitCount.sh "+repoPath+" "+since+" "+until;
+            if(author==null){
+                command = binHome+ "commitCount.sh "+repoPath+" "+since+" "+until;
+            }else {
+                command = binHome+ "commitCount.sh "+repoPath+" "+since+" "+until+" "+author;
+            }
+
             Process process=runtime.exec(command);
             process.waitFor();
             try(BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(process.getInputStream()))){
@@ -106,12 +112,18 @@ public class GitUtil {
     }
 
 
-    public int[] getRepoLineChanges(String repoPath,String since,String until){
+    public int[] getRepoLineChanges(String repoPath,String since,String until,String author){
         int[] result = new int[3];
         String out;
         try{
             Runtime runtime=Runtime.getRuntime();
-            String command = binHome+ "repoLinesChangesCount.sh "+repoPath+" "+since+" "+until;
+            String command;
+            if(author == null){
+                command = binHome+ "repoLinesChangesCount.sh "+repoPath+" "+since+" "+until;
+            }else{
+                command = binHome+ "repoLinesChangesCount.sh "+repoPath+" "+since+" "+until+" "+author;
+            }
+
             Process process=runtime.exec(command);
             process.waitFor();
             try(BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(process.getInputStream()))){
@@ -223,6 +235,9 @@ public class GitUtil {
         }
         return commitBase;
     }
+
+
+
 
 
 }

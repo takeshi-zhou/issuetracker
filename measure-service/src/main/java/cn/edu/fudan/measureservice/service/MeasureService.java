@@ -112,4 +112,37 @@ public interface MeasureService {
      * @return repo的活跃值
      */
     String getActivityByRepoId(String repo_id);
+
+    /**
+     * 获取在issueTracker用户下，所有项目中某个开发者在一段时间内的代码提交行数变化
+     * @param developer_name 开发者的提交名字
+     * @param since 提交的起始时间
+     * @param until 提交的终止时间
+     * @param token 用户token
+     * @param category 工具类别
+     * @return 开发者在一段时间内代码变化信息
+     */
+    CommitBase getCodeChangesByDurationAndDeveloperName(String developer_name,String since,String until,String token,String category);
+
+    /**
+     * 获取在issueTracker用户下，所有项目中某个开发者在一段时间内的代码提交次数
+     * @param developer_name 开发者的提交名字
+     * @param since 提交的起始时间
+     * @param until 提交的终止时间
+     * @param token 用户token
+     * @param category 工具类别
+     * @return 提交次数
+     */
+    int getCommitCountByDurationAndDeveloperName(String developer_name,String since,String until,String token,String category);
+
+    /**
+     * 获取在issueTracker用户下，该用户参与过的项目列表，以及各个项目的活跃度
+     * @param developer_name 开发者的提交名字
+     * @param token 用户token
+     * @param category 工具类别
+     * @return 项目以及项目的活跃度
+     */
+    Object getRepoListByDeveloperName(String developer_name,String token,String category);
+
+
 }

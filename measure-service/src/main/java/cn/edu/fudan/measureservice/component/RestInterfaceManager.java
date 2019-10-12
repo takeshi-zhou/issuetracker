@@ -19,6 +19,7 @@ import javax.xml.ws.Response;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -131,6 +132,17 @@ public class RestInterfaceManager {
 
         ResponseEntity responseEntity = restTemplate.exchange(issueServicePath  + "/measurement/remainingIssue/"+ repoId + "/" + commit + "?spaceType=" + spaceType ,HttpMethod.GET,request,Object.class);
         int result = Integer.valueOf(responseEntity.getBody().toString());
+        return result;
+    }
+
+    public List<JSONObject> getProjectListByCategory(String token,String category){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("token",token);
+        HttpEntity request = new HttpEntity(headers);
+
+        ResponseEntity responseEntity = restTemplate.exchange(projectServicePath  + "/project" + "?type=" + category ,HttpMethod.GET,request,JSONArray.class);
+        String body = responseEntity.getBody().toString();
+        List<JSONObject> result = JSONArray.parseArray(body,JSONObject.class);
         return result;
     }
 
