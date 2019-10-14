@@ -199,4 +199,12 @@ public class Project {
     public void setFirst_auto_scan(int first_auto_scan) {
         this.first_auto_scan = first_auto_scan;
     }
+
+    public String getModule() {
+        return module;
+    }
+
+    public void setModule(String module) {
+        this.module = module;
+    }
 }
