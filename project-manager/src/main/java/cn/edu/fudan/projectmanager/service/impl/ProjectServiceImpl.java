@@ -123,6 +123,13 @@ public class ProjectServiceImpl implements ProjectService {
         return projectDao.getProjectList(account_id,type);
     }
 
+    //jeff
+    @Override
+    public Object getProjectListByModule(String userToken,String type, String module) {
+        String account_id = restInterfaceManager.getAccountId(userToken);
+        return projectDao.getProjectListByModule(account_id,type,module);
+    }
+
     @Override
     public Object getProjectByRepoId(String repo_id) {
         return projectDao.getProjectByRepoId(repo_id);

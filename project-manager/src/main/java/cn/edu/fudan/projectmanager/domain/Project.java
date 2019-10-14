@@ -23,6 +23,7 @@ public class Project {
     private String repo_id;
     private String branch;
     private int first_auto_scan;
+    private String module;
 
     public static Project createOneProjectByRepoBasicInfo(RepoBasicInfo r,String type) throws ParseException {
         return new Project(UUID.randomUUID().toString(), r.getName(), r.getLanguage(), r.getUrl(), r.getVcs_type(), type,"superAccount","Downloaded",

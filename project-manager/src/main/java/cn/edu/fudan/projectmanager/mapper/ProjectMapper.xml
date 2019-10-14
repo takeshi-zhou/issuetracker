@@ -20,6 +20,8 @@
         <result property="repo_id" column="repo_id"/>
         <result property="branch" column="branch"/>
         <result property="first_auto_scan" column="first_auto_scan"/>
+
+        <result property="module" column="module"/>
     </resultMap>
 
     <insert id="addOneProject" parameterType="Project">
@@ -39,7 +41,8 @@
         last_scan_time,
         description,
         repo_id,
-        branch
+        branch,
+        module
         )
         VALUES
         (
@@ -57,7 +60,8 @@
         #{last_scan_time},
         #{description},
         #{repo_id},
-        #{branch}
+        #{branch},
+        #{module}
         )
     </insert>
 
@@ -90,6 +94,11 @@
 
     <select id="getProjectList" parameterType="String" resultMap="project">
         select * from project where account_id = #{account_id} and type = #{type} order by add_time desc
+    </select>
+
+<!--    jeff-->
+    <select id="getProjectListByModule" parameterType="String" resultMap="project">
+        select * from project where account_id = #{account_id} and type = #{type} and module = #{module} order by add_time desc
     </select>
 
     <select id="getProjectByID" parameterType="String" resultMap="project">

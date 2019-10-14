@@ -41,6 +41,15 @@ public class ProjectController {
         return projectService.getProjectList(userToken,type);
     }
 
+    //jeff get project list by module
+    @GetMapping(value = {"/projectByModule"})
+    public Object query(HttpServletRequest request,
+                        @RequestParam("module") String module,
+                        @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
+        String userToken = request.getHeader("token");
+        return projectService.getProjectListByModule(userToken,type,module);
+    }
+
     @GetMapping(value = {"/project/filter"})
     public Object keyWordQuery(HttpServletRequest request,
                                @RequestParam("keyWord") String keyWord,
