@@ -76,7 +76,15 @@ public class ProjectController {
                                @RequestParam("repoId") String repoId,
                                @RequestParam(name = "category",required = false,defaultValue = "bug")String category) {
         String userToken = request.getHeader("token");
-        return projectService.getProjectByRepoIdAndCategory(userToken, repoId,category).getName();
+        try {
+            return projectService.getProjectByRepoIdAndCategory(userToken, repoId,category).getName();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "project add failed! No such repo found!", null);
+        }
+
+//        return projectService.getProjectByRepoIdAndCategory(userToken, repoId,category).getName();
+
     }
 
     //下面是其它服务调用的内部接口
