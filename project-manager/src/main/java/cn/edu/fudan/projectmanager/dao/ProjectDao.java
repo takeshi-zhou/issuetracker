@@ -39,6 +39,11 @@ public class ProjectDao {
         return projectMapper.getProjectList(account_id, type);
     }
 
+    //jeff
+    public List<Project> getProjectListByModule(String account_id,String type, String module){
+        return projectMapper.getProjectListByModule(account_id,type, module);
+    }
+
     public Project getProjectByID(String projectId) {
         return projectMapper.getProjectByID(projectId);
     }

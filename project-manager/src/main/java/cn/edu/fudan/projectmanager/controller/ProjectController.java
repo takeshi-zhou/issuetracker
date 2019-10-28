@@ -41,6 +41,15 @@ public class ProjectController {
         return projectService.getProjectList(userToken,type);
     }
 
+    //jeff get project list by module
+    @GetMapping(value = {"/projectByModule"})
+    public Object query(HttpServletRequest request,
+                        @RequestParam("module") String module,
+                        @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
+        String userToken = request.getHeader("token");
+        return projectService.getProjectListByModule(userToken,type,module);
+    }
+
     @GetMapping(value = {"/project/filter"})
     public Object keyWordQuery(HttpServletRequest request,
                                @RequestParam("keyWord") String keyWord,
@@ -67,7 +76,15 @@ public class ProjectController {
                                @RequestParam("repoId") String repoId,
                                @RequestParam(name = "category",required = false,defaultValue = "bug")String category) {
         String userToken = request.getHeader("token");
-        return projectService.getProjectByRepoIdAndCategory(userToken, repoId,category).getName();
+        try {
+            return projectService.getProjectByRepoIdAndCategory(userToken, repoId,category).getName();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "project add failed! No such repo found!", null);
+        }
+
+//        return projectService.getProjectByRepoIdAndCategory(userToken, repoId,category).getName();
+
     }
 
     //下面是其它服务调用的内部接口

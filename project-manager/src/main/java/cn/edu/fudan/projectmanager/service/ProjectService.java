@@ -13,6 +13,9 @@ public interface ProjectService {
 
     Object getProjectList(String userToken,String type);
 
+    //jeff
+    Object getProjectListByModule(String userToken, String type, String module);
+
     Object getProjectByRepoId(String repo_id);
 
     Object getProjectByAccountId(String account_id);
