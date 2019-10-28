@@ -53,6 +53,10 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(commitServicePath+"/commit-time?commit_id="+commitId,JSONObject.class);
     }
 
+    public JSONObject getCommitByCommitId(String commitId){
+        return restTemplate.getForObject(commitServicePath+"/commit/"+ commitId,JSONObject.class);
+    }
+
     public JSONObject getCommitsOfRepo(String repoId,Integer page,Integer size){
         return restTemplate.getForObject(commitServicePath + "?repo_id=" + repoId + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class);
     }

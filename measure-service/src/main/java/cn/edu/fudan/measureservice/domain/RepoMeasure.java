@@ -16,6 +16,10 @@ public class RepoMeasure {
     private String commit_id;
     private String commit_time;
     private String repo_id;
+    private String developer_name;
+    private String developer_email;
+    private int add_lines;
+    private int del_lines;
 
     public String getUuid() {
         return uuid;
@@ -119,5 +123,37 @@ public class RepoMeasure {
 
     public void setRepo_id(String repo_id) {
         this.repo_id = repo_id;
+    }
+
+    public String getDeveloper_name() {
+        return developer_name;
+    }
+
+    public void setDeveloper_name(String developer_name) {
+        this.developer_name = developer_name;
+    }
+
+    public String getDeveloper_email() {
+        return developer_email;
+    }
+
+    public void setDeveloper_email(String developer_email) {
+        this.developer_email = developer_email;
+    }
+
+    public int getAdd_lines() {
+        return add_lines;
+    }
+
+    public void setAdd_lines(int add_lines) {
+        this.add_lines = add_lines;
+    }
+
+    public int getDel_lines() {
+        return del_lines;
+    }
+
+    public void setDel_lines(int del_lines) {
+        this.del_lines = del_lines;
     }
 }

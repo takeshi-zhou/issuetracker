@@ -156,6 +156,9 @@ public class KafkaServiceImpl implements KafkaService {
         List<ScanMessageWithTime> list=new ArrayList<>();
         ScanMessageWithTime scanMessageWithTime=new ScanMessageWithTime(repoId,commitId);
         scanMessageWithTime.setCommitTime(restInterfaceManager.getCommitTime(commitId).getJSONObject("data").getString("commit_time"));
+        JSONObject commit = restInterfaceManager.getCommitByCommitId(commitId);
+        scanMessageWithTime.setDeveloperName(commit.getJSONObject("data").getString("developer"));
+        scanMessageWithTime.setDeveloperName(commit.getJSONObject("data").getString("developer_email"));
         list.add(scanMessageWithTime);
         //串行扫
         if(existProject(repoId,"bug",false)){

@@ -81,7 +81,7 @@ public class RecommendationController {
             return new ResponseBean(401, "failed! " + e.getMessage(), null);
             }
         }
-    @DeleteMapping(value = {"inner/bugRecommendation/{repoId}"})
+    @DeleteMapping(value = {"/inner/bugRecommendation/{repoId}"})
     public Object deleteBugRecommendation(@PathVariable("repoId") String repoId){
         try {
             recommendationService.deleteBugRecommendationByRepoId(repoId);

@@ -134,16 +134,16 @@ public class MeasureServiceImpl implements MeasureService {
         log.info("received message from topic -> " + consumerRecord.topic() + " : " + commits.size()+" commits need to scan!");
         ack.acknowledge();
         for(CommitWithTime commit:commits){
-            saveMeasureData(commit.getRepoId(),commit.getCommitId(),commit.getCommitTime());
+            saveMeasureData(commit.getRepoId(),commit.getCommitId(),commit.getCommitTime(),commit.getDeveloperName(),commit.getDeveloperEmail());
         }
         log.info("all complete!!!");
     }
 
     //保存某个项目某个commit的度量信息
-    private void saveMeasureData(String repoId, String commitId,String commitTime) {
+    private void saveMeasureData(String repoId, String commitId,String commitTime,String developerName,String developerEmail) {
         try{
             Measure measure=getMeasureDataOfOneCommit(repoId,commitId);
-            saveRepoLevelMeasureData(measure,repoId,commitId,commitTime);
+            saveRepoLevelMeasureData(measure,repoId,commitId,commitTime,developerName,developerEmail);
             savePackageMeasureData(measure,repoId,commitId,commitTime);
         }catch (Exception e){
             e.printStackTrace();
@@ -203,7 +203,7 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     //保存某个项目某个commit项目级别的度量
-    private void saveRepoLevelMeasureData(Measure measure,String repoId,String commitId,String commitTime){
+    private void saveRepoLevelMeasureData(Measure measure,String repoId,String commitId,String commitTime,String developerName,String developerEmail){
         RepoMeasure repoMeasure=new RepoMeasure();
         repoMeasure.setUuid(UUID.randomUUID().toString());
         repoMeasure.setFiles(measure.getTotal().getFiles());
@@ -218,6 +218,11 @@ public class MeasureServiceImpl implements MeasureService {
         repoMeasure.setCommit_id(commitId);
         repoMeasure.setCommit_time(commitTime);
         repoMeasure.setRepo_id(repoId);
+        repoMeasure.setDeveloper_name(developerName);
+        repoMeasure.setDeveloper_email(developerEmail);
+        CommitBase commitBase = getCommitBaseInformation(repoId,commitId);
+        repoMeasure.setAdd_lines(commitBase.getAddLines());
+        repoMeasure.setDel_lines(commitBase.getDelLines());
         if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0)
             repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
     }
@@ -493,7 +498,7 @@ public class MeasureServiceImpl implements MeasureService {
             if(eliminatedIssues != 0){
                 changes.put("eliminatedQuantity",changeLines/eliminatedIssues);
             }else{
-                changes.put("eliminatedQuantity",changeLines/eliminatedIssues);
+                changes.put("eliminatedQuantity",-1);
             }
         }else {
             log.error("not get repo path!");
@@ -544,6 +549,9 @@ public class MeasureServiceImpl implements MeasureService {
         List<JSONObject> projectList = restInterfaceManager.getProjectListByCategory(token,category);
         for(Object project:projectList){
             JSONObject protectJson = (JSONObject)project;
+            if(protectJson.get("download_status").toString().equals("Downloading")){
+                continue;
+            }
             String repo_id = protectJson.get("repo_id").toString();
             try{
                 repoPath=restInterfaceManager.getRepoPath(repo_id,"");
@@ -574,6 +582,9 @@ public class MeasureServiceImpl implements MeasureService {
         List<JSONObject> projectList = restInterfaceManager.getProjectListByCategory(token,category);
         for(Object project:projectList){
             JSONObject protectJson = (JSONObject)project;
+            if(protectJson.get("download_status").toString().equals("Downloading")){
+                continue;
+            }
             String repo_id = protectJson.get("repo_id").toString();
             try{
                 repoPath=restInterfaceManager.getRepoPath(repo_id,"");
@@ -600,24 +611,30 @@ public class MeasureServiceImpl implements MeasureService {
         int commitCount ;
         Map<String,String> result = new HashMap<>();
         List<JSONObject> projectList = restInterfaceManager.getProjectListByCategory(token,category);
-        for(Object project:projectList){
-            JSONObject protectJson = (JSONObject)project;
-            String repo_id = protectJson.get("repo_id").toString();
-            String repo_name = protectJson.get("name").toString();
-            try{
-                repoPath=restInterfaceManager.getRepoPath(repo_id,"");
-                if(repoPath!=null){
-                    commitCount = gitUtil.getCommitCount(repoPath,since,until,developer_name);
-                    if(commitCount != 0){
-                        String active = getActivityByRepoId(repo_id);
-                        result.put(repo_name,active);
-                    }
+        if(projectList != null){
+            for(Object project:projectList){
+                JSONObject protectJson = (JSONObject)project;
+                if(protectJson.get("download_status").toString().equals("Downloading")){
+                    continue;
                 }
-            }finally {
-                if(repoPath!=null)
-                    restInterfaceManager.freeRepoPath(repo_id,repoPath);
+                String repo_id = protectJson.get("repo_id").toString();
+                String repo_name = protectJson.get("name").toString();
+                try{
+                    repoPath=restInterfaceManager.getRepoPath(repo_id,"");
+                    if(repoPath!=null){
+                        commitCount = gitUtil.getCommitCount(repoPath,since,until,developer_name);
+                        if(commitCount != 0){
+                            String active = getActivityByRepoId(repo_id);
+                            result.put(repo_name,active);
+                        }
+                    }
+                }finally {
+                    if(repoPath!=null)
+                        restInterfaceManager.freeRepoPath(repo_id,repoPath);
+                }
             }
         }
+
         return result;
     }
 

@@ -13,6 +13,10 @@
         <result property="java_doc_lines" column="java_doc_lines"/>
         <result property="single_comment_lines" column="single_comment_lines"/>
         <result property="multi_comment_lines" column="multi_comment_lines"/>
+        <result property="developer_name" column="developer_name"/>
+        <result property="developer_email" column="developer_email"/>
+        <result property="add_lines" column="add_lines"/>
+        <result property="del_lines" column="del_lines"/>
     </resultMap>
 
     <resultMap id="repoMeasureWithDate" type="RepoMeasure">
@@ -29,6 +33,10 @@
         <result property="commit_id" column="commit_id"/>
         <result property="commit_time" column="commit_time"/>
         <result property="repo_id" column="repo_id"/>
+        <result property="developer_name" column="developer_name"/>
+        <result property="developer_email" column="developer_email"/>
+        <result property="add_lines" column="add_lines"/>
+        <result property="del_lines" column="del_lines"/>
     </resultMap>
 
     <insert id="insertOneRepoMeasure" >
@@ -46,7 +54,11 @@
                multi_comment_lines,
                commit_id,
                commit_time,
-               repo_id
+               repo_id,
+               developer_name,
+               developer_email,
+               add_lines,
+               del_lines
             )
         values
            (
@@ -62,7 +74,11 @@
               #{multi_comment_lines},
               #{commit_id},
               #{commit_time},
-              #{repo_id}
+              #{repo_id},
+              #{developer_name},
+              #{developer_email},
+              #{add_lines},
+              #{del_lines}
            )
     </insert>
 
@@ -72,13 +88,13 @@
 
     <select id="getRepoMeasureByCommit" resultMap="repoMeasure">
         select
-            files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines
+            files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines,developer_name,developer_email,add_lines,del_lines
         from repo_measure where repo_id = #{repo_id} and commit_id = #{commit_id}
     </select>
 
     <select id="getLatestMeasureData" resultMap="repoMeasure">
         select
-            files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines
+            files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines,developer_name,developer_email,add_lines,del_lines
         from
             repo_measure
         where
@@ -89,7 +105,7 @@
 
     <select id="getFirstMeasureDataAfterDuration" resultMap="repoMeasure">
          select
-            files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines
+            files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines,developer_name,developer_email,add_lines,del_lines
         from
             repo_measure
         where
