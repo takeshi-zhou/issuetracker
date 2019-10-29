@@ -10,8 +10,6 @@ public class ScanMessageWithTime {
     private String repoId;
     private String commitId;
     private String commitTime;
-    private String developerName;
-    private String developerEmail;
 
     public ScanMessageWithTime() {
     }
@@ -45,30 +43,13 @@ public class ScanMessageWithTime {
         this.commitTime = commitTime;
     }
 
-    public String getDeveloperName() {
-        return developerName;
-    }
-
-    public void setDeveloperName(String developerName) {
-        this.developerName = developerName;
-    }
-
-    public String getDeveloperEmail() {
-        return developerEmail;
-    }
-
-    public void setDeveloperEmail(String developerEmail) {
-        this.developerEmail = developerEmail;
-    }
 
     @Override
     public String toString() {
         return "ScanMessageWithTime{" +
                 "repoId='" + repoId + '\'' +
                 ", commitId='" + commitId + '\'' +
-                ", commitTime=" + commitTime + '\'' +
-                ", developerName=" + developerName + '\'' +
-                ", developerEmail=" + developerEmail +
+                ", commitTime=" + commitTime +
                 '}';
     }
 }

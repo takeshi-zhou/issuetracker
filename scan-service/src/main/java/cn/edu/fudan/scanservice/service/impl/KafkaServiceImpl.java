@@ -57,7 +57,7 @@ public class KafkaServiceImpl implements KafkaService {
     private CommitFilterStrategy<ScanMessageWithTime> commitFilter;
 
     @Autowired
-    @Qualifier("EVERYDAY")
+    @Qualifier("RASWS")
     public void setCommitFilter(CommitFilterStrategy<ScanMessageWithTime> commitFilter) {
         this.commitFilter = commitFilter;
     }
@@ -156,9 +156,6 @@ public class KafkaServiceImpl implements KafkaService {
         List<ScanMessageWithTime> list=new ArrayList<>();
         ScanMessageWithTime scanMessageWithTime=new ScanMessageWithTime(repoId,commitId);
         scanMessageWithTime.setCommitTime(restInterfaceManager.getCommitTime(commitId).getJSONObject("data").getString("commit_time"));
-        JSONObject commit = restInterfaceManager.getCommitByCommitId(commitId);
-        scanMessageWithTime.setDeveloperName(commit.getJSONObject("data").getString("developer"));
-        scanMessageWithTime.setDeveloperName(commit.getJSONObject("data").getString("developer_email"));
         list.add(scanMessageWithTime);
         //串行扫
         if(existProject(repoId,"bug",false)){
@@ -197,7 +194,7 @@ public class KafkaServiceImpl implements KafkaService {
         if(!commits.isEmpty()){
             Map<LocalDate,List<ScanMessageWithTime>> map=commits.stream().collect(Collectors.groupingBy((ScanMessageWithTime scanMessageWithTime)->{
                 String dateStr=scanMessageWithTime.getCommitTime().split(" ")[0];
-                return LocalDate.parse(dateStr,DateTimeUtil.Y_M_D_formatter);
+                return LocalDate.parse(dateStr,DateTimeUtil.formatter);
             }));
             List<LocalDate> dates=new ArrayList<>(map.keySet());
             dates.sort(((o1, o2) -> {

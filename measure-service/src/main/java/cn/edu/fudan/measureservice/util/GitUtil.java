@@ -4,6 +4,8 @@ package cn.edu.fudan.measureservice.util;
 import cn.edu.fudan.measureservice.domain.CommitBase;
 import cn.edu.fudan.measureservice.domain.CommitInfo;
 import cn.edu.fudan.measureservice.domain.Developer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,8 @@ public class GitUtil {
 
     @Value("${bin.home}")
     private String binHome;
+
+    private Logger logger = LoggerFactory.getLogger(GitUtil.class);
 
     public  List<String> getCommitFiles(String repoPath,String since,String until){
        List<String> files=new ArrayList<>();
@@ -194,10 +198,22 @@ public class GitUtil {
                 while((out=bufferedReader.readLine())!=null){
                     out=out.trim();
                     if(!out.isEmpty()) {
+                        //当包含files changed或者file changed时，此行是行数变化值
                         if(out.contains("files changed") || out.contains("file changed")){
                             args = out.split("[\\D]+");
-                            commitBase.setAddLines(Integer.valueOf(args[1]));
-                            commitBase.setDelLines(Integer.valueOf(args[2]));
+                            if(args.length>=3){
+                                commitBase.setAddLines(Integer.valueOf(args[1]));
+                                commitBase.setDelLines(Integer.valueOf(args[2]));
+                            }else{
+                                if(out.contains("insertions") || out.contains("insertion")){
+                                    commitBase.setAddLines(Integer.valueOf(args[1]));
+                                    commitBase.setDelLines(0);
+                                }else{
+                                    commitBase.setAddLines(0);
+                                    commitBase.setDelLines(Integer.valueOf(args[1]));
+                                }
+                                logger.info(" the result is -->{}" ,out);
+                            }
                         }else if(out.contains("Author")){
                             String name ="";
                             String email = "";
@@ -210,7 +226,8 @@ public class GitUtil {
                                     Pattern pattern = Pattern.compile("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
                                     Matcher matcher = pattern.matcher(judge);
                                     if (!matcher.matches()) {
-                                        throw new RuntimeException("invalid url!");
+                                        logger.warn("invalid email format --> {} which commit id is --> {}",judge,commitId);
+
                                     }
                                     email = judge;
                                 }else{

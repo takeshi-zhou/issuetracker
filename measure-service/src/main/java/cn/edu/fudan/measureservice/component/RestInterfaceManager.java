@@ -65,6 +65,11 @@ public class RestInterfaceManager {
         return response.getJSONArray("data");
     }
 
+    public JSONObject getCommitByCommitId(String commitId){
+        return restTemplate.getForObject(commitServicePath+"/"+ commitId,JSONObject.class);
+    }
+
+
     public JSONArray getProjectList(String account_id) {
         return restTemplate.getForObject(projectServicePath + "/inner/projects?account_id=" + account_id,JSONArray.class);
     }

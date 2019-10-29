@@ -21,4 +21,6 @@ public interface RepoMeasureMapper {
     RepoMeasure getFirstMeasureDataAfterDuration(@Param("repo_id")String repo_id,@Param("time_line") Date time_line);
 
     List<RepoMeasure> getRepoMeasureBetween(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String util);
+
+    void delRepoMeasureByRepoId(@Param("repo_id")String repo_id);
 }

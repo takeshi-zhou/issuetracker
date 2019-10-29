@@ -131,6 +131,20 @@ public class MeasureController {
 
     }
 
+    @DeleteMapping("/measure/repo-information")
+    @CrossOrigin
+    public ResponseBean deleteRepoMeasureByRepoId(@RequestParam("repo_id")String repo_id
+    ){
+        try{
+            measureService.deleteRepoMeasureByRepoId(repo_id);
+            return new ResponseBean(200,"success",null);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+
+    }
+
     @GetMapping("/measure/repository/quality")
     @CrossOrigin
     public ResponseBean getRepoQualityByCommit(@RequestParam("repo_id")String repo_id,

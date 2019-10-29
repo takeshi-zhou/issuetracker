@@ -119,4 +119,10 @@
         where repo_id = #{repo_id} and commit_time &gt; #{since} and commit_time &lt; #{until}
         order by commit_time;
     </select>
+
+    <delete id="delRepoMeasureByRepoId" parameterType="String">
+        delete from repo_measure
+        where repo_id = #{repo_id} ;
+    </delete>
+
 </mapper>

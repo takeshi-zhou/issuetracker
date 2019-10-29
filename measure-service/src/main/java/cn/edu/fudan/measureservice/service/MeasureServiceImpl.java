@@ -13,6 +13,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -30,6 +32,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class MeasureServiceImpl implements MeasureService {
+
+    private Logger logger = LoggerFactory.getLogger(MeasureServiceImpl.class);
 
     @Value("${repoHome}")
     private String repoHome;
@@ -134,7 +138,20 @@ public class MeasureServiceImpl implements MeasureService {
         log.info("received message from topic -> " + consumerRecord.topic() + " : " + commits.size()+" commits need to scan!");
         ack.acknowledge();
         for(CommitWithTime commit:commits){
-            saveMeasureData(commit.getRepoId(),commit.getCommitId(),commit.getCommitTime(),commit.getDeveloperName(),commit.getDeveloperEmail());
+            String commitId = commit.getCommitId();
+            String developer_name =commit.getDeveloperName();
+            String developer_email =commit.getDeveloperEmail();
+            if(developer_name==null || developer_email==null || developer_name.isEmpty() || developer_email.isEmpty() ){
+                try{
+                    JSONObject jsonCommit = restInterfaceManager.getCommitByCommitId(commitId);
+                    developer_name = jsonCommit.getJSONObject("data").getString("developer");
+                    developer_email = jsonCommit.getJSONObject("data").getString("developer_email");
+                }catch(Exception e){
+                    logger.error("commit is not available, commit's value is --> {}",commit);
+                    e.printStackTrace();
+                }
+            }
+            saveMeasureData(commit.getRepoId(),commitId,commit.getCommitTime(),developer_name,developer_email);
         }
         log.info("all complete!!!");
     }
@@ -268,6 +285,13 @@ public class MeasureServiceImpl implements MeasureService {
     public RepoMeasure getRepoMeasureByRepoIdAndCommitId(String repoId, String commitId) {
         RepoMeasure repoMeasure = repoMeasureMapper.getRepoMeasureByCommit(repoId,commitId);
         return repoMeasure;
+    }
+
+    @Override
+    public void deleteRepoMeasureByRepoId(String repoId) {
+        logger.info("measurement info start to delete");
+        repoMeasureMapper.delRepoMeasureByRepoId(repoId);
+        logger.info("measurement delete completed");
     }
 
 

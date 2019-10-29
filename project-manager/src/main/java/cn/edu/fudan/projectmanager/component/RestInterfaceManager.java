@@ -28,6 +28,8 @@ public class RestInterfaceManager {
     private String repoServicePath;
     @Value("${tag.service.path}")
     private String tagServicePath;
+    @Value("${measure.service.path}")
+    private String measureServicePath;
     @Value("${bug.recommendation.service.path}")
     private String bugRecommendationServicePath;
 
@@ -79,6 +81,10 @@ public class RestInterfaceManager {
     //-----------------------------event service---------------------------------------------------------------
     public void deleteEventOfRepo(String repoId,String category){
         restTemplate.delete(eventServicePath+"/inner/event/" +category+"/"+ repoId);
+    }
+
+    public void deleteRepoMeasure(String repoId){
+        restTemplate.delete(measureServicePath+"/measure/repo-information?repo_id=" + repoId);
     }
 
     //-----------------------------------repo service--------------------------------------------------------

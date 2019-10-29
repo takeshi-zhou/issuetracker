@@ -12,10 +12,12 @@ import java.util.Map;
 public class RecentAllThenSkipWeekStrategy implements CommitFilterStrategy<ScanMessageWithTime> {
 
 
+
+
     @Override
     public List<ScanMessageWithTime> filter(Map<LocalDate, List<ScanMessageWithTime>> map, List<LocalDate> dates) {
         int sourceSize=dates.size();
-        LocalDate nextTimeLimit=dates.get(sourceSize-1).minusMonths(1);
+        LocalDate nextTimeLimit=dates.get(sourceSize-1).minusMonths(ScanIntervalForStrategy.getInterval());
         LinkedList<ScanMessageWithTime> result=new LinkedList<>();
         int i=0;
         boolean isRecent=true;

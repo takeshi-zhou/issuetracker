@@ -35,6 +35,13 @@ public interface MeasureService {
 
 
     /**
+     * 删除一个项目的所有度量信息
+     * @param repoId repo的唯一标识
+     * @return
+     */
+    void deleteRepoMeasureByRepoId(String repoId);
+
+    /**
      * 获取一个项目在某个特定commit快照下的存在包的所有度量信息
      * @param repoId repo的唯一标识
      * @param commit  commit

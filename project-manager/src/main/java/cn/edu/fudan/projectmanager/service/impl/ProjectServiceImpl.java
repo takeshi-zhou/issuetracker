@@ -185,6 +185,12 @@ public class ProjectServiceImpl implements ProjectService {
                 restInterfaceManager.deleteEventOfRepo(repoId, type);
                 restInterfaceManager.deleteScanResultOfRepo(repoId, type);
                 restInterfaceManager.deleteIgnoreRecord(account_id, repoId);
+                if(type.equals("bug")){
+                    logger.info("start to request measure to delete measure info ...");
+                    restInterfaceManager.deleteRepoMeasure(repoId);
+                    logger.info("delete measure info success");
+                }
+
                 if(type.equals("clone")){
                     //对于clone的CPU版本，删除时需要删除前一次commit扫描的结果文件
                     deleteCloneResPreFile(repoId);
