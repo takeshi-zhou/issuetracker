@@ -418,19 +418,29 @@ public class MeasureServiceImpl implements MeasureService {
 
 
 
+//    @Override
+//    public CommitBase getCommitBaseInformation(String repo_id, String commit_id) {
+//        String repoPath=null;
+//        CommitBase commitBase = null;
+//        try{
+//            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
+//            if(repoPath!=null){
+//                commitBase = gitUtil.getOneCommitChanges(repoPath,commit_id);
+//            }
+//        }finally {
+//            if(repoPath!=null)
+//                restInterfaceManager.freeRepoPath(repo_id,repoPath);
+//        }
+//        return commitBase;
+//    }
+
+
+
     @Override
     public CommitBase getCommitBaseInformation(String repo_id, String commit_id) {
-        String repoPath=null;
-        CommitBase commitBase = null;
-        try{
-            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
-            if(repoPath!=null){
-                commitBase = gitUtil.getOneCommitChanges(repoPath,commit_id);
-            }
-        }finally {
-            if(repoPath!=null)
-                restInterfaceManager.freeRepoPath(repo_id,repoPath);
-        }
+
+        CommitBase commitBase = repoMeasureMapper.getCommitBaseInformation(repo_id,commit_id);
+
         return commitBase;
     }
 

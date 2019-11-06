@@ -1,5 +1,6 @@
 package cn.edu.fudan.measureservice.mapper;
 
+import cn.edu.fudan.measureservice.domain.CommitBase;
 import cn.edu.fudan.measureservice.domain.RepoMeasure;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -13,6 +14,8 @@ public interface RepoMeasureMapper {
     int sameMeasureOfOneCommit(@Param("repo_id")String repo_id,@Param("commit_id")String commit_id);
 
     RepoMeasure getRepoMeasureByCommit(@Param("repo_id")String repo_id,@Param("commit_id")String commit_id);
+
+    CommitBase getCommitBaseInformation(@Param("repo_id")String repo_id,@Param("commit_id")String commit_id);
 
     void insertOneRepoMeasure(RepoMeasure repoMeasure);
 
