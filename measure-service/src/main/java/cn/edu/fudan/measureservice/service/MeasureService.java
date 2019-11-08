@@ -98,9 +98,9 @@ public interface MeasureService {
 
 
     /**
-     * 获取一个项目最近12个月的每月提交次数
+     * 获取一个项目的每月提交次数
      * @param repo_id repo的唯一标识
-     * @return repo最近12个月的每月提交次数
+     * @return repo的每月提交次数
      */
     List<CommitCountsMonthly> getCommitCountsMonthly(String repo_id);
 
