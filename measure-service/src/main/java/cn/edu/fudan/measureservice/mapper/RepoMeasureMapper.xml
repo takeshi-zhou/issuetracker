@@ -39,6 +39,15 @@
         <result property="del_lines" column="del_lines"/>
     </resultMap>
 
+    <resultMap id="commitBase" type="CommitBase">
+        <result property="addLines" column="add_lines"/>
+        <result property="delLines" column="del_lines"/>
+        <collection property="authors" ofType="Developer">
+            <result property="name" column="developer_name"/>
+            <result property="email" column="developer_email"/>
+        </collection>
+    </resultMap>
+
     <insert id="insertOneRepoMeasure" >
         insert into repo_measure
             (
@@ -89,6 +98,12 @@
     <select id="getRepoMeasureByCommit" resultMap="repoMeasure">
         select
             files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines,developer_name,developer_email,add_lines,del_lines
+        from repo_measure where repo_id = #{repo_id} and commit_id = #{commit_id}
+    </select>
+
+    <select id="getCommitBaseInformation" resultMap="commitBase">
+        select
+            developer_name,developer_email,add_lines,del_lines
         from repo_measure where repo_id = #{repo_id} and commit_id = #{commit_id}
     </select>
 

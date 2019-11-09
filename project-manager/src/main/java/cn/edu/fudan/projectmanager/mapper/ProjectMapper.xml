@@ -93,7 +93,7 @@
     </select>
 
     <select id="getProjectList" parameterType="String" resultMap="project">
-        select * from project where account_id = #{account_id} and type = #{type} order by add_time desc
+        select * from project where account_id = #{account_id} and type = #{type} order by module desc
     </select>
 
 <!--    jeff-->

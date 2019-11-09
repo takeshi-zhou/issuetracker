@@ -96,6 +96,14 @@ public interface MeasureService {
      */
     int getCommitCountsByDuration(String repo_id,String since,String until);
 
+
+    /**
+     * 获取一个项目的每月提交次数
+     * @param repo_id repo的唯一标识
+     * @return repo的每月提交次数
+     */
+    List<CommitCountsMonthly> getCommitCountsMonthly(String repo_id);
+
     /**
      * 获取一个项目在某个特定commit快照下代码质量指数
      * @param repo_id repo的唯一标识

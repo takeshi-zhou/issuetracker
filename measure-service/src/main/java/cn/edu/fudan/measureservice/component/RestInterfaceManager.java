@@ -1,23 +1,17 @@
 package cn.edu.fudan.measureservice.component;
 
+import cn.edu.fudan.measureservice.domain.CommitCountsMonthly;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.header.Headers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.web.client.RequestCallback;
-import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
-import javax.xml.ws.Response;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,8 +54,9 @@ public class RestInterfaceManager {
 
     public JSONArray getCommitsOfRepo(String repoId){
         JSONObject response=restTemplate.getForObject(commitServicePath + "?repo_id=" + repoId + "&is_whole=true", JSONObject.class);
-        if(response==null||response.getJSONArray("data")==null)
-        return null;
+        if(response==null||response.getJSONArray("data")==null) {
+            return null;
+        }
         return response.getJSONArray("data");
     }
 
@@ -111,8 +106,9 @@ public class RestInterfaceManager {
         JSONObject response=restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId+"&path="+repoPath, JSONObject.class);
         if(response!=null&&response.getJSONObject("data").getString("status").equals("Successful")){
             log.info("{} -> free success",repoPath);
-        }else
+        }else {
             log.warn("{} -> free failed",repoPath);
+        }
         return response;
     }
 
@@ -162,6 +158,13 @@ public class RestInterfaceManager {
         return result;
     }
 
+    //----------------------------------commit service----------------------------------------------------
+    public JSONArray getCommitList(String repo_id){
+        JSONObject response = restTemplate.getForObject(commitServicePath  + "?repo_id=" + repo_id + "&is_whole=true",JSONObject.class);
+        JSONArray data = response.getJSONArray("data");
+        return data;
+    }
 
 
 }
+

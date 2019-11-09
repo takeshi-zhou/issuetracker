@@ -25,6 +25,8 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -418,21 +420,70 @@ public class MeasureServiceImpl implements MeasureService {
 
 
 
+//    @Override
+//    public CommitBase getCommitBaseInformation(String repo_id, String commit_id) {
+//        String repoPath=null;
+//        CommitBase commitBase = null;
+//        try{
+//            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
+//            if(repoPath!=null){
+//                commitBase = gitUtil.getOneCommitChanges(repoPath,commit_id);
+//            }
+//        }finally {
+//            if(repoPath!=null)
+//                restInterfaceManager.freeRepoPath(repo_id,repoPath);
+//        }
+//        return commitBase;
+//    }
+
+
+
     @Override
     public CommitBase getCommitBaseInformation(String repo_id, String commit_id) {
-        String repoPath=null;
-        CommitBase commitBase = null;
-        try{
-            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
-            if(repoPath!=null){
-                commitBase = gitUtil.getOneCommitChanges(repoPath,commit_id);
-            }
-        }finally {
-            if(repoPath!=null)
-                restInterfaceManager.freeRepoPath(repo_id,repoPath);
-        }
+
+        CommitBase commitBase = repoMeasureMapper.getCommitBaseInformation(repo_id,commit_id);
+
         return commitBase;
     }
+
+
+    //jeff 获取一个repo的每月commit次数
+    @Override
+    public List<CommitCountsMonthly> getCommitCountsMonthly(String repo_id) {
+        List<CommitCountsMonthly> result=new ArrayList<>();
+        JSONArray commits = restInterfaceManager.getCommitList(repo_id);
+        LocalDate today = LocalDate.now();
+        System.out.println(today);
+        String last_month = today.toString().substring(0,7);
+
+        //统计1个月内的提交次数
+        int counts = 0;
+        //查询当前commit
+        for(int i=0;i<commits.size();i++){
+            JSONObject project = commits.getJSONObject(i);
+            //截取当前commit时间的日期部分
+            String time = project.getString("commit_time").substring(0,10);
+            //当前commit日期
+            LocalDate commitDay=LocalDate.parse(time,DateTimeUtil.Y_M_D_formatter);
+            String current_month = commitDay.toString().substring(0,7);
+            if (current_month.equals(last_month)){
+                counts++;
+                continue;
+            }
+            result.add(getCommitMonth(last_month, counts));
+            last_month = current_month;
+        }
+
+        return result;
+    }
+
+    private CommitCountsMonthly getCommitMonth(String time, int counts){
+        CommitCountsMonthly commitCountsMonthly=new CommitCountsMonthly();
+        commitCountsMonthly.setMonth(time);
+        commitCountsMonthly.setCommit_counts(counts);
+        return commitCountsMonthly;
+    }
+
 
     @Override
     public CommitBase getCommitBaseInformationByDuration(String repo_id, String since, String until) {

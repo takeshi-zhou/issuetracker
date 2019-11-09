@@ -115,6 +115,20 @@ public class MeasureController {
 
     }
 
+    //获取一个repo的每月commit次数
+    @GetMapping("/measure/repository/commit-counts-monthly")
+    @CrossOrigin
+    public ResponseBean getRepoCommitCountsLastyear(@RequestParam("repo_id")String repo_id)
+                                                    {
+        try{
+            return new ResponseBean(200,"success",measureService.getCommitCountsMonthly(repo_id));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+
+    }
+
 
 
     @GetMapping("/measure/repo-information")
