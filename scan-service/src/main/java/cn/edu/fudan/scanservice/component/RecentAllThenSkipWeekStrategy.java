@@ -25,7 +25,8 @@ public class RecentAllThenSkipWeekStrategy implements CommitFilterStrategy<ScanM
             LocalDate date=dates.get(sourceSize-1-i);
             if(isRecent&&date.isAfter(nextTimeLimit)){
                 List<ScanMessageWithTime> list=map.get(date);
-                result.addFirst(list.get(list.size()-1));
+//                result.addFirst(list.get(list.size()-1));
+                  result = addAllListIntoFirst(result,list);
             }else{
                 isRecent=false;
             }
@@ -37,6 +38,13 @@ public class RecentAllThenSkipWeekStrategy implements CommitFilterStrategy<ScanM
                 }
             }
             i++;
+        }
+        return result;
+    }
+
+    private LinkedList<ScanMessageWithTime> addAllListIntoFirst(LinkedList<ScanMessageWithTime> result,List<ScanMessageWithTime> scanMessageWithTimes){
+        for(ScanMessageWithTime scanMessageWithTime : scanMessageWithTimes){
+            result.addFirst(scanMessageWithTime);
         }
         return result;
     }

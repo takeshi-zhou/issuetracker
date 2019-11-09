@@ -69,6 +69,17 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(commitServicePath+"/"+ commitId,JSONObject.class);
     }
 
+    public JSONObject getProjectListByCondition(String token,String category,String name,String module){
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("token",token);
+        HttpEntity request = new HttpEntity(headers);
+        ResponseEntity responseEntity = restTemplate.exchange(projectServicePath  + "/project/search?category=" + category+"&name=" +name+"&module="+module,HttpMethod.GET,request,JSONObject.class);
+        String body = responseEntity.getBody().toString();
+        JSONObject result = JSONObject.parseObject(body);
+        return result;
+    }
+
 
     public JSONArray getProjectList(String account_id) {
         return restTemplate.getForObject(projectServicePath + "/inner/projects?account_id=" + account_id,JSONArray.class);
@@ -150,5 +161,7 @@ public class RestInterfaceManager {
         List<JSONObject> result = JSONArray.parseArray(body,JSONObject.class);
         return result;
     }
+
+
 
 }

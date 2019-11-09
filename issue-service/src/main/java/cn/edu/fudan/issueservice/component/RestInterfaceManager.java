@@ -4,6 +4,8 @@ import cn.edu.fudan.issueservice.exception.AuthException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.kafka.common.protocol.types.Field;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -18,6 +20,8 @@ import java.util.*;
  **/
 @Component
 public class RestInterfaceManager {
+
+    private static Logger logger = LoggerFactory.getLogger(RestInterfaceManager.class);
 
 
     @Value("${account.service.path}")
@@ -36,6 +40,8 @@ public class RestInterfaceManager {
     private String repoServicePath;
     @Value("${scan.service.path}")
     private String scanServicePath;
+    @Value("${sonar.service.path}")
+    private String sonarServicePath;
 
     private RestTemplate restTemplate;
 
@@ -125,7 +131,13 @@ public class RestInterfaceManager {
     //---------------------------------------------commit service------------------------------------------------------
 
     public JSONObject getOneCommitByCommitId(String commitId){
-        return restTemplate.getForObject(commitServicePath+"/"+commitId,JSONObject.class);
+        try{
+            return restTemplate.getForObject(commitServicePath+"/"+commitId,JSONObject.class);
+        }catch (Exception e){
+            logger.error(" through the API , commit id ---> {} may return  several commits info ",commitId);
+            throw  e;
+        }
+
     }
 
     public JSONObject checkOut(String repo_id,String commit_id){
@@ -153,6 +165,10 @@ public class RestInterfaceManager {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public JSONObject getRepoById(String repoId) {
+        return restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
     }
 
     public String getRepoPath(String repoId) {
@@ -210,4 +226,43 @@ public class RestInterfaceManager {
 /*    public List<String> getScanCommitsIdByDuration(String detail, String start, String end) {
         return null;
     }*/
+
+
+    //--------------------------------------------------------sonar api -----------------------------------------------------
+    public JSONObject getSonarIssueResults(String repoName, String type, int pageSize, boolean resolved,int page) {
+        String baseRequestUrl = sonarServicePath + "/api/issues/search?componentKeys="
+                + repoName
+                + "&s=FILE_LINE&resolved="
+                + resolved
+                + "&ps="
+                + pageSize
+                + "&organization=default-organization&facets=severities%2Ctypes&additionalFields=_all";
+        try {
+            if(page == 0){
+                if(type != null && (type.equals("CODE_SMELL") || type.equals("BUG") || type.equals("VULNERABILITY") ||type.equals("SECURITY_HOTSPOT"))){
+                    return restTemplate.getForObject(baseRequestUrl+"&types="+type, JSONObject.class);
+                }else if(type == null ){
+                    return restTemplate.getForObject(baseRequestUrl, JSONObject.class);
+                }else{
+                    logger.error("this request type --> {} is not available in sonar api",type);
+                    return null;
+                }
+            }else if(page > 0){
+                if(type != null && (type.equals("CODE_SMELL") || type.equals("BUG") || type.equals("VULNERABILITY") ||type.equals("SECURITY_HOTSPOT"))){
+                    return restTemplate.getForObject(baseRequestUrl+"&types="+type+"&p="+page, JSONObject.class);
+                }else if(type == null ){
+                    return restTemplate.getForObject(baseRequestUrl+"&p="+page, JSONObject.class);
+                }else{
+                    logger.error("this request type --> {} is not available in sonar api",type);
+                    return null;
+                }
+            }else{
+                logger.error("this request page --- {} is not available in sonar api ",page);
+                return null;
+            }
+        } catch (RuntimeException e) {
+            logger.error("repo name : {}  ----> request sonar api failed", repoName);
+            throw new RuntimeException("get sonar result failed");
+        }
+    }
 }

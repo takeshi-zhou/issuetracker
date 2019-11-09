@@ -23,4 +23,13 @@ public interface RepoMeasureMapper {
     List<RepoMeasure> getRepoMeasureBetween(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String util);
 
     void delRepoMeasureByRepoId(@Param("repo_id")String repo_id);
+
+    /**
+     * 根据 开发者名字与repo id获取项目度量列表，都可以为null
+     *
+     * @param repo_id
+     * @param developer_name
+     * @param counts
+     */
+    List<RepoMeasure> getRepoMeasureByDeveloperAndRepoId(@Param("repo_id")String repo_id,@Param("developer_name")String developer_name,@Param("counts")int counts);
 }

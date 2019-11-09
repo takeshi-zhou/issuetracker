@@ -1,4 +1,5 @@
 package cn.edu.fudan.scanservice.service.impl;
+import	java.rmi.server.Operation;
 
 
 import cn.edu.fudan.scanservice.component.CommitFilterStrategy;
@@ -9,6 +10,7 @@ import cn.edu.fudan.scanservice.domain.ScanResult;
 import cn.edu.fudan.scanservice.service.KafkaService;
 import cn.edu.fudan.scanservice.task.CloneScanTask;
 import cn.edu.fudan.scanservice.task.FindBugScanTask;
+import cn.edu.fudan.scanservice.task.SonarScanTask;
 import cn.edu.fudan.scanservice.util.DateTimeUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -40,18 +42,22 @@ public class KafkaServiceImpl implements KafkaService {
 
     private FindBugScanTask findBugScanTask;
     private CloneScanTask cloneScanTask;
+    private SonarScanTask sonarScanTask;
     private RestInterfaceManager restInterfaceManager;
     private KafkaTemplate kafkaTemplate;
+
 
     @Autowired
     public KafkaServiceImpl(FindBugScanTask findBugScanTask,
                             CloneScanTask cloneScanTask,
                             RestInterfaceManager restInterfaceManager,
-                            KafkaTemplate kafkaTemplate) {
+                            KafkaTemplate kafkaTemplate,
+                            SonarScanTask sonarScanTask) {
         this.findBugScanTask = findBugScanTask;
         this.cloneScanTask = cloneScanTask;
         this.restInterfaceManager=restInterfaceManager;
         this.kafkaTemplate=kafkaTemplate;
+        this.sonarScanTask=sonarScanTask;
     }
 
     private CommitFilterStrategy<ScanMessageWithTime> commitFilter;
@@ -182,9 +188,10 @@ public class KafkaServiceImpl implements KafkaService {
         cloneInfo.put("commitList",list.stream().map(ScanMessageWithTime::getCommitId).collect(Collectors.toList()));
         //发送消息给clone服务，将度量信息保存
         kafkaTemplate.send("CloneZNJ",JSONObject.toJSONString(cloneInfo));
-        logger.info("message has been send to topic Clone -> {}",repoId);
+        logger.info("message has been send to topic ClonO -> {}",repoId);
     }
 
+    @Override
     @KafkaListener(id = "updateCommit", topics = {"UpdateCommit"}, groupId = "updateCommit")
     public void firstScanByMQ(ConsumerRecord<String, String> consumerRecord) {
         String msg = consumerRecord.value();
@@ -194,7 +201,7 @@ public class KafkaServiceImpl implements KafkaService {
         if(!commits.isEmpty()){
             Map<LocalDate,List<ScanMessageWithTime>> map=commits.stream().collect(Collectors.groupingBy((ScanMessageWithTime scanMessageWithTime)->{
                 String dateStr=scanMessageWithTime.getCommitTime().split(" ")[0];
-                return LocalDate.parse(dateStr,DateTimeUtil.formatter);
+                return LocalDate.parse(dateStr,DateTimeUtil.Y_M_D_formatter);
             }));
             List<LocalDate> dates=new ArrayList<>(map.keySet());
             dates.sort(((o1, o2) -> {
@@ -221,6 +228,8 @@ public class KafkaServiceImpl implements KafkaService {
         logger.info("existBugProject -> {}",existBugProject);
         boolean existCloneProject=existProject(repoId,"clone",true);
         logger.info("existCloneProject -> {}",existCloneProject);
+        boolean existSonarProject=existProject(repoId,"sonar",true);
+        logger.info("existSonarProject -> {}",existSonarProject);
         if(existBugProject){
             logger.info("start auto scan bug -> {}",repoId);
             for(ScanMessageWithTime message:filteredCommits){
@@ -240,6 +249,17 @@ public class KafkaServiceImpl implements KafkaService {
             }
             restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
             sendMessageToClone(repoId,filteredCommits);
+        }else{
+            logger.info("repo {} not exist or has been auto scanned!",repoId);
+        }
+        if(existSonarProject){
+            logger.info("start auto scan sonar -> {}",repoId);
+            for(ScanMessageWithTime message:filteredCommits){
+                String commitId = message.getCommitId();
+                sonarScanTask.runSynchronously(repoId,commitId,"sonar");
+            }
+            restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"sonar");
+
         }else{
             logger.info("repo {} not exist or has been auto scanned!",repoId);
         }

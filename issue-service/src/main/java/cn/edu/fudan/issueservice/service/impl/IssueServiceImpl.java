@@ -53,6 +53,13 @@ public class IssueServiceImpl implements IssueService {
         this.bugMappingService = bugMappingService;
     }
 
+    private SonarMappingServiceImpl sonarMappingService;
+
+    @Autowired
+    public void setBugMappingService(SonarMappingServiceImpl sonarMappingService) {
+        this.sonarMappingService = sonarMappingService;
+    }
+
     private QuartzScheduler quartzScheduler;
 
     @Autowired
@@ -433,6 +440,9 @@ public class IssueServiceImpl implements IssueService {
         }else if(category.equals("clone")){
             log.info("start clone mapping -> repo_id={},pre_commit_id={},current_commit_id={}",repo_id,pre_commit_id,current_commit_id);
             cloneMappingService.mapping(repo_id,pre_commit_id,current_commit_id,category,committer);
+        }else if(category.equals("sonar")){
+            log.info("start sonar mapping -> repo_id={},pre_commit_id={},current_commit_id={}",repo_id,pre_commit_id,current_commit_id);
+            sonarMappingService.mapping(repo_id,pre_commit_id,current_commit_id,category,committer);
         }
     }
 

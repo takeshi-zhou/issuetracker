@@ -662,5 +662,48 @@ public class MeasureServiceImpl implements MeasureService {
         return result;
     }
 
+    @Override
+    public Object getQualityChangesByDeveloperName(String developer_name, String token, String category, int counts, String project_name) {
+        String spaceType= "project";
+        //判断count是否合法
+        if(counts<0){
+            return "counts can not be  negative";
+        }
+
+        List<RepoMeasure> repoMeasures;
+        JSONObject result = restInterfaceManager.getProjectListByCondition(token,category,project_name,null);
+        int code =result.getIntValue("code");
+        if(code != 200){
+            logger.error("request project api failed  ---> {}",project_name);
+            return null;
+        }
+        JSONArray projects = result.getJSONArray("data");
+        if(projects.size() == 0){
+            logger.info("do not have this project --> {}",project_name );
+            return "do not have this project --> "+project_name ;
+        }
+        if(project_name!=null){
+            if (projects.size() > 1){
+                // 这一段的方法待优化 可以在多个project中取最近counts 次数的commits的度量
+                logger.info("more than one project named --> {}",project_name );
+                return "more than one project named --> "+project_name ;
+            }
+            JSONObject project =  projects.getJSONObject(0);
+            String repoId = project.getString("repo_id");
+            repoMeasures = repoMeasureMapper.getRepoMeasureByDeveloperAndRepoId(repoId,developer_name,counts);
+        }else{
+            repoMeasures = repoMeasureMapper.getRepoMeasureByDeveloperAndRepoId(null,developer_name,counts);
+        }
+
+        List<CodeQuality> queries = new ArrayList<>();
+        for(RepoMeasure repoMeasure :repoMeasures){
+            int newIssueCounts = restInterfaceManager.getNumberOfNewIssueByCommit(repoMeasure.getRepo_id(),repoMeasure.getCommit_id(),category,spaceType,token);
+            CodeQuality codeQuality = new CodeQuality(repoMeasure.getAdd_lines(),repoMeasure.getDel_lines(),newIssueCounts,repoMeasure.getCommit_time());
+            queries.add(codeQuality);
+        }
+
+        return queries;
+    }
+
 
 }

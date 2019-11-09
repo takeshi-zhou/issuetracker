@@ -87,6 +87,25 @@ public class ProjectController {
 
     }
 
+    @GetMapping(value = {"/project/search"})
+    public Object getProjectByCondition(HttpServletRequest request,
+                                 @RequestParam(name = "category",required = false)String category,
+                                 @RequestParam(name = "name", required = false)String name,
+                                 @RequestParam(name = "module", required = false)String module
+                                        ){
+        String userToken = request.getHeader("token");
+        try {
+            return new ResponseBean(200, "add success", projectService.getProjectsByCondition(userToken, category,name,module));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "project add failed! No such repo found!", null);
+        }
+
+//        return projectService.getProjectByRepoIdAndCategory(userToken, repoId,category).getName();
+
+    }
+
+
     //下面是其它服务调用的内部接口
 
     @PutMapping(value = {"/inner/project"})
@@ -142,5 +161,7 @@ public class ProjectController {
             return new ResponseBean(401, "project update failed!", null);
         }
     }
+
+
 
 }

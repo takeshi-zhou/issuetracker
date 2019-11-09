@@ -125,4 +125,25 @@
         where repo_id = #{repo_id} ;
     </delete>
 
+
+    <select id="getRepoMeasureByDeveloperAndRepoId" parameterType="String" resultMap="repoMeasureWithDate">
+        select
+            uuid,files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines,commit_id,commit_time,repo_id,developer_name,developer_email,add_lines,del_lines
+        from
+            repo_measure
+        <where>
+            1=1
+            <if test="developer_name != null and developer_name != '' ">
+                and developer_name = #{developer_name}
+            </if>
+
+            <if test="repo_id != null and repo_id != '' ">
+                and repo_id = #{repo_id}
+            </if>
+        </where>
+        order by commit_time desc
+        <if test="counts != 0 ">
+            limit #{counts}
+        </if>
+    </select>
 </mapper>

@@ -73,4 +73,20 @@ public class ExecuteShellUtil {
         return null;
     }
 
+    public  boolean executeSonar(String repoPath, String projectName,String version) {
+        try {
+            Runtime rt = Runtime.getRuntime();
+
+            String command = binHome + "executeSonar.sh " + repoPath + " " + projectName + " " + version;
+            log.info("command -> {}",command);
+            Process process = rt.exec(command);
+            int exitValue = process.waitFor();
+            if (exitValue == 0)
+                return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

@@ -60,8 +60,10 @@ public class ScanOperationAdapter implements ScanOperation {
     public ScanInitialInfo initialScan(String repoId, String commitId,String category) {
         //没有拿到repoPath
         String repoPath = restInterfaceManager.getRepoPath(repoId,commitId);
-        if(repoPath==null)
+        if(repoPath==null) {
+            logger.error("scan initial failed ,  repo id --> {}, commit id --> {} , can't get repo path. ");
             return new ScanInitialInfo(false);
+        }
         Date startTime = new Date();
         JSONObject currentRepo = restInterfaceManager.getRepoById(repoId);
         String localAddress=currentRepo.getJSONObject("data").getString("local_addr");

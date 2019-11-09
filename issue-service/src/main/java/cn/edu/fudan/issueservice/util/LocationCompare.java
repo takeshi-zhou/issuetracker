@@ -11,7 +11,7 @@ public class LocationCompare {
 
     private static final double threshold_commonality = 0.95;
     private static final double threshold_overlapping = 0.9;
-    private static final double threshold_lcs = 0.9;
+    private static final double threshold_lcs = 0.6;
 
 
     public static boolean isUniqueIssue(RawIssue issue_1, RawIssue issue_2) {
