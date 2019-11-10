@@ -510,24 +510,54 @@ public class MeasureServiceImpl implements MeasureService {
         return commitBase;
     }
 
+//    @Override
+//    public int getCommitCountsByDuration(String repo_id, String since, String until) {
+//        String repoPath=null;
+//        int commitCounts = -1;
+//        try{
+//            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
+//            if(repoPath!=null){
+//
+//            //获取repo一段时间内的commit次数
+//            commitCounts = gitUtil.getCommitCount(repoPath,since,until,null);
+//
+//            }
+//        }finally {
+//            if(repoPath!=null)
+//                restInterfaceManager.freeRepoPath(repo_id,repoPath);
+//        }
+//        return commitCounts;
+//    }
+
     @Override
     public int getCommitCountsByDuration(String repo_id, String since, String until) {
-        String repoPath=null;
-        int commitCounts = -1;
-        try{
-            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
-            if(repoPath!=null){
-
-            //获取repo一段时间内的commit次数
-            commitCounts = gitUtil.getCommitCount(repoPath,since,until,null);
-
+        JSONArray commits = restInterfaceManager.getCommitList(repo_id);
+        String sinceday = dateFormatChange(since);
+        String untilday = dateFormatChange(until);
+        LocalDate sinceDay = LocalDate.parse(sinceday,DateTimeUtil.Y_M_D_formatter);
+        LocalDate untilDay = LocalDate.parse(untilday,DateTimeUtil.Y_M_D_formatter);
+        int commitCounts = 0;
+        for(int i=0;i<commits.size();i++){
+            JSONObject project = commits.getJSONObject(i);
+            //截取当前commit时间的日期部分
+            String time = project.getString("commit_time").substring(0,10);
+            //当前commit日期
+            LocalDate commitDay=LocalDate.parse(time,DateTimeUtil.Y_M_D_formatter);
+            if (commitDay.isAfter(sinceDay) && commitDay.isBefore(untilDay)){
+                commitCounts++;
             }
-        }finally {
-            if(repoPath!=null)
-                restInterfaceManager.freeRepoPath(repo_id,repoPath);
         }
         return commitCounts;
     }
+
+    //把日期格式从“2010.10.10转化为2010-10-10”
+    private String dateFormatChange(String dateStr){
+        String newdateStr = dateStr.replace('.','-');
+        return newdateStr;
+    }
+
+
+
 
     @Override
     public double getQuantityByCommitAndCategory(String repo_id, String commit_id, String category,String token ) {
