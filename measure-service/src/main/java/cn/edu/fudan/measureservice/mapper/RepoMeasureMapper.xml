@@ -39,6 +39,7 @@
         <result property="del_lines" column="del_lines"/>
     </resultMap>
 
+<!--    getCommitBaseByCommit-->
     <resultMap id="commitBase" type="CommitBase">
         <result property="addLines" column="add_lines"/>
         <result property="delLines" column="del_lines"/>
@@ -46,6 +47,12 @@
             <result property="name" column="developer_name"/>
             <result property="email" column="developer_email"/>
         </collection>
+    </resultMap>
+
+<!--    getDeveloperListByDuration-->
+    <resultMap id="developerListByDuration" type="Developer">
+        <result property="name" column="developer_name"/>
+        <result property="email" column="developer_email"/>
     </resultMap>
 
     <insert id="insertOneRepoMeasure" >
@@ -105,6 +112,21 @@
         select
             developer_name,developer_email,add_lines,del_lines
         from repo_measure where repo_id = #{repo_id} and commit_id = #{commit_id}
+    </select>
+
+
+    <select id="getDeveloperListByDuration" resultMap="developerListByDuration">
+        select
+            developer_name,developer_email
+        from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until};
+    </select>
+
+    <select id="getAddLinesByDuration" resultType="int">
+        select SUM(add_lines) from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until};
+    </select>
+
+    <select id="getDelLinesByDuration" resultType="int">
+        select SUM(del_lines) from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until};
     </select>
 
     <select id="getLatestMeasureData" resultMap="repoMeasure">

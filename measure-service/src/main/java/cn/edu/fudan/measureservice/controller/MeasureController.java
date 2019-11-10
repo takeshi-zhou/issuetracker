@@ -93,7 +93,7 @@ public class MeasureController {
                                                @RequestParam("since")String since,
                                                @RequestParam("until")String until){
         try{
-            return new ResponseBean(200,"success",measureService.getCommitBaseInformationByDuration(repo_id, since,until));
+            return new ResponseBean(200,"success",measureService.getCommitBaseInformationByDuration(repo_id, since, until));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",null);

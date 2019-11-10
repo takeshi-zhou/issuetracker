@@ -1,6 +1,7 @@
 package cn.edu.fudan.measureservice.mapper;
 
 import cn.edu.fudan.measureservice.domain.CommitBase;
+import cn.edu.fudan.measureservice.domain.Developer;
 import cn.edu.fudan.measureservice.domain.RepoMeasure;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -17,13 +18,19 @@ public interface RepoMeasureMapper {
 
     CommitBase getCommitBaseInformation(@Param("repo_id")String repo_id,@Param("commit_id")String commit_id);
 
+    List<Developer> getDeveloperListByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
+
+    int getAddLinesByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
+
+    int getDelLinesByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
+
     void insertOneRepoMeasure(RepoMeasure repoMeasure);
 
     RepoMeasure getLatestMeasureData(@Param("repo_id")String repo_id);
 
     RepoMeasure getFirstMeasureDataAfterDuration(@Param("repo_id")String repo_id,@Param("time_line") Date time_line);
 
-    List<RepoMeasure> getRepoMeasureBetween(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String util);
+    List<RepoMeasure> getRepoMeasureBetween(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
 
     void delRepoMeasureByRepoId(@Param("repo_id")String repo_id);
 
