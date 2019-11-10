@@ -625,10 +625,27 @@ public class MeasureServiceImpl implements MeasureService {
         int startYear = startDate.getYear();
         int startMonth = startDate.getMonthValue();
         int startDay = startDate.getDayOfMonth();
+        String startMonthStr = String.valueOf(startMonth);
+        String startDayStr = String.valueOf(startDay);
+        String nowMonthStr = String.valueOf(nowMonth);
+        String nowDayStr = String.valueOf(nowDay);
+        if (startMonth<10){
+            startMonthStr = "0" + String.valueOf(startMonth);
+        }
+        if (startDay<10){
+            startDayStr = "0" + String.valueOf(startDay);
+        }
+        if (nowMonth<10){
+            nowMonthStr = "0" + String.valueOf(nowMonth);
+        }
+        if (nowDay<10){
+            nowDayStr = "0" + String.valueOf(nowDay);
+        }
 
-        String start = startYear+"."+startMonth+"."+startDay;
-        String now = nowYear+"."+nowMonth+"."+nowDay;
-
+        String start = startYear+"."+startMonthStr+"."+startDayStr;
+        String now = nowYear+"."+nowMonthStr+"."+nowDayStr;
+        System.out.println(start);
+        System.out.println(now);
         int commitCount = getCommitCountsByDuration(repo_id,start,now);
         if(commitCount != -1){
             if(commitCount <= inactive){
