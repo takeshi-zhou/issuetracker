@@ -37,4 +37,14 @@ public interface ProjectService {
     void updateProjectFirstAutoScan(String repoId,String type);
 
     Project getProjectByRepoIdAndCategory(String userToken,String repoId,String category);
+
+    /**
+     * 根据条件筛选出相应的project列表
+     * @param userToken
+     * @param category
+     * @param name
+     * @param module
+     * @return 返回符合条件的project列表
+     */
+    List<Project> getProjectsByCondition(String userToken,String category,String name,String module);
 }

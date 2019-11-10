@@ -4,6 +4,8 @@ import cn.edu.fudan.scanservice.exception.AuthException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -18,6 +20,7 @@ import java.util.List;
 @Component
 public class RestInterfaceManager {
 
+
     @Value("${account.service.path}")
     private String accountServicePath;
     @Value("${project.service.path}")
@@ -30,6 +33,8 @@ public class RestInterfaceManager {
     private String issueServicePath;
     @Value("${code.service.path}")
     private String codeServicePath;
+    @Value("${sonar.service.path}")
+    private String sonarServicePath;
 
     private RestTemplate restTemplate;
 
@@ -37,8 +42,10 @@ public class RestInterfaceManager {
         this.restTemplate = restTemplate;
     }
 
+    private Logger logger = LoggerFactory.getLogger(RestInterfaceManager.class);
+
     //----------------------------------account service----------------------------------------------------
-    public void userAuth(String userToken)throws AuthException {
+    public void userAuth(String userToken) throws AuthException {
         JSONObject result = restTemplate.getForObject(accountServicePath + "/user/auth/" + userToken, JSONObject.class);
         if (result == null || result.getIntValue("code") != 200) {
             throw new AuthException("auth failed!");
@@ -46,36 +53,38 @@ public class RestInterfaceManager {
     }
 
     //-----------------------------------commit service-------------------------------------------------------
-    public JSONObject checkOut(String repo_id,String commit_id){
+    public JSONObject checkOut(String repo_id, String commit_id) {
         return restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class);
     }
-    public JSONObject getCommitTime(String commitId){
-        return restTemplate.getForObject(commitServicePath+"/commit-time?commit_id="+commitId,JSONObject.class);
+
+    public JSONObject getCommitTime(String commitId) {
+        return restTemplate.getForObject(commitServicePath + "/commit-time?commit_id=" + commitId, JSONObject.class);
     }
 
-    public JSONObject getCommitByCommitId(String commitId){
-        return restTemplate.getForObject(commitServicePath+"/commit/"+ commitId,JSONObject.class);
+    public JSONObject getCommitByCommitId(String commitId) {
+        return restTemplate.getForObject(commitServicePath + "/commit/" + commitId, JSONObject.class);
     }
 
-    public JSONObject getCommitsOfRepo(String repoId,Integer page,Integer size){
+    public JSONObject getCommitsOfRepo(String repoId, Integer page, Integer size) {
         return restTemplate.getForObject(commitServicePath + "?repo_id=" + repoId + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class);
     }
 
     //-----------------------------------repo service--------------------------------------------------------
-    public JSONObject getRepoById(String repoId){
+    public JSONObject getRepoById(String repoId) {
         return restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
     }
 
     //-----------------------------------issue service-------------------------------------------------------
-    public JSONObject mapping(JSONObject requestParam){
+    public JSONObject mapping(JSONObject requestParam) {
         return restTemplate.postForObject(issueServicePath + "/inner/issue/mapping", requestParam, JSONObject.class);
     }
 
-    public void insertRawIssuesWithLocations(List<JSONObject> rawIssues){
-        restTemplate.postForObject(issueServicePath+"/inner/raw-issue",rawIssues,JSONObject.class);
+    public void insertRawIssuesWithLocations(List<JSONObject> rawIssues) {
+        restTemplate.postForObject(issueServicePath + "/inner/raw-issue", rawIssues, JSONObject.class);
     }
-    public void deleteRawIssueOfRepo(String repoId,String category){
-        restTemplate.delete(issueServicePath + "/inner/raw-issue/" +category+"/"+ repoId);
+
+    public void deleteRawIssueOfRepo(String repoId, String category) {
+        restTemplate.delete(issueServicePath + "/inner/raw-issue/" + category + "/" + repoId);
     }
 
     //-----------------------------------------------project service-------------------------------------------------
@@ -83,8 +92,8 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(projectServicePath + "/inner/project/repo-id?project-id=" + projectId, String.class);
     }
 
-    public JSONArray getProjectsOfRepo(String repoId){
-        return restTemplate.getForObject(projectServicePath + "/inner/project?repo_id=" + repoId,JSONArray.class);
+    public JSONArray getProjectsOfRepo(String repoId) {
+        return restTemplate.getForObject(projectServicePath + "/inner/project?repo_id=" + repoId, JSONArray.class);
     }
 
     public void updateProject(JSONObject projectParam) {
@@ -94,28 +103,29 @@ public class RestInterfaceManager {
             throw new RuntimeException("project update failed!");
         }
     }
-    public JSONObject existThisProject(String repoId,String category,boolean isFirst){
-        return restTemplate.getForObject(projectServicePath+"/inner/project/exist?repo_id="+repoId+"&type="+category+"&is_first="+isFirst,JSONObject.class);
+
+    public JSONObject existThisProject(String repoId, String category, boolean isFirst) {
+        return restTemplate.getForObject(projectServicePath + "/inner/project/exist?repo_id=" + repoId + "&type=" + category + "&is_first=" + isFirst, JSONObject.class);
     }
 
-    public void updateFirstAutoScannedToTrue(String repoId,String category){
-        try{
-            restTemplate.put(projectServicePath+"/inner/project/first-auto-scan?repo_id="+repoId+"&type="+category,JSONObject.class);
-        }catch (Exception e) {
+    public void updateFirstAutoScannedToTrue(String repoId, String category) {
+        try {
+            restTemplate.put(projectServicePath + "/inner/project/first-auto-scan?repo_id=" + repoId + "&type=" + category, JSONObject.class);
+        } catch (Exception e) {
             throw new RuntimeException("project update failed!");
         }
     }
 
     //---------------------------------------------code service---------------------------------------------------------
-    public String getRepoPath(String repoId,String commit_id){
-        String repoPath=null;
-        JSONObject response=restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId+"&commit_id="+commit_id, JSONObject.class).getJSONObject("data");
-        if (response != null ){
-            if(response.getString("status").equals("Successful")) {
-                repoPath=response.getString("content");
-                log.info("repoHome -> {}" ,repoPath);
-            }else{
-                log.error("get repoHome fail -> {}",response.getString("content"));
+    public String getRepoPath(String repoId, String commit_id) {
+        String repoPath = null;
+        JSONObject response = restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId + "&commit_id=" + commit_id, JSONObject.class).getJSONObject("data");
+        if (response != null) {
+            if (response.getString("status").equals("Successful")) {
+                repoPath = response.getString("content");
+                log.info("repoHome -> {}", repoPath);
+            } else {
+                log.error("get repoHome fail -> {}", response.getString("content"));
             }
         } else {
             log.error("code service response null!");
@@ -123,10 +133,43 @@ public class RestInterfaceManager {
         return repoPath;
     }
 
-    public JSONObject freeRepoPath(String repoId,String repoPath){
-        if(repoPath!=null)
-            return restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId+"&path="+repoPath, JSONObject.class);
+    public JSONObject freeRepoPath(String repoId, String repoPath) {
+        if (repoPath != null)
+            return restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId + "&path=" + repoPath, JSONObject.class);
         return null;
     }
 
+
+    //--------------------------------------------------------sonar api -----------------------------------------------------
+    public JSONObject getSonarIssueResults(String repoName, String type, int pageSize, boolean resolved) {
+        try {
+            if(type != null && (type.equals("CODE_SMELL") || type.equals("BUG") || type.equals("VULNERABILITY") ||type.equals("SECURITY_HOTSPOT"))){
+                return restTemplate.getForObject(sonarServicePath + "/api/issues/search?componentKeys="
+                        + repoName
+                        + "&s=FILE_LINE&resolved="
+                        + resolved
+                        + "&types="
+                        + type
+                        + "&ps="
+                        + pageSize
+                        + "&organization=default-organization&facets=severities%2Ctypes&additionalFields=_all", JSONObject.class);
+            }else if(type == null ){
+                return restTemplate.getForObject(sonarServicePath + "/api/issues/search?componentKeys="
+                        + repoName
+                        + "&s=FILE_LINE&resolved="
+                        + resolved
+                        + "&ps="
+                        + pageSize
+                        + "&organization=default-organization&facets=severities%2Ctypes&additionalFields=_all", JSONObject.class);
+            }else{
+                logger.error("this request type is not available in sonar api");
+                return null;
+            }
+
+        } catch (RuntimeException e) {
+            logger.error("repo name : {}  ----> request sonar api failed", repoName);
+            throw new RuntimeException("get sonar result failed");
+        }
+    }
 }
+

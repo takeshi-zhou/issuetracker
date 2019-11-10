@@ -160,4 +160,16 @@ public interface MeasureService {
     Object getRepoListByDeveloperName(String developer_name,String token,String category);
 
 
+    /**
+     * 获取在issueTracker用户下，该用户最近一定数量的commit的代码质量度量信息
+     * @param developer_name 开发者的提交名字
+     * @param token 用户token
+     * @param category 工具类别
+     * @param counts commit数量
+     * @param project_name 项目名
+     * @return 项目以及项目的活跃度
+     */
+    Object getQualityChangesByDeveloperName(String developer_name,String token,String category,int counts,String project_name );
+
+
 }

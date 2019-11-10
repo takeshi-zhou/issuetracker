@@ -92,4 +92,9 @@ public class ProjectDao {
     public Project getProjectByRepoIdAndCategory( String account_id, String repoId,String category){
         return projectMapper.getProjectByRepoIdAndCategory(account_id, repoId,category);
     }
+
+    public List<Project> getProjectsByCondition( String account_id, String category, String name, String module){
+        return projectMapper.getProjectsByCondition(account_id, category,name,module);
+    }
+
 }

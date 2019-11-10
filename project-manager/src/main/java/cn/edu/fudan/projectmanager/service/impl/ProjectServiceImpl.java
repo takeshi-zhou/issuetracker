@@ -294,4 +294,11 @@ public class ProjectServiceImpl implements ProjectService {
         String account_id = restInterfaceManager.getAccountId(userToken);
         return projectDao.getProjectByRepoIdAndCategory(account_id,repoId,category);
     }
+
+    @Override
+    public List<Project> getProjectsByCondition(String userToken, String category, String name, String module) {
+        String account_id = restInterfaceManager.getAccountId(userToken);
+        List<Project> projects = projectDao.getProjectsByCondition(account_id,category,name,module);
+        return projects;
+    }
 }

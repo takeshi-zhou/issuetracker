@@ -259,4 +259,22 @@ public class MeasureController {
         }
     }
 
+    @GetMapping("/measure/developer/quality-changes")
+    @CrossOrigin
+    public ResponseBean getQualityChangesByDeveloperName(
+            @RequestParam("developer_name")String developerName,
+            @RequestParam("category")String category,
+            @RequestParam(value="counts" ,required =false,defaultValue = "0")int counts,
+            @RequestParam(value="project_name" ,required =false )String projectName,
+            HttpServletRequest request
+    ){
+        try{
+            String token = request.getHeader("token");
+            return new ResponseBean(200,"success",measureService.getQualityChangesByDeveloperName(developerName,token,category,counts,projectName));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
 }

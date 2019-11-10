@@ -170,7 +170,7 @@
     <select id="getProjectCountWithThisRepoIdAndType" parameterType="String" resultType="int">
         select count(uuid)
         from project
-        where repo_id = #{repo_id} and type = #{type} and first_auto_scan = 0
+        where repo_id = #{repo_id} and type = #{type}
     </select>
 
     <select id="getProjectByRepoIdAndCategory" parameterType="String" resultMap="project">
@@ -178,5 +178,23 @@
         from project
         where repo_id = #{repo_id} and type = #{category} and account_id = #{account_id}
     </select>
+
+    <select id="getProjectsByCondition" parameterType="String" resultMap="project">
+        select uuid,name,language,url,vcs_type,type,account_id,download_status,scan_status,add_time,till_commit_time,last_scan_time,description,repo_id,branch,first_auto_scan,module
+        from project
+        <where>
+            account_id = #{account_id}
+            <if test="type != null and type != '' ">
+                and type = #{type}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="module != null and module != ''">
+                and module = #{module}
+            </if>
+        </where>
+    </select>
+
 
 </mapper>
