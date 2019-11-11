@@ -88,6 +88,13 @@ public interface MeasureService {
     CommitBase getCommitBaseInformationByDuration(String repo_id,String since,String until);
 
     /**
+     * 获取一个项目每个月的commitBaseInfo
+     * @param repo_id repo的唯一标识
+     * @return 一个repo每月的代码变化信息以及提交者的信息
+     */
+    List<CommitBaseInfoMonthly> getCommitBaseInfoMonthly(String repo_id);
+
+    /**
      * 获取一个项目在指定一段时间内提交次数
      * @param repo_id repo的唯一标识
      * @param since 起始时间
