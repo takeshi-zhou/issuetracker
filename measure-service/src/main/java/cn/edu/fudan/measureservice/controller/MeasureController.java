@@ -101,6 +101,20 @@ public class MeasureController {
 
     }
 
+    //获取repo每月的commitBaseInfo
+    @GetMapping("/measure/repository/commitBaseInfo-monthly")
+    @CrossOrigin
+    public ResponseBean getCodeChangesByDuration(@RequestParam("repo_id")String repo_id){
+
+        try{
+            return new ResponseBean(200,"success",measureService.getCommitBaseInfoMonthly(repo_id));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+
+    }
+
     @GetMapping("/measure/repository/commit-counts")
     @CrossOrigin
     public ResponseBean getRepoCommitCountsByCommit(@RequestParam("repo_id")String repo_id,

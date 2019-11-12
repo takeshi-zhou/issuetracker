@@ -20,9 +20,9 @@ public interface RepoMeasureMapper {
 
     List<Developer> getDeveloperListByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
 
-    int getAddLinesByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
+    Integer getAddLinesByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
 
-    int getDelLinesByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
+    Integer getDelLinesByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
 
     void insertOneRepoMeasure(RepoMeasure repoMeasure);
 

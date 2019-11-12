@@ -121,12 +121,12 @@
         from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until};
     </select>
 
-    <select id="getAddLinesByDuration" resultType="int">
-        select SUM(add_lines) from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until};
+    <select id="getAddLinesByDuration" resultType="Integer">
+        select IFNULL(SUM(add_lines),0) from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until};
     </select>
 
-    <select id="getDelLinesByDuration" resultType="int">
-        select SUM(del_lines) from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until};
+    <select id="getDelLinesByDuration" resultType="Integer">
+        select IFNULL(SUM(del_lines),0) from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until};
     </select>
 
     <select id="getLatestMeasureData" resultMap="repoMeasure">

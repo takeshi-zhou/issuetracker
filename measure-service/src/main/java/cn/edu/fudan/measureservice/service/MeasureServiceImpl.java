@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.tomcat.jni.Local;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -457,6 +458,42 @@ public class MeasureServiceImpl implements MeasureService {
         commitBase.setAddLines(addLines);
         commitBase.setDelLines(delLines);
         return commitBase;
+    }
+
+    @Override
+    public List<CommitBaseInfoMonthly> getCommitBaseInfoMonthly(String repo_id){
+        List<CommitBaseInfoMonthly> result=new ArrayList<>();
+        JSONArray commits = restInterfaceManager.getCommitList(repo_id);
+        //获取查询时的日期 也就是今天的日期 记作indexDay
+        LocalDate indexDay = LocalDate.now();
+        System.out.println(indexDay);
+        CommitBase commitBase = new CommitBase();
+
+        //获取最早一次提交的commit信息
+        int len = commits.size();
+        JSONObject project = commits.getJSONObject(len-1);
+        String time = project.getString("commit_time").substring(0,10);
+        //最早一次commit日期
+        LocalDate startDay=LocalDate.parse(time,DateTimeUtil.Y_M_D_formatter);
+        while(indexDay.isAfter(startDay)){
+            //当月第一天
+            LocalDate first = indexDay.with(TemporalAdjusters.firstDayOfMonth());
+            //当月最后一天
+            LocalDate last = indexDay.with(TemporalAdjusters.lastDayOfMonth());
+            commitBase = getCommitBaseInformationByDuration(repo_id, first.toString(), last.toString());
+            result.add(getCommitBaseMonth(indexDay.toString().substring(0,7), commitBase));
+            //indexDay 变成上个月最后一天
+            indexDay = first.minusDays(1);
+        }
+
+        return result;
+    }
+
+    private CommitBaseInfoMonthly getCommitBaseMonth(String time, CommitBase commitBase){
+        CommitBaseInfoMonthly commitBaseInfoMonthly=new CommitBaseInfoMonthly();
+        commitBaseInfoMonthly.setMonth(time);
+        commitBaseInfoMonthly.setCommitBaseInfo(commitBase);
+        return commitBaseInfoMonthly;
     }
 
 
