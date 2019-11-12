@@ -1,6 +1,7 @@
 package cn.edu.fudan.measureservice.mapper;
 
 import cn.edu.fudan.measureservice.domain.CommitBase;
+import cn.edu.fudan.measureservice.domain.CommitInfoDeveloper;
 import cn.edu.fudan.measureservice.domain.Developer;
 import cn.edu.fudan.measureservice.domain.RepoMeasure;
 import org.apache.ibatis.annotations.Param;
@@ -19,6 +20,8 @@ public interface RepoMeasureMapper {
     CommitBase getCommitBaseInformation(@Param("repo_id")String repo_id,@Param("commit_id")String commit_id);
 
     List<Developer> getDeveloperListByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
+
+    List<CommitInfoDeveloper> getCommitInfoDeveloperListByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
 
     Integer getAddLinesByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
 

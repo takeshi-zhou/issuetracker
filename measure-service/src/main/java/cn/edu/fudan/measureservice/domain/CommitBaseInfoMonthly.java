@@ -4,7 +4,7 @@ package cn.edu.fudan.measureservice.domain;
 public class CommitBaseInfoMonthly {
 
     private String month;
-    private CommitBase commitBase;
+    private CommitBaseInfoDuration commitBaseInfoDuration;
 
 
     public String getMonth() {
@@ -15,12 +15,12 @@ public class CommitBaseInfoMonthly {
         this.month = month;
     }
 
-    public CommitBase getCommitBaseInfo() {
-        return commitBase;
+    public CommitBaseInfoDuration getCommitBaseInfo() {
+        return commitBaseInfoDuration;
     }
 
-    public void setCommitBaseInfo(CommitBase commitBase) {
-        this.commitBase = commitBase;
+    public void setCommitBaseInfo(CommitBaseInfoDuration commitBaseInfoDuration) {
+        this.commitBaseInfoDuration = commitBaseInfoDuration;
     }
 
 }

@@ -87,6 +87,7 @@ public class MeasureController {
 
     }
 
+    //获取一个repo在一段时间内的所有开发者的commit信息
     @GetMapping("/measure/repository/duration")
     @CrossOrigin
     public ResponseBean getCodeChangesByDuration(@RequestParam("repo_id")String repo_id,

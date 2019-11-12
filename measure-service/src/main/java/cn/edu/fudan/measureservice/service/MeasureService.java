@@ -79,13 +79,13 @@ public interface MeasureService {
     CommitBase getCommitBaseInformation(String repo_id,String commit_id);
 
     /**
-     * 获取一个项目在某个特定commit快照下代码行数的变化
+     * 获取一个项目在一段时间代码变化信息以及提交者的信息
      * @param repo_id repo的唯一标识
      * @param since 起始时间
      * @param until 终止时间
      * @return repo的一段时间代码变化信息以及提交者的信息
      */
-    CommitBase getCommitBaseInformationByDuration(String repo_id,String since,String until);
+    CommitBaseInfoDuration getCommitBaseInformationByDuration(String repo_id,String since,String until);
 
     /**
      * 获取一个项目每个月的commitBaseInfo

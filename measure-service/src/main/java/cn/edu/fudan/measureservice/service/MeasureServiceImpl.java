@@ -102,10 +102,10 @@ public class MeasureServiceImpl implements MeasureService {
                 time_line=now.minusWeeks(1);
         }
         //当前时间该项目的度量值
-        log.info("开始获取第一个度量........");
+        logger.info("开始获取第一个度量........");
         RepoMeasure measure1=repoMeasureMapper.getLatestMeasureData(repoId);
         //某个时间跨度之前项目的度量值
-        log.info("开始获取第二个度量........");
+        logger.info("开始获取第二个度量........");
         RepoMeasure measure2=repoMeasureMapper.getFirstMeasureDataAfterDuration(repoId,DateTimeUtil.transfer(time_line));
         if(measure1!=null&&measure2!=null){
             Map<String,Object> measureChanges=new HashMap<>();
@@ -138,7 +138,7 @@ public class MeasureServiceImpl implements MeasureService {
     @KafkaListener(id = "measure", topics = {"Measure"}, groupId = "measure")
     public void commitInfoListener(ConsumerRecord<String, String> consumerRecord, Acknowledgment ack) {
         List<CommitWithTime> commits=JSONArray.parseArray(consumerRecord.value(),CommitWithTime.class);
-        log.info("received message from topic -> " + consumerRecord.topic() + " : " + commits.size()+" commits need to scan!");
+        logger.info("received message from topic -> " + consumerRecord.topic() + " : " + commits.size()+" commits need to scan!");
         ack.acknowledge();
         for(CommitWithTime commit:commits){
             String commitId = commit.getCommitId();
@@ -156,7 +156,7 @@ public class MeasureServiceImpl implements MeasureService {
             }
             saveMeasureData(commit.getRepoId(),commitId,commit.getCommitTime(),developer_name,developer_email);
         }
-        log.info("all complete!!!");
+        logger.info("all complete!!!");
     }
 
     //保存某个项目某个commit的度量信息
@@ -419,26 +419,6 @@ public class MeasureServiceImpl implements MeasureService {
         return repoRank;
     }
 
-
-
-//    @Override
-//    public CommitBase getCommitBaseInformation(String repo_id, String commit_id) {
-//        String repoPath=null;
-//        CommitBase commitBase = null;
-//        try{
-//            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
-//            if(repoPath!=null){
-//                commitBase = gitUtil.getOneCommitChanges(repoPath,commit_id);
-//            }
-//        }finally {
-//            if(repoPath!=null)
-//                restInterfaceManager.freeRepoPath(repo_id,repoPath);
-//        }
-//        return commitBase;
-//    }
-
-
-
     @Override
     public CommitBase getCommitBaseInformation(String repo_id, String commit_id) {
 
@@ -448,16 +428,18 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     @Override
-    public CommitBase getCommitBaseInformationByDuration(String repo_id,String since,String until) {
-        CommitBase commitBase = new CommitBase();
+    public CommitBaseInfoDuration getCommitBaseInformationByDuration(String repo_id,String since,String until) {
+        CommitBaseInfoDuration commitBaseInfoDuration = new CommitBaseInfoDuration();
+        String sinceDay = dateFormatChange(since);
+        String untilDay = dateFormatChange(until);
 
-        List<Developer> developers = repoMeasureMapper.getDeveloperListByDuration(repo_id, since, until);
-        int addLines = repoMeasureMapper.getAddLinesByDuration(repo_id, since, until);
-        int delLines = repoMeasureMapper.getDelLinesByDuration(repo_id, since, until);
-        commitBase.setAuthors(developers);
-        commitBase.setAddLines(addLines);
-        commitBase.setDelLines(delLines);
-        return commitBase;
+        List<CommitInfoDeveloper> CommitInfoDeveloper = repoMeasureMapper.getCommitInfoDeveloperListByDuration(repo_id, sinceDay, untilDay);
+        int addLines = repoMeasureMapper.getAddLinesByDuration(repo_id, sinceDay, untilDay);
+        int delLines = repoMeasureMapper.getDelLinesByDuration(repo_id, sinceDay, untilDay);
+        commitBaseInfoDuration.setCommitInfoList(CommitInfoDeveloper);
+        commitBaseInfoDuration.setSumAddLines(addLines);
+        commitBaseInfoDuration.setSumDelLines(delLines);
+        return commitBaseInfoDuration;
     }
 
     @Override
@@ -467,7 +449,7 @@ public class MeasureServiceImpl implements MeasureService {
         //获取查询时的日期 也就是今天的日期 记作indexDay
         LocalDate indexDay = LocalDate.now();
         System.out.println(indexDay);
-        CommitBase commitBase = new CommitBase();
+        CommitBaseInfoDuration commitBaseInfoDuration = new CommitBaseInfoDuration();
 
         //获取最早一次提交的commit信息
         int len = commits.size();
@@ -480,8 +462,8 @@ public class MeasureServiceImpl implements MeasureService {
             LocalDate first = indexDay.with(TemporalAdjusters.firstDayOfMonth());
             //当月最后一天
             LocalDate last = indexDay.with(TemporalAdjusters.lastDayOfMonth());
-            commitBase = getCommitBaseInformationByDuration(repo_id, first.toString(), last.toString());
-            result.add(getCommitBaseMonth(indexDay.toString().substring(0,7), commitBase));
+            commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, first.toString(), last.toString());
+            result.add(getCommitBaseMonth(indexDay.toString().substring(0,7), commitBaseInfoDuration));
             //indexDay 变成上个月最后一天
             indexDay = first.minusDays(1);
         }
@@ -489,10 +471,10 @@ public class MeasureServiceImpl implements MeasureService {
         return result;
     }
 
-    private CommitBaseInfoMonthly getCommitBaseMonth(String time, CommitBase commitBase){
+    private CommitBaseInfoMonthly getCommitBaseMonth(String time, CommitBaseInfoDuration commitBaseInfoDuration){
         CommitBaseInfoMonthly commitBaseInfoMonthly=new CommitBaseInfoMonthly();
         commitBaseInfoMonthly.setMonth(time);
-        commitBaseInfoMonthly.setCommitBaseInfo(commitBase);
+        commitBaseInfoMonthly.setCommitBaseInfo(commitBaseInfoDuration);
         return commitBaseInfoMonthly;
     }
 
@@ -534,97 +516,6 @@ public class MeasureServiceImpl implements MeasureService {
         return commitCountsMonthly;
     }
 
-
-//    @Override
-//    public CommitBase getCommitBaseInformationByDuration(String repo_id, String since, String until) {
-//        String repoPath=null;
-//        CommitBase commitBase = new CommitBase();
-//        try{
-//            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
-//            if(repoPath!=null){
-//
-//                //获取repo一段时间内行数变化值
-//                int[] lineChanges = gitUtil.getRepoLineChanges(repoPath,since,until,null);
-//                commitBase.setAddLines(lineChanges[0]);
-//                commitBase.setDelLines(lineChanges[1]);
-//
-//                //获取repo一段时间内开发者列表信息
-//                List<Developer> developers = gitUtil.getRepoDevelopers(repoPath,since,until);
-//                commitBase.setAuthors(developers);
-//            }
-//        }finally {
-//            if(repoPath!=null)
-//                restInterfaceManager.freeRepoPath(repo_id,repoPath);
-//        }
-//
-//        return commitBase;
-//    }
-
-//    @Override
-//    public CommitBase getCommitBaseInformationByDuration(String repo_id, String since, String until) {
-//        String repoPath=null;
-//        CommitBase result = new CommitBase();
-//        //循环中每个符合条件的commit
-//        CommitBase currentCommitBase = new CommitBase();
-//        int addLines = 0;
-//        int delLines = 0;
-//        try{
-//            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
-//            if(repoPath!=null){
-//
-//                JSONArray commits = restInterfaceManager.getCommitList(repo_id);
-//                String sinceday = dateFormatChange(since);
-//                String untilday = dateFormatChange(until);
-//                LocalDate sinceDay = LocalDate.parse(sinceday,DateTimeUtil.Y_M_D_formatter);
-//                LocalDate untilDay = LocalDate.parse(untilday,DateTimeUtil.Y_M_D_formatter);
-//                int commitCounts = 0;
-//                for(int i=0;i<commits.size();i++){
-//                    JSONObject project = commits.getJSONObject(i);
-//                    //截取当前commit时间的日期部分
-//                    String time = project.getString("commit_time").substring(0,10);
-//                    String commit_id = project.getString("commit_id");
-//                    //当前commit日期
-//                    LocalDate commitDay=LocalDate.parse(time,DateTimeUtil.Y_M_D_formatter);
-//                    if (commitDay.isAfter(sinceDay) && commitDay.isBefore(untilDay)){
-//                        commitCounts++;
-//                    }
-//                }
-//
-//                //获取repo一段时间内行数变化值
-//                int[] lineChanges = gitUtil.getRepoLineChanges(repoPath,since,until,null);
-//                commitBase.setAddLines(lineChanges[0]);
-//                commitBase.setDelLines(lineChanges[1]);
-//
-//                //获取repo一段时间内开发者列表信息
-//                List<Developer> developers = gitUtil.getRepoDevelopers(repoPath,since,until);
-//                commitBase.setAuthors(developers);
-//            }
-//        }finally {
-//            if(repoPath!=null)
-//                restInterfaceManager.freeRepoPath(repo_id,repoPath);
-//        }
-//
-//        return commitBase;
-//    }
-
-//    @Override
-//    public int getCommitCountsByDuration(String repo_id, String since, String until) {
-//        String repoPath=null;
-//        int commitCounts = -1;
-//        try{
-//            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
-//            if(repoPath!=null){
-//
-//            //获取repo一段时间内的commit次数
-//            commitCounts = gitUtil.getCommitCount(repoPath,since,until,null);
-//
-//            }
-//        }finally {
-//            if(repoPath!=null)
-//                restInterfaceManager.freeRepoPath(repo_id,repoPath);
-//        }
-//        return commitCounts;
-//    }
 
     @Override
     public int getCommitCountsByDuration(String repo_id, String since, String until) {
@@ -692,7 +583,7 @@ public class MeasureServiceImpl implements MeasureService {
                     changes.put("addedQuantity",-1);
                 }
             }else{
-                log.error("ScanResult 未记录该commit");
+                logger.error("ScanResult 未记录该commit");
             }
 
             int eliminatedIssues = restInterfaceManager.getNumberOfEliminateIssueByCommit(repo_id,commit_id,category,spaceType,token);
@@ -703,7 +594,7 @@ public class MeasureServiceImpl implements MeasureService {
                 changes.put("eliminatedQuantity",-1);
             }
         }else {
-            log.error("not get repo path!");
+            logger.error("not get repo path!");
         }
 
 
