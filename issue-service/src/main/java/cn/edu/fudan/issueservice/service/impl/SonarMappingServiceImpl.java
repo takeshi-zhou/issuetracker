@@ -44,7 +44,11 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
 
 
     public void insertLocations(String rawIssueUUID,JSONObject issue){
+        int startLine;
+        int endLine;
         JSONObject textRange = issue.getJSONObject("textRange");
+        startLine = textRange.getIntValue("startLine");
+        endLine = textRange.getIntValue("endLine");
         JSONArray flows = issue.getJSONArray("flows");
 
     }

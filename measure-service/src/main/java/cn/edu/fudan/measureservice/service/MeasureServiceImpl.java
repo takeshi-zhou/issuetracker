@@ -829,18 +829,21 @@ public class MeasureServiceImpl implements MeasureService {
         }
 
         List<RepoMeasure> repoMeasures;
-        JSONObject result = restInterfaceManager.getProjectListByCondition(token,category,project_name,null);
-        int code =result.getIntValue("code");
-        if(code != 200){
-            logger.error("request project api failed  ---> {}",project_name);
-            return null;
-        }
-        JSONArray projects = result.getJSONArray("data");
-        if(projects.size() == 0){
-            logger.info("do not have this project --> {}",project_name );
-            return "do not have this project --> "+project_name ;
-        }
-        if(project_name!=null){
+        //如果projectName的名字为null则表示用户在所有project列表中最近30次commit的代码质量信息
+        if(project_name==null){
+            repoMeasures = repoMeasureMapper.getRepoMeasureByDeveloperAndRepoId(null,developer_name,counts);
+        }else{
+            JSONObject result = restInterfaceManager.getProjectListByCondition(token,category,project_name,null);
+            int code =result.getIntValue("code");
+            if(code != 200){
+                logger.error("request project api failed  ---> {}",project_name);
+                return null;
+            }
+            JSONArray projects = result.getJSONArray("data");
+            if(projects.size() == 0){
+                logger.info("do not have this project --> {}",project_name );
+                return "do not have this project --> "+project_name ;
+            }
             if (projects.size() > 1){
                 // 这一段的方法待优化 可以在多个project中取最近counts 次数的commits的度量
                 logger.info("more than one project named --> {}",project_name );
@@ -849,9 +852,9 @@ public class MeasureServiceImpl implements MeasureService {
             JSONObject project =  projects.getJSONObject(0);
             String repoId = project.getString("repo_id");
             repoMeasures = repoMeasureMapper.getRepoMeasureByDeveloperAndRepoId(repoId,developer_name,counts);
-        }else{
-            repoMeasures = repoMeasureMapper.getRepoMeasureByDeveloperAndRepoId(null,developer_name,counts);
+
         }
+
 
         List<CodeQuality> queries = new ArrayList<>();
         for(RepoMeasure repoMeasure :repoMeasures){

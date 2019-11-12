@@ -101,8 +101,6 @@ public class ProjectController {
             return new ResponseBean(401, "project add failed! No such repo found!", null);
         }
 
-//        return projectService.getProjectByRepoIdAndCategory(userToken, repoId,category).getName();
-
     }
 
 

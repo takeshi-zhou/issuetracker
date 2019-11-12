@@ -33,23 +33,23 @@ public class ProjectDaoTest extends ProjectManagerApplicationTests {
         this.restTemplate=restTemplate;
     }
 
-    @Test
-    public void addOneProject() {
-        ResponseEntity<String> resp = restTemplate.getForEntity("https://api.github.com/repos/qiurunze123/miaosha", String.class);
-        JSONObject json = JSONObject.parseObject(resp.getBody());
-        Project project = new Project();
-        project.setUuid("pro1");
-        project.setName("Java");
-        project.setLanguage("Java");
-        project.setType("bug");
-        project.setUrl("https://github.com/qiurunze123/miaosha");
-        project.setVcs_type("git");
-        project.setAccount_id("1");
-        project.setBranch("master");
-        project.setDownload_status("Downloaded");
-        project.setScan_status("Not Scanned");
-        project.setDescription(json.getString("description"));
-        project.setRepo_id("227a91de-a522-11e8-8fa0-d067e5ea858d");
-        projectDao.addOneProject(project);
-    }
+//    @Test
+//    public void addOneProject() {
+//        ResponseEntity<String> resp = restTemplate.getForEntity("https://api.github.com/repos/qiurunze123/miaosha", String.class);
+//        JSONObject json = JSONObject.parseObject(resp.getBody());
+//        Project project = new Project();
+//        project.setUuid("pro1");
+//        project.setName("Java");
+//        project.setLanguage("Java");
+//        project.setType("bug");
+//        project.setUrl("https://github.com/qiurunze123/miaosha");
+//        project.setVcs_type("git");
+//        project.setAccount_id("1");
+//        project.setBranch("master");
+//        project.setDownload_status("Downloaded");
+//        project.setScan_status("Not Scanned");
+//        project.setDescription(json.getString("description"));
+//        project.setRepo_id("227a91de-a522-11e8-8fa0-d067e5ea858d");
+//        projectDao.addOneProject(project);
+//    }
 }

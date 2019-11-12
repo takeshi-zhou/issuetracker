@@ -86,8 +86,14 @@ public class ProjectServiceImpl implements ProjectService {
             }
         }
         Project project=new Project();
+        //验证project name是否重复
         String name=projectInfo.getString("name");
         String type=projectInfo.getString("type");
+        List<Project> verifyProjectList= projectDao.getProjectsByCondition(accountId,type,name,null);
+        if(verifyProjectList.size()>=1){
+            throw new RuntimeException("The project name has already been used! ");
+        }
+        String module=projectInfo.getString("module");
 
         if (projectDao.hasBeenAdded(accountId, url, type, branch)) {
             throw new RuntimeException("The project has been added!");
@@ -112,6 +118,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setDownload_status("Downloading");
         project.setAdd_time(new Date());
         project.setBranch(branch);
+        project.setModule(module);
         projectDao.addOneProject(project);
         //向RepoManager这个Topic发送消息，请求开始下载
         send(projectId, url,isPrivate,username,password,branch);
