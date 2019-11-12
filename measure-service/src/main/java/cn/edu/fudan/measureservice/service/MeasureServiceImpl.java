@@ -894,9 +894,25 @@ public class MeasureServiceImpl implements MeasureService {
 
 
         List<CodeQuality> queries = new ArrayList<>();
+
+        CodeQuality codeQuality;
+        String projectName = null;
         for(RepoMeasure repoMeasure :repoMeasures){
             int newIssueCounts = restInterfaceManager.getNumberOfNewIssueByCommit(repoMeasure.getRepo_id(),repoMeasure.getCommit_id(),category,spaceType,token);
-            CodeQuality codeQuality = new CodeQuality(repoMeasure.getAdd_lines(),repoMeasure.getDel_lines(),newIssueCounts,repoMeasure.getCommit_time());
+            codeQuality = new CodeQuality(repoMeasure.getAdd_lines(),repoMeasure.getDel_lines(),newIssueCounts,repoMeasure.getCommit_time());
+            JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoMeasure.getRepo_id());
+            if(projects.size()==0){
+                logger.error("can not find project by repo_id --->{}",repoMeasure.getRepo_id());
+            }else {
+                projectName = projects.getJSONObject(0).getString("name");
+            }
+            codeQuality.setCommitId(repoMeasure.getCommit_id());
+            codeQuality.setProjectName(projectName);
+            if(newIssueCounts == -1){
+                logger.info("this commit --> {} can not be compiled",repoMeasure.getCommit_id());
+                codeQuality.setExpression("this commit can not be compiled!");
+            }
+
             queries.add(codeQuality);
         }
 

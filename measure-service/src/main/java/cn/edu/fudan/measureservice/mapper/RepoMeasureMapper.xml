@@ -178,6 +178,7 @@
                 and repo_id = #{repo_id}
             </if>
         </where>
+        group by commit_id
         order by commit_time desc
         <if test="counts != 0 ">
             limit #{counts}

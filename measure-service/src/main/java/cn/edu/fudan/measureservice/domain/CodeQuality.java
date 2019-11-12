@@ -4,6 +4,8 @@ public class CodeQuality {
     private String expression;
     private String date;
     private double result;
+    private String commitId;
+    private String projectName;
 
     public CodeQuality(){
         super();
@@ -13,7 +15,12 @@ public class CodeQuality {
 
         this.expression = newIssues + "/(" + addLines + "+" + delLines + ")";
         this.date = date;
-        this.result = newIssues/(addLines+delLines);
+        if(addLines != 0 && delLines != 0 && newIssues !=-1){
+            this.result = newIssues*1.0/(addLines+delLines);
+        }else{
+            result=0;
+        }
+
 
     }
 
@@ -23,6 +30,10 @@ public class CodeQuality {
 
     public void setExpression(int addLines,int delLines, int newIssues) {
         this.expression = newIssues + "/(" + addLines + "+" + delLines + ")";
+    }
+
+    public void setExpression(String expression) {
+        this.expression = expression;
     }
 
     public String getDate() {
@@ -39,5 +50,21 @@ public class CodeQuality {
 
     public void setResult(double result) {
         this.result = result;
+    }
+
+    public String getCommitId() {
+        return commitId;
+    }
+
+    public void setCommitId(String commitId) {
+        this.commitId = commitId;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 }

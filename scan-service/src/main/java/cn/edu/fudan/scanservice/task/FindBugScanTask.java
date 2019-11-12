@@ -35,6 +35,7 @@ public class FindBugScanTask extends BaseScanTask{
         //如果那个锁成功设置了过期时间，那么key过期后，其他线程自然可以获取到锁
         //如果那个锁并没有成功地设置过期时间
         //那么等待获取同一个锁的线程会因为15min的超时而强行获取到锁，并设置自己的identifier和key的过期时间
+
         String identifier = redisLock.acquireLockWithTimeOut(repoId, 15, 15, TimeUnit.MINUTES);
         try {
             scan(scanOperation,repoId, commitId,category);
