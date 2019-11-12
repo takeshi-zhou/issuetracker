@@ -55,6 +55,15 @@
         <result property="email" column="developer_email"/>
     </resultMap>
 
+    <!--    getCommitInfoDeveloperListByDuration-->
+    <resultMap id="CommitInfoDeveloperListByDuration" type="CommitInfoDeveloper">
+        <result property="author" column="developer_name"/>
+        <result property="email" column="developer_email"/>
+        <result property="commit_counts" column="commit_counts"/>
+        <result property="add" column="sumAdd"/>
+        <result property="del" column="sumDel"/>
+    </resultMap>
+
     <insert id="insertOneRepoMeasure" >
         insert into repo_measure
             (
@@ -120,6 +129,15 @@
             developer_name,developer_email
         from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until};
     </select>
+
+    <select id="getCommitInfoDeveloperListByDuration" resultMap="CommitInfoDeveloperListByDuration">
+        select
+            developer_name,developer_email,SUM(add_lines) as sumAdd, SUM(del_lines) as sumDel, COUNT(*) as commit_counts
+        from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until}
+        GROUP BY developer_name
+    </select>
+
+
 
     <select id="getAddLinesByDuration" resultType="Integer">
         select IFNULL(SUM(add_lines),0) from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until};

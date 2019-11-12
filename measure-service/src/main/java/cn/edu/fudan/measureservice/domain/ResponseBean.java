@@ -1,5 +1,7 @@
 package cn.edu.fudan.measureservice.domain;
 
+
+
 import java.io.Serializable;
 
 /**
