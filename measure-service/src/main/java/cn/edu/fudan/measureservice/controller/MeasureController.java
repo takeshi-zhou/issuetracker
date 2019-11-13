@@ -288,7 +288,7 @@ public class MeasureController {
             return new ResponseBean(200,"success",measureService.getQualityChangesByDeveloperName(developerName,token,category,counts,projectName));
         }catch (Exception e){
             e.printStackTrace();
-            return new ResponseBean(401,"failed",null);
+            return new ResponseBean(401,"failed",e.getMessage());
         }
     }
 

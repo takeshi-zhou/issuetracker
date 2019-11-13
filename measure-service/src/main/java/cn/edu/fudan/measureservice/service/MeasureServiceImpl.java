@@ -753,7 +753,7 @@ public class MeasureServiceImpl implements MeasureService {
         String spaceType= "project";
         //判断count是否合法
         if(counts<0){
-            return "counts can not be  negative";
+            throw new RuntimeException("counts can not be  negative");
         }
 
         List<RepoMeasure> repoMeasures;
@@ -765,17 +765,17 @@ public class MeasureServiceImpl implements MeasureService {
             int code =result.getIntValue("code");
             if(code != 200){
                 logger.error("request project api failed  ---> {}",project_name);
-                return null;
+                throw new RuntimeException("request project api failed  ---> "+ project_name);
             }
             JSONArray projects = result.getJSONArray("data");
             if(projects.size() == 0){
                 logger.info("do not have this project --> {}",project_name );
-                return "do not have this project --> "+project_name ;
+                throw new RuntimeException("do not have this project --> "+project_name);
             }
             if (projects.size() > 1){
                 // 这一段的方法待优化 可以在多个project中取最近counts 次数的commits的度量
                 logger.info("more than one project named --> {}",project_name );
-                return "more than one project named --> "+project_name ;
+                throw new RuntimeException("more than one project named --> "+project_name);
             }
             JSONObject project =  projects.getJSONObject(0);
             String repoId = project.getString("repo_id");

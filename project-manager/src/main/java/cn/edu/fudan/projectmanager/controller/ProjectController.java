@@ -42,6 +42,7 @@ public class ProjectController {
     }
 
     //jeff get project list by module
+    @Deprecated
     @GetMapping(value = {"/projectByModule"})
     public Object query(HttpServletRequest request,
                         @RequestParam("module") String module,
