@@ -445,18 +445,15 @@ public class MeasureServiceImpl implements MeasureService {
     @Override
     public List<CommitBaseInfoMonthly> getCommitBaseInfoMonthly(String repo_id){
         List<CommitBaseInfoMonthly> result=new ArrayList<>();
-        JSONArray commits = restInterfaceManager.getCommitList(repo_id);
         //获取查询时的日期 也就是今天的日期 记作indexDay
         LocalDate indexDay = LocalDate.now();
         System.out.println(indexDay);
         CommitBaseInfoDuration commitBaseInfoDuration = new CommitBaseInfoDuration();
 
         //获取最早一次提交的commit信息
-        int len = commits.size();
-        JSONObject project = commits.getJSONObject(len-1);
-        String time = project.getString("commit_time").substring(0,10);
+        String startDateStr = repoMeasureMapper.getStartDateOfRepo(repo_id).substring(0,10);
         //最早一次commit日期
-        LocalDate startDay=LocalDate.parse(time,DateTimeUtil.Y_M_D_formatter);
+        LocalDate startDay=LocalDate.parse(startDateStr,DateTimeUtil.Y_M_D_formatter);
         while(indexDay.isAfter(startDay)){
             //当月第一天
             LocalDate first = indexDay.with(TemporalAdjusters.firstDayOfMonth());
@@ -483,30 +480,24 @@ public class MeasureServiceImpl implements MeasureService {
     @Override
     public List<CommitCountsMonthly> getCommitCountsMonthly(String repo_id) {
         List<CommitCountsMonthly> result=new ArrayList<>();
-        JSONArray commits = restInterfaceManager.getCommitList(repo_id);
-        LocalDate today = LocalDate.now();
-        System.out.println(today);
-        String last_month = today.toString().substring(0,7);
-
-        //统计1个月内的提交次数
+        String startDateStr = repoMeasureMapper.getStartDateOfRepo(repo_id).substring(0,10);
+        //最早一次commit日期
+        LocalDate startDay=LocalDate.parse(startDateStr,DateTimeUtil.Y_M_D_formatter);
+        LocalDate indexDay = LocalDate.now();
+        System.out.println(indexDay);
         int counts = 0;
-        //查询当前commit
-        for(int i=0;i<commits.size();i++){
-            JSONObject project = commits.getJSONObject(i);
-            //截取当前commit时间的日期部分
-            String time = project.getString("commit_time").substring(0,10);
-            //当前commit日期
-            LocalDate commitDay=LocalDate.parse(time,DateTimeUtil.Y_M_D_formatter);
-            String current_month = commitDay.toString().substring(0,7);
-            if (current_month.equals(last_month)){
-                counts++;
-                continue;
-            }
-            result.add(getCommitMonth(last_month, counts));
-            last_month = current_month;
+        while(indexDay.isAfter(startDay)){
+            //当月第一天
+            LocalDate first = indexDay.with(TemporalAdjusters.firstDayOfMonth());
+            //当月最后一天
+            LocalDate last = indexDay.with(TemporalAdjusters.lastDayOfMonth());
+            counts = getCommitCountsByDuration(repo_id, first.toString(), last.toString());
+            result.add(getCommitMonth(indexDay.toString().substring(0,7), counts));
+            //indexDay 变成上个月最后一天
+            indexDay = first.minusDays(1);
         }
-
         return result;
+
     }
 
     private CommitCountsMonthly getCommitMonth(String time, int counts){
@@ -519,23 +510,12 @@ public class MeasureServiceImpl implements MeasureService {
 
     @Override
     public int getCommitCountsByDuration(String repo_id, String since, String until) {
-        JSONArray commits = restInterfaceManager.getCommitList(repo_id);
+
         String sinceday = dateFormatChange(since);
         String untilday = dateFormatChange(until);
-        LocalDate sinceDay = LocalDate.parse(sinceday,DateTimeUtil.Y_M_D_formatter);
-        LocalDate untilDay = LocalDate.parse(untilday,DateTimeUtil.Y_M_D_formatter);
-        int commitCounts = 0;
-        for(int i=0;i<commits.size();i++){
-            JSONObject project = commits.getJSONObject(i);
-            //截取当前commit时间的日期部分
-            String time = project.getString("commit_time").substring(0,10);
-            //当前commit日期
-            LocalDate commitDay=LocalDate.parse(time,DateTimeUtil.Y_M_D_formatter);
-            if (commitDay.isAfter(sinceDay) && commitDay.isBefore(untilDay)){
-                commitCounts++;
-            }
-        }
-        return commitCounts;
+
+        int commitCountsByDuration = repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceday, untilday);
+        return commitCountsByDuration;
     }
 
     //把日期格式从“2010.10.10转化为2010-10-10”
