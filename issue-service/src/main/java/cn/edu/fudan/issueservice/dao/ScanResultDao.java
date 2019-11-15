@@ -5,6 +5,8 @@ import cn.edu.fudan.issueservice.domain.IssueCountPo;
 import cn.edu.fudan.issueservice.domain.ScanResult;
 import cn.edu.fudan.issueservice.mapper.ScanResultMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -19,6 +21,8 @@ import java.util.List;
 public class ScanResultDao {
 
     private ScanResultMapper scanResultMapper;
+    //jeff replace log with logger
+    private Logger logger = LoggerFactory.getLogger(ScanResultDao.class);
 
     @Autowired
     public void setScanResultMapper(ScanResultMapper scanResultMapper) {
@@ -33,7 +37,7 @@ public class ScanResultDao {
         try{
             scanResultMapper.deleteScanResultsByRepoIdAndCategory(repo_id, category);
         }catch (Exception e){
-           log.error(e.getMessage());
+            logger.error(e.getMessage());
         }
     }
 
@@ -41,7 +45,7 @@ public class ScanResultDao {
         try {
             return scanResultMapper.getScanResultsGroupByDay(repoIds, category, start, end);
         }catch (Exception e){
-            log.error(e.getMessage());
+            logger.error(e.getMessage());
             return null;
         }
     }
@@ -50,7 +54,7 @@ public class ScanResultDao {
         try{
             return scanResultMapper.getMergedScanResult(repoIds, category, start, end);
         }catch (Exception e){
-            log.error(e.getMessage());
+            logger.error(e.getMessage());
             return null;
         }
     }
@@ -59,7 +63,7 @@ public class ScanResultDao {
         try{
             return scanResultMapper.getScanResultsEachCommit(repo_id, category, start, end);
         }catch (Exception e){
-            log.error(e.getMessage());
+            logger.error(e.getMessage());
             return null;
         }
     }
@@ -68,7 +72,7 @@ public class ScanResultDao {
         try{
             return scanResultMapper.getScanResultsEachDeveloper(repo_id, category, start, end);
         }catch (Exception e){
-            log.error(e.getMessage());
+            logger.error(e.getMessage());
             return null;
         }
     }
@@ -79,7 +83,7 @@ public class ScanResultDao {
             return scanResultMapper.getNewIssueCountByCommit(repo_id, commit_id,category);
         }catch (Exception e){
             e.printStackTrace();
-            log.error(e.getMessage());
+            logger.error(e.getMessage());
             return -1;
         }
     }
@@ -88,7 +92,7 @@ public class ScanResultDao {
         try{
             return scanResultMapper.getEliminateIssueCountByCommit(repo_id, commit_id,category);
         }catch (Exception e){
-            log.error(e.getMessage());
+            logger.error(e.getMessage());
             return -1;
         }
     }

@@ -14,6 +14,8 @@ import cn.edu.fudan.issueservice.service.MappingService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -31,6 +33,7 @@ import java.util.List;
 @Slf4j
 @Service
 public class BaseMappingServiceImpl implements MappingService {
+    private Logger logger = LoggerFactory.getLogger(BaseMappingServiceImpl.class);
 
     @Value("${solved.tag_id}")
     private String solvedTagId;
@@ -216,7 +219,7 @@ public class BaseMappingServiceImpl implements MappingService {
             solvedInfo.put("repoid",repo_id);
             solvedInfos.add(solvedInfo);
         }
-        log.info("solvedBug -> {}",JSONArray.toJSONString(solvedInfos));
+        logger.info("solvedBug -> {}",JSONArray.toJSONString(solvedInfos));
         if(!solvedInfos.isEmpty()){
             kafkaTemplate.send("solvedBug",JSONArray.toJSONString(solvedInfos));
         }

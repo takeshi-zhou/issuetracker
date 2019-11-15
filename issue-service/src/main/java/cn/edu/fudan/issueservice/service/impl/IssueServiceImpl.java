@@ -10,6 +10,8 @@ import cn.edu.fudan.issueservice.util.DateTimeUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class IssueServiceImpl implements IssueService {
+    private Logger logger = LoggerFactory.getLogger(IssueServiceImpl.class);
 
     @Value("${solved.tag_id}")
     private String solvedTagId;
@@ -96,16 +99,16 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public void deleteIssueByRepoIdAndCategory(String repoId,String category) {
-        log.info("start to delete issue -> repoId={} , category={}",repoId,category);
+        logger.info("start to delete issue -> repoId={} , category={}",repoId,category);
 
         //先删除该项目所有issue对应的tag
         List<String> issueIds = issueDao.getIssueIdsByRepoIdAndCategory(repoId, category);
         restInterfaceManager.deleteTagsOfIssueInOneRepo(issueIds);
-        log.info("tag delete success!");
+        logger.info("tag delete success!");
         issueDao.deleteIssueByRepoIdAndCategory(repoId,category);
-        log.info("issue delete success!");
+        logger.info("issue delete success!");
         scanResultDao.deleteScanResultsByRepoIdAndCategory(repoId, category);
-        log.info("scan result delete success!");
+        logger.info("scan result delete success!");
 
     }
 
@@ -435,13 +438,13 @@ public class IssueServiceImpl implements IssueService {
             committer=commitInfo.getJSONObject("data").getString("developer");
         }
         if(category.equals("bug")){
-            log.info("start bug mapping -> repo_id={},pre_commit_id={},current_commit_id={}",repo_id,pre_commit_id,current_commit_id);
+            logger.info("start bug mapping -> repo_id={},pre_commit_id={},current_commit_id={}",repo_id,pre_commit_id,current_commit_id);
             bugMappingService.mapping(repo_id,pre_commit_id,current_commit_id,category,committer);
         }else if(category.equals("clone")){
-            log.info("start clone mapping -> repo_id={},pre_commit_id={},current_commit_id={}",repo_id,pre_commit_id,current_commit_id);
+            logger.info("start clone mapping -> repo_id={},pre_commit_id={},current_commit_id={}",repo_id,pre_commit_id,current_commit_id);
             cloneMappingService.mapping(repo_id,pre_commit_id,current_commit_id,category,committer);
         }else if(category.equals("sonar")){
-            log.info("start sonar mapping -> repo_id={},pre_commit_id={},current_commit_id={}",repo_id,pre_commit_id,current_commit_id);
+            logger.info("start sonar mapping -> repo_id={},pre_commit_id={},current_commit_id={}",repo_id,pre_commit_id,current_commit_id);
             sonarMappingService.mapping(repo_id,pre_commit_id,current_commit_id,category,committer);
         }
     }
