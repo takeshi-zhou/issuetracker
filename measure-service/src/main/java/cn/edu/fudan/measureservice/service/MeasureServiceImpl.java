@@ -510,7 +510,9 @@ public class MeasureServiceImpl implements MeasureService {
 
     @Override
     public int getCommitCountsByDuration(String repo_id, String since, String until) {
-
+        if (since.compareTo(until)>0 || since.length()>10 || until.length()>10){
+            throw new RuntimeException("please input correct date");
+        }
         String sinceday = dateFormatChange(since);
         String untilday = dateFormatChange(until);
 
