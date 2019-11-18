@@ -2,11 +2,12 @@ package cn.edu.fudan.issueservice.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-
+@Service
 public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
 
 
