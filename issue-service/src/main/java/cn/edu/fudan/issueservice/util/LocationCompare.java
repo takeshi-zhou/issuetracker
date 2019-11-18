@@ -6,51 +6,55 @@ import cn.edu.fudan.issueservice.domain.RawIssue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-
+/**
+ * @auther : fancying
+ */
 public class LocationCompare {
 
-    private static final double threshold_commonality = 0.95;
-    private static final double threshold_overlapping = 0.9;
-    private static final double threshold_lcs = 0.6;
+    private static final double THRESHOLD_COMMONALITY = 0.8;
+    private static final double THRESHOLD_OVERLAPPING = 0.8;
+    private static final double THRESHOLD_LCS = 0.5;
 
 
-    public static boolean isUniqueIssue(RawIssue issue_1, RawIssue issue_2) {
-//		if(!issue_1.getType().equals(issue_2.getType()))
-////			return false;
-        if (!issue_1.equals(issue_2)) return false;
-        List<Location> intersect_locations = intersect(issue_1.getLocations(), issue_2.getLocations());
-        List<Location> intersect_locations2 = intersect(issue_2.getLocations(), issue_1.getLocations());
-        List<Location> union_locations = union(issue_1.getLocations(), issue_2.getLocations());
-        double commonality = (double) intersect_locations.size() / union_locations.size();
+    public static boolean isSameIssue(RawIssue rawIssue1, RawIssue rawIssue2) {
 
-        if (commonality < threshold_commonality)
+        if (!rawIssue1.hasSameBaseInfo(rawIssue2)){
             return false;
-
-        int count_overlapping = 0;
-        for (Location location : intersect_locations) {
-            //theSameItem( issue_1.contentOf(location), issue_2.contentOf((Location) it))
-            for (Location location2 : intersect_locations2) { //may exist the situation of  n to n
-                if (location2.equals(location) && theSameItem(location.getCode(), location2.getCode()))
-                    count_overlapping++;
-            }
         }
 
-        return !((double)count_overlapping / union_locations.size() < threshold_overlapping);
-	    /*
-	    if (count_overlapping/union_locations.size()<threshold_overlapping)
-	         return false;
-	    return true;*/
+
+        List<Location> intersectLocations = intersect(rawIssue1.getLocations(), rawIssue2.getLocations());
+        List<Location> intersectLocations2 = intersect(rawIssue2.getLocations(), rawIssue1.getLocations());
+        List<Location> unionLocations = union(rawIssue1.getLocations(), rawIssue2.getLocations());
+        double commonality = (double) Math.min(intersectLocations.size(), intersectLocations2.size()) / unionLocations.size();
+
+        // 一个method中同等类型的问题比较多会有匹配不上的误差
+        if (commonality < THRESHOLD_COMMONALITY) {
+            return false;
+        } else if (commonality == 1) {
+            return true;
+        }
+
+        int countOverlapping = 0;
+        for (Location location : intersectLocations) {
+            //theSameItem( issue_1.contentOf(location), issue_2.contentOf((Location) it))
+            //may exist the situation of  n to n
+            for (Location location2 : intersectLocations2) {
+                if (location2.equals(location) && theSameItem(location.getCode(), location2.getCode())) {
+                    ++countOverlapping;
+                }
+            }
+        }
+        return ((double)countOverlapping / intersectLocations.size() >= THRESHOLD_OVERLAPPING);
     }
 
     private static List<Location> union(List<Location> locations1, List<Location> locations2) {
         // TODO Auto-generated method stub
-        List<Location> unionList = new ArrayList<>();
-        for (Location location : locations1) {
-            unionList.add(location);
-        }
+        List<Location> unionList = new ArrayList<>(locations1);
         for (Location location : locations2) {
-            if (!unionList.contains(location))
+            if (!unionList.contains(location)) {
                 unionList.add(location);
+            }
         }
         return unionList;
     }
@@ -68,10 +72,10 @@ public class LocationCompare {
         return insertList;
     }
 
-    private static boolean theSameItem(String content_1, String content_2) {
-        return ((double) lcs(content_1, content_2)) / (double) Math.max(content_1.length(), content_2.length()) > threshold_lcs;
+    private static boolean theSameItem(String content1, String content2) {
+        return ((double) lcs(content1, content2)) / (double) Math.max(content1.length(), content2.length()) > THRESHOLD_LCS;
 		/*
-		   if (lcs(content_1, content_2)/Math.max(content_1.length(), content_2.length())>threshold_lcs)
+		   if (lcs(content_1, content_2)/Math.max(content_1.length(), content_2.length())>THRESHOLD_LCS)
 		       return true;
 		   return false;*/
     }
@@ -120,7 +124,8 @@ public class LocationCompare {
 
         char[] s1 = x.toCharArray();
         char[] s2 = y.toCharArray();
-        int[][] array = new int[x.length() + 1][y.length() + 1];//此处的棋盘长度要比字符串长度多加1，需要多存储一行0和一列0
+        //此处二维数组长度要比字符串长度多加1，需要多存储一行0和一列0
+        int[][] array = new int[x.length() + 1][y.length() + 1];
 
         for (int j = 0; j < array[0].length; j++) {//第0行第j列全部赋值为0
             array[0][j] = 0;
@@ -155,10 +160,7 @@ public class LocationCompare {
                 }
             }
         }
-	/*
-		while(!stack.isEmpty()){//打印输出栈正好是正向输出最大的公共子序列
-			System.out.print(stack.pop());
-		}*/
+
         return stack.size();
     }
 
