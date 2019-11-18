@@ -5,11 +5,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
+@Component
 public class SonarScanTask extends BaseScanTask {
 
     private Logger logger = LoggerFactory.getLogger(SonarScanTask.class);
