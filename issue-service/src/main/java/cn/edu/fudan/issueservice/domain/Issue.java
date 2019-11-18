@@ -22,6 +22,9 @@ public class Issue {
     private List<Object> tags;
     private int priority;
     private int displayId ;
+    private String status;
+    private String resolution;
+    private String sonar_issue_id;
 
     public Issue() {
     }
@@ -209,4 +212,27 @@ public class Issue {
         this.displayId = displayId;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getResolution() {
+        return resolution;
+    }
+
+    public void setResolution(String resolution) {
+        this.resolution = resolution;
+    }
+
+    public String getSonar_issue_id() {
+        return sonar_issue_id;
+    }
+
+    public void setSonar_issue_id(String sonar_issue_id) {
+        this.sonar_issue_id = sonar_issue_id;
+    }
 }

@@ -23,4 +23,6 @@ public interface ScanMapper {
     Date getLastScannedCommitTime(@Param("repo_id") String repo_id,@Param("category")String category);
 
     List<Scan> getScannedCommits(@Param("repo_id") String repo_id,@Param("category")String category);
+
+    Scan  getScanByCategoryAndRepoIdAndCommitId(@Param("repo_id") String repo_id,@Param("category") String category,@Param("commit_id") String commit_id);
 }

@@ -116,4 +116,9 @@ public class ScanController {
         return scanService.getLatestScannedCommitId(repo_id, category);
     }
 
+
+    @GetMapping(value = "/inner/scan/commit")
+    public Object getScanByCategoryAndRepoIdAndCommitId(@RequestParam("repo_id") String repo_id,@RequestParam("category")String category,@RequestParam("commit_id")String commit_id){
+        return scanService.getScanByCategoryAndRepoIdAndCommitId(repo_id, category,commit_id);
+    }
 }

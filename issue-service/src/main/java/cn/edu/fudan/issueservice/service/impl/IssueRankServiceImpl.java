@@ -90,34 +90,46 @@ public class IssueRankServiceImpl implements IssueRankService {
     @Override
     public Map rankOfDeveloper(String repoId, String start,String end) {
         // duration: 2018.01.01-2018.12.12
-        String repoPath = restInterfaceManager.getRepoPath(repoId);
-        //commitId 单个commit所对应的引入Issue数量
-        Map<String, Integer> commitNewIssue = issueDao.getCommitNewIssue(start, end, repoId);
-        // 某段时间内的commit列表以及对应的Issue数量 commitId developer-email
-        // 一个开发人员可能对应多个commit
-        Map<String, String> commitDeveloper = restInterfaceManager.getDeveloperByCommits(commitNewIssue.keySet());
+        String repoPath =null;
+        Map<String,Integer> usersCodeLine=null;
+        try{
+            repoPath = restInterfaceManager.getRepoPath(repoId);
+            //commitId 单个commit所对应的引入Issue数量
+            Map<String, Integer> commitNewIssue = issueDao.getCommitNewIssue(start, end, repoId);
+            // 某段时间内的commit列表以及对应的Issue数量 commitId developer-email
+            // 一个开发人员可能对应多个commit
+            Map<String, String> commitDeveloper = restInterfaceManager.getDeveloperByCommits(commitNewIssue.keySet());
 
-        // 某段时间内开发人员列表
-        Set<String> developers = new HashSet<>(commitDeveloper.values());
+            // 某段时间内开发人员列表
+            Set<String> developers = new HashSet<>(commitDeveloper.values());
 
-        // 开发人员 代码行数
-        Map<String,Integer> usersCodeLine  = executeShellUtil.developersLinesOfCode(start, end , repoPath, developers);
+            // 开发人员 代码行数
+            usersCodeLine  = executeShellUtil.developersLinesOfCode(start, end , repoPath, developers);
 
-        // 开发人员 issue数量
-        Map<String, Integer> developerNewIssue = new ConcurrentHashMap<>(16);
-        for (String commitId : commitDeveloper.keySet()) {
-            String developer = commitDeveloper.get(commitId);
-            int newIssue = commitNewIssue.get(commitId);
-            if (developerNewIssue.containsKey(developer)) {
-                newIssue += developerNewIssue.get(developer);
+            // 开发人员 issue数量
+            Map<String, Integer> developerNewIssue = new ConcurrentHashMap<>(16);
+            for (String commitId : commitDeveloper.keySet()) {
+                String developer = commitDeveloper.get(commitId);
+                int newIssue = commitNewIssue.get(commitId);
+                if (developerNewIssue.containsKey(developer)) {
+                    newIssue += developerNewIssue.get(developer);
+                }
+                developerNewIssue.put(developer, newIssue);
             }
-            developerNewIssue.put(developer, newIssue);
-        }
 
-        for (String developer : developerNewIssue.keySet()) {
-            usersCodeLine.put(developer, usersCodeLine.get(developer) / developerNewIssue.get(developer) );
-        }
+            for (String developer : developerNewIssue.keySet()) {
+                usersCodeLine.put(developer, usersCodeLine.get(developer) / developerNewIssue.get(developer) );
+            }
 
+
+
+        }catch(Exception e){
+            throw e;
+        }finally {
+            if(repoPath != null){
+                restInterfaceManager.freeRepoPath(repoId,repoPath);
+            }
+        }
         //排序
         return sortByValue(usersCodeLine);
     }

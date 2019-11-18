@@ -11,7 +11,7 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
 servers:
-- url: http://10.141.221.85:8000
+- url: http://127.0.0.1:8000
   description: 接口测试地址
 
 
@@ -278,6 +278,16 @@ paths:
         200:
           description: "successful operation"
           content:
+            text/plain:
+              schema:
+                type: "object"
+                format: Map[string, Integer]
+              examples:
+                IssueTypeCountsExample:
+                  value:
+                    UI_INHERITANCE_UNSAFE_GETRESOURCE: 1
+                    UC_USELESS_OBJECT: 2
+                    DM_DEFAULT_ENCODING:  4
             application/json:
               schema:
                 type: "object"
@@ -320,6 +330,9 @@ paths:
         200:
           description: "successful operation"
           content:
+            application/json:
+              schema:
+                $ref: 'string'
             text/plain:
               schema:
                 type: "string"
@@ -336,14 +349,14 @@ paths:
       operationId: "getCodeChangesByCommit"
       parameters:
       - in: "query"
-        name: "repo_id"
+        name: "repoId"
         description: "repo的唯一ID"
         required: true
         schema:
           type: "string"
           example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
       - in: "query"
-        name: "commit_id"
+        name: "commitId"
         description: "commit的唯一ID"
         required: true
         schema:
@@ -354,6 +367,9 @@ paths:
           description: "successful operation"
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/CodeChangesResponseBean'
+            text/plain:
               schema:
                 $ref: '#/components/schemas/CodeChangesResponseBean'
         400:
@@ -368,7 +384,7 @@ paths:
       operationId: "getCodeChangesByDuration"
       parameters:
       - in: "query"
-        name: "repo_id"
+        name: "repoId"
         description: "repo的唯一ID"
         required: true
         schema:
@@ -393,6 +409,9 @@ paths:
           description: "successful operation"
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/CodeChangesResponseBean'
+            text/plain:
               schema:
                 $ref: '#/components/schemas/CodeChangesResponseBean'
         400:
@@ -425,6 +444,9 @@ paths:
           description: "successful operation"
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/RepoMeasureResponseBean'
+            text/plain:
               schema:
                 $ref: '#/components/schemas/RepoMeasureResponseBean'
         400:
@@ -464,6 +486,9 @@ paths:
           description: "successful operation"
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/CommitCountsResponseBean'
+            text/plain:
               schema:
                 $ref: '#/components/schemas/CommitCountsResponseBean'
         400:
@@ -793,6 +818,148 @@ paths:
         400:
           description: "failed"
 
+  /measure/developer/quality-changes:
+    get:
+      tags:
+      - "开发者度量API"
+      summary: "获取用户最近一定次数commit的代码提交质量"
+      description: "根据开发者名字获取开发者最近一定次数commit的代码提交质量"
+      operationId: "getQualityChangesByDeveloperName"
+      parameters:
+      - in: "query"
+        name: "category"
+        description: "工具选择，findbugs则选择'bug' "
+        required: true
+        schema:
+          type: "string"
+          example: "bug"
+      - in: "query"
+        name: "developer_name"
+        description: "开发者姓名"
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "counts"
+        description: "提交次数"
+        required: false
+        schema:
+          type: "integer"
+          default: 0
+      - in: "query"
+        name: "project_name"
+        description: "指定特定的项目名字"
+        required: false
+        schema:
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperQualityChangesResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/DeveloperQualityChangesResponseBean'
+        400:
+          description: "failed"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBean'
+
+  /project/search:
+    get:
+      tags:
+      - "项目管理API"
+      summary: "根据条件获取相应的project列表"
+      description: "根据条件获取相应的project列表"
+      operationId: "getProjectByCondition"
+      parameters:
+      - in: "query"
+        name: "category"
+        description: "工具选择，findbugs则选择'bug',clone则选择'clone' "
+        required: false
+        schema:
+          type: "string"
+          example: "bug"
+      - in: "query"
+        name: "name"
+        description: "项目名"
+        required: false
+        schema:
+          type: "string"
+      - in: "query"
+        name: "module"
+        description: "所属模块"
+        required: false
+        schema:
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSearchResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProjectSearchResponseBean'
+        400:
+          description: "failed"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBean'
+
+  /user/login:
+    get:
+      tags:
+      - "项目管理API"
+      summary: "用户登录"
+      description: "根据账号密码获取相应的token"
+      operationId: "login"
+      parameters:
+      - in: "query"
+        name: "username"
+        description: "用户名 "
+        required: false
+        schema:
+          type: "string"
+          example: "bug"
+      - in: "query"
+        name: "password"
+        description: "密码"
+        required: false
+        schema:
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/LoginResponseBean'
+        400:
+          description: "failed"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBean'
+
 components:
   schemas:
     Developer:
@@ -869,13 +1036,22 @@ components:
           description: "圈复杂度"
         commit_id:
           type: "string"
-          format: double
         commit_time:
           type: "string"
-          format: double
         repo_id:
           type: "string"
-          format: double
+        developer_name:
+          type: "string"
+        developer_email:
+          type: "string"
+        add_lines:
+          type: "integer"
+          format: int32
+          description: "代码增加行数"
+        del_lines:
+          type: "integer"
+          format: int32
+          description: "代码删除行数"
 
     RepoMeasureResponseBean:
       type: "object"
@@ -1013,6 +1189,134 @@ components:
           type: "string"
         data:
           $ref: '#/components/schemas/CommitBase'
+
+    DeveloperQualityChangesResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        msg:
+          type: "string"
+        data:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/CodeQualityBean'
+
+    CodeQualityBean:
+      type: "object"
+      properties:
+        expression:
+          type: "string"
+          description: "代码质量结果的公式"
+        date:
+          type: "string"
+          description: "代码提交时间"
+        result:
+          type: "number"
+          description: "代码质量结果"
+        commitId:
+          type: "string"
+          description: "commit的唯一ID"
+        projectName:
+          type: "string"
+          description: "项目名"
+
+    ErrorResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          description: "状态码"
+        msg:
+          type: "string"
+        data:
+          type: "string"
+          description: "错误信息"
+
+    ProjectSearchResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        msg:
+          type: "string"
+        data:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/ProjectBean'
+
+    ProjectBean:
+      type: "object"
+      properties:
+        uuid:
+          type: "string"
+          description: "项目唯一ID"
+        name:
+          type: "string"
+          description: "项目名"
+        language:
+          type: "number"
+          description: "项目语言"
+        url:
+          type: "string"
+          description: "项目地址"
+        vcs_type:
+          type: "string"
+          description: "版本控制系统类型"
+        type:
+          type: "string"
+          description: "扫描工具类型"
+        account_id:
+          type: "string"
+          description: "用户id"
+        download_status:
+          type: "number"
+          description: "下载状态"
+        scan_status:
+          type: "string"
+          description: "更新状态"
+        add_time:
+          type: "string"
+          format: date
+          example: "2019-11-11 09:19:08"
+          description: "项目添加时间"
+        till_commit_time:
+          type: "string"
+          format: date
+          description: "最后一次commit提交时间"
+        last_scan_time:
+          type: "string"
+          format: date
+          description: "最后一次扫描时间"
+        description:
+          type: "string"
+          description: "项目描述"
+        repo_id:
+          type: "string"
+          description: "repo的唯一ID"
+        branch:
+          type: "string"
+          description: "分支名"
+        first_auto_scan:
+          type: "string"
+        module:
+          type: "string"
+          description: "项目所属模块"
+
+    LoginResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        msg:
+          type: "string"
+        data:
+          type: "object"
+          properties:
+            username:
+              type: "string"
+            token:
+              type: "string"
 
 
 externalDocs:

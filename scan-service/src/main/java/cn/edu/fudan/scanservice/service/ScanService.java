@@ -21,4 +21,6 @@ public interface ScanService {
     String getNextScannedCommitID(String repo_id,String category,String commitId);
 
     String getPreviousScannedCommitID(String repo_id,String category,String commitId);
+
+    Scan getScanByCategoryAndRepoIdAndCommitId(String repo_id,String category,String commit_id);
 }

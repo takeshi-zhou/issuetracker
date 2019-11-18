@@ -59,7 +59,7 @@ public class IssueServiceImpl implements IssueService {
     private SonarMappingServiceImpl sonarMappingService;
 
     @Autowired
-    public void setBugMappingService(SonarMappingServiceImpl sonarMappingService) {
+    public void setSonarMappingService(SonarMappingServiceImpl sonarMappingService) {
         this.sonarMappingService = sonarMappingService;
     }
 
