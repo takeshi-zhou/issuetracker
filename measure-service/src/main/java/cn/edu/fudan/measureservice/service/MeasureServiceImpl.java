@@ -366,6 +366,18 @@ public class MeasureServiceImpl implements MeasureService {
     public ActiveMeasure getOneActiveMeasure(String repoId,String since,String until){
             ActiveMeasure activeMeasure=new ActiveMeasure();
             String repoPath=null;
+            String[] sinceDates = since.split("\\D");
+            String[] untilDates = until.split("\\D");
+            if(sinceDates.length != 3 || untilDates.length != 3){
+                logger.error("since --> {} or until --> {} ,pattern is not available" ,since,until);
+                return activeMeasure;
+            }
+            LocalDate sinceLocalDate = LocalDate.of(Integer.parseInt(sinceDates[0]),Integer.parseInt(sinceDates[1]),Integer.parseInt(sinceDates[2]));
+            LocalDate untilLocalDate = LocalDate.of(Integer.parseInt(untilDates[0]),Integer.parseInt(untilDates[1]),Integer.parseInt(untilDates[2]));
+            if(sinceLocalDate.plusMonths(1).isBefore(untilLocalDate)){
+                sinceLocalDate = untilLocalDate.minusMonths(1);
+            }
+            since = sinceLocalDate.getYear()+"-"+sinceLocalDate.getMonthValue()+"-"+sinceLocalDate.getDayOfMonth();
             try{
                 repoPath=restInterfaceManager.getRepoPath(repoId,"");
                 activeMeasure.setCommitInfos(gitUtil.getCommitInfoByAuthor(repoPath,since,until));

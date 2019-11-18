@@ -96,10 +96,10 @@ public class ProjectController {
                                         ){
         String userToken = request.getHeader("token");
         try {
-            return new ResponseBean(200, "add success", projectService.getProjectsByCondition(userToken, category,name,module));
+            return new ResponseBean(200, "get success", projectService.getProjectsByCondition(userToken, category,name,module));
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseBean(401, "project add failed! No such repo found!", null);
+            return new ResponseBean(401, "operate failed", null);
         }
 
     }

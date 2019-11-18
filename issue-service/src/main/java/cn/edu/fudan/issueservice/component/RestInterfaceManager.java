@@ -265,4 +265,43 @@ public class RestInterfaceManager {
             throw new RuntimeException("get sonar result failed");
         }
     }
+
+
+    public JSONObject getRuleInfo(String ruleKey,String actives,String organizationKey){
+        String baseRequestUrl = sonarServicePath + "/api/rules/show?key=";
+        if(ruleKey ==null){
+            logger.error("ruleKey is missing");
+            return null;
+        }
+        if(actives==null ){
+            if(organizationKey ==null){
+                return restTemplate.getForObject(baseRequestUrl+ruleKey, JSONObject.class);
+            }else{
+                return restTemplate.getForObject(baseRequestUrl+ruleKey+"&organization="+organizationKey, JSONObject.class);
+            }
+
+        }else{
+            if(organizationKey ==null){
+                return restTemplate.getForObject(baseRequestUrl+ruleKey+"&actives="+actives, JSONObject.class);
+            }else{
+                return restTemplate.getForObject(baseRequestUrl+ruleKey+"&organization="+organizationKey+"&actives="+actives, JSONObject.class);
+            }
+        }
+
+    }
+
+    //------------------------------------------------------scan api ---------------------------------------------
+
+
+    public JSONObject getScanByCategoryAndRepoIdAndCommitId(String repoId,String commit_id ,String category){
+        return restTemplate.getForObject(scanServicePath + "/inner/scan/commit?repo_id=" + repoId+"&commit_id="+commit_id+"&category="+category, JSONObject.class);
+    }
+
+
+
+
+
+
+
+
 }
