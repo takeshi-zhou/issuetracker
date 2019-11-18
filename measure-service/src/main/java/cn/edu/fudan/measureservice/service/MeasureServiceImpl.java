@@ -436,9 +436,11 @@ public class MeasureServiceImpl implements MeasureService {
         List<CommitInfoDeveloper> CommitInfoDeveloper = repoMeasureMapper.getCommitInfoDeveloperListByDuration(repo_id, sinceDay, untilDay);
         int addLines = repoMeasureMapper.getAddLinesByDuration(repo_id, sinceDay, untilDay);
         int delLines = repoMeasureMapper.getDelLinesByDuration(repo_id, sinceDay, untilDay);
+        int sumCommitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceDay, untilDay);
         commitBaseInfoDuration.setCommitInfoList(CommitInfoDeveloper);
         commitBaseInfoDuration.setSumAddLines(addLines);
         commitBaseInfoDuration.setSumDelLines(delLines);
+        commitBaseInfoDuration.setSumCommitCounts(sumCommitCounts);
         return commitBaseInfoDuration;
     }
 
@@ -497,7 +499,6 @@ public class MeasureServiceImpl implements MeasureService {
             indexDay = first.minusDays(1);
         }
         return result;
-
     }
 
     private CommitCountsMonthly getCommitMonth(String time, int counts){
