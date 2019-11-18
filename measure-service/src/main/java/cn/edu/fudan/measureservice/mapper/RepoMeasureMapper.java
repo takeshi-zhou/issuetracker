@@ -19,13 +19,15 @@ public interface RepoMeasureMapper {
 
     CommitBase getCommitBaseInformation(@Param("repo_id")String repo_id,@Param("commit_id")String commit_id);
 
-    List<Developer> getDeveloperListByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
-
     List<CommitInfoDeveloper> getCommitInfoDeveloperListByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
 
     Integer getAddLinesByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
 
     Integer getDelLinesByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
+
+    int getCommitCountsByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
+
+    String getStartDateOfRepo(@Param("repo_id")String repo_id);
 
     void insertOneRepoMeasure(RepoMeasure repoMeasure);
 

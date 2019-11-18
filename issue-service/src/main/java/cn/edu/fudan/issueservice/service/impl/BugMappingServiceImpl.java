@@ -5,6 +5,8 @@ import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service("bugMapping")
 public class BugMappingServiceImpl extends BaseMappingServiceImpl {
+    private Logger logger = LoggerFactory.getLogger(BaseMappingServiceImpl.class);
 
     @Override
     public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category, String committer) {
@@ -31,7 +34,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,current_commit_id);
             if (rawIssues == null || rawIssues.isEmpty())
                 return;
-            log.info("first scan mapping!");
+            logger.info("first scan mapping!");
             for (RawIssue rawIssue : rawIssues) {
                 Issue issue=generateOneNewIssue(repo_id,rawIssue,category,current_commit_id,commitDate,date);
                 insertIssueList.add(issue);
@@ -40,9 +43,9 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             int newIssueCount = insertIssueList.size();
             int remainingIssueCount = insertIssueList.size();
             int eliminatedIssueCount = 0;
-            log.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
+            logger.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
-            log.info("dashboard info updated!");
+            logger.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(rawIssues);
             scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,current_commit_id,commitDate,developer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
         } else {
@@ -51,7 +54,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             List<RawIssue> currentRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,current_commit_id);
             if (currentRawIssues == null || currentRawIssues.isEmpty())
                 return;
-            log.info("not first mapping!");
+            logger.info("not first mapping!");
             //mapping开始之前end commit是上一个commit的表示是上个commit存活的issue
             Set<String> existsIssueIds=issueDao.getIssuesByEndCommit(repo_id,category,pre_commit_id).stream().map(Issue::getUuid).collect(Collectors.toSet());
             //装需要更新的
@@ -101,16 +104,16 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             if (!issues.isEmpty()) {
                 //更新issue
                 issueDao.batchUpdateIssue(issues);
-                log.info("issue update success!");
+                logger.info("issue update success!");
             }
             //在匹配的issue中上次commit被ignore的个数
             int ignoredCountInMappedIssues=mappedIssueIds.isEmpty()?0:issueDao.getIgnoredCountInMappedIssues(ignoreTagId,mappedIssueIds);
             int eliminatedIssueCount = preRawIssues.size() - equalsCount+ignoreCountInNewIssues+ignoredCountInMappedIssues;
             int remainingIssueCount = currentRawIssues.size()-ignoreCountInNewIssues-ignoredCountInMappedIssues;
             int newIssueCount = currentRawIssues.size() - equalsCount-ignoreCountInNewIssues;
-            log.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
+            logger.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
-            log.info("dashboard info updated!");
+            logger.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(currentRawIssues);
             modifyToSolvedTag(repo_id, category,pre_commit_id,EventType.ELIMINATE_BUG,committer,commitDate);
             scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,current_commit_id,commitDate,developer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
@@ -120,13 +123,13 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             issueDao.insertIssueList(insertIssueList);
             issueEventManager.sendIssueEvent(EventType.NEW_BUG,insertIssueList,committer,repo_id,commitDate);
             newIssueInfoUpdate(insertIssueList,category,repo_id);
-            log.info("new issue insert success!");
+            logger.info("new issue insert success!");
         }
         //打tag
         if(!tags.isEmpty()){
             restInterfaceManager.addTags(tags);
         }
-        log.info("mapping finished!");
+        logger.info("mapping finished!");
     }
 
     //根据rawIssue产生一个新的Issue对象

@@ -49,12 +49,6 @@
         </collection>
     </resultMap>
 
-<!--    getDeveloperListByDuration-->
-    <resultMap id="developerListByDuration" type="Developer">
-        <result property="name" column="developer_name"/>
-        <result property="email" column="developer_email"/>
-    </resultMap>
-
     <!--    getCommitInfoDeveloperListByDuration-->
     <resultMap id="CommitInfoDeveloperListByDuration" type="CommitInfoDeveloper">
         <result property="author" column="developer_name"/>
@@ -123,13 +117,6 @@
         from repo_measure where repo_id = #{repo_id} and commit_id = #{commit_id}
     </select>
 
-
-    <select id="getDeveloperListByDuration" resultMap="developerListByDuration">
-        select
-            developer_name,developer_email
-        from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until};
-    </select>
-
     <select id="getCommitInfoDeveloperListByDuration" resultMap="CommitInfoDeveloperListByDuration">
         select
             developer_name,developer_email,SUM(add_lines) as sumAdd, SUM(del_lines) as sumDel, COUNT(*) as commit_counts
@@ -137,7 +124,9 @@
         GROUP BY developer_name
     </select>
 
-
+    <select id="getStartDateOfRepo" resultType="String">
+        select commit_time from repo_measure where repo_id = #{repo_id} ORDER BY commit_time LIMIT 1;
+    </select>
 
     <select id="getAddLinesByDuration" resultType="Integer">
         select IFNULL(SUM(add_lines),0) from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until};
@@ -145,6 +134,12 @@
 
     <select id="getDelLinesByDuration" resultType="Integer">
         select IFNULL(SUM(del_lines),0) from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until};
+    </select>
+
+    <select id="getCommitCountsByDuration" resultType="int">
+        select
+             COUNT(*) as commit_counts
+        from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until}
     </select>
 
     <select id="getLatestMeasureData" resultMap="repoMeasure">

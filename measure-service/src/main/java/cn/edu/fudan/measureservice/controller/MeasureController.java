@@ -122,10 +122,10 @@ public class MeasureController {
                                                @RequestParam("since")String since,
                                                @RequestParam("until")String until){
         try{
-            return new ResponseBean(200,"success",measureService.getCommitCountsByDuration(repo_id, since,until));
+            return new ResponseBean(200,"success",measureService.getCommitCountsByDuration(repo_id, since, until));
         }catch (Exception e){
             e.printStackTrace();
-            return new ResponseBean(401,"failed",null);
+            return new ResponseBean(401,"failed",e.getMessage());
         }
 
     }
@@ -291,5 +291,4 @@ public class MeasureController {
             return new ResponseBean(401,"failed",e.getMessage());
         }
     }
-
 }

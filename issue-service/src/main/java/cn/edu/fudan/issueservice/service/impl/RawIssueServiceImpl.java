@@ -8,6 +8,8 @@ import cn.edu.fudan.issueservice.domain.RawIssue;
 import cn.edu.fudan.issueservice.service.RawIssueService;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,7 @@ import java.util.Map;
 @Slf4j
 @Service
 public class RawIssueServiceImpl implements RawIssueService {
+    private Logger logger = LoggerFactory.getLogger(RawIssueServiceImpl.class);
 
 
     private RestInterfaceManager restInterfaceManager;
@@ -103,23 +106,23 @@ public class RawIssueServiceImpl implements RawIssueService {
         String repoHome=null;
         try{
             JSONObject response = restInterfaceManager.getRepoPath(repo_id,commit_id).getJSONObject("data");
-            log.info(response.toJSONString());
+            logger.info(response.toJSONString());
             if (response != null && response.getString("status").equals("Successful")) {
                 repoHome=response.getString("content");
-                log.info("repoHome -> {}" ,repoHome);
+                logger.info("repoHome -> {}" ,repoHome);
                 result.put("code", getFileContent(repoHome+"/"+file_path));
             } else {
                 result.put("code", "");
             }
         }catch (Exception e){
-            log.error(e.getMessage());
+            logger.error(e.getMessage());
         }finally {
             if(repoHome!=null){
                 JSONObject response =restInterfaceManager.freeRepoPath(repo_id,repoHome);
                 if (response != null && response.getJSONObject("data").getString("status").equals("Successful"))
-                    log.info("{} free success",repoHome);
+                    logger.info("{} free success",repoHome);
                 else
-                    log.info("{} free failed",repoHome);
+                    logger.info("{} free failed",repoHome);
             }
 
         }
