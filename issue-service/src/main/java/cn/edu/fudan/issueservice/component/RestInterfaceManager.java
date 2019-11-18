@@ -239,7 +239,7 @@ public class RestInterfaceManager {
                 + "&organization=default-organization&facets=severities%2Ctypes&additionalFields=_all";
         try {
             if(page == 0){
-                if(type != null && (type.equals("CODE_SMELL") || type.equals("BUG") || type.equals("VULNERABILITY") ||type.equals("SECURITY_HOTSPOT"))){
+                if(type != null && ("CODE_SMELL".equals(type) || "BUG".equals(type) || "VULNERABILITY".equals(type) ||"SECURITY_HOTSPOT".equals(type))){
                     return restTemplate.getForObject(baseRequestUrl+"&types="+type, JSONObject.class);
                 }else if(type == null ){
                     return restTemplate.getForObject(baseRequestUrl, JSONObject.class);
@@ -248,7 +248,7 @@ public class RestInterfaceManager {
                     return null;
                 }
             }else if(page > 0){
-                if(type != null && (type.equals("CODE_SMELL") || type.equals("BUG") || type.equals("VULNERABILITY") ||type.equals("SECURITY_HOTSPOT"))){
+                if(type != null && ("CODE_SMELL".equals(type) || "BUG".equals(type) || "VULNERABILITY".equals(type) ||"SECURITY_HOTSPOT".equals(type))){
                     return restTemplate.getForObject(baseRequestUrl+"&types="+type+"&p="+page, JSONObject.class);
                 }else if(type == null ){
                     return restTemplate.getForObject(baseRequestUrl+"&p="+page, JSONObject.class);
@@ -262,6 +262,17 @@ public class RestInterfaceManager {
             }
         } catch (RuntimeException e) {
             logger.error("repo name : {}  ----> request sonar api failed", repoName);
+            throw new RuntimeException("get sonar result failed");
+        }
+    }
+
+    public JSONObject getSonarIssueResultsBySonarIssueKey(String issues,int pageSize) {
+        String baseRequestUrl = sonarServicePath + "/api/issues/search?";
+
+        try {
+            return restTemplate.getForObject(baseRequestUrl+"&issues="+issues+"&ps="+pageSize, JSONObject.class);
+        } catch (RuntimeException e) {
+            logger.error("issues : {}  ----> request sonar api failed", issues);
             throw new RuntimeException("get sonar result failed");
         }
     }
@@ -290,11 +301,20 @@ public class RestInterfaceManager {
 
     }
 
+    public JSONObject getSonarSourceLines(String componentKey,int from,int to){
+        if(to<from){
+            logger.error("lines {} can not greater {} ",from,to);
+        }
+        return restTemplate.getForObject(sonarServicePath+"/api/sources/lines?key="+componentKey+"&from="+from+"&to="+to, JSONObject.class);
+
+
+    }
+
     //------------------------------------------------------scan api ---------------------------------------------
 
 
-    public JSONObject getScanByCategoryAndRepoIdAndCommitId(String repoId,String commit_id ,String category){
-        return restTemplate.getForObject(scanServicePath + "/inner/scan/commit?repo_id=" + repoId+"&commit_id="+commit_id+"&category="+category, JSONObject.class);
+    public JSONObject getScanByCategoryAndRepoIdAndCommitId(String repoId,String commitId ,String category){
+        return restTemplate.getForObject(scanServicePath + "/inner/scan/commit?repo_id=" + repoId+"&commit_id="+commitId+"&category="+category, JSONObject.class);
     }
 
 

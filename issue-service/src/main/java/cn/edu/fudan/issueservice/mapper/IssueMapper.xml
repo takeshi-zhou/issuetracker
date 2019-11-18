@@ -87,7 +87,10 @@
         create_time,
         update_time,
         priority,
-        display_id
+        display_id,
+        status,
+        resolution,
+        sonar_issue_id
         )
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
@@ -106,7 +109,10 @@
             #{item.create_time},
             #{item.update_time},
             #{item.priority},
-            #{item.displayId}
+            #{item.displayId},
+            #{item.status},
+            #{item.resolution},
+            #{item.sonar_issue_id}
             )
         </foreach>
     </insert>
@@ -233,6 +239,20 @@
                 <foreach collection="list" item="item">
                     <if test="item.update_time != null">
                         when uuid=#{item.uuid} then #{item.update_time}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="status = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    <if test="item.status != null">
+                        when uuid=#{item.uuid} then #{item.status}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="update_time = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    <if test="item.resolution != null">
+                        when uuid=#{item.uuid} then #{item.resolution}
                     </if>
                 </foreach>
             </trim>
