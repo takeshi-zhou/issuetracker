@@ -11,6 +11,15 @@ public class CommitBaseInfoDuration {
     private List<CommitInfoDeveloper> commitInfoList;
     private int sumAddLines;
     private int sumDelLines;
+    private int sumCommitCounts;
+
+    public int getSumCommitCounts() {
+        return sumCommitCounts;
+    }
+
+    public void setSumCommitCounts(int sumCommitCounts) {
+        this.sumCommitCounts = sumCommitCounts;
+    }
 
     public CommitBaseInfoDuration() {
     }

@@ -6,10 +6,7 @@ import cn.edu.fudan.issueservice.component.TagMapHelper;
 import cn.edu.fudan.issueservice.dao.IssueDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.dao.ScanResultDao;
-import cn.edu.fudan.issueservice.domain.EventType;
-import cn.edu.fudan.issueservice.domain.Issue;
-import cn.edu.fudan.issueservice.domain.RawIssue;
-import cn.edu.fudan.issueservice.domain.RawIssueDetail;
+import cn.edu.fudan.issueservice.domain.*;
 import cn.edu.fudan.issueservice.service.MappingService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -142,7 +139,7 @@ public class BaseMappingServiceImpl implements MappingService {
 
     Date getCommitDate(String commitId){
         JSONObject response=restInterfaceManager.getCommitTime(commitId);
-        if(response!=null){
+        if(response!=null && response.getJSONObject("data") != null){
             return response.getJSONObject("data").getDate("commit_time");
         }
         return null;
@@ -163,15 +160,17 @@ public class BaseMappingServiceImpl implements MappingService {
 
     int addTag(List<JSONObject> tags, JSONArray ignoreTypes, RawIssue rawIssue, Issue issue){
         int result=0;
-        String tagID;
+        String tagID = null;
         if(ignoreTypes!=null&&!ignoreTypes.isEmpty()&&ignoreTypes.contains(rawIssue.getType())){
             //如果新增的issue的类型包含在ignore的类型之中，打ignore的tag
             tagID=ignoreTagId;
             issue.setPriority(5);
             result=1;
-        }else{
+        }else if (rawIssue.getCategory().equals(Scanner.FINDBUGS.getType())){
             RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
             tagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
+        }else if(rawIssue.getCategory().equals(Scanner.SONAR.getType())){
+            tagID = tagMapHelper.getTagIdByPriority(issue.getPriority());
         }
         if(tagID!=null){
             JSONObject tagged = new JSONObject();

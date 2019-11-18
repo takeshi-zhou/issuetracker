@@ -53,4 +53,21 @@ public class TagMapHelper {
         else
             return null;
     }
+
+    public String getTagIdByPriority(int priority){
+        switch(priority){
+            case 0:
+                return immediate;
+            case 1:
+                return urgent;
+            case 2:
+                return high;
+            case 3:
+                return normal;
+            case 4:
+                return low;
+            default:
+                return null;
+        }
+    }
 }

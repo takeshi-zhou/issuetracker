@@ -150,4 +150,10 @@ public class ScanServiceImpl implements ScanService {
         }
         return previousScannedCommitId;
     }
+
+    @Override
+    public Scan getScanByCategoryAndRepoIdAndCommitId(String repo_id, String category, String commit_id) {
+        return  scanDao.getScanByCategoryAndRepoIdAndCommitId(repo_id, category,commit_id);
+    }
+
 }

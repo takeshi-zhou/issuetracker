@@ -46,6 +46,29 @@
         <result property="detail" column="detail"/>
     </resultMap>
 
+    <resultMap id="issue4" type="Issue">
+        <id property="uuid" column="uuid"/>
+        <result property="type" column="type"/>
+        <result property="category" column="category"/>
+        <result property="start_commit" column="start_commit"/>
+        <result property="start_commit_date" column="start_commit_date"/>
+        <result property="end_commit" column="end_commit"/>
+        <result property="end_commit_date" column="end_commit_date"/>
+        <result property="raw_issue_start" column="raw_issue_start"/>
+        <result property="raw_issue_end" column="raw_issue_end"/>
+        <result property="repo_id" column="repo_id"/>
+        <result property="target_files" column="target_files"/>
+        <result property="create_time" column="create_time"/>
+        <result property="update_time" column="update_time"/>
+        <result property="priority" column="priority"/>
+        <result property="displayId" column="display_id"/>
+        <result property="status" column="status"/>
+        <result property="resolution" column="resolution"/>
+        <result property="sonar_issue_id" column="sonar_issue_id"/>
+        <collection property="issueType" column="type"
+                    select="cn.edu.fudan.issueservice.mapper.IssueTypeMapper.getIssueTypeByTypeName"/>
+    </resultMap>
+
 
     <insert id="insertIssueList" parameterType="List">
         insert into issue
@@ -368,5 +391,12 @@
         from issue
         where repo_id = #{repo_id} and start_commit_date between #{start} and #{end}
         group by start_commit order by value
+    </select>
+
+    <select id="getSonarIssueByRepoId" parameterType="String" resultMap="Issue4">
+        select sonar_issue_id
+        from issue
+        where repo_id = #{repo_id} and category = #{category}
+        order by sonar_issue_id
     </select>
 </mapper>
