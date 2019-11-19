@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -28,11 +29,17 @@ public class CloneScanTask extends BaseScanTask{
 
 
     private void run(String repoId, String commitId, String category) {
-        String identifier = redisLock.acquireLockWithTimeOut(repoId, 15, 15, TimeUnit.MINUTES);
+        String identifier= UUID.randomUUID().toString();
+        Boolean lockResult = false;
+        while(!lockResult){
+            lockResult =  redisLock.tryLock(repoId, identifier, 600, 600);
+        }
+
+        logger.info("redis lock identifier id --> {}",identifier);
         try {
             scan(scanOperation,repoId, commitId,category);
         } finally {
-            if (!redisLock.releaseLock(repoId, identifier)) {
+            if (!redisLock.releaseLockNew(repoId, identifier)) {
                 logger.error("repo->" + repoId + " release lock failed!");
             }
         }

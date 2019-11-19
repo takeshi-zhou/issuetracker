@@ -286,7 +286,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
             logger.info("mapping finished!");
 
         }catch(Exception e){
-
+            throw e;
         }finally {
             if(repoPath!= null){
                 restInterfaceManager.freeRepoPath(repo_id,repoPath);

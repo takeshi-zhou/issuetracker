@@ -413,7 +413,7 @@
         group by start_commit order by value
     </select>
 
-    <select id="getSonarIssueByRepoId" parameterType="String" resultMap="Issue4">
+    <select id="getSonarIssueByRepoId" parameterType="String" resultMap="issue4">
         select sonar_issue_id
         from issue
         where repo_id = #{repo_id} and category = #{category}

@@ -5,6 +5,7 @@ import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.domain.ScanInitialInfo;
 import cn.edu.fudan.scanservice.domain.ScanResult;
 import cn.edu.fudan.scanservice.util.ExecuteShellUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public class SonarQubeScanOperation extends ScanOperationAdapter  {
             return false;
         }
         //如果components的size为0代表scanner 扫描项目结果失败了
-        JSONObject components = sonarIssues.getJSONObject("components");
+        JSONArray components = sonarIssues.getJSONArray("components");
         if(components.size() == 0){
             logger.error("use sonar scanner to analyze ---> {}  failed",repoName);
             return false;

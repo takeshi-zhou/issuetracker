@@ -7,6 +7,7 @@ import org.apache.kafka.common.protocol.types.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -230,73 +231,93 @@ public class RestInterfaceManager {
 
     //--------------------------------------------------------sonar api -----------------------------------------------------
     public JSONObject getSonarIssueResults(String repoName, String type, int pageSize, boolean resolved,int page) {
-        String baseRequestUrl = sonarServicePath + "/api/issues/search?componentKeys="
-                + repoName
-                + "&s=FILE_LINE&resolved="
-                + resolved
-                + "&ps="
-                + pageSize
-                + "&organization=default-organization&facets=severities%2Ctypes&additionalFields=_all";
-        try {
-            if(page == 0){
-                if(type != null && ("CODE_SMELL".equals(type) || "BUG".equals(type) || "VULNERABILITY".equals(type) ||"SECURITY_HOTSPOT".equals(type))){
-                    return restTemplate.getForObject(baseRequestUrl+"&types="+type, JSONObject.class);
-                }else if(type == null ){
-                    return restTemplate.getForObject(baseRequestUrl, JSONObject.class);
-                }else{
-                    logger.error("this request type --> {} is not available in sonar api",type);
-                    return null;
+
+        String url = sonarServicePath + "/api/issues/search";
+        Map<String, String> map = new HashMap<>();
+        map.put("additionalFields","_all");
+        map.put("s","FILE_LINE");
+        map.put("componentKeys",repoName);
+        map.put("resolved",String.valueOf(resolved));
+
+        if(page>0){
+            map.put("p",page+"");
+        }
+        if(pageSize>0){
+            map.put("ps",pageSize+"");
+        }
+        if(type != null){
+            String[] types = type.split(",");
+            StringBuilder stringBuilder = new StringBuilder();
+            for(int i=0;i<types.length;i++){
+                String typeSb = types[i];
+                if("CODE_SMELL".equals(typeSb) || "BUG".equals(typeSb) || "VULNERABILITY".equals(typeSb) || "SECURITY_HOTSPOT".equals(typeSb)){
+                    stringBuilder.append(typeSb+",");
                 }
-            }else if(page > 0){
-                if(type != null && ("CODE_SMELL".equals(type) || "BUG".equals(type) || "VULNERABILITY".equals(type) ||"SECURITY_HOTSPOT".equals(type))){
-                    return restTemplate.getForObject(baseRequestUrl+"&types="+type+"&p="+page, JSONObject.class);
-                }else if(type == null ){
-                    return restTemplate.getForObject(baseRequestUrl+"&p="+page, JSONObject.class);
-                }else{
-                    logger.error("this request type --> {} is not available in sonar api",type);
-                    return null;
-                }
+            }
+            if(!stringBuilder.toString().isEmpty()){
+                map.put("types",stringBuilder.toString().substring(0,stringBuilder.toString().length()-1));
             }else{
-                logger.error("this request page --- {} is not available in sonar api ",page);
+                logger.error("this request type --> {} is not available in sonar api",type);
                 return null;
             }
-        } catch (RuntimeException e) {
-            logger.error("repo name : {}  ----> request sonar api failed", repoName);
-            throw new RuntimeException("get sonar result failed");
         }
+
+
+        try {
+            ResponseEntity entity = restTemplate.getForEntity(url,JSONObject.class,map);
+            JSONObject result  = JSONObject.parseObject(entity.getBody().toString());
+            return result;
+
+        }catch (RuntimeException e) {
+            logger.error("repo name : {}  ----> request sonar api failed", repoName);
+            throw e;
+        }
+
+
     }
 
     public JSONObject getSonarIssueResultsBySonarIssueKey(String issues,int pageSize) {
-        String baseRequestUrl = sonarServicePath + "/api/issues/search?";
-
+        String baseRequestUrl = sonarServicePath + "/api/issues/search";
+        Map<String, String> map = new HashMap<>();
+        map.put("issues",issues);
+        if(pageSize>0){
+            map.put("ps",pageSize+"");
+        }
         try {
-            return restTemplate.getForObject(baseRequestUrl+"&issues="+issues+"&ps="+pageSize, JSONObject.class);
+            ResponseEntity entity = restTemplate.getForEntity(baseRequestUrl,JSONObject.class,map);
+            JSONObject result  = JSONObject.parseObject(entity.getBody().toString());
+            return result;
         } catch (RuntimeException e) {
             logger.error("issues : {}  ----> request sonar api failed", issues);
-            throw new RuntimeException("get sonar result failed");
+            throw e;
         }
     }
 
 
     public JSONObject getRuleInfo(String ruleKey,String actives,String organizationKey){
+        Map<String, String> map = new HashMap<>();
+
         String baseRequestUrl = sonarServicePath + "/api/rules/show?key=";
         if(ruleKey ==null){
             logger.error("ruleKey is missing");
             return null;
-        }
-        if(actives==null ){
-            if(organizationKey ==null){
-                return restTemplate.getForObject(baseRequestUrl+ruleKey, JSONObject.class);
-            }else{
-                return restTemplate.getForObject(baseRequestUrl+ruleKey+"&organization="+organizationKey, JSONObject.class);
-            }
-
         }else{
-            if(organizationKey ==null){
-                return restTemplate.getForObject(baseRequestUrl+ruleKey+"&actives="+actives, JSONObject.class);
-            }else{
-                return restTemplate.getForObject(baseRequestUrl+ruleKey+"&organization="+organizationKey+"&actives="+actives, JSONObject.class);
-            }
+            map.put("key",ruleKey);
+        }
+        if(actives != null){
+            map.put("actives",actives);
+        }
+        if(organizationKey != null){
+            map.put("organization",organizationKey);
+        }
+
+        try{
+            ResponseEntity entity = restTemplate.getForEntity(baseRequestUrl,JSONObject.class,map);
+            JSONObject result  = JSONObject.parseObject(entity.getBody().toString());
+            return result;
+        }catch(RuntimeException e){
+            logger.error("ruleKey : {}  ----> request sonar  rule infomation api failed", ruleKey);
+            throw e;
         }
 
     }
@@ -305,7 +326,20 @@ public class RestInterfaceManager {
         if(to<from){
             logger.error("lines {} can not greater {} ",from,to);
         }
-        return restTemplate.getForObject(sonarServicePath+"/api/sources/lines?key="+componentKey+"&from="+from+"&to="+to, JSONObject.class);
+        Map<String, String> map = new HashMap<>();
+
+        String baseRequestUrl = sonarServicePath + "/api/sources/lines";
+        map.put("componentKeys",componentKey);
+        map.put("from",String.valueOf(from));
+        map.put("to",String.valueOf(to));
+        try{
+            ResponseEntity entity = restTemplate.getForEntity(baseRequestUrl,JSONObject.class,map);
+            return JSONObject.parseObject(entity.getBody().toString());
+        }catch (RuntimeException e){
+            logger.error("componentKey : {}  ----> request sonar  source Lines  api failed , from --> {} , to --> {}", componentKey,from,to);
+            throw e;
+        }
+
 
 
     }

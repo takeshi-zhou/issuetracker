@@ -105,4 +105,5 @@ public class BaseScanTask {
         send(repoId, commitId, category,"success", "all complete");
         restInterfaceManager.freeRepoPath(scanInitialInfo.getRepoId(),scanInitialInfo.getRepoPath());
     }
+
 }
