@@ -5,7 +5,13 @@
  **/
 package cn.edu.fudan.issueservice.component;
 
+import cn.edu.fudan.issueservice.IssueServiceApplicationTests;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -15,7 +21,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 
-public class RestInterfaceManagerTest {
+@PrepareForTest({ RestTemplate.class})
+public class RestInterfaceManagerTest extends IssueServiceApplicationTests {
 
 
 
@@ -42,5 +49,31 @@ public class RestInterfaceManagerTest {
 
 
 
+    }
+
+    @Autowired
+    @InjectMocks
+    RestInterfaceManager restInterfaceManager;
+
+    @Test
+    public void getSonarIssueResults() {
+        JSONObject result =restInterfaceManager.getSonarIssueResults("swagger-maven-plugin-master",null,100,false,1);
+        System.out.println(1);
+    }
+
+    @Test
+    public void getRuleInfo() {
+        JSONObject result =restInterfaceManager.getRuleInfo("squid:S1313",null,null);
+        int  a=1;
+        a= a+1;
+        System.out.println(a);
+    }
+
+    @Test
+    public void getSonarSourceLines() {
+        JSONObject result =restInterfaceManager.getSonarSourceLines("scala-maven-plugin-master:src/it/test1/src/main/java/TestClass.java",20,25);
+        int  a=1;
+        a= a+1;
+        System.out.println(a);
     }
 }

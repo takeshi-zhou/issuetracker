@@ -414,7 +414,7 @@
     </select>
 
     <select id="getSonarIssueByRepoId" parameterType="String" resultMap="issue4">
-        select sonar_issue_id
+        select *
         from issue
         where repo_id = #{repo_id} and category = #{category}
         order by sonar_issue_id

@@ -146,16 +146,13 @@ public class RestInterfaceManager {
 
     //--------------------------------------------------------sonar api -----------------------------------------------------
     public JSONObject getSonarIssueResults(String repoName, String type, int pageSize, boolean resolved) {
-        String url = sonarServicePath + "/api/issues/search";
         Map<String, String> map = new HashMap<>();
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(sonarServicePath + "/api/issues/search?componentKeys={componentKeys}&additionalFields={additionalFields}&s={s}&resolved={resolved}");
         map.put("additionalFields","_all");
         map.put("s","FILE_LINE");
         map.put("componentKeys",repoName);
         map.put("resolved",String.valueOf(resolved));
-
-        if(pageSize>0){
-            map.put("ps",pageSize+"");
-        }
         if(type != null){
             String[] types = type.split(",");
             StringBuilder stringBuilder = new StringBuilder();
@@ -166,13 +163,22 @@ public class RestInterfaceManager {
                 }
             }
             if(!stringBuilder.toString().isEmpty()){
-                map.put("types",stringBuilder.toString().substring(0,stringBuilder.toString().length()-1));
+                urlBuilder.append("&componentKeys={componentKeys}");
+                String requestTypes = stringBuilder.toString().substring(0,stringBuilder.toString().length()-1);
+                map.put("types",requestTypes);
             }else{
                 logger.error("this request type --> {} is not available in sonar api",type);
                 return null;
             }
         }
 
+
+        if(pageSize>0){
+            urlBuilder.append("&ps={ps}");
+            map.put("ps",String.valueOf(pageSize));
+        }
+
+        String url = urlBuilder.toString();
 
         try {
             ResponseEntity entity = restTemplate.getForEntity(url,JSONObject.class,map);
@@ -181,7 +187,7 @@ public class RestInterfaceManager {
 
         }catch (RuntimeException e) {
             logger.error("repo name : {}  ----> request sonar api failed", repoName);
-            throw new RuntimeException("get sonar result failed");
+            throw e;
         }
     }
 }

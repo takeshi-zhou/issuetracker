@@ -231,20 +231,13 @@ public class RestInterfaceManager {
 
     //--------------------------------------------------------sonar api -----------------------------------------------------
     public JSONObject getSonarIssueResults(String repoName, String type, int pageSize, boolean resolved,int page) {
-
-        String url = sonarServicePath + "/api/issues/search";
         Map<String, String> map = new HashMap<>();
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(sonarServicePath + "/api/issues/search?componentKeys={componentKeys}&additionalFields={additionalFields}&s={s}&resolved={resolved}");
         map.put("additionalFields","_all");
         map.put("s","FILE_LINE");
         map.put("componentKeys",repoName);
         map.put("resolved",String.valueOf(resolved));
-
-        if(page>0){
-            map.put("p",page+"");
-        }
-        if(pageSize>0){
-            map.put("ps",pageSize+"");
-        }
         if(type != null){
             String[] types = type.split(",");
             StringBuilder stringBuilder = new StringBuilder();
@@ -255,13 +248,25 @@ public class RestInterfaceManager {
                 }
             }
             if(!stringBuilder.toString().isEmpty()){
-                map.put("types",stringBuilder.toString().substring(0,stringBuilder.toString().length()-1));
+                urlBuilder.append("&componentKeys={componentKeys}");
+                String requestTypes = stringBuilder.toString().substring(0,stringBuilder.toString().length()-1);
+                map.put("types",requestTypes);
             }else{
                 logger.error("this request type --> {} is not available in sonar api",type);
                 return null;
             }
         }
 
+        if(page>0){
+            urlBuilder.append("&p={p}");
+            map.put("p",String.valueOf(page));
+        }
+        if(pageSize>0){
+            urlBuilder.append("&ps={ps}");
+            map.put("ps",String.valueOf(pageSize));
+        }
+
+        String url = urlBuilder.toString();
 
         try {
             ResponseEntity entity = restTemplate.getForEntity(url,JSONObject.class,map);
@@ -277,11 +282,12 @@ public class RestInterfaceManager {
     }
 
     public JSONObject getSonarIssueResultsBySonarIssueKey(String issues,int pageSize) {
-        String baseRequestUrl = sonarServicePath + "/api/issues/search";
+        String baseRequestUrl = sonarServicePath + "/api/issues/search?issues={issues}";
         Map<String, String> map = new HashMap<>();
         map.put("issues",issues);
         if(pageSize>0){
             map.put("ps",pageSize+"");
+            baseRequestUrl= baseRequestUrl+"&ps={ps}";
         }
         try {
             ResponseEntity entity = restTemplate.getForEntity(baseRequestUrl,JSONObject.class,map);
@@ -297,7 +303,7 @@ public class RestInterfaceManager {
     public JSONObject getRuleInfo(String ruleKey,String actives,String organizationKey){
         Map<String, String> map = new HashMap<>();
 
-        String baseRequestUrl = sonarServicePath + "/api/rules/show?key=";
+        String baseRequestUrl = sonarServicePath + "/api/rules/show";
         if(ruleKey ==null){
             logger.error("ruleKey is missing");
             return null;
@@ -312,9 +318,10 @@ public class RestInterfaceManager {
         }
 
         try{
-            ResponseEntity entity = restTemplate.getForEntity(baseRequestUrl,JSONObject.class,map);
-            JSONObject result  = JSONObject.parseObject(entity.getBody().toString());
-            return result;
+//            ResponseEntity entity = restTemplate.getForEntity(baseRequestUrl,JSONObject.class,map);
+//            JSONObject result  = JSONObject.parseObject(entity.getBody().toString());
+//            return result;
+            return restTemplate.getForObject(baseRequestUrl + "?key=" + ruleKey, JSONObject.class);
         }catch(RuntimeException e){
             logger.error("ruleKey : {}  ----> request sonar  rule infomation api failed", ruleKey);
             throw e;
@@ -328,8 +335,8 @@ public class RestInterfaceManager {
         }
         Map<String, String> map = new HashMap<>();
 
-        String baseRequestUrl = sonarServicePath + "/api/sources/lines";
-        map.put("componentKeys",componentKey);
+        String baseRequestUrl = sonarServicePath + "/api/sources/lines?key={key}&from={from}&to={to}";
+        map.put("key",componentKey);
         map.put("from",String.valueOf(from));
         map.put("to",String.valueOf(to));
         try{

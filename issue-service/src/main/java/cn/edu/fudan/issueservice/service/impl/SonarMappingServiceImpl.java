@@ -101,7 +101,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                 scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,current_commit_id,commitDate,developer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
             }else{
                 //先获取数据库所有的sonarIssueKey，并且已经排序，用作后面的二分法查找。
-                List<Issue> issueList = issueDao.getSonarIssueKeysByRepoId(repo_id, Scanner.SONAR.getType());
+                List<Issue> issueList = issueDao.getSonarIssueByRepoId(repo_id, Scanner.SONAR.getType());
 
                 String[] sonarIssueKeys = new String[issueList.size()];
                 for(int i=0;i<issueList.size();i++){
@@ -264,8 +264,10 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
             }
 
             //更新issue
-            issueDao.batchUpdateIssue(updateIssueList);
-            logger.info("issue update success!");
+            if(updateIssueList.size()!=0){
+                issueDao.batchUpdateIssue(updateIssueList);
+                logger.info("issue update success!");
+            }
 
             if (!insertRawIssues.isEmpty()) {
                 rawIssueDao.insertRawIssueList(insertRawIssues);
@@ -286,7 +288,8 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
             logger.info("mapping finished!");
 
         }catch(Exception e){
-            throw e;
+            e.printStackTrace();
+            logger.error("current_commit_id --> {} ,repo_id --> {} mapping failed" ,current_commit_id,repo_id);
         }finally {
             if(repoPath!= null){
                 restInterfaceManager.freeRepoPath(repo_id,repoPath);
@@ -297,17 +300,22 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
 
 
 
-    public void insertLocations(String rawIssueUUID,JSONObject issue,String repoPath){
-        int startLine;
-        int endLine;
+    public void insertLocations(String rawIssueUUID,JSONObject issue,String repoPath) throws Exception{
+        int startLine =0;
+        int endLine = 0;
         String sonar_path;
         String[] sonarComponents;
         String filePath = null;
         List<Location> locations = new ArrayList<>();
         //分成两部分处理，第一部分针对issue中的textRange存储location
         JSONObject textRange = issue.getJSONObject("textRange");
-        startLine = textRange.getIntValue("startLine");
-        endLine = textRange.getIntValue("endLine");
+        if(textRange != null){
+            startLine = textRange.getIntValue("startLine");
+            endLine = textRange.getIntValue("endLine");
+        }else{
+            logger.error("textRange is null , sonar issue-->",issue.toJSONString());
+        }
+
         sonar_path =issue.getString("component");
         if(sonar_path != null) {
             sonarComponents = sonar_path.split(":");
@@ -315,6 +323,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                 filePath = sonarComponents[sonarComponents.length - 1];
             }
         }
+
         Location mainLocation = getLocation(startLine,endLine,rawIssueUUID,filePath,repoPath);
         locations.add(mainLocation);
         //第二部分针对issue中的flows中的所有location存储
@@ -349,11 +358,19 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
 
     }
 
-    private Location getLocation(int startLine,int endLine,String rawIssueId,String filePath,String repoPath){
+    private Location getLocation(int startLine,int endLine,String rawIssueId,String filePath,String repoPath) throws Exception{
         Location location = new Location();
         String locationUUID = UUID.randomUUID().toString();
         //获取相应的code
-        String code = ASTUtil.getCode(startLine,endLine,repoPath+"/"+filePath);
+        String code= null;
+        try{
+            code = ASTUtil.getCode(startLine,endLine,repoPath+"/"+filePath);
+        }catch (Exception e){
+            logger.info("file path --> {} file deleted",repoPath+"/"+filePath);
+            logger.error("rawIssueId --> {}  get code failed.",rawIssueId);
+
+        }
+
         location.setCode(code);
 
         location.setUuid(locationUUID);
@@ -380,11 +397,11 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
 
     private RawIssue getRawIssue(String repo_id, String current_commit_id, String category,String rawIssueUUID,String issueUUID,JSONObject issue){
         //根据category,repoId,commitId,获取唯一的scanId
-        JSONObject scan = restInterfaceManager.getScanByCategoryAndRepoIdAndCommitId(repo_id,current_commit_id,category);
-        if(scan == null){
-            logger.error("can not get scan, with repo_id-->{} ,commit_id --> {} ,category --> {}" ,repo_id,current_commit_id,category);
-            return null;
-        }
+//        JSONObject scan = restInterfaceManager.getScanByCategoryAndRepoIdAndCommitId(repo_id,current_commit_id,category);
+//        if(scan == null){
+//            logger.error("can not get scan, with repo_id-->{} ,commit_id --> {} ,category --> {}" ,repo_id,current_commit_id,category);
+//            return null;
+//        }
 
         //根据ruleId获取rule的name
         String issueName=null;
@@ -408,7 +425,8 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
         rawIssue.setUuid(rawIssueUUID);
         rawIssue.setType(issueName);
         rawIssue.setFile_name(filePath);
-        rawIssue.setScan_id(scan.getString("uuid"));
+        //待改，因为数据库不可为空
+        rawIssue.setScan_id("sonar");
         rawIssue.setIssue_id(issueUUID);
         rawIssue.setCommit_id(current_commit_id);
         rawIssue.setRepo_id(repo_id);
@@ -446,29 +464,34 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
             issue.setResolution(sonarIssue.getString("resolution"));
         }
         issue.setDisplayId(++currentDisplayId);
-
+        int priority =-1;
         String severity = sonarIssue.getString("severity");
-        int priority ;
-        switch (severity){
-            case "BLOCKER":
-                priority = 0;
-                break;
-            case "CRITICAL":
-                priority = 1;
-                break;
-            case "MAJOR":
-                priority = 2;
-                break;
-            case "MINOR":
-                priority = 3;
-                break;
-            case "INFO":
-                priority = 4;
-                break;
-            default:
-                logger.error("severity --> {} this case have not taken into account !",severity);
-                priority = -1;
+        if(severity!=null){
+
+            switch (severity){
+                case "BLOCKER":
+                    priority = 0;
+                    break;
+                case "CRITICAL":
+                    priority = 1;
+                    break;
+                case "MAJOR":
+                    priority = 2;
+                    break;
+                case "MINOR":
+                    priority = 3;
+                    break;
+                case "INFO":
+                    priority = 4;
+                    break;
+                default:
+                    logger.error("severity --> {} this case have not taken into account !",severity);
+                    priority = -1;
+            }
+        }else{
+            logger.error("severity --> is null ,rawIssue  id--> {}" ,rawIssue.getUuid());
         }
+
         issue.setPriority(priority);
         issue.setSonar_issue_id(sonarIssue.getString("key"));
         return issue;
