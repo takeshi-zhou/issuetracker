@@ -2,6 +2,7 @@ package cn.edu.fudan.cloneservice.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
@@ -27,6 +28,18 @@ public class DateTimeUtil {
 
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
+    public static DateTimeFormatter Y_M_D_formatter = new DateTimeFormatterBuilder()
+            .appendValue(ChronoField.YEAR)
+            .appendLiteral("-")
+            .appendValue(ChronoField.MONTH_OF_YEAR, 2)//第二个参数是宽度，比如2月份，如果宽度定为2，那么格式化后就是02
+            .appendLiteral("-")
+            .appendValue(ChronoField.DAY_OF_MONTH, 2)
+            .toFormatter();
+
+    public static LocalDate parse(String dateStr){
+        return LocalDate.parse(dateStr,Y_M_D_formatter);
+    }
+
     public static String format(Date date) {
         return new SimpleDateFormat(DATE_FORMAT).format(date);
     }
@@ -41,7 +54,7 @@ public class DateTimeUtil {
         return date;
     }
 
-    public static Date parse(String str) {
+    public static Date transfer(String str) {
         try {
             return new SimpleDateFormat(DATE_FORMAT).parse(str);
         } catch (ParseException e) {

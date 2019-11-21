@@ -4,9 +4,12 @@ import cn.edu.fudan.cloneservice.bean.CloneInstanceInfo;
 import cn.edu.fudan.cloneservice.component.RestInterfaceManager;
 import cn.edu.fudan.cloneservice.dao.*;
 import cn.edu.fudan.cloneservice.domain.*;
+import cn.edu.fudan.cloneservice.mapper.RepoCommitMapper;
 import cn.edu.fudan.cloneservice.service.CloneMeasureService;
+import cn.edu.fudan.cloneservice.util.DateTimeUtil;
 import cn.edu.fudan.cloneservice.util.JGitUtil;
 import cn.edu.fudan.cloneservice.util.LineNumUtil;
+import org.eclipse.jgit.gitrepo.RepoCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -30,6 +34,9 @@ import java.util.*;
 public class CloneMeasureServiceImpl implements CloneMeasureService {
     @Autowired
     CloneInstanceInfoDao cloneInstanceInfoDao;
+
+    @Autowired
+    RepoCommitMapper repoCommitMapper;
 
 //    @Autowired
 //    IssueDao issueDao;
@@ -112,6 +119,46 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
         }
         return -1;
     }
+
+    @Override
+    public List<RepoCloneInfoMonthly> getRepoCloneInfoByRepoId(String repo_id) {
+        List<RepoCloneInfoMonthly> result=new ArrayList<>();
+        //获取一个repo最新最近的一次commit的日期last_day
+        String last_day_str = repoCommitMapper.getLastDateOfRepo(repo_id).substring(0,10);;
+        LocalDate last_day=LocalDate.parse(last_day_str, DateTimeUtil.Y_M_D_formatter);
+        LocalDate first_day=last_day.minusDays(30);
+        String first_day_str = first_day.toString().substring(0,10);
+        List<Commit> commit_list = repoCommitMapper.selectCommitByRepoIdAndDuration(repo_id,first_day_str,last_day_str);
+
+        //统计最近一次的commit，单独统计是为了方便循环判断和上一次commit日期是否相同
+        Commit commit0 = commit_list.get(0);
+        String commit_id0 = commit0.getCommit_id();
+        List<CloneInstanceInfo> lci0 =  cloneInstanceInfoDao.getCloneInsListByRepoIdAndCommitId(repo_id, commit_id0);
+        long clone_line0 =  getCloneLine(lci0);
+        long total_line0 = getRepoTotalLine(repo_id, commit_id0);
+        Double ratio0 = 1.0 * clone_line0 / total_line0;
+        RepoCloneInfoMonthly repoCloneInfoMonthly0 = new RepoCloneInfoMonthly(last_day_str,repo_id, commit_id0, clone_line0,total_line0,ratio0);
+        result.add(repoCloneInfoMonthly0);
+
+        //循环从倒数第二次commit开始
+        for (int i=1; i<commit_list.size(); i++){
+            Commit commit = commit_list.get(i);
+            if (!commit.getCommit_time().substring(0, 10).equals(last_day_str)){
+                String commit_id = commit.getCommit_id();
+                String commit_date = commit.getCommit_time().substring(0,10);
+                List<CloneInstanceInfo> lci =  cloneInstanceInfoDao.getCloneInsListByRepoIdAndCommitId(repo_id, commit_id);
+                long clone_line =  getCloneLine(lci);
+                long total_line = getRepoTotalLine(repo_id, commit_id);
+                Double ratio = 1.0 * clone_line / total_line;
+                RepoCloneInfoMonthly repoCloneInfoMonthly = new RepoCloneInfoMonthly(commit_date,repo_id, commit_id, clone_line,total_line,ratio);
+                result.add(repoCloneInfoMonthly);
+                last_day_str = commit_date;//更新上一次commit的日期
+            }
+        }
+
+        return result;
+    }
+
 
 //    //这个commit中，某个开发者的克隆代码行数
 //    @Override

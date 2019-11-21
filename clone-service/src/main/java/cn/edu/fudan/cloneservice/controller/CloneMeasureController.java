@@ -45,6 +45,19 @@ public class CloneMeasureController {
             return new ResponseBean(401,"failed",null);
         }
     }
+
+    //jeff 获取一个项目距离最后一次提交之前1个月之内的commit的代码重复数据
+    @GetMapping(value = {"/clonemeasure/repo-monthly"})
+    public ResponseBean getMeasureCloneMonthly(
+            @RequestParam("repo_id") String repo_id
+    ){
+        try{
+            return new ResponseBean(200,"success",cloneMeasureService.getRepoCloneInfoByRepoId(repo_id));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
 //    @GetMapping(value = {"/clonemeasure/developer"})
 //    public ResponseBean getMeasureCloneDataByDevelopName(@RequestParam("repo_id") String repo_id,
 //                                                         @RequestParam("commit_id") String commit_id,

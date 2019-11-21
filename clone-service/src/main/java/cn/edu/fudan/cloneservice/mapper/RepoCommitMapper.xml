@@ -19,4 +19,12 @@ ORDER BY commit_time
         select uuid, repo_id, commit_id, commit_time
         from scan where repo_id=#{repo_id} and commit_time between #{since} and #{until} order by commit_time
     </select>
+    <select id="getLastDateOfRepo" resultType="String">
+        select commit_time from commit where repo_id = #{repo_id} ORDER BY commit_time DESC LIMIT 1;
+    </select>
+    <select id="selectCommitByRepoIdAndDuration" resultMap="commit_map">
+        select uuid, repo_id, commit_id, commit_time
+        from commit where repo_id=#{repo_id} and commit_time between #{since} and #{until} order by commit_time desc
+    </select>
+
 </mapper>

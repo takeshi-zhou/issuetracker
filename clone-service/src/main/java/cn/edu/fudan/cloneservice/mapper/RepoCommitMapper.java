@@ -14,4 +14,13 @@ public interface RepoCommitMapper {
             @Param("until") String until
     );
 
+    String getLastDateOfRepo(@Param("repo_id")String repo_id);
+
+    List<Commit> selectCommitByRepoIdAndDuration(
+            @Param("repo_id") String repo_id,
+            @Param("since") String since,
+            @Param("until") String until
+    );
+
+
 }
