@@ -17,6 +17,7 @@ public class RecentAllThenSkipWeekStrategy implements CommitFilterStrategy<ScanM
     @Override
     public List<ScanMessageWithTime> filter(Map<LocalDate, List<ScanMessageWithTime>> map, List<LocalDate> dates) {
         int sourceSize=dates.size();
+        ScanIntervalForStrategy.setInterval(11);
         LocalDate nextTimeLimit=dates.get(sourceSize-1).minusMonths(ScanIntervalForStrategy.getInterval());
         LinkedList<ScanMessageWithTime> result=new LinkedList<>();
         int i=0;
@@ -32,8 +33,8 @@ public class RecentAllThenSkipWeekStrategy implements CommitFilterStrategy<ScanM
             }
             if(!isRecent){
                 if(date.isBefore(nextTimeLimit)||i==sourceSize-1){
-                    List<ScanMessageWithTime> list=map.get(date);
-                    result.addFirst(list.get(list.size()-1));
+//                    List<ScanMessageWithTime> list=map.get(date);
+//                    result.addFirst(list.get(list.size()-1));
                     nextTimeLimit=nextTimeLimit.minusWeeks(1);
                 }
             }

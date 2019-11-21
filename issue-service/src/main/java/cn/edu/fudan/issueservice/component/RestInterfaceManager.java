@@ -7,6 +7,7 @@ import org.apache.kafka.common.protocol.types.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -230,71 +231,131 @@ public class RestInterfaceManager {
 
     //--------------------------------------------------------sonar api -----------------------------------------------------
     public JSONObject getSonarIssueResults(String repoName, String type, int pageSize, boolean resolved,int page) {
-        String baseRequestUrl = sonarServicePath + "/api/issues/search?componentKeys="
-                + repoName
-                + "&s=FILE_LINE&resolved="
-                + resolved
-                + "&ps="
-                + pageSize
-                + "&organization=default-organization&facets=severities%2Ctypes&additionalFields=_all";
-        try {
-            if(page == 0){
-                if(type != null && (type.equals("CODE_SMELL") || type.equals("BUG") || type.equals("VULNERABILITY") ||type.equals("SECURITY_HOTSPOT"))){
-                    return restTemplate.getForObject(baseRequestUrl+"&types="+type, JSONObject.class);
-                }else if(type == null ){
-                    return restTemplate.getForObject(baseRequestUrl, JSONObject.class);
-                }else{
-                    logger.error("this request type --> {} is not available in sonar api",type);
-                    return null;
+        Map<String, String> map = new HashMap<>();
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(sonarServicePath + "/api/issues/search?componentKeys={componentKeys}&additionalFields={additionalFields}&s={s}&resolved={resolved}");
+        map.put("additionalFields","_all");
+        map.put("s","FILE_LINE");
+        map.put("componentKeys",repoName);
+        map.put("resolved",String.valueOf(resolved));
+        if(type != null){
+            String[] types = type.split(",");
+            StringBuilder stringBuilder = new StringBuilder();
+            for(int i=0;i<types.length;i++){
+                String typeSb = types[i];
+                if("CODE_SMELL".equals(typeSb) || "BUG".equals(typeSb) || "VULNERABILITY".equals(typeSb) || "SECURITY_HOTSPOT".equals(typeSb)){
+                    stringBuilder.append(typeSb+",");
                 }
-            }else if(page > 0){
-                if(type != null && (type.equals("CODE_SMELL") || type.equals("BUG") || type.equals("VULNERABILITY") ||type.equals("SECURITY_HOTSPOT"))){
-                    return restTemplate.getForObject(baseRequestUrl+"&types="+type+"&p="+page, JSONObject.class);
-                }else if(type == null ){
-                    return restTemplate.getForObject(baseRequestUrl+"&p="+page, JSONObject.class);
-                }else{
-                    logger.error("this request type --> {} is not available in sonar api",type);
-                    return null;
-                }
+            }
+            if(!stringBuilder.toString().isEmpty()){
+                urlBuilder.append("&componentKeys={componentKeys}");
+                String requestTypes = stringBuilder.toString().substring(0,stringBuilder.toString().length()-1);
+                map.put("types",requestTypes);
             }else{
-                logger.error("this request page --- {} is not available in sonar api ",page);
+                logger.error("this request type --> {} is not available in sonar api",type);
                 return null;
             }
-        } catch (RuntimeException e) {
+        }
+
+        if(page>0){
+            urlBuilder.append("&p={p}");
+            map.put("p",String.valueOf(page));
+        }
+        if(pageSize>0){
+            urlBuilder.append("&ps={ps}");
+            map.put("ps",String.valueOf(pageSize));
+        }
+
+        String url = urlBuilder.toString();
+
+        try {
+            ResponseEntity entity = restTemplate.getForEntity(url,JSONObject.class,map);
+            JSONObject result  = JSONObject.parseObject(entity.getBody().toString());
+            return result;
+
+        }catch (RuntimeException e) {
             logger.error("repo name : {}  ----> request sonar api failed", repoName);
-            throw new RuntimeException("get sonar result failed");
+            throw e;
+        }
+
+
+    }
+
+    public JSONObject getSonarIssueResultsBySonarIssueKey(String issues,int pageSize) {
+        String baseRequestUrl = sonarServicePath + "/api/issues/search?issues={issues}";
+        Map<String, String> map = new HashMap<>();
+        map.put("issues",issues);
+        if(pageSize>0){
+            map.put("ps",pageSize+"");
+            baseRequestUrl= baseRequestUrl+"&ps={ps}";
+        }
+        try {
+            ResponseEntity entity = restTemplate.getForEntity(baseRequestUrl,JSONObject.class,map);
+            JSONObject result  = JSONObject.parseObject(entity.getBody().toString());
+            return result;
+        } catch (RuntimeException e) {
+            logger.error("issues : {}  ----> request sonar api failed", issues);
+            throw e;
         }
     }
 
 
     public JSONObject getRuleInfo(String ruleKey,String actives,String organizationKey){
-        String baseRequestUrl = sonarServicePath + "/api/rules/show?key=";
+        Map<String, String> map = new HashMap<>();
+
+        String baseRequestUrl = sonarServicePath + "/api/rules/show";
         if(ruleKey ==null){
             logger.error("ruleKey is missing");
             return null;
-        }
-        if(actives==null ){
-            if(organizationKey ==null){
-                return restTemplate.getForObject(baseRequestUrl+ruleKey, JSONObject.class);
-            }else{
-                return restTemplate.getForObject(baseRequestUrl+ruleKey+"&organization="+organizationKey, JSONObject.class);
-            }
-
         }else{
-            if(organizationKey ==null){
-                return restTemplate.getForObject(baseRequestUrl+ruleKey+"&actives="+actives, JSONObject.class);
-            }else{
-                return restTemplate.getForObject(baseRequestUrl+ruleKey+"&organization="+organizationKey+"&actives="+actives, JSONObject.class);
-            }
+            map.put("key",ruleKey);
         }
+        if(actives != null){
+            map.put("actives",actives);
+        }
+        if(organizationKey != null){
+            map.put("organization",organizationKey);
+        }
+
+        try{
+//            ResponseEntity entity = restTemplate.getForEntity(baseRequestUrl,JSONObject.class,map);
+//            JSONObject result  = JSONObject.parseObject(entity.getBody().toString());
+//            return result;
+            return restTemplate.getForObject(baseRequestUrl + "?key=" + ruleKey, JSONObject.class);
+        }catch(RuntimeException e){
+            logger.error("ruleKey : {}  ----> request sonar  rule infomation api failed", ruleKey);
+            throw e;
+        }
+
+    }
+
+    public JSONObject getSonarSourceLines(String componentKey,int from,int to){
+        if(to<from){
+            logger.error("lines {} can not greater {} ",from,to);
+        }
+        Map<String, String> map = new HashMap<>();
+
+        String baseRequestUrl = sonarServicePath + "/api/sources/lines?key={key}&from={from}&to={to}";
+        map.put("key",componentKey);
+        map.put("from",String.valueOf(from));
+        map.put("to",String.valueOf(to));
+        try{
+            ResponseEntity entity = restTemplate.getForEntity(baseRequestUrl,JSONObject.class,map);
+            return JSONObject.parseObject(entity.getBody().toString());
+        }catch (RuntimeException e){
+            logger.error("componentKey : {}  ----> request sonar  source Lines  api failed , from --> {} , to --> {}", componentKey,from,to);
+            throw e;
+        }
+
+
 
     }
 
     //------------------------------------------------------scan api ---------------------------------------------
 
 
-    public JSONObject getScanByCategoryAndRepoIdAndCommitId(String repoId,String commit_id ,String category){
-        return restTemplate.getForObject(scanServicePath + "/inner/scan/commit?repo_id=" + repoId+"&commit_id="+commit_id+"&category="+category, JSONObject.class);
+    public JSONObject getScanByCategoryAndRepoIdAndCommitId(String repoId,String commitId ,String category){
+        return restTemplate.getForObject(scanServicePath + "/inner/scan/commit?repo_id=" + repoId+"&commit_id="+commitId+"&category="+category, JSONObject.class);
     }
 
 

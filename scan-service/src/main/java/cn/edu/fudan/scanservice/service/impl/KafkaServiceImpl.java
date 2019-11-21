@@ -188,7 +188,7 @@ public class KafkaServiceImpl implements KafkaService {
         cloneInfo.put("commitList",list.stream().map(ScanMessageWithTime::getCommitId).collect(Collectors.toList()));
         //发送消息给clone服务，将度量信息保存
         kafkaTemplate.send("CloneZNJ",JSONObject.toJSONString(cloneInfo));
-        logger.info("message has been send to topic ClonO -> {}",repoId);
+        logger.info("message has been send to topic Clone -> {}",repoId);
     }
 
     @Override

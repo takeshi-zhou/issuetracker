@@ -169,7 +169,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
         for(RawIssue currentRawIssue:current){
             boolean isMapped=false;
             for(RawIssue preRawIssue:pre){
-                if(!preRawIssue.isMapped()&& LocationCompare.isUniqueIssue(currentRawIssue,preRawIssue)){
+                if(!preRawIssue.isMapped()&& LocationCompare.isSameIssue(currentRawIssue,preRawIssue)){
                     preRawIssue.setMapped(true);
                     isMapped=true;
                     break;

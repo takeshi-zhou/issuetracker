@@ -167,16 +167,39 @@ public class RawIssue {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (!(obj instanceof RawIssue)) return false;
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof RawIssue)) {
+            return false;
+        }
         RawIssue rawIssue = (RawIssue) obj;
-        if(this.detail==null||((RawIssue) obj).detail==null)
+
+        return rawIssue.getUuid().equals(((RawIssue) obj).getUuid());
+
+/*        if (this.detail != null && ((RawIssue) obj).detail != null) {
+            return rawIssue.detail.equals(detail) &&
+                    rawIssue.file_name.equals(file_name);
+        }
+
+        if(this.detail == null || ((RawIssue) obj).detail == null) {
             return rawIssue.type.equals(type) &&
-                   rawIssue.file_name.equals(file_name);
-        else
+                    rawIssue.file_name.equals(file_name);
+        } else {
             return rawIssue.type.equals(type) &&
                     rawIssue.detail.equals(detail) &&
                     rawIssue.file_name.equals(file_name);
+
+        }
+        return false;*/
+    }
+
+    public boolean hasSameBaseInfo(RawIssue obj) {
+        if (this.detail != null && obj.detail != null) {
+            return obj.detail.equals(detail) &&
+                    obj.file_name.equals(file_name);
+        }
+        return false;
     }
 
     @Override

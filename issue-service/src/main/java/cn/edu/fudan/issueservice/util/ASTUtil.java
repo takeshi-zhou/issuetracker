@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public class ASTUtil {
 
-    public static String getCode(int startLine, int endLine, String filePath) {
+    public static String getCode(int startLine, int endLine, String filePath) throws Exception{
         StringBuilder code = new StringBuilder();
         String s = "";
         int line = 1;
@@ -21,6 +21,7 @@ public class ASTUtil {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            throw e;
         }
         return code.toString();
     }

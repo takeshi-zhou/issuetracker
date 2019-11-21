@@ -125,14 +125,22 @@ public class Location {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (!(obj instanceof Location)) return false;
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Location)) {
+            return false;
+        }
         Location location = (Location) obj;
-        if(this.class_name!=null&&location.class_name!=null&&this.method_name!=null&&location.method_name!=null)
+        if(this.class_name != null && location.class_name != null
+                && this.method_name != null && location.method_name!=null) {
             return location.class_name.equals(class_name) &&
                     location.method_name.equals(method_name) &&
-                    location.file_path.equals(file_path);
-        else
-            return location.file_path.equals(file_path);
+                    location.file_path.equals(file_path) &&
+                    bug_lines.split(",").length == location.bug_lines.split(",").length;
+        }
+
+        return false;
+
     }
 }

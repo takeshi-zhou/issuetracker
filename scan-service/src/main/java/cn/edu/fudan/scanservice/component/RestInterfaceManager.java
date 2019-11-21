@@ -7,9 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -142,33 +146,48 @@ public class RestInterfaceManager {
 
     //--------------------------------------------------------sonar api -----------------------------------------------------
     public JSONObject getSonarIssueResults(String repoName, String type, int pageSize, boolean resolved) {
-        try {
-            if(type != null && (type.equals("CODE_SMELL") || type.equals("BUG") || type.equals("VULNERABILITY") ||type.equals("SECURITY_HOTSPOT"))){
-                return restTemplate.getForObject(sonarServicePath + "/api/issues/search?componentKeys="
-                        + repoName
-                        + "&s=FILE_LINE&resolved="
-                        + resolved
-                        + "&types="
-                        + type
-                        + "&ps="
-                        + pageSize
-                        + "&organization=default-organization&facets=severities%2Ctypes&additionalFields=_all", JSONObject.class);
-            }else if(type == null ){
-                return restTemplate.getForObject(sonarServicePath + "/api/issues/search?componentKeys="
-                        + repoName
-                        + "&s=FILE_LINE&resolved="
-                        + resolved
-                        + "&ps="
-                        + pageSize
-                        + "&organization=default-organization&facets=severities%2Ctypes&additionalFields=_all", JSONObject.class);
+        Map<String, String> map = new HashMap<>();
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(sonarServicePath + "/api/issues/search?componentKeys={componentKeys}&additionalFields={additionalFields}&s={s}&resolved={resolved}");
+        map.put("additionalFields","_all");
+        map.put("s","FILE_LINE");
+        map.put("componentKeys",repoName);
+        map.put("resolved",String.valueOf(resolved));
+        if(type != null){
+            String[] types = type.split(",");
+            StringBuilder stringBuilder = new StringBuilder();
+            for(int i=0;i<types.length;i++){
+                String typeSb = types[i];
+                if("CODE_SMELL".equals(typeSb) || "BUG".equals(typeSb) || "VULNERABILITY".equals(typeSb) || "SECURITY_HOTSPOT".equals(typeSb)){
+                    stringBuilder.append(typeSb+",");
+                }
+            }
+            if(!stringBuilder.toString().isEmpty()){
+                urlBuilder.append("&componentKeys={componentKeys}");
+                String requestTypes = stringBuilder.toString().substring(0,stringBuilder.toString().length()-1);
+                map.put("types",requestTypes);
             }else{
-                logger.error("this request type is not available in sonar api");
+                logger.error("this request type --> {} is not available in sonar api",type);
                 return null;
             }
+        }
 
-        } catch (RuntimeException e) {
+
+        if(pageSize>0){
+            urlBuilder.append("&ps={ps}");
+            map.put("ps",String.valueOf(pageSize));
+        }
+
+        String url = urlBuilder.toString();
+
+        try {
+            ResponseEntity entity = restTemplate.getForEntity(url,JSONObject.class,map);
+            JSONObject result  = JSONObject.parseObject(entity.getBody().toString());
+            return result;
+
+        }catch (RuntimeException e) {
             logger.error("repo name : {}  ----> request sonar api failed", repoName);
-            throw new RuntimeException("get sonar result failed");
+            throw e;
         }
     }
 }

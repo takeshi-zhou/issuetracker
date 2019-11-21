@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -36,11 +37,17 @@ public class FindBugScanTask extends BaseScanTask{
         //如果那个锁并没有成功地设置过期时间
         //那么等待获取同一个锁的线程会因为15min的超时而强行获取到锁，并设置自己的identifier和key的过期时间
 
-        String identifier = redisLock.acquireLockWithTimeOut(repoId, 15, 15, TimeUnit.MINUTES);
+        String identifier= UUID.randomUUID().toString();
+        Boolean lockResult = false;
+        while(!lockResult){
+            lockResult =  redisLock.tryLock(repoId, identifier, 600, 600);
+        }
+
+        logger.info("redis lock identifier id --> {}",identifier);
         try {
             scan(scanOperation,repoId, commitId,category);
         } finally {
-            if (!redisLock.releaseLock(repoId, identifier)) {
+            if (!redisLock.releaseLockNew(repoId, identifier)) {
                 logger.error("repo->" + repoId + " release lock failed!");
             }
         }
