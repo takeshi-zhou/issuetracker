@@ -81,6 +81,16 @@
     </select>
 
     <select id="getScanByCategoryAndRepoIdAndCommitId" parameterType="String" resultMap="scan">
-        select * from scan where repo_id=#{repo_id} and category = #{category} and commit_id = #{commit_id}
+        select * from scan
+        <where>
+            repo_id=#{repo_id}
+            <if test="category != null and category != ''">
+                and category = #{category}
+            </if>
+            <if test="commit_id != null and commit_id != ''">
+                and commit_id = #{commit_id}
+            </if>
+        </where>
+        order by commit_time desc
     </select>
 </mapper>

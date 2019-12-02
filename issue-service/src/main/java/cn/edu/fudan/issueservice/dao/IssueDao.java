@@ -34,6 +34,10 @@ public class IssueDao {
         issueMapper.batchUpdateIssue(list);
     }
 
+    public void batchUpdateSonarIssues(List<Issue> list) {
+        issueMapper.batchUpdateSonarIssues(list);
+    }
+
     public Issue getIssueByID(String uuid) {
         return issueMapper.getIssueByID(uuid);
     }

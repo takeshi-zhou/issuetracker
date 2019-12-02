@@ -65,4 +65,6 @@ public interface IssueMapper {
     List<WeakHashMap<Object, Object>> getCommitNewIssue(@Param("start") String start, @Param("end") String end, @Param("repo_id") String repoId);
 
     List<Issue> getSonarIssueByRepoId(@Param("repo_id") String repoId,@Param("category")String category);
+
+    void batchUpdateSonarIssues(List<Issue> list);
 }

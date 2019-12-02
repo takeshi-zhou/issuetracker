@@ -76,4 +76,12 @@ public class RestInterfaceManagerTest extends IssueServiceApplicationTests {
         a= a+1;
         System.out.println(a);
     }
+
+    @Test
+    public void getSonarIssueResultsBySonarIssueKey() {
+        JSONObject result =restInterfaceManager.getSonarIssueResultsBySonarIssueKey("AW6PA9HLefbZGoYREgMh,AW6PA9HLefbZGoYREgMh,AW6PA9HLefbZGoYREgMh,AW6PA9HLefbZGoYREgMh,AW6PA9HLefbZGoYREgMi",0);
+        int  a=1;
+        a= a+1;
+        System.out.println(a);
+    }
 }

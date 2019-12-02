@@ -144,6 +144,9 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                             //先判断flow的size是否变化。
                             JSONArray flows = sonarIssue.getJSONArray("flows");
                             JSONObject textRange = sonarIssue.getJSONObject("textRange");
+                            if(textRange==null){
+                                continue;
+                            }
                             //判断代码是否更改过的标志
                             Boolean locationsHaveChanged =false;
                             if(rawIssue.getLocations().size()==flows.size()+1){
@@ -207,53 +210,75 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                         solvedIssues.add(issueList.get(m));
                     }
                 }
+                //实际解决的缺陷总数
+                int realResolvedIssueCounts=0;
                 //solved issue 数量不为零
-                if(solvedIssues.size() != 0){
-                    StringBuilder solvedSonarIssueKeysStringBuilder = new StringBuilder();
-                    for (Issue solvedIssue:
-                            solvedIssues) {
-                        solvedSonarIssueKeysStringBuilder.append(solvedIssue.getSonar_issue_id()+",");
-                    }
-                    String solvedSonarIssueKeys = solvedSonarIssueKeysStringBuilder.toString().substring(0,solvedSonarIssueKeysStringBuilder.toString().length()-1);
-
+                if(!solvedIssues.isEmpty()){
                     //数据库中未匹配的则是solved issue的总数量
                     eliminatedIssueCount = solvedIssues.size();
-                    //获取sonar相应issue key的 issue信息
-                    JSONObject sonarSolvedIssues = restInterfaceManager.getSonarIssueResultsBySonarIssueKey(solvedSonarIssueKeys,eliminatedIssueCount);
-                    if(sonarSolvedIssues.getIntValue("total")!=eliminatedIssueCount){
-                        logger.error("commit_id --> {},the count of solved issues is not correct,cause sonar find ->{}, db find -->{} ",current_commit_id,sonarSolvedIssues.getIntValue("total"),eliminatedIssueCount);
-                    }
-                    JSONArray solvedSonarIssues = sonarSolvedIssues.getJSONArray("issues");
-                    for(Issue solvedIssue:
-                            solvedIssues){
-                        for(int k=0;k<solvedSonarIssues.size();k++){
-                            JSONObject solvedSonarIssue = solvedSonarIssues.getJSONObject(k);
-                            if(solvedIssue.getSonar_issue_id().equals(solvedSonarIssue.getString("key"))){
-                                String rawIssueUUID = UUID.randomUUID().toString();
-                                String issueUUID = solvedIssue.getUuid();
-                                //将改issue的所有location直接表中
-                                insertLocations(rawIssueUUID,solvedSonarIssue,repoPath);
-                                //获取rawIssue
-                                RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,issueUUID,solvedSonarIssue);
-                                insertRawIssues.add(rawIssue);
-                                //更新issue状态
-
-                                solvedIssue.setStatus(solvedSonarIssue.getString("status"));
-                                solvedIssue.setResolution(solvedSonarIssue.getString("resolution"));
+                    Issue[] solvedIssuesArray = solvedIssues.toArray(new Issue[solvedIssues.size()]);
+                    int l =0;
+                    while(l<solvedIssues.size()){
+                        //因为path url的长度有限制，所以每次只拼接5个sonar issue key发送请求
+                        StringBuilder solvedSonarIssueKeysStringBuilder = new StringBuilder() ;
+                        if(l>solvedIssues.size()-5){
+                            for(; l<solvedIssues.size();l++){
+                                solvedSonarIssueKeysStringBuilder.append(solvedIssuesArray[l].getSonar_issue_id()+",");
                             }
-
+                        }else{
+                            int times = l+5;
+                            for(; l<times;l++){
+                                solvedSonarIssueKeysStringBuilder.append(solvedIssuesArray[l].getSonar_issue_id()+",");
+                            }
                         }
-                        //如果没有匹配上则将status 置为 NON-MATCHED
-                        if(solvedIssue.getResolution()==null || solvedIssue.getResolution().isEmpty()){
-                            solvedIssue.setStatus("NON-MATCHED");
-                        }
-                        solvedIssue.setEnd_commit(current_commit_id);
-                        solvedIssue.setEnd_commit_date(commitDate);
-                        solvedIssue.setUpdate_time(new Date());
+                        l+=5;
+                        String solvedSonarIssueKeys = solvedSonarIssueKeysStringBuilder.toString().substring(0,solvedSonarIssueKeysStringBuilder.toString().length()-1);
 
-                        updateIssueList.add(solvedIssue);
+
+                        //获取sonar相应issue key的 issue信息
+                        JSONObject sonarSolvedIssues = restInterfaceManager.getSonarIssueResultsBySonarIssueKey(solvedSonarIssueKeys,eliminatedIssueCount);
+                        realResolvedIssueCounts +=sonarSolvedIssues.getIntValue("total");
+
+                        if(sonarSolvedIssues.getIntValue("total") != solvedSonarIssueKeys.split(",").length){
+                            logger.error("sonar issue keys --> {}  ,db result is not equal to sonar db ",solvedSonarIssueKeys );
+                        }
+
+                        JSONArray solvedSonarIssues = sonarSolvedIssues.getJSONArray("issues");
+                        for(Issue solvedIssue:
+                                solvedIssues){
+                            for(int k=0;k<solvedSonarIssues.size();k++){
+                                JSONObject solvedSonarIssue = solvedSonarIssues.getJSONObject(k);
+                                if(solvedIssue.getSonar_issue_id().equals(solvedSonarIssue.getString("key"))){
+                                    String rawIssueUUID = UUID.randomUUID().toString();
+                                    String issueUUID = solvedIssue.getUuid();
+                                    //将改issue的所有location直接表中
+                                    insertLocations(rawIssueUUID,solvedSonarIssue,repoPath);
+                                    //获取rawIssue
+                                    RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,issueUUID,solvedSonarIssue);
+                                    insertRawIssues.add(rawIssue);
+                                    //更新issue状态
+
+                                    solvedIssue.setStatus(solvedSonarIssue.getString("status"));
+                                    solvedIssue.setResolution(solvedSonarIssue.getString("resolution"));
+                                }
+
+                            }
+                            //如果没有匹配上则将status 置为 NON-MATCHED
+                            if(!"CLOSED".equals(solvedIssue.getStatus()) || solvedIssue.getResolution()==null || solvedIssue.getResolution().isEmpty()){
+                                solvedIssue.setStatus("NON-MATCHED");
+                            }
+                            solvedIssue.setEnd_commit(current_commit_id);
+                            solvedIssue.setEnd_commit_date(commitDate);
+                            solvedIssue.setUpdate_time(new Date());
+
+                            updateIssueList.add(solvedIssue);
+                        }
+
                     }
 
+                }
+                if(realResolvedIssueCounts!=eliminatedIssueCount){
+                    logger.error("commit_id --> {},the count of solved issues is not correct,cause sonar find ->{}, db find -->{} ",current_commit_id,realResolvedIssueCounts,eliminatedIssueCount);
                 }
 
                 //remain Issue
@@ -264,10 +289,26 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
             }
 
             //更新issue
-            if(updateIssueList.size()!=0){
-                issueDao.batchUpdateIssue(updateIssueList);
+            if (!updateIssueList.isEmpty()) {
+                //更新issue
+                issueDao.batchUpdateSonarIssues(updateIssueList);
                 logger.info("issue update success!");
             }
+
+//            if(updateIssueList.size()!=0){
+//                int size = 1;
+//                List<Issue> updateIssueShortList = new ArrayList<>();
+//                for(Issue issue:updateIssueList){
+//                    updateIssueShortList.add(issue);
+//                    if(size%10 == 0){
+//                        issueDao.batchUpdateIssue(updateIssueShortList);
+//                        updateIssueShortList.clear();
+//                    }
+//
+//                }
+//                issueDao.batchUpdateIssue(updateIssueShortList);
+//                logger.info("issue update success!");
+//            }
 
             if (!insertRawIssues.isEmpty()) {
                 rawIssueDao.insertRawIssueList(insertRawIssues);

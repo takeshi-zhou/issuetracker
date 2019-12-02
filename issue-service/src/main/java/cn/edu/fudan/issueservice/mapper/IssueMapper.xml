@@ -190,6 +190,7 @@
         where repo_id = #{repo_id} and end_commit = #{commit_id} and category = #{category}
     </select>
 
+
     <update id="batchUpdateIssue" parameterType="List">
         update issue
         <trim prefix="set" suffixOverrides=",">
@@ -242,26 +243,43 @@
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="status = case" suffix="end,">
-                <foreach collection="list" item="item">
-                    <if test="item.status != null">
-                        when uuid=#{item.uuid} then #{item.status}
-                    </if>
-                </foreach>
-            </trim>
-            <trim prefix="update_time = case" suffix="end,">
-                <foreach collection="list" item="item">
-                    <if test="item.resolution != null">
-                        when uuid=#{item.uuid} then #{item.resolution}
-                    </if>
-                </foreach>
-            </trim>
         </trim>
         <where>
             <foreach collection="list" separator="or" item="item">
                 uuid = #{item.uuid}
             </foreach>
         </where>
+    </update>
+
+    <update id="batchUpdateSonarIssues" parameterType="List">
+        <!-- 接收list参数，循环着组装sql语句，注意for循环的写法
+      separator=";" 代表着每次循环完，在sql后面放一个分号
+      item="item" 循环List的每条的结果集
+      collection="list" list 即为 map传过来的参数key -->
+        <foreach collection="list" separator=";" item="item">
+            update issue
+            <trim prefix="set" suffixOverrides=",">
+                update_time=#{item.update_time},
+                <if test="item.end_commit != null">
+                    end_commit=#{item.end_commit},
+                </if>
+                <if test="item.end_commit_date != null">
+                    end_commit_date=#{item.end_commit_date},
+                </if>
+                <if test="item.status != null">
+                    status=#{item.status},
+                </if>
+                <if test="item.resolution != null">
+                    resolution=#{item.resolution},
+                </if>
+                <if test="item.start_commit != null">
+                    start_commit=#{item.start_commit},
+                </if>
+            </trim>
+            <where>
+                    uuid = #{item.uuid}
+            </where>
+        </foreach>
     </update>
 
     <delete id="deleteIssueByRepoIdAndCategory" parameterType="String">

@@ -282,6 +282,7 @@ public class RestInterfaceManager {
     }
 
     public JSONObject getSonarIssueResultsBySonarIssueKey(String issues,int pageSize) {
+        //由于pathurl不能过长，所以请求时设置为5个issueKey为一组
         String baseRequestUrl = sonarServicePath + "/api/issues/search?issues={issues}";
         Map<String, String> map = new HashMap<>();
         map.put("issues",issues);
@@ -332,6 +333,8 @@ public class RestInterfaceManager {
     public JSONObject getSonarSourceLines(String componentKey,int from,int to){
         if(to<from){
             logger.error("lines {} can not greater {} ",from,to);
+        }else if(to==from){
+            to=from+1;
         }
         Map<String, String> map = new HashMap<>();
 

@@ -12,6 +12,10 @@ public class SearchUtil {
         int end = strings.length-1;
         while (start <= end) {
             if(start == end ){
+                int compareResult = value.compareTo(strings[end]);
+                if(compareResult==0){
+                    return end;
+                }
                 return -1;
             }else{
                 middle = (start+end)/2;

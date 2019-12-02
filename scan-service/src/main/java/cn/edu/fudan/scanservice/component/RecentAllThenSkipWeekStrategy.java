@@ -35,7 +35,7 @@ public class RecentAllThenSkipWeekStrategy implements CommitFilterStrategy<ScanM
                 if(date.isBefore(nextTimeLimit)||i==sourceSize-1){
 //                    List<ScanMessageWithTime> list=map.get(date);
 //                    result.addFirst(list.get(list.size()-1));
-                    nextTimeLimit=nextTimeLimit.minusWeeks(1);
+                    nextTimeLimit=nextTimeLimit.plusWeeks(1);
                 }
             }
             i++;
