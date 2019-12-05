@@ -1,17 +1,21 @@
 package cn.edu.fudan.scanservice.component;
+import	java.util.Comparator;
 
 import cn.edu.fudan.scanservice.domain.ScanMessageWithTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component("RASWS")
 public class RecentAllThenSkipWeekStrategy implements CommitFilterStrategy<ScanMessageWithTime> {
 
-
+    private Logger logger = LoggerFactory.getLogger(RecentAllThenSkipWeekStrategy.class);
 
 
     @Override
@@ -36,6 +40,7 @@ public class RecentAllThenSkipWeekStrategy implements CommitFilterStrategy<ScanM
 //                    List<ScanMessageWithTime> list=map.get(date);
 //                    result.addFirst(list.get(list.size()-1));
                     nextTimeLimit=nextTimeLimit.plusWeeks(1);
+                    logger.info("nextTimeLimit --> {}",nextTimeLimit.getYear()+"-"+nextTimeLimit.getMonthValue()+"-"+nextTimeLimit.getDayOfMonth() );
                 }
             }
             i++;
@@ -44,7 +49,8 @@ public class RecentAllThenSkipWeekStrategy implements CommitFilterStrategy<ScanM
     }
 
     private LinkedList<ScanMessageWithTime> addAllListIntoFirst(LinkedList<ScanMessageWithTime> result,List<ScanMessageWithTime> scanMessageWithTimes){
-        for(ScanMessageWithTime scanMessageWithTime : scanMessageWithTimes){
+        List<ScanMessageWithTime> sortedList = scanMessageWithTimes.stream().sorted(Comparator.comparing(ScanMessageWithTime::getCommitTime).reversed()).collect(Collectors.toList());
+        for(ScanMessageWithTime scanMessageWithTime : sortedList){
             result.addFirst(scanMessageWithTime);
         }
         return result;

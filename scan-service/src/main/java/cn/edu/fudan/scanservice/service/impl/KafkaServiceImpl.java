@@ -204,6 +204,7 @@ public class KafkaServiceImpl implements KafkaService {
     public void firstScanByMQ(ConsumerRecord<String, String> consumerRecord) {
         String msg = consumerRecord.value();
         List<ScanMessageWithTime> commits=JSONArray.parseArray(msg,ScanMessageWithTime.class);
+        commits = commits.stream().distinct().collect(Collectors.toList());
         int size=commits.size();
         logger.info("received message from topic -> " + consumerRecord.topic() + " : " + size+" commits need to scan!");
         if(!commits.isEmpty()){

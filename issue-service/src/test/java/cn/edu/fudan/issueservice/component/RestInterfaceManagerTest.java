@@ -71,7 +71,7 @@ public class RestInterfaceManagerTest extends IssueServiceApplicationTests {
 
     @Test
     public void getSonarSourceLines() {
-        JSONObject result =restInterfaceManager.getSonarSourceLines("scala-maven-plugin-master:src/it/test1/src/main/java/TestClass.java",20,25);
+        JSONObject result =restInterfaceManager.getSonarSourceLines("scala-maven-plugin-master:src/main/java/org_scala_tools_maven/ScalaContinuousCompileMojo.java",105,105);
         int  a=1;
         a= a+1;
         System.out.println(a);
@@ -79,7 +79,7 @@ public class RestInterfaceManagerTest extends IssueServiceApplicationTests {
 
     @Test
     public void getSonarIssueResultsBySonarIssueKey() {
-        JSONObject result =restInterfaceManager.getSonarIssueResultsBySonarIssueKey("AW6PA9HLefbZGoYREgMh,AW6PA9HLefbZGoYREgMh,AW6PA9HLefbZGoYREgMh,AW6PA9HLefbZGoYREgMh,AW6PA9HLefbZGoYREgMi",0);
+        JSONObject result =restInterfaceManager.getSonarIssueResultsBySonarIssueKey("AW7FWf--fYNwV8HGFjBe,AW7FWf--fYNwV8HGFjBe,AW7FWf-5fYNwV8HGFjBc,AW7FWf-5fYNwV8HGFjBc,AW7FWf-5fYNwV8HGFjBd",0);
         int  a=1;
         a= a+1;
         System.out.println(a);

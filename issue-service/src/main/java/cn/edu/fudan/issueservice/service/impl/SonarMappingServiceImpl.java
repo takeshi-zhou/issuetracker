@@ -236,7 +236,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
 
 
                         //获取sonar相应issue key的 issue信息
-                        JSONObject sonarSolvedIssues = restInterfaceManager.getSonarIssueResultsBySonarIssueKey(solvedSonarIssueKeys,eliminatedIssueCount);
+                        JSONObject sonarSolvedIssues = restInterfaceManager.getSonarIssueResultsBySonarIssueKey(solvedSonarIssueKeys,0);
                         realResolvedIssueCounts +=sonarSolvedIssues.getIntValue("total");
 
                         if(sonarSolvedIssues.getIntValue("total") != solvedSonarIssueKeys.split(",").length){

@@ -134,10 +134,17 @@ public class Location {
         Location location = (Location) obj;
         if(this.class_name != null && location.class_name != null
                 && this.method_name != null && location.method_name!=null) {
-            return location.class_name.equals(class_name) &&
-                    location.method_name.equals(method_name) &&
-                    location.file_path.equals(file_path) &&
-                    bug_lines.split(",").length == location.bug_lines.split(",").length;
+            if (bug_lines==null && location.bug_lines==null) {
+                return location.class_name.equals(class_name) &&
+                        location.method_name.equals(method_name) &&
+                        location.file_path.equals(file_path);
+            } else if(bug_lines!=null && location.bug_lines!=null){
+                return location.class_name.equals(class_name) &&
+                        location.method_name.equals(method_name) &&
+                        location.file_path.equals(file_path) &&
+                        bug_lines.split(",").length == location.bug_lines.split(",").length;
+            }
+
         }
 
         return false;

@@ -22,7 +22,7 @@ public class SearchUtil {
                 int compareResult = value.compareTo(strings[middle]);
                 if(compareResult==0){
                     return middle;
-                }else if(compareResult==-1){
+                }else if(compareResult<0){
                     end = --middle;
                 }else{
                     start=++middle;
