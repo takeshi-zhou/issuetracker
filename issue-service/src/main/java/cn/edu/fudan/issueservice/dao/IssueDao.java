@@ -134,4 +134,8 @@ public class IssueDao {
     public List<Issue> getSonarIssueByRepoId(String repoId, String category) {
         return issueMapper.getSonarIssueByRepoId(repoId, category);
     }
+
+    public Issue getIssueBySonarIssueKey(String sonarIssueId) {
+        return issueMapper.getIssueBySonarIssueKey(sonarIssueId);
+    }
 }

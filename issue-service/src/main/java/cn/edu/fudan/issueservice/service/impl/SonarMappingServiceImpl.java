@@ -122,8 +122,23 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                         int index = SearchUtil.dichotomy(sonarIssueKeys,sonarIssueKey);
                         //当index=-1 表示未匹配上，不为-1时表示匹配上了
                         if(index==-1){
+                            //如果未匹配上先判断是否是REOPENED
+                            if("REOPENED".equals(sonarIssue.getString("status"))){
+                                Issue issueReopened = issueDao.getIssueBySonarIssueKey(sonarIssueKey);
+                                if(issueReopened != null){
+                                    issueReopened.setEnd_commit(current_commit_id);
+                                    issueReopened.setEnd_commit_date(commitDate);
+                                    issueReopened.setUpdate_time(new Date());
+                                    issueReopened.setStatus("REOPENED");
+                                    issueReopened.setResolution(null);
+                                    updateIssueList.add(issueReopened);
+                                    continue;
+                                }
+
+                            }
                             issueUUID = UUID.randomUUID().toString();
                             newIssueCount++;
+
                             String rawIssueUUID = UUID.randomUUID().toString();
                             //将改issue的所有location直接表中
                             insertLocations(rawIssueUUID,sonarIssue,repoPath);
@@ -191,17 +206,17 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                                 //获取rawIssue
                                 RawIssue newRawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,issueUUID,sonarIssue);
                                 insertRawIssues.add(newRawIssue);
-                                //更新issue的状态
-                                Issue updateIssue = issueList.get(index);
-                                updateIssue.setEnd_commit(current_commit_id);
-                                updateIssue.setEnd_commit_date(commitDate);
-                                updateIssue.setUpdate_time(new Date());
-                                if("RESOLVED".equals(updateIssue.getStatus()) && "FIXED".equals(updateIssue.getResolution())){
-                                    updateIssue.setStatus("REOPENED");
-                                    updateIssue.setResolution(null);
-                                }
-                                updateIssueList.add(updateIssue);
+
                             }
+
+                            //更新issue的状态
+                            Issue updateIssue = issueList.get(index);
+                            updateIssue.setEnd_commit(current_commit_id);
+                            updateIssue.setEnd_commit_date(commitDate);
+                            updateIssue.setUpdate_time(new Date());
+                            updateIssue.setStatus(sonarIssue.getString("status"));
+                            updateIssue.setResolution(null);
+                            updateIssueList.add(updateIssue);
                         }
                     }
                 }
@@ -218,6 +233,9 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                     eliminatedIssueCount = solvedIssues.size();
                     Issue[] solvedIssuesArray = solvedIssues.toArray(new Issue[solvedIssues.size()]);
                     int l =0;
+                    //此处效率很差，后面需要重构成遍历for循环
+
+
                     while(l<solvedIssues.size()){
                         //因为path url的长度有限制，所以每次只拼接5个sonar issue key发送请求
                         StringBuilder solvedSonarIssueKeysStringBuilder = new StringBuilder() ;
@@ -249,32 +267,42 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                             for(int k=0;k<solvedSonarIssues.size();k++){
                                 JSONObject solvedSonarIssue = solvedSonarIssues.getJSONObject(k);
                                 if(solvedIssue.getSonar_issue_id().equals(solvedSonarIssue.getString("key"))){
-                                    String rawIssueUUID = UUID.randomUUID().toString();
-                                    String issueUUID = solvedIssue.getUuid();
-                                    //将改issue的所有location直接表中
-                                    insertLocations(rawIssueUUID,solvedSonarIssue,repoPath);
-                                    //获取rawIssue
-                                    RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,issueUUID,solvedSonarIssue);
-                                    insertRawIssues.add(rawIssue);
+//                                    String rawIssueUUID = UUID.randomUUID().toString();
+//                                    String issueUUID = solvedIssue.getUuid();
+//                                    //将改issue的所有location直接表中
+//                                    insertLocations(rawIssueUUID,solvedSonarIssue,repoPath);
+//                                    //获取rawIssue
+//                                    RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,issueUUID,solvedSonarIssue);
+//                                    insertRawIssues.add(rawIssue);
+                                    //此处后面更改为请求bugRecommendation接口
                                     //更新issue状态
 
                                     solvedIssue.setStatus(solvedSonarIssue.getString("status"));
                                     solvedIssue.setResolution(solvedSonarIssue.getString("resolution"));
+                                    break;
                                 }
 
                             }
-                            //如果没有匹配上则将status 置为 NON-MATCHED
-                            if(!"CLOSED".equals(solvedIssue.getStatus()) || solvedIssue.getResolution()==null || solvedIssue.getResolution().isEmpty()){
-                                solvedIssue.setStatus("NON-MATCHED");
-                            }
-                            solvedIssue.setEnd_commit(current_commit_id);
-                            solvedIssue.setEnd_commit_date(commitDate);
-                            solvedIssue.setUpdate_time(new Date());
 
-                            updateIssueList.add(solvedIssue);
                         }
 
                     }
+                    for(Issue solvedIssue:
+                            solvedIssues){
+                        //如果没有匹配上则将status 置为 NON-MATCHED
+                        if(!"CLOSED".equals(solvedIssue.getStatus()) || solvedIssue.getResolution()==null || solvedIssue.getResolution().isEmpty()){
+                            solvedIssue.setStatus("NON-MATCHED");
+                        }
+                        //暂时先不加入修改priority，考虑到sonar跟本地修改priority的冲突
+                        //目前是以缺陷出现的最后一个commit作为end_commit
+//                        solvedIssue.setEnd_commit(current_commit_id);
+//                        solvedIssue.setEnd_commit_date(commitDate);
+                        solvedIssue.setUpdate_time(new Date());
+
+                        updateIssueList.add(solvedIssue);
+                    }
+
+
 
                 }
                 if(realResolvedIssueCounts!=eliminatedIssueCount){
@@ -505,10 +533,22 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
             issue.setResolution(sonarIssue.getString("resolution"));
         }
         issue.setDisplayId(++currentDisplayId);
-        int priority =-1;
+        int priority=-1;
         String severity = sonarIssue.getString("severity");
         if(severity!=null){
+            priority =translateSeverityToPriority(sonarIssue.getString("severity"));
+        }else{
+            logger.error("severity --> is null ,rawIssue  id--> {}" ,rawIssue.getUuid());
+        }
 
+        issue.setPriority(priority);
+        issue.setSonar_issue_id(sonarIssue.getString("key"));
+        return issue;
+    }
+
+    private int translateSeverityToPriority(String severity){
+        int priority=-1;
+        if(severity!=null){
             switch (severity){
                 case "BLOCKER":
                     priority = 0;
@@ -530,11 +570,8 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                     priority = -1;
             }
         }else{
-            logger.error("severity --> is null ,rawIssue  id--> {}" ,rawIssue.getUuid());
+            logger.error("severity --> is null ");
         }
-
-        issue.setPriority(priority);
-        issue.setSonar_issue_id(sonarIssue.getString("key"));
-        return issue;
+        return priority;
     }
 }

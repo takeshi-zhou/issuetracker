@@ -2,6 +2,7 @@ package cn.edu.fudan.issueservice.dao;
 
 import cn.edu.fudan.issueservice.IssueServiceApplicationTests;
 import cn.edu.fudan.issueservice.domain.Issue;
+import cn.edu.fudan.issueservice.domain.Scanner;
 import cn.edu.fudan.issueservice.mapper.IssueMapper;
 import cn.edu.fudan.issueservice.util.TestDataMaker;
 import org.junit.Test;
@@ -42,5 +43,13 @@ public class IssueDaoTest extends IssueServiceApplicationTests {
         issue2.setResolution("FIXED");
         issue2.setUpdate_time(new Date());
         issueMapper.batchUpdateSonarIssues(issues);
+    }
+
+    @Test
+    public void getSonarIssueByRepoId() {
+        String repoId="75e8622c-6fef-11e9-b723-0f92b2ad63bf";
+        String category = Scanner.SONAR.getType();
+        List<Issue> issues = issueMapper.getSonarIssueByRepoId(repoId, category);
+        System.out.println(1+1);
     }
 }

@@ -66,5 +66,7 @@ public interface IssueMapper {
 
     List<Issue> getSonarIssueByRepoId(@Param("repo_id") String repoId,@Param("category")String category);
 
+    Issue getIssueBySonarIssueKey(@Param("sonar_issue_id")String sonar_issue_id);
+
     void batchUpdateSonarIssues(List<Issue> list);
 }
