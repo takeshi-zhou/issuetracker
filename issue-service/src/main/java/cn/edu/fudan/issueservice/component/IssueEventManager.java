@@ -47,8 +47,9 @@ public class IssueEventManager {
             event.put("commitTime",commitTime);
             issueEvents.add(event);
         }
-        if(!issueEvents.isEmpty())
-             restTemplate.postForObject(eventServicePath,issueEvents,JSONObject.class);
+        if(!issueEvents.isEmpty()) {
+            restTemplate.postForObject(eventServicePath,issueEvents,JSONObject.class);
+        }
     }
 
     public void sendRawIssueEvent(EventType eventType,List<RawIssue> rawIssues,String committer,String repoId,Date currentCommitTime){
@@ -68,7 +69,8 @@ public class IssueEventManager {
             event.put("commitTime",commitTime);
             issueEvents.add(event);
         }
-        if(!issueEvents.isEmpty())
+        if(!issueEvents.isEmpty()) {
             restTemplate.postForObject(eventServicePath,issueEvents,JSONObject.class);
+        }
     }
 }

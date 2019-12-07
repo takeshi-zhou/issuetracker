@@ -114,8 +114,9 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
             e.printStackTrace();
         }
         finally {
-            if(repoPath!=null)
+            if(repoPath!=null) {
                 restInterfaceManager.freeRepoPath(repo_id,repoPath);
+            }
         }
         return -1;
     }

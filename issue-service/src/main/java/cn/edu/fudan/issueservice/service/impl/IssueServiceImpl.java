@@ -166,8 +166,9 @@ public class IssueServiceImpl implements IssueService {
         int size = requestParam.getIntValue("size");
         int page = requestParam.getIntValue("page");
         String category=requestParam.getString("category");
-        if (project_id == null || size == 0 || page == 0)
+        if (project_id == null || size == 0 || page == 0) {
             throw new IllegalArgumentException("param lost!");
+        }
         String repoId = restInterfaceManager.getRepoIdOfProject(project_id);
         JSONArray tag_ids = requestParam.getJSONArray("tags");
         JSONArray types = requestParam.getJSONArray("types");
@@ -251,8 +252,9 @@ public class IssueServiceImpl implements IssueService {
                 }
             }
             //如果从dashboard过来只查新增和干掉的，但redis并没有相应的issue id,返回empty
-            if(issueIds.isEmpty())
+            if(issueIds.isEmpty()) {
                 return empty;
+            }
         }else{
             //点击项目列表查询的，必定是单个项目
             String repoId = restInterfaceManager.getRepoIdOfProject(projectId);
@@ -272,16 +274,18 @@ public class IssueServiceImpl implements IssueService {
                     issueIdsAfterFilter.add(issueId);
                 }
             }
-            if(!issueIdsAfterFilter.isEmpty())
+            if(!issueIdsAfterFilter.isEmpty()) {
                 query.put("list",issueIdsAfterFilter);
-            else{
-                if(!specificTaggedIssueIds.isEmpty())
+            } else{
+                if(!specificTaggedIssueIds.isEmpty()) {
                     query.put("list",specificTaggedIssueIds.toJavaList(String.class));
+                }
             }
         }else{
             //不根据tag来筛选时需要自动过滤solved的和ignore的issue_ids
-            if(!issueIds.isEmpty())
+            if(!issueIds.isEmpty()) {
                 query.put("list",issueIds);
+            }
 
             List<String> tag_ids = new ArrayList<>();
             tag_ids.add(solvedTagId);
@@ -311,12 +315,14 @@ public class IssueServiceImpl implements IssueService {
     private void addSpecificIssueIdsForRepo(boolean onlyNew,boolean onlyEliminated,String repoId,String duration,String category,List<String> issueIds){
         if(onlyNew){
             List<String> newIssueIds=stringRedisTemplate.opsForList().range("dashboard:"+category+":"+duration+":new:"+ repoId,0,-1);
-            if(newIssueIds!=null&&!newIssueIds.isEmpty())
+            if(newIssueIds!=null&&!newIssueIds.isEmpty()) {
                 issueIds.addAll(newIssueIds);
+            }
         }else if(onlyEliminated){
             List<String> eliminatedIssueIds=stringRedisTemplate.opsForList().range("dashboard:"+category+":"+duration+":eliminated:"+ repoId,0,-1);
-            if(eliminatedIssueIds!=null&&!eliminatedIssueIds.isEmpty())
+            if(eliminatedIssueIds!=null&&!eliminatedIssueIds.isEmpty()) {
                 issueIds.addAll(eliminatedIssueIds);
+            }
         }
     }
 
@@ -355,8 +361,9 @@ public class IssueServiceImpl implements IssueService {
     }
 
     private List<IssueCount> getFormatData(List<String> newList, List<String> remainingList, List<String> eliminatedList) {
-        if (newList == null || remainingList == null || eliminatedList == null)
+        if (newList == null || remainingList == null || eliminatedList == null) {
             return Collections.emptyList();
+        }
         List<IssueCount> list = new ArrayList<>();
         for (int i = 0; i < newList.size(); i++) {
             String[] str1=newList.get(i).split(":");
@@ -473,8 +480,9 @@ public class IssueServiceImpl implements IssueService {
                     while(start.isBefore(end)){
                         LocalDate temp=start.plusWeeks(1);
                         IssueCountPo issueCountPo=scanResultDao.getMergedScanResult(repoIds.toJavaList(String.class),category, DateTimeUtil.y_m_d_format(start),DateTimeUtil.y_m_d_format(temp));
-                        if(issueCountPo!=null)
+                        if(issueCountPo!=null) {
                             result.add(issueCountPo);
+                        }
                         start=temp;
                     }
                 }else{
@@ -484,8 +492,9 @@ public class IssueServiceImpl implements IssueService {
         }else{
             //只需要查询该项目的扫描情况
             String repoId=restInterfaceManager.getRepoIdOfProject(project_id);
-            if(repoId==null)
+            if(repoId==null) {
                 throw new IllegalArgumentException("this project id not exist!");
+            }
             if(month==1){
                 //过去30天
                 LocalDate start=end.minusMonths(1);
@@ -496,8 +505,9 @@ public class IssueServiceImpl implements IssueService {
                 while(start.isBefore(end)){
                     LocalDate temp=start.plusWeeks(1);
                     IssueCountPo issueCountPo=scanResultDao.getMergedScanResult(Collections.singletonList(repoId),category, DateTimeUtil.y_m_d_format(start),DateTimeUtil.y_m_d_format(temp));
-                    if(issueCountPo!=null)
+                    if(issueCountPo!=null) {
                         result.add(issueCountPo);
+                    }
                     start=temp;
                 }
             }else{

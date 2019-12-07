@@ -28,8 +28,9 @@ public class ExecuteShellUtil {
            log.info("command -> {}",command);
             Process process = rt.exec(command);
             int exitValue = process.waitFor();
-            if (exitValue == 0)
+            if (exitValue == 0) {
                 return true;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -43,8 +44,9 @@ public class ExecuteShellUtil {
             log.info("command -> {}",command);
             Process process = rt.exec(command);
             int exitValue = process.waitFor();
-            if (exitValue == 0)
+            if (exitValue == 0) {
                 return true;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

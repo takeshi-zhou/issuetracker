@@ -90,8 +90,9 @@ public class JavaNCSSResultHandler implements ResultHandler{
                 while(tdIterator.hasNext()){
                     Element tdElement=tdIterator.next();
                     String valueText=tdElement.getText();
-                    if(valueText.contains(","))
+                    if(valueText.contains(",")) {
                         valueText=valueText.replaceAll(",","");
+                    }
                     switch (count2++){
                         case 2:
                             packageAverage.setClasses(Double.valueOf(valueText));

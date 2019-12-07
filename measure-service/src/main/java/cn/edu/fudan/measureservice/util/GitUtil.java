@@ -35,8 +35,9 @@ public class GitUtil {
             try(BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(process.getInputStream()))){
                 while((s=bufferedReader.readLine())!=null){
                     s=s.trim();
-                    if(!s.isEmpty())
+                    if(!s.isEmpty()) {
                         files.add(s);
+                    }
                 }
             }catch (Exception e){
                 e.printStackTrace();

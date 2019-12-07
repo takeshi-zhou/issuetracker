@@ -81,14 +81,18 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void addAccount(Account account) {
-        if (account.getAccountName() == null || account.getPassword() == null || account.getEmail() == null || account.getName() == null)
+        if (account.getAccountName() == null || account.getPassword() == null || account.getEmail() == null || account.getName() == null) {
             throw new RuntimeException("param loss");
-        if (isAccountNameExist(account.getAccountName()))
+        }
+        if (isAccountNameExist(account.getAccountName())) {
             throw new RuntimeException("accountName has been used!");
-        if (isEmailExist(account.getEmail()))
+        }
+        if (isEmailExist(account.getEmail())) {
             throw new RuntimeException("email has been used!");
-        if (isNameExist(account.getName()))
+        }
+        if (isNameExist(account.getName())) {
             throw new RuntimeException("nickName has been used!");
+        }
         account.setUuid(UUID.randomUUID().toString());
         account.setPassword(MD5Util.md5(account.getAccountName() + account.getPassword()));
         accountDao.addAccount(account);

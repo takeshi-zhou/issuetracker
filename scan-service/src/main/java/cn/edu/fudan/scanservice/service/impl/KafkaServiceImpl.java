@@ -138,10 +138,12 @@ public class KafkaServiceImpl implements KafkaService {
         }
         String projectId = requestParam.getString("projectId");
         String commitId = requestParam.getString("commitId");
-        if(projectId==null||projectId.equals(""))
+        if(projectId==null||projectId.equals("")) {
             throw new IllegalArgumentException("please provide projectId");
-        if(commitId==null||commitId.equals(""))
+        }
+        if(commitId==null||commitId.equals("")) {
             throw new IllegalArgumentException("please provide commitId");
+        }
         initialProject(projectId);
         String repoId = restInterfaceManager.getRepoIdOfProject(projectId);
         if(category.equals("clone")){
@@ -214,8 +216,9 @@ public class KafkaServiceImpl implements KafkaService {
             }));
             List<LocalDate> dates=new ArrayList<>(map.keySet());
             dates.sort(((o1, o2) -> {
-                if(o1.equals(o2))
+                if(o1.equals(o2)) {
                     return 0;
+                }
                 return o1.isBefore(o2)?-1:1;
             }));
             firstAutoScan(map,dates);

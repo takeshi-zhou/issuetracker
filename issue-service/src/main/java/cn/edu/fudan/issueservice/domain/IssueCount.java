@@ -53,14 +53,14 @@ public class IssueCount implements Serializable {
         this.newIssueCount += another.getNewIssueCount();
         this.eliminatedIssueCount += another.getEliminatedIssueCount();
         this.remainingIssueCount += another.getRemainingIssueCount();
-        if(this.newIssueIds==null)
+        if(this.newIssueIds==null) {
             this.newIssueIds = another.newIssueIds;
-        else{
+        } else{
             this.newIssueIds.addAll(another.newIssueIds);
         }
-        if(this.eliminatedIssueIds==null)
+        if(this.eliminatedIssueIds==null) {
             this.eliminatedIssueIds=another.eliminatedIssueIds;
-        else{
+        } else{
             this.eliminatedIssueIds.addAll(another.eliminatedIssueIds);
         }
     }

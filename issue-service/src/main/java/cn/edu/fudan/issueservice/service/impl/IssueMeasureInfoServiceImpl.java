@@ -67,8 +67,9 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
     @Override
     public int numberOfNewIssue(String duration, String spaceType, String detail) {
         // duration: 2018.01.01-2018.12.12
-        if (duration.length() < 21)
+        if (duration.length() < 21) {
             throw new RuntimeException("duration error!");
+        }
         String start = duration.substring(0,10);
         String end = duration.substring(11,21);
         //List<String> commits = restInterfaceManager.getScanCommitsIdByDuration(detail, start, end);
@@ -98,8 +99,9 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
     @Override
     public int numberOfEliminateIssue(String duration, String spaceType, String detail) {
         // duration: 2018.01.01-2018.12.12
-        if (duration.length() < 21)
+        if (duration.length() < 21) {
             throw new RuntimeException("duration error!");
+        }
         String start = duration.substring(0,10);
         String end = duration.substring(11,21);
 
