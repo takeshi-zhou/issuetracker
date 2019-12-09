@@ -5,6 +5,11 @@ import java.util.List;
 
 public interface Filetraves {
 
+     /**
+      * directory all file list
+      *
+      * @return List<File>
+      */
      List<File> directoryAllFileList();
 
 }
