@@ -80,8 +80,9 @@ public class MeasureServiceImpl implements MeasureService {
             String repoId=projects.getJSONObject(i).getString("repo_id");
             if(!repoIds.contains(repoId)){
                 Object change=getMeasureChangeOfOneProject(repoId,repoName,duration);
-                if(change!=null)
+                if(change!=null) {
                     projectsMeasureChanges.add(change);
+                }
                 repoIds.add(repoId);
             }
         }
@@ -175,15 +176,18 @@ public class MeasureServiceImpl implements MeasureService {
         Measure measure=null;
         try{
             repoPath=restInterfaceManager.getRepoPath(repoId,commitId);
-            if(repoPath!=null)
+            if(repoPath!=null) {
                 measure=measureAnalyzer.analyze(repoPath,"",resultHandler);
+            }
         }catch (Exception e){
             e.printStackTrace();
-            if(repoPath!=null)
+            if(repoPath!=null) {
                 restInterfaceManager.freeRepoPath(repoId,repoPath);
+            }
         }finally {
-            if(repoPath!=null)
+            if(repoPath!=null) {
                 restInterfaceManager.freeRepoPath(repoId,repoPath);
+            }
         }
         return measure;
     }
@@ -197,8 +201,9 @@ public class MeasureServiceImpl implements MeasureService {
             p.setCommit_id(commitId);
             p.setCommit_time(commitTime);
             p.setRepo_id(repoId);
-            if(packageMeasureMapper.samePackageMeasureExist(repoId,commitId,p.getName())>0)
+            if(packageMeasureMapper.samePackageMeasureExist(repoId,commitId,p.getName())>0) {
                 continue;
+            }
             String packageName=p.getName();
             int count=0;
             int ccn=0;
@@ -209,9 +214,9 @@ public class MeasureServiceImpl implements MeasureService {
                 }
             }
            // log.info("count -> {} , ccn -> {}",count,ccn);
-            if(count==0)
+            if(count==0) {
                 p.setCcn(0.00);
-            else{
+            } else{
                 double result=(double)ccn/count;
                 p.setCcn(Double.valueOf(df.format(result)));
             }
@@ -243,8 +248,9 @@ public class MeasureServiceImpl implements MeasureService {
         CommitBase commitBase = getCommitBaseInformation(repoId,commitId);
         repoMeasure.setAdd_lines(commitBase.getAddLines());
         repoMeasure.setDel_lines(commitBase.getDelLines());
-        if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0)
+        if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
             repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
+        }
     }
 
     @Override
@@ -252,8 +258,9 @@ public class MeasureServiceImpl implements MeasureService {
         List<RepoMeasure> result=new ArrayList<>();
         //先统一把这个时间段的所有度量值对象都取出来，然后按照时间单位要求来过滤
         List<RepoMeasure> repoMeasures=repoMeasureMapper.getRepoMeasureBetween(repoId,since,until);
-        if(repoMeasures==null||repoMeasures.isEmpty())
+        if(repoMeasures==null||repoMeasures.isEmpty()) {
             return Collections.emptyList();
+        }
         repoMeasures= repoMeasures.stream().map(repoMeasure -> {
             String date=repoMeasure.getCommit_time();
             repoMeasure.setCommit_time(date.split(" ")[0]);
@@ -302,8 +309,9 @@ public class MeasureServiceImpl implements MeasureService {
     public List<Package> getPackageMeasureUnderSpecificCommit(String repoId, String commit) {
 
         List<Package> packageMeasures=packageMeasureMapper.getPackageMeasureByRepoIdAndCommit(repoId,commit);
-        if(packageMeasures==null||packageMeasures.isEmpty())
+        if(packageMeasures==null||packageMeasures.isEmpty()) {
             return Collections.emptyList();
+        }
 //        Map<String,List<Package>> result=packageMeasures.stream().collect(Collectors.groupingBy(Package::getName));
 //        result.forEach((name,measures)->{
 //            measures.sort(Comparator.comparing(Package::getCommit_time));
@@ -321,9 +329,9 @@ public class MeasureServiceImpl implements MeasureService {
         switch (granularity){
             case day:
                 do{
-                    if(date.plusDays(1).isAfter(limit))
+                    if(date.plusDays(1).isAfter(limit)) {
                         result.add(getOneActiveMeasure(repoPath,DateTimeUtil.y_m_d_format(date),DateTimeUtil.y_m_d_format(limit)));
-                    else{
+                    } else{
                         next=date.plusDays(1);
                         result.add(getOneActiveMeasure(repoPath,DateTimeUtil.y_m_d_format(date),DateTimeUtil.y_m_d_format(next)));
                         date=next;
@@ -332,9 +340,9 @@ public class MeasureServiceImpl implements MeasureService {
                 break;
             case week:
                 do{
-                    if(date.plusWeeks(1).isAfter(limit))
+                    if(date.plusWeeks(1).isAfter(limit)) {
                         result.add(getOneActiveMeasure(repoPath,DateTimeUtil.y_m_d_format(date),DateTimeUtil.y_m_d_format(limit)));
-                    else{
+                    } else{
                         next=date.plusWeeks(1);
                         result.add(getOneActiveMeasure(repoPath,DateTimeUtil.y_m_d_format(date),DateTimeUtil.y_m_d_format(next)));
                         date=next;
@@ -343,9 +351,9 @@ public class MeasureServiceImpl implements MeasureService {
                 break;
             case month:
                 do{
-                    if(date.plusMonths(1).isAfter(limit))
+                    if(date.plusMonths(1).isAfter(limit)) {
                         result.add(getOneActiveMeasure(repoPath,DateTimeUtil.y_m_d_format(date),DateTimeUtil.y_m_d_format(limit)));
-                    else{
+                    } else{
                         next=date.plusMonths(1);
                         result.add(getOneActiveMeasure(repoPath,DateTimeUtil.y_m_d_format(date),DateTimeUtil.y_m_d_format(next)));
                         date=next;
@@ -386,18 +394,21 @@ public class MeasureServiceImpl implements MeasureService {
                     if(map.containsKey(file)){
                         int count=map.get(file);
                         map.put(file,count+1);
-                    }else
+                    }else {
                         map.put(file,0);
+                    }
                 }
                 List<String> distinctFiles=new ArrayList<>(map.keySet());
                 distinctFiles.sort((file1,file2)->map.get(file2)-map.get(file1));
-                if(distinctFiles.size()>=10)
+                if(distinctFiles.size()>=10) {
                     activeMeasure.setMostCommitFiles(distinctFiles.subList(0,10));
-                else
+                } else {
                     activeMeasure.setMostCommitFiles(distinctFiles);
+                }
             }finally {
-                if(repoPath!=null)
+                if(repoPath!=null) {
                     restInterfaceManager.freeRepoPath(repoId,repoPath);
+                }
             }
             return activeMeasure;
     }
@@ -425,8 +436,9 @@ public class MeasureServiceImpl implements MeasureService {
             repoPath=restInterfaceManager.getRepoPath(repoId,"");
             repoRank.setCommitCount(gitUtil.getCommitCount(repoPath,since,until,null));
         }finally {
-            if(repoPath!=null)
+            if(repoPath!=null) {
                 restInterfaceManager.freeRepoPath(repoId,repoPath);
+            }
         }
         return repoRank;
     }
@@ -669,8 +681,9 @@ public class MeasureServiceImpl implements MeasureService {
 
                 }
             }finally {
-                if(repoPath!=null)
+                if(repoPath!=null) {
                     restInterfaceManager.freeRepoPath(repo_id,repoPath);
+                }
             }
 
         }
@@ -699,8 +712,9 @@ public class MeasureServiceImpl implements MeasureService {
 
                 }
             }finally {
-                if(repoPath!=null)
+                if(repoPath!=null) {
                     restInterfaceManager.freeRepoPath(repo_id,repoPath);
+                }
             }
 
         }
@@ -734,8 +748,9 @@ public class MeasureServiceImpl implements MeasureService {
                         }
                     }
                 }finally {
-                    if(repoPath!=null)
+                    if(repoPath!=null) {
                         restInterfaceManager.freeRepoPath(repo_id,repoPath);
+                    }
                 }
             }
         }

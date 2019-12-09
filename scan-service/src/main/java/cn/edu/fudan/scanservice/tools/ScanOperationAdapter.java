@@ -43,8 +43,9 @@ public class ScanOperationAdapter implements ScanOperation {
     @Override
     public boolean checkCommit(String repoId,String commitId,String category) {
         Date lastScannedCommitTime = scanDao.getLastScannedCommitTime(repoId,category);
-        if(lastScannedCommitTime==null)
+        if(lastScannedCommitTime==null) {
             return true;
+        }
         JSONObject jsonObject = restInterfaceManager.getCommitTime(commitId);
         Date commit_time = jsonObject.getJSONObject("data").getDate("commit_time");
         return lastScannedCommitTime.before(commit_time);
@@ -99,10 +100,11 @@ public class ScanOperationAdapter implements ScanOperation {
         JSONObject requestParam = new JSONObject();
         requestParam.put("repo_id", repoId);
         requestParam.put("category",category);
-        if (pre_commit_id != null)
+        if (pre_commit_id != null) {
             requestParam.put("pre_commit_id", pre_commit_id);
-        else
+        } else {
             requestParam.put("pre_commit_id", commitId);
+        }
         requestParam.put("current_commit_id", commitId);
         logger.info("mapping between " + requestParam.toJSONString());
         JSONObject result = restInterfaceManager.mapping(requestParam);

@@ -10,6 +10,13 @@ import java.util.List;
 @Repository
 public interface AccountMapper {
 
+    /**
+     * login
+     *
+     * @param accountName get user accountName
+     * @param password  get user password
+     * @return Account
+     */
     Account login(@Param("accountName") String accountName, @Param("password") String password);
 
     void addAccount(Account account);

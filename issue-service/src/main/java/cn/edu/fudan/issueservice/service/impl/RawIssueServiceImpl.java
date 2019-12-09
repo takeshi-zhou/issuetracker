@@ -119,10 +119,11 @@ public class RawIssueServiceImpl implements RawIssueService {
         }finally {
             if(repoHome!=null){
                 JSONObject response =restInterfaceManager.freeRepoPath(repo_id,repoHome);
-                if (response != null && response.getJSONObject("data").getString("status").equals("Successful"))
+                if (response != null && response.getJSONObject("data").getString("status").equals("Successful")) {
                     logger.info("{} free success",repoHome);
-                else
+                } else {
                     logger.info("{} free failed",repoHome);
+                }
             }
 
         }

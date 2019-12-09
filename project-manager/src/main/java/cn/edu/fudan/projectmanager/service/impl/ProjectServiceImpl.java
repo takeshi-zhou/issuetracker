@@ -252,10 +252,13 @@ public class ProjectServiceImpl implements ProjectService {
         Map<String,Object> result=new HashMap<>();
         if(isFirst)
             //如果项目是第一次添加时判断是否自动扫
+        {
             result.put("exist",projectDao.existProjectWithThisRepoIdAndTypeAndNotAutoScanned(repoId, type));
-        else
+        } else
             //后续收到新的commit时判断是否扫
+        {
             result.put("exist",projectDao.existProjectWithThisRepoIdAndType(repoId, type));
+        }
         return result;
     }
 

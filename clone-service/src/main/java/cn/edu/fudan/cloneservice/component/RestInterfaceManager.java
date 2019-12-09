@@ -47,8 +47,9 @@ public class RestInterfaceManager {
 
     public JSONArray getCommitsOfRepo(String repoId){
         JSONObject response=restTemplate.getForObject(commitServicePath + "?repo_id=" + repoId + "&is_whole=true", JSONObject.class);
-        if(response==null||response.getJSONArray("data")==null)
+        if(response==null||response.getJSONArray("data")==null) {
             return null;
+        }
         return response.getJSONArray("data");
     }
 
@@ -78,8 +79,9 @@ public class RestInterfaceManager {
         JSONObject response=restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId+"&path="+repoPath, JSONObject.class);
         if(response!=null&&response.getJSONObject("data").getString("status").equals("Successful")){
             log.info("{} -> free success",repoPath);
-        }else
+        }else {
             log.warn("{} -> free failed",repoPath);
+        }
         return response;
     }
 

@@ -42,16 +42,17 @@ public class TagMapHelper {
 //    }
 
     public String getTagIdByRank(int rank){
-        if(rank>=1&&rank<=4)
+        if(rank>=1&&rank<=4) {
             return urgent;
-        else if(rank>=5&&rank<=9)
+        } else if(rank>=5&&rank<=9) {
             return high;
-        else if(rank>=10&&rank<=14)
+        } else if(rank>=10&&rank<=14) {
             return normal;
-        else if(rank>=15&&rank<=20)
+        } else if(rank>=15&&rank<=20) {
             return low;
-        else
+        } else {
             return null;
+        }
     }
 
     public String getTagIdByPriority(int priority){

@@ -59,12 +59,14 @@ public class TagServiceImpl implements TagService {
                 tagDao.addOneTag(new Tag(tag_id, name, scope, PriorityEnum.getByValue(name).getColor()));
             }
             logger.error(tagDao.hasBeenTagged(tag_id, itemId).toString());
-            if (tagDao.hasBeenTagged(tag_id, itemId) > 0)
+            if (tagDao.hasBeenTagged(tag_id, itemId) > 0) {
                 throw new RuntimeException("duplicate tag!");
+            }
             tagDao.addOneTaggedItem(itemId, tag_id);
         } else {
-            if (PriorityEnum.contains(name.toUpperCase()))
+            if (PriorityEnum.contains(name.toUpperCase())) {
                 throw new IllegalArgumentException("enter other tag" + name);
+            }
             tag_id = UUID.randomUUID().toString();
             tagDao.addOneTag(new Tag(tag_id, name, scope, "#ffffff"));
             tagDao.addOneTaggedItem(itemId, tag_id);
@@ -108,8 +110,9 @@ public class TagServiceImpl implements TagService {
                 tagDao.modifyOneTagged(oldTagId, newTagId, itemId);
             }
         } else {
-            if (PriorityEnum.contains(name.toUpperCase()))
+            if (PriorityEnum.contains(name.toUpperCase())) {
                 throw new IllegalArgumentException("enter other tag" + name);
+            }
             tagDao.modifyOneTag(oldTagId, name);
         }
 
@@ -122,8 +125,9 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<String> getItemIdsByTagIds(List<String> tagIds) {
-        if (tagIds == null || tagIds.size() == 0)
+        if (tagIds == null || tagIds.size() == 0) {
             return null;
+        }
         return tagDao.getItemIdsByTagIds(tagIds);
     }
 
@@ -142,8 +146,9 @@ public class TagServiceImpl implements TagService {
     @Override
     public boolean isSolved(String itemId) {
         List<Tag> tags=tagDao.getTagsByItemId(itemId);
-        if(tags==null||tags.isEmpty())
+        if(tags==null||tags.isEmpty()) {
             return false;
+        }
         return tags.get(0).getName().equals("Solved");
     }
 
@@ -211,8 +216,9 @@ public class TagServiceImpl implements TagService {
      * */
     private boolean isIgnored(String userId, int level, String type, String repoId) {
         Integer recordLevel = ignoreRecordDao.queryMinIgnoreLevelByUserId(userId, type);
-        if (recordLevel == null)
+        if (recordLevel == null) {
             return false;
+        }
 
         // user 1 repo 2 project 3
         if (recordLevel == IgnoreLevelEnum.USER.value() ) {

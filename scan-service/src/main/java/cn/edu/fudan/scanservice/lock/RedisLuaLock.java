@@ -54,8 +54,9 @@ public class RedisLuaLock {
         long end=System.currentTimeMillis()+timeUnit.toMillis(acquireTimeOut);
         while(System.currentTimeMillis()<end){
             Boolean acquired= stringRedisTemplate.execute(acquireScript, Collections.singletonList(lockName),String.valueOf(lockExpire),identifier);
-            if(acquired!=null&&acquired)
+            if(acquired!=null&&acquired) {
                 return identifier;
+            }
             try {
                 Thread.sleep(10);
             }catch(InterruptedException ie){

@@ -31,8 +31,12 @@ public class RepoRank {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (!(obj instanceof RepoRank)) return false;
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof RepoRank)) {
+            return false;
+        }
         RepoRank repoRank=(RepoRank)obj;
         return this.reoName.equals(repoRank.reoName)&&this.commitCount.equals(repoRank.commitCount);
     }
