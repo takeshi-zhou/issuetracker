@@ -79,10 +79,6 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
     @Override
     public RepoCloneMeasureData getRepoMeasureCloneDataByRepoIdCommitId(String repo_id, String commit_id) {
         List<CloneInstanceInfo> lci =  cloneInstanceInfoDao.getCloneInsListByRepoIdAndCommitId(repo_id, commit_id);
-//        Integer sum = 0;
-//        for (CloneInstanceInfo cloneInstanceInfo: lci){
-//            sum += (cloneInstanceInfo.getEnd_line() - cloneInstanceInfo.getStart_line() + 1);
-//        }
         long sum =  getCloneLine(lci);
         long total_line = getRepoTotalLine(repo_id, commit_id);
         RepoCloneMeasureData repoCloneMeasureData = new RepoCloneMeasureData(repo_id, commit_id, sum, total_line);

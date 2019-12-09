@@ -15,6 +15,15 @@ import java.util.List;
  * Version :1.0
  */
 public interface IssueMapper {
+
+    /**
+     * getIssueByDuration
+     *
+     * @param repo_id get issue repo id
+     * @param start get issue start
+     * @param end get issue end
+     * @return List<Issue>
+     */
     List<Issue> getIssueByDuration(@Param("repo_id") String repo_id,
                                    @Param("start") String start,
                                    @Param("end") String end);

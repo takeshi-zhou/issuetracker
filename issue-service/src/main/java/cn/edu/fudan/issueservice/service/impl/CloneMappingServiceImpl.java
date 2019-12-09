@@ -21,8 +21,21 @@ import java.util.stream.Collectors;
 public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
     private Logger logger = LoggerFactory.getLogger(CloneMappingServiceImpl.class);
 
-
-    //每一次映射完产生的所有的新的clone group
+    /**
+     * newCloneInsert 每一次映射完产生的所有的新的clone group
+     *
+     * @param isFirst whether map is first
+     * @param map clone map
+     * @param groupsNeedInsert groups need insert
+     * @param repo_id get repo id
+     * @param developer developer
+     * @param current_commit_id current commit id
+     * @param commitDate get commit date
+     * @param category get clone category
+     * @param committer committer
+     * @param date get date
+     * @return int
+     */
     private int newCloneInsert(boolean isFirst,Map<String,List<RawIssue>> map,Set<String> groupsNeedInsert,String repo_id,String developer,String current_commit_id,Date commitDate,String category,String committer,Date date){
         List<Issue> insertIssueList = new ArrayList<>();
         List<JSONObject> tags = new ArrayList<>();

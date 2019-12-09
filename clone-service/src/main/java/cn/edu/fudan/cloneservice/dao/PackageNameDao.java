@@ -32,7 +32,6 @@ public class PackageNameDao {
                     clone_ins_num = 0;
                 }
                 List<Integer> list = map_name_method_file_count.get(name);
-//            assert (list.size() == 2);
                 int clone_ins_line = 0;
                 if(line_map.containsKey(name)){
                     Map<String, Set> submap = line_map.get(name);

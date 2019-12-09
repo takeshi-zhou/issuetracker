@@ -169,7 +169,6 @@ public class GitUtil {
                     if(!out.isEmpty()) {
                         Developer developer = new Developer();
                         String []args=out.split("[\\s\\t]+");
-//                       int commitTimes=Integer.valueOf(args[0]);
                         developer.setName(args[1]);
                         developer.setEmail(args[2]);
                         developers.add(developer);

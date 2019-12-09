@@ -171,15 +171,8 @@ public class IssueRankServiceImpl implements IssueRankService {
     // 默认由大到小排序
     //类型 V 必须实现 Comparable 接口，并且这个接口的类型是 V 或 V 的任一父类。这样声明后，V 的实例之间，V 的实例和它的父类的实例之间，可以相互比较大小。
     private static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
-/*        List<Map.Entry<K, V>> list = new LinkedList<>(map.entrySet());
-        Collections.sort(list, (o1,o2) -> (o2.getValue()).compareTo(o1.getValue()));
-        Map<K, V> result = new LinkedHashMap<>();
-        for (Map.Entry<K, V> entry : list) {
-            result.put(entry.getKey(), entry.getValue());
-        }*/
         Map<K, V> result = new LinkedHashMap<>();
         Stream<Map.Entry<K, V>> st = map.entrySet().stream();
-        //st.sorted(Comparator.comparing(Map.Entry::getValue)).forEach(e -> result.put(e.getKey(), e.getValue()));
         st.sorted((e1, e2) -> e1.getValue().compareTo(e2.getValue())).forEach(e -> result.put(e.getKey(), e.getValue()));
         return result;
     }

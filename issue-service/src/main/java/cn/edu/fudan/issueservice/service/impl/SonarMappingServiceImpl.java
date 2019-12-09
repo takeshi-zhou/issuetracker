@@ -323,21 +323,6 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                 logger.info("issue update success!");
             }
 
-//            if(updateIssueList.size()!=0){
-//                int size = 1;
-//                List<Issue> updateIssueShortList = new ArrayList<>();
-//                for(Issue issue:updateIssueList){
-//                    updateIssueShortList.add(issue);
-//                    if(size%10 == 0){
-//                        issueDao.batchUpdateIssue(updateIssueShortList);
-//                        updateIssueShortList.clear();
-//                    }
-//
-//                }
-//                issueDao.batchUpdateIssue(updateIssueShortList);
-//                logger.info("issue update success!");
-//            }
-
             if (!insertRawIssues.isEmpty()) {
                 rawIssueDao.insertRawIssueList(insertRawIssues);
                 logger.info("new raw issue insert success!");

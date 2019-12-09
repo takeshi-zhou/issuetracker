@@ -85,7 +85,6 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public void deleteTag(String tagId, String itemId) {
-        //tagDao.deleteOneTag(tagId);
         tagDao.deleteOneTagged(tagId, itemId);
     }
 

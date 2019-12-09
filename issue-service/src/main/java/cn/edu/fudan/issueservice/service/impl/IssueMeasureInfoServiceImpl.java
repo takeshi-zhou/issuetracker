@@ -54,9 +54,6 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
             return rawIssueDao.getNumberOfRemainingIssueBaseFile(repoId, commit, detail);
         }
         // 需要单独引入用户问题记录表 ？
-/*        if (SpaceType.DEVELOPER.getLevel().equals(spaceType)) {
-            return rawIssueDao.getNumberOfRemainingIssueBaseDeveloper(repoId, commit, detail);
-        }*/
 
         return -1;
     }
@@ -78,7 +75,6 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
             return ;
         }*/
 
-        // detail 是repoId
         if (SpaceType.PROJECT.getLevel().equals(spaceType)) {
             return issueDao.getNumberOfNewIssueByDuration(detail, start, end);
         }

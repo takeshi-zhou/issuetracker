@@ -51,12 +51,6 @@ public class ScanOperationAdapter implements ScanOperation {
         return lastScannedCommitTime.before(commit_time);
     }
 
-//    @Override
-//    public boolean checkOut(String repoId, String commitId) {
-//        JSONObject response = restInterfaceManager.checkOut(repoId, commitId);
-//        return response != null && response.getJSONObject("data").getString("status").equals("Successful");
-//    }
-
     @Override
     public ScanInitialInfo initialScan(String repoId, String commitId,String category) {
         //没有拿到repoPath

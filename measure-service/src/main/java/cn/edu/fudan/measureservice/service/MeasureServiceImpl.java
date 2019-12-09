@@ -213,7 +213,6 @@ public class MeasureServiceImpl implements MeasureService {
                     ccn+=function.getCcn();
                 }
             }
-           // log.info("count -> {} , ccn -> {}",count,ccn);
             if(count==0) {
                 p.setCcn(0.00);
             } else{
@@ -266,7 +265,6 @@ public class MeasureServiceImpl implements MeasureService {
             repoMeasure.setCommit_time(date.split(" ")[0]);
             return repoMeasure;
         }).collect(Collectors.toList());
-        //LocalDate end=DateTimeUtil.parse(until);
         LocalDate nextTimeLimit= DateTimeUtil.parse(since);
         switch (granularity){
             case week:
@@ -312,10 +310,6 @@ public class MeasureServiceImpl implements MeasureService {
         if(packageMeasures==null||packageMeasures.isEmpty()) {
             return Collections.emptyList();
         }
-//        Map<String,List<Package>> result=packageMeasures.stream().collect(Collectors.groupingBy(Package::getName));
-//        result.forEach((name,measures)->{
-//            measures.sort(Comparator.comparing(Package::getCommit_time));
-//        });
         return packageMeasures;
     }
 

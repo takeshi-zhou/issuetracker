@@ -173,7 +173,6 @@ public class RestInterfaceManager {
     }
 
     public String getRepoPath(String repoId) {
-        //restTemplate.getForObject(repoServicePath + "/" + repoId, String.class);
         MultiValueMap<String, String> requestEntity = new LinkedMultiValueMap<>(1);
         requestEntity.add("query", "uuid=\"" + repoId + "\"");
         JSONObject jsonObject = restTemplate.postForObject(repoServicePath, requestEntity,JSONObject.class);
@@ -215,12 +214,10 @@ public class RestInterfaceManager {
     }
 
     public Map getRepoAndLatestScannedCommit(Set repoList) {
-        //restTemplate.postForObject(scanServicePath + "/repo", repoList, JSONArray.class);
         return null;
     }
 
     public Map getRepoAndCodeLine(Map repoCommit) {
-        //return restTemplate.postForObject(tagServicePath + "/item-ids", tag_ids, JSONArray.class);
         return null;
     }
 
@@ -319,9 +316,6 @@ public class RestInterfaceManager {
         }
 
         try{
-//            ResponseEntity entity = restTemplate.getForEntity(baseRequestUrl,JSONObject.class,map);
-//            JSONObject result  = JSONObject.parseObject(entity.getBody().toString());
-//            return result;
             return restTemplate.getForObject(baseRequestUrl + "?key=" + ruleKey, JSONObject.class);
         }catch(RuntimeException e){
             logger.error("ruleKey : {}  ----> request sonar  rule infomation api failed", ruleKey);
