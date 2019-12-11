@@ -167,16 +167,21 @@ public class RawIssue {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (!(obj instanceof RawIssue)) return false;
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof RawIssue)) {
+            return false;
+        }
         RawIssue rawIssue = (RawIssue) obj;
-        if(this.detail==null||((RawIssue) obj).detail==null)
+        if(this.detail==null||((RawIssue) obj).detail==null) {
             return rawIssue.type.equals(type) &&
                    rawIssue.file_name.equals(file_name);
-        else
+        } else {
             return rawIssue.type.equals(type) &&
                     rawIssue.detail.equals(detail) &&
                     rawIssue.file_name.equals(file_name);
+        }
     }
 
     @Override

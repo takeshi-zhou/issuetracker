@@ -21,8 +21,21 @@ import java.util.stream.Collectors;
 public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
     private Logger logger = LoggerFactory.getLogger(CloneMappingServiceImpl.class);
 
-
-    //每一次映射完产生的所有的新的clone group
+    /**
+     * newCloneInsert 每一次映射完产生的所有的新的clone group
+     *
+     * @param isFirst whether map is first
+     * @param map clone map
+     * @param groupsNeedInsert groups need insert
+     * @param repo_id get repo id
+     * @param developer developer
+     * @param current_commit_id current commit id
+     * @param commitDate get commit date
+     * @param category get clone category
+     * @param committer committer
+     * @param date get date
+     * @return int
+     */
     private int newCloneInsert(boolean isFirst,Map<String,List<RawIssue>> map,Set<String> groupsNeedInsert,String repo_id,String developer,String current_commit_id,Date commitDate,String category,String committer,Date date){
         List<Issue> insertIssueList = new ArrayList<>();
         List<JSONObject> tags = new ArrayList<>();
@@ -48,11 +61,12 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
                     issue.setRaw_issue_start(rawIssue.getUuid());
                     ignoreCountInNewIssues+=addTag(tags,ignoreTypes,rawIssue,issue);
                 }
-                if(i==rawIssuesInOneGroup.size()-1)
+                if(i==rawIssuesInOneGroup.size()-1) {
                     issue.setRaw_issue_end(rawIssue.getUuid());
+                }
                 rawIssue.setIssue_id(new_IssueId);
+                insertIssueList.add(issue);
             }
-            insertIssueList.add(issue);
         }
         //新的issue
         if (!insertIssueList.isEmpty()) {
@@ -85,8 +99,9 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
         String developer=getDeveloper(current_commit_id);
         if (pre_commit_id.equals(current_commit_id)) {
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,current_commit_id);
-            if (rawIssues == null || rawIssues.isEmpty())
+            if (rawIssues == null || rawIssues.isEmpty()) {
                 return;
+            }
             logger.info("first scan mapping!");
             Map<String,List<RawIssue>> map=rawIssues.stream().collect(Collectors.groupingBy(RawIssue::getType));
             //对于第一次而言所有的group都是新增的
@@ -96,8 +111,9 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             //不是第一次扫描，需要和前一次的commit进行mapping
             List<RawIssue> rawIssues1 = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,pre_commit_id);
             List<RawIssue> rawIssues2 = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,current_commit_id);
-            if (rawIssues2 == null || rawIssues2.isEmpty())
+            if (rawIssues2 == null || rawIssues2.isEmpty()) {
                 return;
+            }
             logger.info("not first mapping!");
             //装需要更新的Issue
             List<Issue> issues = new ArrayList<>();

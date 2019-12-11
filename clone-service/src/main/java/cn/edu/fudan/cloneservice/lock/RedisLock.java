@@ -54,8 +54,9 @@ public class RedisLock {
                 stringRedisTemplate.multi();
                 stringRedisTemplate.delete(lockKey);
                 List<Object> result = stringRedisTemplate.exec();
-                if (result == null)
+                if (result == null) {
                     continue;
+                }
                 return true;
             }
             stringRedisTemplate.unwatch();

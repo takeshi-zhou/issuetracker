@@ -19,7 +19,6 @@ public class Issue {
     private Date create_time;
     private Date update_time;
 //    private IssueType issueType;
-//    private List<Object> tags;
     private int priority;
     private int displayId ;
 
@@ -67,14 +66,6 @@ public class Issue {
         this.priority = priority;
     }
 
-//    public IssueType getIssueType() {
-//        return issueType;
-//    }
-//
-//    public void setIssueType(IssueType issueType) {
-//        this.issueType = issueType;
-//    }
-
     public Date getStart_commit_date() {
         return start_commit_date;
     }
@@ -120,14 +111,6 @@ public class Issue {
             this.update_time = (Date) update_time.clone();
         }
     }
-
-//    public List<Object> getTags() {
-//        return tags;
-//    }
-//
-//    public void setTags(List<Object> tags) {
-//        this.tags = tags;
-//    }
 
     public String getType() {
         return type;

@@ -63,8 +63,9 @@ public class MeasureController {
                                        HttpServletRequest request){
         try{
             String userToken=request.getHeader("token");
-            if(userToken==null)
+            if(userToken==null) {
                 throw new Exception("need user token!");
+            }
             return new ResponseBean(200,"success",measureService.getRepoRankByCommit(userToken,since,until));
         }catch (Exception e){
             e.printStackTrace();

@@ -19,7 +19,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 @PrepareForTest({ RestTemplate.class})
 public class RestInterfaceManagerTest extends IssueServiceApplicationTests {
@@ -83,5 +85,14 @@ public class RestInterfaceManagerTest extends IssueServiceApplicationTests {
         int  a=1;
         a= a+1;
         System.out.println(a);
+    }
+
+    @Test
+    public void getSonarSourcesLinesShow(){
+        List<String> resultList = restInterfaceManager.getSonarSourcesLinesShow("issueTrackerScannerTest:issue-service/src/main/java/cn/edu/fudan/issueservice/component/RestInterfaceManager.java",1,239);
+        int index = 0;
+        for (String code:resultList) {
+            System.out.println((index++)+": "+code);
+        }
     }
 }

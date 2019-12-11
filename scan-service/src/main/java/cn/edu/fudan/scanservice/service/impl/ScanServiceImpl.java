@@ -121,8 +121,9 @@ public class ScanServiceImpl implements ScanService {
     public String getNextScannedCommitID(String repo_id, String category, String commitId) {
         String nextScannedCommitId="";
         List<String> scannedCommitId = scanDao.getScannedCommits(repo_id,category);
-        if(scannedCommitId==null||scannedCommitId.isEmpty())
+        if(scannedCommitId==null||scannedCommitId.isEmpty()) {
             return nextScannedCommitId;
+        }
         for(int i=0;i<scannedCommitId.size();i++){
             if(scannedCommitId.get(i).equals(commitId)){
                 if(i+1<scannedCommitId.size()){
@@ -138,8 +139,9 @@ public class ScanServiceImpl implements ScanService {
     public String getPreviousScannedCommitID(String repo_id, String category, String commitId) {
         String previousScannedCommitId="";
         List<String> scannedCommitId = scanDao.getScannedCommits(repo_id,category);
-        if(scannedCommitId==null||scannedCommitId.isEmpty())
+        if(scannedCommitId==null||scannedCommitId.isEmpty()) {
             return previousScannedCommitId;
+        }
         for(int i=0;i<scannedCommitId.size();i++){
             if(scannedCommitId.get(i).equals(commitId)){
                 if(i>0){

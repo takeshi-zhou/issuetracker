@@ -9,17 +9,21 @@ public class SearchUtilTest {
 
     @Test
     public void   dichotomy(){
-        String[] strings = new String[8];
-        strings[0]="Lx";
-        strings[1]="Ly";
-        strings[2]="Lw";
-        strings[3]="MN";
-        strings[4]="Mn";
-        strings[5]="NN";
-        strings[6]="NNL";
-        strings[7]="Nn";
 
-        String search = "Lx";
+
+        String[] strings = new String[10];
+        strings[0]="aa";
+        strings[1]="ab";
+        strings[2]="ac";
+        strings[3]="ad";
+        strings[4]="ae";
+        strings[5]="af";
+        strings[6]="ag";
+        strings[7]="ah";
+        strings[8]="ai";
+        strings[9]="aj";
+        String search = "aj";
+
         int index = SearchUtil.dichotomy(strings,search);
         System.out.println(index);
     }

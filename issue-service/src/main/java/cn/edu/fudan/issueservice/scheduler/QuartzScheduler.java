@@ -41,7 +41,9 @@ public class QuartzScheduler {
     @Scheduled(cron = "0 10 0 1 * *")
     public void perMonth() {
         JSONArray projects = restInterfaceManager.getProjectList(null);//所有用户的所有project
-        if (projects == null||projects.isEmpty()) return;
+        if (projects == null||projects.isEmpty()) {
+            return;
+        }
         for (int i=0;i<projects.size();i++) {
             JSONObject project=projects.getJSONObject(i);
             if(project!=null){
@@ -65,7 +67,9 @@ public class QuartzScheduler {
         List<String> accountIds=restInterfaceManager.getAccountIds();
         for (String account_id : accountIds) {
             JSONArray projects = restInterfaceManager.getProjectList(account_id);
-            if (projects == null||projects.isEmpty()) continue;
+            if (projects == null||projects.isEmpty()) {
+                continue;
+            }
             for (int i=0;i<projects.size();i++) {
                 JSONObject project=projects.getJSONObject(i);
                 if(project!=null){

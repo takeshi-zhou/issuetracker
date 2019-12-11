@@ -39,7 +39,6 @@ public class PackageServiceImpl implements PackageService {
     public void cloneMessageListener(ConsumerRecord<String, String> consumerRecord) {
         String msg = consumerRecord.value();
 //        System.out.println(msg);
-//        logger.info("received message from topic -> " + consumerRecord.topic() + " : " + msg);
         ScanInitialInfo scanInitialInfo = JSONObject.parseObject(msg, ScanInitialInfo.class);
 
         //#0 收到要扫描的项目信息
@@ -62,7 +61,6 @@ public class PackageServiceImpl implements PackageService {
     public void ReCloneMessageListener(ConsumerRecord<String, String> consumerRecord) {
         String msg = consumerRecord.value();
 //        System.out.println(msg);
-//        logger.info("received message from topic -> " + consumerRecord.topic() + " : " + msg);
         ScanInitialInfo scanInitialInfo = JSONObject.parseObject(msg, ScanInitialInfo.class);
 
         //#0 收到要扫描的项目信息

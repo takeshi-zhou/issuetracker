@@ -17,7 +17,9 @@ public class ASTUtil {
                     code.append("\n");
                 }
                 line++;
-                if (line > endLine) break;
+                if (line > endLine) {
+                    break;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -100,7 +100,6 @@ public class RawIssueServiceImpl implements RawIssueService {
     @Override
     public Object getCode(String project_id, String commit_id, String file_path) {
 //        file_path=file_path.substring(file_path.indexOf("/")+1);
-//        file_path=file_path.substring(file_path.indexOf("/")+1);
         Map<String, Object> result = new HashMap<>();
         String repo_id =restInterfaceManager.getRepoIdOfProject(project_id);
         String repoHome=null;
@@ -119,10 +118,11 @@ public class RawIssueServiceImpl implements RawIssueService {
         }finally {
             if(repoHome!=null){
                 JSONObject response =restInterfaceManager.freeRepoPath(repo_id,repoHome);
-                if (response != null && response.getJSONObject("data").getString("status").equals("Successful"))
+                if (response != null && response.getJSONObject("data").getString("status").equals("Successful")) {
                     logger.info("{} free success",repoHome);
-                else
+                } else {
                     logger.info("{} free failed",repoHome);
+                }
             }
 
         }

@@ -203,7 +203,8 @@ public class PackageScanTask {
 
     private void addLines(Set<Integer> si, String bug_lines){
         try {
-            String div[] = bug_lines.split(",");
+//            String div[] = bug_lines.split(",");
+            String[] div = bug_lines.split(",");
             for(String str:div){
                 si.add(Integer.parseInt(str));
             }

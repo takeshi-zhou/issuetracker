@@ -138,10 +138,12 @@ public class KafkaServiceImpl implements KafkaService {
         }
         String projectId = requestParam.getString("projectId");
         String commitId = requestParam.getString("commitId");
-        if(projectId==null||projectId.equals(""))
+        if(projectId==null||projectId.equals("")) {
             throw new IllegalArgumentException("please provide projectId");
-        if(commitId==null||commitId.equals(""))
+        }
+        if(commitId==null||commitId.equals("")) {
             throw new IllegalArgumentException("please provide commitId");
+        }
         initialProject(projectId);
         String repoId = restInterfaceManager.getRepoIdOfProject(projectId);
         if(category.equals("clone")){
@@ -214,8 +216,9 @@ public class KafkaServiceImpl implements KafkaService {
             }));
             List<LocalDate> dates=new ArrayList<>(map.keySet());
             dates.sort(((o1, o2) -> {
-                if(o1.equals(o2))
+                if(o1.equals(o2)) {
                     return 0;
+                }
                 return o1.isBefore(o2)?-1:1;
             }));
             firstAutoScan(map,dates);
@@ -255,7 +258,8 @@ public class KafkaServiceImpl implements KafkaService {
 //        }
 //        logger.info("existSonarProject -> {}",existSonarProject);
         //bug扫描
-        if((existProject(repoId,"bug",false)||existProject(repoId,"bug",true))&&Boolean.parseBoolean(bugResultMap.get("isFirst"))){
+        boolean existedForBug =(existProject(repoId,"bug",false)||existProject(repoId,"bug",true))&&Boolean.parseBoolean(bugResultMap.get("isFirst"));
+        if(existedForBug){
             List<ScanMessageWithTime> bugFilterCommits = filteredCommits;
             if(bugResultMap.get("location") != null){
                 bugFilterCommits =updateFilterCommits(filteredCommits,Integer.parseInt(bugResultMap.get("location")));
@@ -271,7 +275,8 @@ public class KafkaServiceImpl implements KafkaService {
             logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
         //clone扫描
-        if((existProject(repoId,"clone",false)||existProject(repoId,"clone",true))&&Boolean.parseBoolean(cloneResultMap.get("isFirst"))){
+        boolean existedForClone = (existProject(repoId,"clone",false)||existProject(repoId,"clone",true))&&Boolean.parseBoolean(cloneResultMap.get("isFirst"));
+        if(existedForClone){
             List<ScanMessageWithTime> cloneFilterCommits = filteredCommits;
             if(cloneResultMap.get("location") != null){
                 cloneFilterCommits =updateFilterCommits(filteredCommits,Integer.parseInt(cloneResultMap.get("location")));
@@ -287,17 +292,18 @@ public class KafkaServiceImpl implements KafkaService {
             logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
         //sonar扫描
-        if((existProject(repoId,"sonar",false)||existProject(repoId,"sonar",true))&&Boolean.parseBoolean(sonarResultMap.get("isFirst"))){
-            List<ScanMessageWithTime> sonarFilterCommits = filteredCommits;
-            if(sonarResultMap.get("location") != null){
-                sonarFilterCommits =updateFilterCommits(filteredCommits,Integer.parseInt(sonarResultMap.get("location")));
-            }
-            logger.info("start auto scan sonar -> {}",repoId);
-            for(ScanMessageWithTime message:sonarFilterCommits){
-                String commitId = message.getCommitId();
-                sonarScanTask.runSynchronously(repoId,commitId,"sonar");
-            }
-            restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"sonar");
+        boolean existedForSonar = (existProject(repoId,"sonar",false)||existProject(repoId,"sonar",true))&&Boolean.parseBoolean(sonarResultMap.get("isFirst"));
+        if(existedForSonar){
+        List<ScanMessageWithTime> sonarFilterCommits = filteredCommits;
+        if(sonarResultMap.get("location") != null){
+            sonarFilterCommits =updateFilterCommits(filteredCommits,Integer.parseInt(sonarResultMap.get("location")));
+        }
+        logger.info("start auto scan sonar -> {}",repoId);
+        for(ScanMessageWithTime message:sonarFilterCommits){
+            String commitId = message.getCommitId();
+            sonarScanTask.runSynchronously(repoId,commitId,"sonar");
+        }
+        restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"sonar");
 
         }else{
             logger.info("repo {} not exist or has been auto scanned!",repoId);

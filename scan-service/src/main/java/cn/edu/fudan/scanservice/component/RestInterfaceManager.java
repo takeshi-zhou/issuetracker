@@ -138,8 +138,9 @@ public class RestInterfaceManager {
     }
 
     public JSONObject freeRepoPath(String repoId, String repoPath) {
-        if (repoPath != null)
+        if (repoPath != null) {
             return restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId + "&path=" + repoPath, JSONObject.class);
+        }
         return null;
     }
 

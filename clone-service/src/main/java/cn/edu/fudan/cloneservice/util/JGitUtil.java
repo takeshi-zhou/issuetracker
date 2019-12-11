@@ -79,7 +79,6 @@ public class JGitUtil {
                     .setMustExist(true)
                     .build();
             // find the current commit id
-//            ObjectId curCommitId = repository.resolve(commit_id);
             Git git = new Git(repository);
             try {
                 Iterable<RevCommit> log = git.log().call();

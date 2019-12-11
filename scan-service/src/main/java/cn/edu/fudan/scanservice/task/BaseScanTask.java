@@ -64,13 +64,6 @@ public class BaseScanTask {
             logger.error("Current commit time is before last scanned commit!");
             return;
         }
-//        logger.info("start to checkout -> " + commitId);
-        //checkout,如果失败发送错误消息，直接返回
-//        if (!scanOperation.checkOut(repoId, commitId)) {
-//            send(repoId, commitId, category,"failed", "check out failed");
-//            logger.error("Check Out Failed!");
-//            return;
-//        }
         logger.info("this commit is valid -> start the scan initialization......");
         ScanInitialInfo scanInitialInfo = scanOperation.initialScan(repoId, commitId,category);
         if(!scanInitialInfo.isSuccess()){

@@ -78,8 +78,9 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
                         sb.append(fragStart);
                         fragStart++;
                     }
-                    if (sb.length() > 0)
+                    if (sb.length() > 0) {
                         bugLines = sb.deleteCharAt(0).toString();
+                    }
                     cloneLocation.put("start_line",startLine);
                     cloneLocation.put("end_line",endLine);
                     cloneLocation.put("bug_lines",bugLines);

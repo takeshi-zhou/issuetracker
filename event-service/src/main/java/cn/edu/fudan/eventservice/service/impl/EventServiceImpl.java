@@ -49,8 +49,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void deleteEvents(String repo_id, String category) {
-        if(repo_id!=null&&category!=null)
+        if(repo_id!=null&&category!=null) {
             eventDao.deleteEventByRepoIdAndCategory(category,repo_id);
+        }
     }
 
     @Override

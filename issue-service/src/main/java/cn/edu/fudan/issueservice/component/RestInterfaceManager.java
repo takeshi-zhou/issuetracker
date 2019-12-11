@@ -1,6 +1,7 @@
 package cn.edu.fudan.issueservice.component;
 
 import cn.edu.fudan.issueservice.exception.AuthException;
+import cn.edu.fudan.issueservice.util.RegexUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.kafka.common.protocol.types.Field;
@@ -173,7 +174,6 @@ public class RestInterfaceManager {
     }
 
     public String getRepoPath(String repoId) {
-        //restTemplate.getForObject(repoServicePath + "/" + repoId, String.class);
         MultiValueMap<String, String> requestEntity = new LinkedMultiValueMap<>(1);
         requestEntity.add("query", "uuid=\"" + repoId + "\"");
         JSONObject jsonObject = restTemplate.postForObject(repoServicePath, requestEntity,JSONObject.class);
@@ -215,12 +215,10 @@ public class RestInterfaceManager {
     }
 
     public Map getRepoAndLatestScannedCommit(Set repoList) {
-        //restTemplate.postForObject(scanServicePath + "/repo", repoList, JSONArray.class);
         return null;
     }
 
     public Map getRepoAndCodeLine(Map repoCommit) {
-        //return restTemplate.postForObject(tagServicePath + "/item-ids", tag_ids, JSONArray.class);
         return null;
     }
 
@@ -319,9 +317,6 @@ public class RestInterfaceManager {
         }
 
         try{
-//            ResponseEntity entity = restTemplate.getForEntity(baseRequestUrl,JSONObject.class,map);
-//            JSONObject result  = JSONObject.parseObject(entity.getBody().toString());
-//            return result;
             return restTemplate.getForObject(baseRequestUrl + "?key=" + ruleKey, JSONObject.class);
         }catch(RuntimeException e){
             logger.error("ruleKey : {}  ----> request sonar  rule infomation api failed", ruleKey);
@@ -350,6 +345,39 @@ public class RestInterfaceManager {
 
 
 
+    }
+
+    /**该函数用来解析/api/sources/show返回来的每行代码（由于返回的数据出现各种标签，现需去掉标签）
+     * @param componentKey
+     * @param from
+     * @param to
+     * @return
+     */
+    public List<String> getSonarSourcesLinesShow(String componentKey, int from, int to){
+        if (to<from){
+            logger.error("lines {} can not greater than {} ",from,to);
+        }
+
+        ArrayList<String> linesList = new ArrayList<>();
+        Map<String,String> paraMap = new HashMap<>(3);
+        String baseRequestUrl = sonarServicePath + "api/sources/show?key={key}&from={from}&to={to}";
+        paraMap.put("key",componentKey);
+        paraMap.put("from",String.valueOf(from));
+        paraMap.put("to",String.valueOf(to));
+        JSONObject linesJO = restTemplate.getForObject(baseRequestUrl, JSONObject.class,paraMap);
+        List<java.lang.Object> sourcesList = (List<Object>) linesJO.get("sources");
+        int sourceListSize = sourcesList.size();
+        Map<List<String>,String> regexAndReplaceStr = new HashMap<>();
+        regexAndReplaceStr.put(Arrays.asList("<span[^>]*>","</span[^>]*>"),"");
+        regexAndReplaceStr.put(Arrays.asList("&lt;"),"<");
+        regexAndReplaceStr.put(Arrays.asList("&gt;"),">");
+        regexAndReplaceStr.put(Arrays.asList("&amp;"),"&");
+        for (int i = 0; i < sourceListSize; i++) {
+            String code = (String) ((List<Object>)(sourcesList.get(i))).get(1);
+            code = RegexUtil.getNoTagCode(code,regexAndReplaceStr);
+            linesList.add(code);
+        }
+        return linesList;
     }
 
     //------------------------------------------------------scan api ---------------------------------------------

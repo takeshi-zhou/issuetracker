@@ -50,8 +50,9 @@ public class FindBugScanOperation extends ScanOperationAdapter {
             json.append("\":\"");
             json.append(attributes.get(i).getValue());
             json.append("\"");
-            if (i != attributes.size() - 1)
+            if (i != attributes.size() - 1) {
                 json.append(",");
+            }
         }
         json.append("}");
         return json.toString();
@@ -92,8 +93,9 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         //Method节点
         Element method = bugInstance.element("Method");
         Iterator<Element> iterator = bugInstance.elementIterator("SourceLine");
-        if (method == null)
+        if (method == null) {
             return null;
+        }
         String methodName = method.attributeValue("name");
         Element sourceLineInMethod = method.element("SourceLine");
         int start = Integer.parseInt(sourceLineInMethod.attributeValue("start"));
@@ -112,12 +114,14 @@ public class FindBugScanOperation extends ScanOperationAdapter {
                     bugLineBuilder.append(startBugLine);
                 }
             }
-            if (bugLineBuilder.length() > 0)
+            if (bugLineBuilder.length() > 0) {
                 bugLines = bugLineBuilder.deleteCharAt(0).toString();
-            if (container.size() > 0)
+            }
+            if (container.size() > 0) {
                 code = ASTUtil.getCodeAtSpecificLines(container, repoPath+ "/" + filePath);
-            else
+            } else {
                 code = ASTUtil.getCode(start, end,  repoPath+ "/" + filePath);
+            }
         } else {
             code = ASTUtil.getCode(start, end, repoPath+ "/" + filePath);
         }

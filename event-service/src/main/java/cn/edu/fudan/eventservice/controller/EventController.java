@@ -37,8 +37,9 @@ public class EventController {
     @CrossOrigin
     public Object eventHasNew(HttpServletRequest request,@RequestParam(name="category",defaultValue = "bug")String category){
         String token=request.getHeader("token");
-        if(token==null)
+        if(token==null) {
             throw new RuntimeException("need user token!");
+        }
         return eventService.hasNewEvents(token,category);
     }
 
@@ -46,8 +47,9 @@ public class EventController {
     @CrossOrigin
     public Object getCurrentEvents(HttpServletRequest request,@RequestParam(name="category",defaultValue = "bug")String category){
         String token=request.getHeader("token");
-        if(token==null)
+        if(token==null) {
             throw new RuntimeException("need user token!");
+        }
         return eventService.getCurrentEvents(token,category);
     }
 

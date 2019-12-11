@@ -16,10 +16,31 @@ import java.util.Set;
  * Version :1.0
  */
 public interface CloneMeasureService {
+
+    /**
+     * get repo measure clone data by repo id commit id
+     *
+     * @param repo_id get user repo id
+     * @param commit_id get user commit id
+     * @return RepoCloneMeasureData
+     */
     RepoCloneMeasureData getRepoMeasureCloneDataByRepoIdCommitId(String repo_id, String commit_id);
 
+    /**
+     * get repo clone ratio by repo id commit id
+     *
+     * @param repo_id get user repo id
+     * @param commit_id get user commit id
+     * @return RepoCloneRatio
+     */
     RepoCloneRatio getRepoCloneRatioByRepoIdCommitId(String repo_id, String commit_id);
 
+    /**
+     * get repo clone info by repo id
+     *
+     * @param repo_id get user repo id
+     * @return List<RepoCloneInfoMonthly>
+     */
     List<RepoCloneInfoMonthly> getRepoCloneInfoByRepoId(String repo_id);
 
 //    DeveloperCloneMeasureData getDeveloperMeasureCloneDataByRepoIdCommitId(String repo_id, String commit_id, String developer_name);
