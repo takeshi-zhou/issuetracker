@@ -122,20 +122,54 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                         int index = SearchUtil.dichotomy(sonarIssueKeys,sonarIssueKey);
                         //当index=-1 表示未匹配上，不为-1时表示匹配上了
                         if(index==-1){
-                            //如果未匹配上先判断是否是REOPENED
-                            if("REOPENED".equals(sonarIssue.getString("status"))){
-                                Issue issueReopened = issueDao.getIssueBySonarIssueKey(sonarIssueKey);
-                                if(issueReopened != null){
-                                    issueReopened.setEnd_commit(current_commit_id);
-                                    issueReopened.setEnd_commit_date(commitDate);
-                                    issueReopened.setUpdate_time(new Date());
-                                    issueReopened.setStatus("REOPENED");
-                                    issueReopened.setResolution(null);
-                                    updateIssueList.add(issueReopened);
-                                    continue;
+
+
+                            Issue confirmIssue = issueDao.getIssueBySonarIssueKey(sonarIssueKey);
+                            if(confirmIssue != null){
+                                //判断是否是缺陷重新打开了,但是目前没有标志位表示这个缺陷是否属于缺陷重新打开，或者在某个版本已经修复了，哪个版本又重新引入
+                                if("CLOSED".equals(confirmIssue.getStatus())){
+                                    Issue issueReopened = issueDao.getIssueBySonarIssueKey(sonarIssueKey);
+                                    if(issueReopened != null){
+                                        issueReopened.setEnd_commit(current_commit_id);
+                                        issueReopened.setEnd_commit_date(commitDate);
+                                        issueReopened.setUpdate_time(new Date());
+                                        issueReopened.setStatus(sonarIssue.getString("status"));
+                                        issueReopened.setResolution(null);
+                                        updateIssueList.add(issueReopened);
+                                        newIssueCount++;
+
+
+                                        String rawIssueUUID = UUID.randomUUID().toString();
+                                        //将改issue的所有location直接表中
+                                        insertLocations(rawIssueUUID,sonarIssue,repoPath);
+                                        //获取rawIssue
+                                        RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,confirmIssue.getUuid(),sonarIssue);
+                                        insertRawIssues.add(rawIssue);
+
+                                        continue;
+                                    }
+
+                                }else{
+                                    logger.error("sonarIssueKey  map failed --> {}  ",sonarIssueKey);
                                 }
 
                             }
+
+
+//                            //如果未匹配上先判断是否是REOPENED
+//                            if("REOPENED".equals(sonarIssue.getString("status"))){
+//                                Issue issueReopened = issueDao.getIssueBySonarIssueKey(sonarIssueKey);
+//                                if(issueReopened != null){
+//                                    issueReopened.setEnd_commit(current_commit_id);
+//                                    issueReopened.setEnd_commit_date(commitDate);
+//                                    issueReopened.setUpdate_time(new Date());
+//                                    issueReopened.setStatus("REOPENED");
+//                                    issueReopened.setResolution(null);
+//                                    updateIssueList.add(issueReopened);
+//                                    continue;
+//                                }
+//
+//                            }
                             issueUUID = UUID.randomUUID().toString();
                             newIssueCount++;
 
@@ -167,6 +201,9 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                             if(rawIssue.getLocations().size()==flows.size()+1){
                                 //先判断issue的textRange中的行内代码是否发生过变化
                                 JSONObject codeSourceMaster = restInterfaceManager.getSonarSourceLines(sonarIssue.getString("component"),textRange.getIntValue("startLine"),textRange.getIntValue("endLine"));
+                                if(codeSourceMaster ==null){
+                                   continue;
+                                }
                                 JSONArray sourcesMaster = codeSourceMaster.getJSONArray("sources");
                                 for(int m=0;m<sourcesMaster.size();m++){
                                     JSONObject source = sourcesMaster.getJSONObject(m);
@@ -184,6 +221,9 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                                         String flowComponent = flowLocation.getString("component");
                                         JSONObject flowTextRange =  flowLocation.getJSONObject("textRange");
                                         JSONObject codeSourceFlow = restInterfaceManager.getSonarSourceLines(flowComponent,flowTextRange.getIntValue("startLine"),flowTextRange.getIntValue("endLine"));
+                                        if(codeSourceMaster ==null){
+                                            continue;
+                                        }
                                         JSONArray sourcesFlow = codeSourceFlow.getJSONArray("sources");
                                         for(int k=0;k<sourcesFlow.size();k++){
                                             JSONObject source = sourcesFlow.getJSONObject(k);
@@ -235,72 +275,101 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                     int l =0;
                     //此处效率很差，后面需要重构成遍历for循环
 
+                    List<JSONObject> sonarSolvedIssuesAll = new ArrayList<>();
 
-                    while(l<solvedIssues.size()){
+                    while(l<solvedIssues.size()) {
                         //因为path url的长度有限制，所以每次只拼接5个sonar issue key发送请求
-                        StringBuilder solvedSonarIssueKeysStringBuilder = new StringBuilder() ;
-                        if(l>solvedIssues.size()-5){
-                            for(; l<solvedIssues.size();l++){
-                                solvedSonarIssueKeysStringBuilder.append(solvedIssuesArray[l].getSonar_issue_id()+",");
+                        StringBuilder solvedSonarIssueKeysStringBuilder = new StringBuilder();
+                        List<String> issueIds =new ArrayList<>();
+                        if (l > solvedIssues.size() - 5) {
+                            for (; l < solvedIssues.size(); l++) {
+                                solvedSonarIssueKeysStringBuilder.append(solvedIssuesArray[l].getSonar_issue_id() + ",");
+                                issueIds.add(solvedIssuesArray[l].getUuid());
                             }
-                        }else{
-                            int times = l+5;
-                            for(; l<times;l++){
-                                solvedSonarIssueKeysStringBuilder.append(solvedIssuesArray[l].getSonar_issue_id()+",");
+                        } else {
+                            int times = l + 5;
+                            for (; l < times; l++) {
+                                solvedSonarIssueKeysStringBuilder.append(solvedIssuesArray[l].getSonar_issue_id() + ",");
+                                issueIds.add(solvedIssuesArray[l].getUuid());
                             }
                         }
-                        l+=5;
-                        String solvedSonarIssueKeys = solvedSonarIssueKeysStringBuilder.toString().substring(0,solvedSonarIssueKeysStringBuilder.toString().length()-1);
+                        String solvedSonarIssueKeys = solvedSonarIssueKeysStringBuilder.toString().substring(0, solvedSonarIssueKeysStringBuilder.toString().length() - 1);
 
 
                         //获取sonar相应issue key的 issue信息
-                        JSONObject sonarSolvedIssues = restInterfaceManager.getSonarIssueResultsBySonarIssueKey(solvedSonarIssueKeys,0);
-                        realResolvedIssueCounts +=sonarSolvedIssues.getIntValue("total");
+                        JSONObject sonarSolvedIssues = restInterfaceManager.getSonarIssueResultsBySonarIssueKey(solvedSonarIssueKeys, 0);
+                        realResolvedIssueCounts += sonarSolvedIssues.getIntValue("total");
 
-                        if(sonarSolvedIssues.getIntValue("total") != solvedSonarIssueKeys.split(",").length){
-                            logger.error("sonar issue keys --> {}  ,db result is not equal to sonar db ",solvedSonarIssueKeys );
+                        if (sonarSolvedIssues.getIntValue("total") != solvedSonarIssueKeys.split(",").length) {
+                            int total = sonarSolvedIssues.getIntValue("total");
+                            logger.error("sonar issue keys --> {}  ,db result is not equal to sonar db ,sonar total is {}", solvedSonarIssueKeys,total);
                         }
 
+                        List<Issue> correspondingIssues = issueDao.getIssuesByIssueIds(issueIds);
                         JSONArray solvedSonarIssues = sonarSolvedIssues.getJSONArray("issues");
-                        for(Issue solvedIssue:
-                                solvedIssues){
-                            for(int k=0;k<solvedSonarIssues.size();k++){
+                        for(Issue solvedIssue : correspondingIssues){
+                            for (int k = 0; k < solvedSonarIssues.size(); k++) {
                                 JSONObject solvedSonarIssue = solvedSonarIssues.getJSONObject(k);
                                 if(solvedIssue.getSonar_issue_id().equals(solvedSonarIssue.getString("key"))){
-//                                    String rawIssueUUID = UUID.randomUUID().toString();
-//                                    String issueUUID = solvedIssue.getUuid();
-//                                    //将改issue的所有location直接表中
-//                                    insertLocations(rawIssueUUID,solvedSonarIssue,repoPath);
-//                                    //获取rawIssue
-//                                    RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,issueUUID,solvedSonarIssue);
-//                                    insertRawIssues.add(rawIssue);
-                                    //此处后面更改为请求bugRecommendation接口
-                                    //更新issue状态
-
                                     solvedIssue.setStatus(solvedSonarIssue.getString("status"));
                                     solvedIssue.setResolution(solvedSonarIssue.getString("resolution"));
                                     break;
                                 }
-
                             }
+                            if(!"CLOSED".equals(solvedIssue.getStatus()) || solvedIssue.getResolution()==null || solvedIssue.getResolution().isEmpty()){
+                                solvedIssue.setStatus("NON-MATCHED");
+                            }
+                            solvedIssue.setUpdate_time(new Date());
 
+                            updateIssueList.add(solvedIssue);
                         }
 
                     }
-                    for(Issue solvedIssue:
-                            solvedIssues){
-                        //如果没有匹配上则将status 置为 NON-MATCHED
-                        if(!"CLOSED".equals(solvedIssue.getStatus()) || solvedIssue.getResolution()==null || solvedIssue.getResolution().isEmpty()){
-                            solvedIssue.setStatus("NON-MATCHED");
-                        }
-                        //暂时先不加入修改priority，考虑到sonar跟本地修改priority的冲突
-                        //目前是以缺陷出现的最后一个commit作为end_commit
-//                        solvedIssue.setEnd_commit(current_commit_id);
-//                        solvedIssue.setEnd_commit_date(commitDate);
-                        solvedIssue.setUpdate_time(new Date());
 
-                        updateIssueList.add(solvedIssue);
-                    }
+
+
+
+
+
+//                        for(Issue solvedIssue:
+//                                solvedIssues){
+//                            for(int k=0;k<solvedSonarIssues.size();k++){
+//                                JSONObject solvedSonarIssue = solvedSonarIssues.getJSONObject(k);
+//                                if(solvedIssue.getSonar_issue_id().equals(solvedSonarIssue.getString("key"))){
+////                                    String rawIssueUUID = UUID.randomUUID().toString();
+////                                    String issueUUID = solvedIssue.getUuid();
+////                                    //将改issue的所有location直接表中
+////                                    insertLocations(rawIssueUUID,solvedSonarIssue,repoPath);
+////                                    //获取rawIssue
+////                                    RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,issueUUID,solvedSonarIssue);
+////                                    insertRawIssues.add(rawIssue);
+//                                    //此处后面更改为请求bugRecommendation接口
+//                                    //更新issue状态
+//
+//                                    solvedIssue.setStatus(solvedSonarIssue.getString("status"));
+//                                    solvedIssue.setResolution(solvedSonarIssue.getString("resolution"));
+//                                    break;
+//                                }
+//
+//                            }
+//
+//                        }
+//
+//                    }
+//                    for(Issue solvedIssue:
+//                            solvedIssues){
+//                        //如果没有匹配上则将status 置为 NON-MATCHED
+//                        if(!"CLOSED".equals(solvedIssue.getStatus()) || solvedIssue.getResolution()==null || solvedIssue.getResolution().isEmpty()){
+//                            solvedIssue.setStatus("NON-MATCHED");
+//                        }
+//                        //暂时先不加入修改priority，考虑到sonar跟本地修改priority的冲突
+//                        //目前是以缺陷出现的最后一个commit作为end_commit
+////                        solvedIssue.setEnd_commit(current_commit_id);
+////                        solvedIssue.setEnd_commit_date(commitDate);
+//                        solvedIssue.setUpdate_time(new Date());
+//
+//                        updateIssueList.add(solvedIssue);
+//                    }
 
 
 

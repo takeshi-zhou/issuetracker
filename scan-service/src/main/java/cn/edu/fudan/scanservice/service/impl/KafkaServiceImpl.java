@@ -71,7 +71,7 @@ public class KafkaServiceImpl implements KafkaService {
     private CommitFilterStrategy<ScanMessageWithTime> commitFilter;
 
     @Autowired
-    @Qualifier("RASWS")
+    @Qualifier("EVERYDAY")
     public void setCommitFilter(CommitFilterStrategy<ScanMessageWithTime> commitFilter) {
         this.commitFilter = commitFilter;
     }

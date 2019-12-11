@@ -138,4 +138,8 @@ public class IssueDao {
     public Issue getIssueBySonarIssueKey(String sonarIssueId) {
         return issueMapper.getIssueBySonarIssueKey(sonarIssueId);
     }
+
+    public List<Issue> getIssuesByIssueIds(List<String> issueIds) {
+        return issueMapper.getIssuesByIssueIds(issueIds);
+    }
 }

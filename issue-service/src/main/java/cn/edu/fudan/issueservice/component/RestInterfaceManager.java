@@ -333,8 +333,6 @@ public class RestInterfaceManager {
     public JSONObject getSonarSourceLines(String componentKey,int from,int to){
         if(to<from){
             logger.error("lines {} can not greater {} ",from,to);
-        }else if(to==from){
-            to=from+1;
         }
         Map<String, String> map = new HashMap<>();
 
@@ -347,7 +345,7 @@ public class RestInterfaceManager {
             return JSONObject.parseObject(entity.getBody().toString());
         }catch (RuntimeException e){
             logger.error("componentKey : {}  ----> request sonar  source Lines  api failed , from --> {} , to --> {}", componentKey,from,to);
-            throw e;
+            return null;
         }
 
 

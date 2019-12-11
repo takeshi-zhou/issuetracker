@@ -443,4 +443,13 @@
         from issue
         where sonar_issue_id = binary(#{sonar_issue_id})
     </select>
+
+
+    <select id="getIssuesByIssueIds" parameterType="List" resultMap="issue4">
+        SELECT * FROM issue
+        WHERE uuid IN
+        <foreach collection="list" item="issue_id"  open="(" close=")" separator=",">
+            #{issue_id}
+        </foreach>
+    </select>
 </mapper>

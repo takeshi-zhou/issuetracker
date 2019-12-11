@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author WZY
  * @version 1.0
@@ -84,6 +86,7 @@ public class BaseScanTask {
             restInterfaceManager.freeRepoPath(scanInitialInfo.getRepoId(),scanInitialInfo.getRepoPath());
             return;
         }
+
         logger.info("scan complete ->" + scanResult.getDescription());
         logger.info("start to mapping ......");
         if (!scanOperation.mapping(repoId, commitId,category)) {

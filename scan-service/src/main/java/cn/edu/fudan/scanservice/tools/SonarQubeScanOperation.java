@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 @Component("sonar")
 public class SonarQubeScanOperation extends ScanOperationAdapter  {
 
@@ -59,6 +61,13 @@ public class SonarQubeScanOperation extends ScanOperationAdapter  {
             return new ScanResult("Sonar","failed", "analyze failed");
         }
         logger.info("sonar analyze complete");
+        logger.info("need to wait for the update of data...");
+        try {
+            TimeUnit.SECONDS.sleep( 30 );
+        } catch (InterruptedException e) {
+            logger.error("Thread error when execute  sonar scan ");
+
+        }
         return new ScanResult("Sonar","success", "Scan Success!");
     }
 

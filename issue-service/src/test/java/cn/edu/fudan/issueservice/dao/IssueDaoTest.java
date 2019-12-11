@@ -52,4 +52,15 @@ public class IssueDaoTest extends IssueServiceApplicationTests {
         List<Issue> issues = issueMapper.getSonarIssueByRepoId(repoId, category);
         System.out.println(1+1);
     }
+
+    @Test
+    public void getIssuesByIssueIds() {
+        List<String> issueIds = new ArrayList<>();
+        issueIds.add("000fb38a-1df0-4837-95c4-522febd6f22a");
+        issueIds.add("001283d7-9e47-4818-aaf7-c1d5be6f0257");
+        String category = Scanner.SONAR.getType();
+        List<Issue> issues = issueMapper.getIssuesByIssueIds(issueIds);
+        System.out.println(1+1);
+    }
+
 }
