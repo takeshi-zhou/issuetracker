@@ -267,7 +267,7 @@ public class RestInterfaceManager {
         String url = urlBuilder.toString();
 
         try {
-            ResponseEntity entity = restTemplate.getForEntity(url,JSONObject.class,map);
+            ResponseEntity entity = restTemplate.getForEntity(url, JSONObject.class,map);
             JSONObject result  = JSONObject.parseObject(entity.getBody().toString());
             return result;
 
