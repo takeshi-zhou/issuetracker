@@ -1,6 +1,6 @@
 package cn.edu.fudan.scanservice.tools;
 
-import cn.edu.fudan.scanservice.component.RestInterfaceManager;
+import cn.edu.fudan.scanservice.component.rest.RestInterfaceManager;
 import cn.edu.fudan.scanservice.dao.ScanDao;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.domain.ScanInitialInfo;

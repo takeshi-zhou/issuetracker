@@ -1,7 +1,6 @@
-package cn.edu.fudan.scanservice.component;
+package cn.edu.fudan.scanservice.component.strategy;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 
 public class ScanIntervalForStrategy {

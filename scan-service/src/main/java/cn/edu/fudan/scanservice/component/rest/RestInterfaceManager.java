@@ -1,4 +1,4 @@
-package cn.edu.fudan.scanservice.component;
+package cn.edu.fudan.scanservice.component.rest;
 
 import cn.edu.fudan.scanservice.exception.AuthException;
 import com.alibaba.fastjson.JSONArray;
@@ -70,8 +70,42 @@ public class RestInterfaceManager {
     }
 
     public JSONObject getCommitsOfRepo(String repoId, Integer page, Integer size) {
+        String url = commitServicePath + "?repo_id=" + repoId;
+        if(page != null ){
+            if(size != null){
+                if(size<=0 || page<=0){
+                    logger.error("page size or page is not correct . page size --> {},page --> {}",size,page);
+                    return null;
+                }
+                url += "&per_page="+size;
+            }
+            url += "&page="+page;
+        }
+
         return restTemplate.getForObject(commitServicePath + "?repo_id=" + repoId + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class);
     }
+
+    public JSONObject getCommitsOfRepoByConditions(String repoId, Integer page, Integer pageSize,Boolean isWhole) {
+
+        String url = commitServicePath + "?repo_id=" + repoId;
+        if(page != null ){
+            if(pageSize != null){
+                if(pageSize<=0 || page<=0){
+                    logger.error("page size or page is not correct . page size --> {},page --> {}",pageSize,page);
+                    return null;
+                }
+                url += "&per_page=" + pageSize;
+            }
+            url += "&page=" + page;
+        }
+
+        if(isWhole != null){
+            url += "&is_whole=" + isWhole ;
+        }
+        return restTemplate.getForObject(url, JSONObject.class);
+
+    }
+
 
     //-----------------------------------repo service--------------------------------------------------------
     public JSONObject getRepoById(String repoId) {

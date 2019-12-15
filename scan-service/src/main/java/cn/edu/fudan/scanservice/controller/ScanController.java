@@ -71,54 +71,5 @@ public class ScanController {
         }
     }
 
-    //下面都是供其它服务调用的内部接口
 
-    @DeleteMapping(value = {"/inner/scan/{category}/{repoId}"})
-    public Object deleteScans(@PathVariable("category")String category,@PathVariable("repoId") String repoId) {
-        try {
-            scanService.deleteScanByRepoIdAndCategory(repoId,category);
-            return new ResponseBean(200, "scan delete success!", null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseBean(401, "scan delete failed", null);
-        }
-    }
-
-    @PutMapping(value = {"/inner/scan"})
-    public Object updateScan(@RequestBody Scan scan) {
-        try {
-            scanService.updateOneScan(scan);
-            return new ResponseBean(200, "scan update success!", null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseBean(401, "scan update failed", null);
-        }
-    }
-
-    @PostMapping(value = {"/inner/scan"})
-    public Object addOneScan(@RequestBody Scan scan){
-        try {
-            scanService.insertOneScan(scan);
-            return new ResponseBean(200, "scan add success!", null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseBean(401, "scan add failed", null);
-        }
-    }
-
-    @GetMapping(value = {"/inner/scan/commits"})
-    public Object getScannedCommits(@RequestParam("repo_id") String repo_id,@RequestParam("category")String category) {
-        return scanService.getScannedCommits(repo_id,category);
-    }
-
-    @GetMapping(value = "inner/scan/last-commit")
-    public String getLatestScannedCommitId(@RequestParam("repo_id") String repo_id,@RequestParam("category")String category){
-        return scanService.getLatestScannedCommitId(repo_id, category);
-    }
-
-
-    @GetMapping(value = "/inner/scan/commit")
-    public Object getScanByCategoryAndRepoIdAndCommitId(@RequestParam("repo_id") String repo_id,@RequestParam("category")String category,@RequestParam("commit_id")String commit_id){
-        return scanService.getScanByCategoryAndRepoIdAndCommitId(repo_id, category,commit_id);
-    }
 }

@@ -1,4 +1,4 @@
-package cn.edu.fudan.scanservice.component;
+package cn.edu.fudan.scanservice.component.strategy;
 
 import java.time.LocalDate;
 import java.util.List;

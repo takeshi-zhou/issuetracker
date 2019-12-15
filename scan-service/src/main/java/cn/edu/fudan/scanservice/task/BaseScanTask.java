@@ -1,6 +1,6 @@
 package cn.edu.fudan.scanservice.task;
 
-import cn.edu.fudan.scanservice.component.RestInterfaceManager;
+import cn.edu.fudan.scanservice.component.rest.RestInterfaceManager;
 import cn.edu.fudan.scanservice.domain.ScanInitialInfo;
 import cn.edu.fudan.scanservice.domain.ScanResult;
 import cn.edu.fudan.scanservice.lock.RedisLuaLock;
@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author WZY

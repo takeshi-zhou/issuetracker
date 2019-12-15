@@ -1,6 +1,8 @@
-package cn.edu.fudan.scanservice.component;
+package cn.edu.fudan.scanservice.component.strategy.impl;
 import	java.util.Comparator;
 
+import cn.edu.fudan.scanservice.component.strategy.ScanIntervalForStrategy;
+import cn.edu.fudan.scanservice.component.strategy.CommitFilterStrategy;
 import cn.edu.fudan.scanservice.domain.ScanMessageWithTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ public class RecentAllThenSkipWeekStrategy implements CommitFilterStrategy<ScanM
     @Override
     public List<ScanMessageWithTime> filter(Map<LocalDate, List<ScanMessageWithTime>> map, List<LocalDate> dates) {
         int sourceSize=dates.size();
+
         ScanIntervalForStrategy.setInterval(11);
         LocalDate nextTimeLimit=dates.get(sourceSize-1).minusMonths(ScanIntervalForStrategy.getInterval());
         LinkedList<ScanMessageWithTime> result=new LinkedList<>();

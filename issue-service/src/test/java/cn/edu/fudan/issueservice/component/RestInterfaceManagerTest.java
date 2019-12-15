@@ -73,7 +73,7 @@ public class RestInterfaceManagerTest extends IssueServiceApplicationTests {
 
     @Test
     public void getSonarSourceLines() {
-        JSONObject result =restInterfaceManager.getSonarSourceLines("issueTrackerScannerTest:issue-service/src/main/java/cn/edu/fudan/issueservice/component/RestInterfaceManager.java",144,144);
+        JSONObject result =restInterfaceManager.getSonarSourceLines("scala-maven-plugin-master:src/main/java/org/scala_tools/maven/executions/ReflectionJavaMainCaller.java",74,74);
         int  a=1;
         a= a+1;
         System.out.println(a);

@@ -339,6 +339,7 @@ public class RestInterfaceManager {
             ResponseEntity entity = restTemplate.getForEntity(baseRequestUrl,JSONObject.class,map);
             return JSONObject.parseObject(entity.getBody().toString());
         }catch (RuntimeException e){
+            e.printStackTrace();
             logger.error("componentKey : {}  ----> request sonar  source Lines  api failed , from --> {} , to --> {}", componentKey,from,to);
             return null;
         }

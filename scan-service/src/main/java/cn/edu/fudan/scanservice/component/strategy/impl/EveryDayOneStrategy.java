@@ -1,5 +1,6 @@
-package cn.edu.fudan.scanservice.component;
+package cn.edu.fudan.scanservice.component.strategy.impl;
 
+import cn.edu.fudan.scanservice.component.strategy.CommitFilterStrategy;
 import cn.edu.fudan.scanservice.domain.ScanMessageWithTime;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component("EVERYDAY")
-public class EveryDayOneStrategy implements  CommitFilterStrategy<ScanMessageWithTime>{
+public class EveryDayOneStrategy implements CommitFilterStrategy<ScanMessageWithTime> {
 
 
     @Override

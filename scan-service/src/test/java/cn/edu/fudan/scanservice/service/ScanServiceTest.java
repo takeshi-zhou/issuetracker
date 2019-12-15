@@ -1,7 +1,7 @@
 package cn.edu.fudan.scanservice.service;
 
 import cn.edu.fudan.scanservice.ScanServiceApplicationTests;
-import cn.edu.fudan.scanservice.component.RestInterfaceManager;
+import cn.edu.fudan.scanservice.component.rest.RestInterfaceManager;
 import cn.edu.fudan.scanservice.dao.ScanDao;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.service.impl.ScanServiceImpl;
@@ -19,8 +19,6 @@ import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 

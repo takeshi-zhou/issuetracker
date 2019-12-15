@@ -1,5 +1,6 @@
-package cn.edu.fudan.scanservice.component;
+package cn.edu.fudan.scanservice.component.strategy.impl;
 
+import cn.edu.fudan.scanservice.component.strategy.CommitFilterStrategy;
 import cn.edu.fudan.scanservice.domain.ScanMessageWithTime;
 import org.springframework.stereotype.Component;
 

@@ -1,9 +1,8 @@
 package cn.edu.fudan.scanservice.service.impl;
-import	java.rmi.server.Operation;
 
 
-import cn.edu.fudan.scanservice.component.CommitFilterStrategy;
-import cn.edu.fudan.scanservice.component.RestInterfaceManager;
+import cn.edu.fudan.scanservice.component.strategy.CommitFilterStrategy;
+import cn.edu.fudan.scanservice.component.rest.RestInterfaceManager;
 import cn.edu.fudan.scanservice.dao.ScanDao;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.domain.ScanMessage;
@@ -176,7 +175,7 @@ public class KafkaServiceImpl implements KafkaService {
         //串行扫
         if(existProject(repoId,"bug",false)){
             findBugScanTask.runSynchronously(repoId, commitId,"bug");
-             sendMessageToMeasure(repoId,list);
+            sendMessageToMeasure(repoId,list);
         }
         if(existProject(repoId,"clone",false)){
             cloneScanTask.runSynchronously(repoId,commitId,"clone");
