@@ -69,10 +69,6 @@ public class RestInterfaceManager {
 
     //------------------------------------bug-recommendation service-------------------------------------------
 
-    public void deleteBugRecommendationOfRepo(String repoId){
-        restTemplate.delete(bugRecommendationServicePath + "/inner/bugRecommendation/" +repoId);
-    }
-
     //-------------------------------scan service--------------------------------------------------------------
     public void deleteScanOfRepo(String repoId,String category){
         restTemplate.delete(scanServicePath+"/inner/scan/" +category+"/"+ repoId);

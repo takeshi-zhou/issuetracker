@@ -61,13 +61,14 @@ public class RecentAllStrategy implements CommitFilterStrategy<ScanMessageWithTi
         }
 
         int i=0;
-        boolean isRecent=false;
+        boolean isRecent=true;
         while(i<sourceSize){
             LocalDate date=dates.get(sourceSize-1-i);
-            if(isRecent || date.isAfter(nextTimeLimit)){
+            if(isRecent && date.isAfter(nextTimeLimit)){
                 List<ScanMessageWithTime> list=map.get(date);
                 result = addAllListIntoFirst(result,list);
-                isRecent= true;
+            }else{
+                isRecent=false;
             }
 
             i++;

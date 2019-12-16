@@ -244,7 +244,7 @@ public class MeasureServiceImpl implements MeasureService {
         repoMeasure.setRepo_id(repoId);
         repoMeasure.setDeveloper_name(developerName);
         repoMeasure.setDeveloper_email(developerEmail);
-        CommitBase commitBase = getCommitBaseInformation(repoId,commitId);
+        CommitBase commitBase = getCommitBaseInformationByCLI(repoId,commitId);
         repoMeasure.setAdd_lines(commitBase.getAddLines());
         repoMeasure.setDel_lines(commitBase.getDelLines());
         if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
@@ -442,6 +442,30 @@ public class MeasureServiceImpl implements MeasureService {
 
         CommitBase commitBase = repoMeasureMapper.getCommitBaseInformation(repo_id,commit_id);
 
+        return commitBase;
+    }
+
+    /**
+     * 通过命令行获取指定commit增加和删除的行数
+     * @param repo_id
+     * @param commit_id
+     * @return
+     */
+    private CommitBase getCommitBaseInformationByCLI(String repo_id, String commit_id) {
+
+        String repoPath=null;
+        CommitBase commitBase = null;
+        try{
+            repoPath=restInterfaceManager.getRepoPath(repo_id,"");
+            if(repoPath!=null){
+                commitBase = gitUtil.getOneCommitChanges(repoPath,commit_id);
+            }
+        }finally {
+            if(repoPath!=null){
+                restInterfaceManager.freeRepoPath(repo_id,repoPath);
+            }
+
+        }
         return commitBase;
     }
 

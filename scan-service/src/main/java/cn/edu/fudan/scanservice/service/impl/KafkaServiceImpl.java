@@ -70,7 +70,7 @@ public class KafkaServiceImpl implements KafkaService {
     private CommitFilterStrategy<ScanMessageWithTime> commitFilter;
 
     @Autowired
-    @Qualifier("EVERYDAY")
+    @Qualifier("RAS")
     public void setCommitFilter(CommitFilterStrategy<ScanMessageWithTime> commitFilter) {
         this.commitFilter = commitFilter;
     }
@@ -231,6 +231,9 @@ public class KafkaServiceImpl implements KafkaService {
             e.printStackTrace();
         }
         List<ScanMessageWithTime> filteredCommits=commitFilter.filter(map,dates);
+        if(filteredCommits.isEmpty()){
+            return ;
+        }
         String repoId=filteredCommits.get(0).getRepoId();
         logger.info("{} need to auto scan!",repoId);
         logger.info(filteredCommits.size()+" commits need to scan after filtered!");

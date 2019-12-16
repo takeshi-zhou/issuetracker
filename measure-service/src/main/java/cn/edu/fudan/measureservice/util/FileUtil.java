@@ -23,6 +23,7 @@ public class FileUtil {
             BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(process.getInputStream()));
             return Integer.valueOf(bufferedReader.readLine());
         }catch (Exception e){
+            e.printStackTrace();
             log.error(e.getMessage());
         }
         return 0;

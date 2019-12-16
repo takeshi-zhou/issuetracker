@@ -34,4 +34,11 @@ public class RestInterfaceManagerTest extends ScanServiceApplicationTests {
         JSONObject result = restInterfaceManager.getCommitsOfRepo("fe5ed888-6a82-11e9-ad13-e9d58090e871",1,1);
         System.out.println("success");
     }
+
+
+    @Test
+    public void getRepoPath() {
+        String result = restInterfaceManager.getRepoPath("bc62ad1a-14d7-11ea-9635-3d7444b06c34","aad48b73e22f8fe4b8222a5686a2b39344f1db55");
+        System.out.println("result");
+    }
 }
