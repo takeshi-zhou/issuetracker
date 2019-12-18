@@ -120,7 +120,12 @@
     <select id="getCommitInfoDeveloperListByDuration" resultMap="CommitInfoDeveloperListByDuration">
         select
             developer_name,developer_email,SUM(add_lines) as sumAdd, SUM(del_lines) as sumDel, COUNT(*) as commit_counts
-        from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until}
+        from repo_measure
+        where
+         repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until}
+        <if test="developer_name != null and developer_name != ''" >
+            and developer_name = #{developer_name}
+        </if>
         GROUP BY developer_name
     </select>
 

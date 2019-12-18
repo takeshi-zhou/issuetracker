@@ -85,14 +85,16 @@ public interface MeasureService {
      * @param until 终止时间
      * @return repo的一段时间代码变化信息以及提交者的信息
      */
-    CommitBaseInfoDuration getCommitBaseInformationByDuration(String repo_id,String since,String until);
+    CommitBaseInfoDuration getCommitBaseInformationByDuration(String repo_id,String since,String until, String developer_name);
+
+
 
     /**
      * 获取一个项目每个月的commitBaseInfo
      * @param repo_id repo的唯一标识
      * @return 一个repo每月的代码变化信息以及提交者的信息
      */
-    List<CommitBaseInfoMonthly> getCommitBaseInfoMonthly(String repo_id);
+    List<CommitBaseInfoGranularity> getCommitBaseInfoGranularity(String repo_id, String granularity, String since, String until, String developer_name);
 
     /**
      * 获取一个项目在指定一段时间内提交次数
