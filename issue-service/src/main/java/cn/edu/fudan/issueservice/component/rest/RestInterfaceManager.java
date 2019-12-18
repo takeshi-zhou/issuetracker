@@ -13,8 +13,6 @@ import java.lang.reflect.Method;
  * @author WZY
  * @version 1.0
  **/
-@Component
-@Slf4j
 public class RestInterfaceManager {
 
     private RestTemplate restTemplate;

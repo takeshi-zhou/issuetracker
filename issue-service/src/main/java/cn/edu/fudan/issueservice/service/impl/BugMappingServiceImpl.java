@@ -142,10 +142,16 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             logger.info("issue update success!");
         }
         //在匹配的issue中上次commit被ignore的个数
-        int ignoredCountInMappedIssues=mappedIssueIds.isEmpty()?0:issueDao.getIgnoredCountInMappedIssues(ignoreTagId,mappedIssueIds);
-        int eliminatedIssueCount = preRawIssues.size() - equalsCount+ignoreCountInNewIssues+ignoredCountInMappedIssues;
-        int remainingIssueCount = currentRawIssues.size()-ignoreCountInNewIssues-ignoredCountInMappedIssues;
-        int newIssueCount = currentRawIssues.size() - equalsCount-ignoreCountInNewIssues;
+        //原先的计算方式，存在问题
+//        int ignoredCountInMappedIssues=mappedIssueIds.isEmpty()?0:issueDao.getIgnoredCountInMappedIssues(ignoreTagId,mappedIssueIds);
+//        int eliminatedIssueCount = preRawIssues.size() - equalsCount+ignoreCountInNewIssues+ignoredCountInMappedIssues;
+//        int remainingIssueCount = currentRawIssues.size()-ignoreCountInNewIssues-ignoredCountInMappedIssues;
+//        int newIssueCount = currentRawIssues.size() - equalsCount-ignoreCountInNewIssues;
+
+
+        int eliminatedIssueCount = preRawIssues.size() - (currentRawIssues.size()  - insertIssueList.size()) ;
+        int remainingIssueCount = currentRawIssues.size();
+        int newIssueCount = insertIssueList.size();
         logger.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount, remainingIssueCount, eliminatedIssueCount);
         dashboardUpdate(repoId, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
         logger.info("dashboard info updated!");

@@ -26,6 +26,17 @@
         <result property="eliminatedIssueCount" column="eliminated_count"/>
     </resultMap>
 
+    <resultMap id="scanResultForQuality" type="scanResult">
+        <id property="id" column="id"/>
+        <result property="category" column="category"/>
+        <result property="repo_id" column="repo_id"/>
+        <result property="commit_date" column="commit_date"/>
+        <result property="developer" column="developer"/>
+        <result property="new_count" column="new_count"/>
+        <result property="eliminated_count" column="eliminated_count"/>
+        <result property="remaining_count" column="remaining_count"/>
+    </resultMap>
+
 
     <insert id="addOneScanResult" parameterType="ScanResult">
         insert into scan_result
@@ -152,5 +163,23 @@
     <select id="getEliminateIssueCountByCommit" resultType="Integer">
         select eliminated_count from scan_result
         where repo_id = #{repo_id} and category = #{category} and commit_id = #{commit_id}
+    </select>
+
+    <select id="getScanResultByCondition" resultMap="scanResultForQuality">
+        select * from scan_result
+        where repo_id = #{repo_id}
+        <if test="category != null">
+            and category = #{category}
+        </if>
+        <if test="since != null">
+            and <![CDATA[ commit_date >= #{since} ]]>
+        </if>
+        <if test="until != null">
+            and <![CDATA[ commit_date <= #{until} ]]>
+        </if>
+        <if test="developer != null">
+            and developer = #{developer}
+        </if>
+
     </select>
 </mapper>

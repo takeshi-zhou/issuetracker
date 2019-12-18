@@ -144,9 +144,10 @@ public interface MeasureService {
      * @param until 提交的终止时间
      * @param token 用户token
      * @param category 工具类别
+     * @param repoId repo唯一ID
      * @return 开发者在一段时间内代码变化信息
      */
-    CommitBase getCodeChangesByDurationAndDeveloperName(String developer_name,String since,String until,String token,String category);
+    Object getCodeChangesByDurationAndDeveloperName(String developer_name,String since,String until,String token,String category,String repoId);
 
     /**
      * 获取在issueTracker用户下，所有项目中某个开发者在一段时间内的代码提交次数
@@ -181,4 +182,6 @@ public interface MeasureService {
     Object getQualityChangesByDeveloperName(String developer_name,String token,String category,int counts,String project_name );
 
 
+
+    Object InsertData(String repoId);
 }

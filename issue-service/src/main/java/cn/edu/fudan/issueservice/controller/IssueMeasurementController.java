@@ -8,12 +8,10 @@ package cn.edu.fudan.issueservice.controller;
 import cn.edu.fudan.issueservice.domain.ResponseBean;
 import cn.edu.fudan.issueservice.service.IssueMeasureInfoService;
 import cn.edu.fudan.issueservice.service.IssueRankService;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
@@ -38,6 +36,30 @@ public class IssueMeasurementController {
     /**
      * quantity
      * */
+
+
+    @GetMapping(value = {"/measurement/code-quality"})
+    public Object getCodeQuality(@RequestParam(value = "developer",required = false) String developer,
+                                 @RequestParam(value = "timeGranularity", required = false) String timeGranularity,
+                                 @RequestParam(value = "since",required = false) String since,
+                                 @RequestParam(value = "until",required = false) String until,
+                                 @RequestParam(value = "repoId") String repoId,
+                                 @RequestParam(value = "tool",required = false) String tool,
+                                 @RequestParam(value = "page",required = false,defaultValue = "0") int page,
+                                 @RequestParam(value = "ps",required = false,defaultValue = "0") int ps) {
+        try {
+            return new ResponseBean(200, "success!", issueMeasureInfoService.getQualityChangesByCondition(developer,timeGranularity,since,until,repoId,tool,page,ps) );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "failed!", e.getMessage());
+        }
+    }
+
+
+
+
+
+
     // spaceType : developer project file package
     //detail : developerId fileName packageName
     @GetMapping(value = {"/measurement/remainingIssue/{repoId}/{commit}"})
@@ -111,6 +133,8 @@ public class IssueMeasurementController {
             return new ResponseBean(401, "failed!", Collections.emptyList());
         }
     }
+
+
 
 
     /**

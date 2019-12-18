@@ -250,15 +250,16 @@ public class MeasureController {
     @GetMapping("/measure/developer/code-change")
     @CrossOrigin
     public ResponseBean getCodeChangesByDurationAndDeveloperName(
-                                                                 @RequestParam("developer_name")String developer_name,
-                                                                 @RequestParam("since")String since,
-                                                                 @RequestParam("until")String until,
-                                                                 @RequestParam("category")String category,
+                                                                 @RequestParam(value="developer_name", required = false)String developer_name,
+                                                                 @RequestParam(value="since",required = false)String since,
+                                                                 @RequestParam(value="until",required = false)String until,
+                                                                 @RequestParam(value="category",required = false)String category,
+                                                                 @RequestParam(value ="repo_id" ,required = false)String repoId,
                                                                  HttpServletRequest request
     ){
         try{
             String token = request.getHeader("token");
-            return new ResponseBean(200,"success",measureService.getCodeChangesByDurationAndDeveloperName(developer_name,since,until,token,category));
+            return new ResponseBean(200,"success",measureService.getCodeChangesByDurationAndDeveloperName(developer_name,since,until,token,category,repoId));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",null);
@@ -312,6 +313,19 @@ public class MeasureController {
         try{
             String token = request.getHeader("token");
             return new ResponseBean(200,"success",measureService.getQualityChangesByDeveloperName(developerName,token,category,counts,projectName));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+    @GetMapping("/measure/commit")
+    @CrossOrigin
+    public ResponseBean insertCommitsRepoMeasure(
+            @RequestParam("repo_id")String repoId
+    ){
+        try{
+            return new ResponseBean(200,"success",measureService.InsertData(repoId));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());
