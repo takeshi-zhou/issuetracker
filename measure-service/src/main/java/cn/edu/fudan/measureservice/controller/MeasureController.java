@@ -126,7 +126,7 @@ public class MeasureController {
 //    }
 
     //按照不同时间段（since、until），不同聚合粒度（granularity：天/周/月），不同开发者（developerName），获取工作量数据
-    @GetMapping("/measure/repository/commitBaseInfo-monthly")
+    @GetMapping("/measure/repository/commitBaseInfo-granularity")
     @CrossOrigin
     public ResponseBean getCommitBaseInfoGranularity(@RequestParam("repo_id")String repo_id,
                                                  @RequestParam(name = "granularity",required = false, defaultValue = "week")String granularity,
