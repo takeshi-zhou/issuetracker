@@ -96,4 +96,13 @@ public class ScanResultDao {
             return -1;
         }
     }
+
+    public List<ScanResult> getScanResultByCondition( String repoId, String since, String until, String category, String developer){
+        try{
+            return scanResultMapper.getScanResultByCondition(repoId, since,until,category,developer);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            return null;
+        }
+    }
 }

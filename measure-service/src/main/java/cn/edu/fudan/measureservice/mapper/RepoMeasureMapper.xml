@@ -58,6 +58,18 @@
         <result property="del" column="sumDel"/>
     </resultMap>
 
+
+    <resultMap id="Commit" type="Commit">
+        <id property="uuid" column="uuid"/>
+        <result property="commit_id" column="commit_id"/>
+        <result property="message" column="message"/>
+        <result property="developer" column="developer"/>
+        <result property="commit_time" column="commit_time"/>
+        <result property="repo_id" column="repo_id"/>
+        <result property="developer_email" column="developer_email"/>
+        <result property="self_index" column="self_index"/>
+    </resultMap>
+
     <insert id="insertOneRepoMeasure" >
         insert into repo_measure
             (
@@ -176,7 +188,7 @@
     </delete>
 
 
-    <select id="getRepoMeasureByDeveloperAndRepoId" parameterType="String" resultMap="repoMeasureWithDate">
+    <select id="getRepoMeasureByDeveloperAndRepoId"  resultMap="repoMeasureWithDate">
         select
             uuid,files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines,commit_id,commit_time,repo_id,developer_name,developer_email,add_lines,del_lines
         from
@@ -190,6 +202,14 @@
                 <if test="repo_id != null and repo_id != '' ">
                     and repo_id = #{repo_id}
                 </if>
+
+                <if test="since != null and since != '' ">
+                    and <![CDATA[ commit_time >= #{since} ]]>
+                </if>
+
+                <if test="until != null and until != '' ">
+                    and <![CDATA[ commit_time <= #{until} ]]>
+                </if>
             </trim>
         </where>
         group by commit_id
@@ -197,5 +217,9 @@
         <if test="counts != 0 ">
             limit #{counts}
         </if>
+    </select>
+
+    <select id="getCommits" parameterType="String" resultMap="Commit">
+        select * from commit where repo_id= #{repo_id} order by commit_time desc limit 0,58;
     </select>
 </mapper>

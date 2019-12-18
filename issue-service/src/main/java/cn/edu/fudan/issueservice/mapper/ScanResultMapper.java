@@ -26,4 +26,6 @@ public interface ScanResultMapper {
     int getNewIssueCountByCommit(@Param("repo_id") String repo_id,@Param("commit_id") String commit_id,@Param("category") String category);
 
     int getEliminateIssueCountByCommit(@Param("repo_id") String repo_id,@Param("commit_id") String commit_id,@Param("category") String category);
+
+    List<ScanResult> getScanResultByCondition(@Param("repo_id") String repoId,@Param("since") String since,@Param("until") String until,@Param("category") String category,@Param("developer") String developer);
 }

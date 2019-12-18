@@ -4,6 +4,7 @@ import cn.edu.fudan.measureservice.analyzer.MeasureAnalyzer;
 import cn.edu.fudan.measureservice.component.RestInterfaceManager;
 import cn.edu.fudan.measureservice.domain.*;
 import cn.edu.fudan.measureservice.domain.Package;
+import cn.edu.fudan.measureservice.domain.test.Commit;
 import cn.edu.fudan.measureservice.handler.ResultHandler;
 import cn.edu.fudan.measureservice.mapper.PackageMeasureMapper;
 import cn.edu.fudan.measureservice.mapper.RepoMeasureMapper;
@@ -161,7 +162,7 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     //保存某个项目某个commit的度量信息
-    private void saveMeasureData(String repoId, String commitId,String commitTime,String developerName,String developerEmail) {
+    public void saveMeasureData(String repoId, String commitId,String commitTime,String developerName,String developerEmail) {
         try{
             Measure measure=getMeasureDataOfOneCommit(repoId,commitId);
             saveRepoLevelMeasureData(measure,repoId,commitId,commitTime,developerName,developerEmail);
@@ -675,36 +676,54 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     @Override
-    public CommitBase getCodeChangesByDurationAndDeveloperName(String developer_name, String since, String until, String token, String category) {
+    public Object getCodeChangesByDurationAndDeveloperName(String developer_name, String since, String until, String token, String category,String repoId) {
         String repoPath=null;
         int[] lineChanges ;
         CommitBase commitBase = new CommitBase();
         int lineAdds = 0;
         int lineDels = 0;
-        List<JSONObject> projectList = restInterfaceManager.getProjectListByCategory(token,category);
-        for(Object project:projectList){
-            JSONObject protectJson = (JSONObject)project;
-            if(protectJson.get("download_status").toString().equals("Downloading")){
-                continue;
+        if(repoId == null || repoId.isEmpty()){
+            if(category == null || category.isEmpty()){
+                return " The category should not be null when  repo id is null";
             }
-            String repo_id = protectJson.get("repo_id").toString();
-            try{
-                repoPath=restInterfaceManager.getRepoPath(repo_id,"");
-                if(repoPath!=null){
-
-                    //获取repo一段时间内行数变化值
-                    lineChanges = gitUtil.getRepoLineChanges(repoPath,since,until,developer_name);
-                    lineAdds += lineChanges[0];
-                    lineDels += lineChanges[1];
-
+            List<JSONObject> projectList = restInterfaceManager.getProjectListByCategory(token,category);
+            for(Object project:projectList){
+                JSONObject protectJson = (JSONObject)project;
+                if(protectJson.get("download_status").toString().equals("Downloading")){
+                    continue;
                 }
-            }finally {
-                if(repoPath!=null) {
-                    restInterfaceManager.freeRepoPath(repo_id,repoPath);
+                String eachRepoId = protectJson.get("repo_id").toString();
+                List<RepoMeasure> repoMeasures = repoMeasureMapper.getRepoMeasureByDeveloperAndRepoId(eachRepoId,developer_name,0,since,until);
+                for(RepoMeasure repoMeasure : repoMeasures){
+                    lineAdds += repoMeasure.getAdd_lines();
+                    lineDels += repoMeasure.getDel_lines();
                 }
+
+//                try{
+//                    repoPath=restInterfaceManager.getRepoPath(repo_id,"");
+//                    if(repoPath!=null){
+//
+//                        //获取repo一段时间内行数变化值
+//                        lineChanges = gitUtil.getRepoLineChanges(repoPath,since,until,developer_name);
+//                        lineAdds += lineChanges[0];
+//                        lineDels += lineChanges[1];
+//
+//                    }
+//                }finally {
+//                    if(repoPath!=null) {
+//                        restInterfaceManager.freeRepoPath(repo_id,repoPath);
+//                    }
+//                }
+
             }
-
+        }else{
+            List<RepoMeasure> repoMeasures = repoMeasureMapper.getRepoMeasureByDeveloperAndRepoId(repoId,developer_name,0,since,until);
+            for(RepoMeasure repoMeasure : repoMeasures){
+                lineAdds += repoMeasure.getAdd_lines();
+                lineDels += repoMeasure.getDel_lines();
+            }
         }
+
         commitBase.setAddLines(lineAdds);
         commitBase.setDelLines(lineDels);
 
@@ -787,7 +806,7 @@ public class MeasureServiceImpl implements MeasureService {
         List<RepoMeasure> repoMeasures;
         //如果projectName的名字为null则表示用户在所有project列表中最近30次commit的代码质量信息
         if(project_name==null){
-            repoMeasures = repoMeasureMapper.getRepoMeasureByDeveloperAndRepoId(null,developer_name,counts);
+            repoMeasures = repoMeasureMapper.getRepoMeasureByDeveloperAndRepoId(null,developer_name,counts,null,null);
         }else{
             JSONObject result = restInterfaceManager.getProjectListByCondition(token,category,project_name,null);
             int code =result.getIntValue("code");
@@ -807,7 +826,7 @@ public class MeasureServiceImpl implements MeasureService {
             }
             JSONObject project =  projects.getJSONObject(0);
             String repoId = project.getString("repo_id");
-            repoMeasures = repoMeasureMapper.getRepoMeasureByDeveloperAndRepoId(repoId,developer_name,counts);
+            repoMeasures = repoMeasureMapper.getRepoMeasureByDeveloperAndRepoId(repoId,developer_name,counts,null,null);
 
         }
 
@@ -836,6 +855,16 @@ public class MeasureServiceImpl implements MeasureService {
         }
 
         return queries;
+    }
+
+    @Override
+    public Object InsertData(String repoId) {
+        List<Commit> commits = repoMeasureMapper.getCommits(repoId);
+
+        for(Commit commit: commits){
+           saveMeasureData(commit.getRepo_id(),commit.getCommit_id(),commit.getCommit_time(),commit.getDeveloper(),commit.getDeveloper_email());
+        }
+        return "success";
     }
 
 

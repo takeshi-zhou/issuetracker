@@ -4,6 +4,7 @@ import cn.edu.fudan.measureservice.domain.CommitBase;
 import cn.edu.fudan.measureservice.domain.CommitInfoDeveloper;
 import cn.edu.fudan.measureservice.domain.Developer;
 import cn.edu.fudan.measureservice.domain.RepoMeasure;
+import cn.edu.fudan.measureservice.domain.test.Commit;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -45,6 +46,9 @@ public interface RepoMeasureMapper {
      * @param repo_id
      * @param developer_name
      * @param counts
+     *
      */
-    List<RepoMeasure> getRepoMeasureByDeveloperAndRepoId(@Param("repo_id")String repo_id,@Param("developer_name")String developer_name,@Param("counts")int counts);
+    List<RepoMeasure> getRepoMeasureByDeveloperAndRepoId(@Param("repo_id")String repo_id,@Param("developer_name")String developer_name,@Param("counts")int counts,@Param("since")String since,@Param("until")String until);
+
+    List<Commit> getCommits(@Param("repo_id")String repo_id);
 }

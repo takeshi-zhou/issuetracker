@@ -8,6 +8,9 @@ import org.apache.kafka.common.protocol.types.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -44,6 +47,8 @@ public class RestInterfaceManager {
     private String scanServicePath;
     @Value("${sonar.service.path}")
     private String sonarServicePath;
+    @Value("${measure.service.path}")
+    private String measureServicePath;
 
     private RestTemplate restTemplate;
 
@@ -388,8 +393,64 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(scanServicePath + "/inner/scan/commit?repo_id=" + repoId+"&commit_id="+commitId+"&category="+category, JSONObject.class);
     }
 
+    // --------------------------------------------------------measure api ---------------------------------------------------------
 
 
+    public JSONObject getCodeChangesByDurationAndDeveloperName(String developerName,String since ,String until,String category,String repoId){
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("token",null);
+        HttpEntity request = new HttpEntity(headers);
+        StringBuilder urlBuilder = new StringBuilder();
+        boolean isFirstPram =true;
+        urlBuilder.append(measureServicePath + "/measure/developer/code-change?");
+        if(developerName != null){
+            if(!isFirstPram){
+                urlBuilder.append("&");
+            }else{
+                isFirstPram=false;
+            }
+            urlBuilder.append("developer_name=" + developerName);
+        }
+
+        if(since != null){
+            if(!isFirstPram){
+                urlBuilder.append("&");
+            }else{
+                isFirstPram=false;
+            }
+            urlBuilder.append("since=" + since);
+        }
+        if(until != null){
+            if(!isFirstPram){
+                urlBuilder.append("&");
+            }else{
+                isFirstPram=false;
+            }
+            urlBuilder.append("until=" + until);
+        }
+        if(category != null){
+            if(!isFirstPram){
+                urlBuilder.append("&");
+            }else{
+                isFirstPram=false;
+            }
+            urlBuilder.append("category=" + category);
+        }
+        if(repoId != null){
+            if(!isFirstPram){
+                urlBuilder.append("&");
+            }else{
+                isFirstPram=false;
+            }
+            urlBuilder.append("repo_id=" + repoId);
+        }
+        String url = urlBuilder.toString();
+        ResponseEntity responseEntity = restTemplate.exchange(url , HttpMethod.GET,request,JSONObject.class);
+        String body = responseEntity.getBody().toString();
+        JSONObject result = JSONObject.parseObject(body,JSONObject.class);
+        return result;
+    }
 
 
 
