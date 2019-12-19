@@ -106,25 +106,6 @@ public class MeasureController {
 
     }
 
-
-    //按照不同时间段（since、until），不同聚合粒度（type：天/周/月），不同开发者（developerName），获取工作量数据
-//    @GetMapping("/measure/repository/workload")
-//    @CrossOrigin
-//    public ResponseBean getWorkload(@RequestParam(name = "repo_id",required = true )String repo_id,
-//                                    @RequestParam(name = "since",required = false )String since,
-//                                    @RequestParam(name = "until",required = false )String until,
-//                                    @RequestParam(name = "time_granularity",required = false )Granularity granularity,
-//                                    @RequestParam(name = "developer_name",required = false )String developer_name){
-//
-//        try{
-//            return new ResponseBean(200,"success",measureService.getWorkload(repo_id,since,until,category,granularity,developer_name));
-//        }catch (Exception e){
-//            e.printStackTrace();
-//            return new ResponseBean(401,"failed",null);
-//        }
-//
-//    }
-
     //按照不同时间段（since、until），不同聚合粒度（granularity：天/周/月），不同开发者（developerName），获取工作量数据
     @GetMapping("/measure/repository/commitBaseInfo-granularity")
     @CrossOrigin
