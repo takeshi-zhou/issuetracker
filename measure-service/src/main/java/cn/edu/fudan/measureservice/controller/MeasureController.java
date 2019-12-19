@@ -1,6 +1,7 @@
 package cn.edu.fudan.measureservice.controller;
 
 import cn.edu.fudan.measureservice.domain.Granularity;
+import cn.edu.fudan.measureservice.domain.Category;
 import cn.edu.fudan.measureservice.domain.ResponseBean;
 import cn.edu.fudan.measureservice.service.MeasureService;
 import org.springframework.web.bind.annotation.*;
@@ -88,14 +89,16 @@ public class MeasureController {
 
     }
 
-    //获取一个repo在一段时间内的所有开发者的commit信息
+    //获取一个repo在一段时间内的某个开发者的commit信息，如果不指定开发者参数，则返回所有开发者commit信息
     @GetMapping("/measure/repository/duration")
     @CrossOrigin
-    public ResponseBean getCodeChangesByDuration(@RequestParam("repo_id")String repo_id,
+    public ResponseBean getCommitBaseInformationByDuration(@RequestParam("repo_id")String repo_id,
                                                @RequestParam("since")String since,
-                                               @RequestParam("until")String until){
+                                               @RequestParam("until")String until,
+                                               @RequestParam(name = "developer_name",required = false)String developer_name
+                                                 ){
         try{
-            return new ResponseBean(200,"success",measureService.getCommitBaseInformationByDuration(repo_id, since, until));
+            return new ResponseBean(200,"success",measureService.getCommitBaseInformationByDuration(repo_id, since, until, developer_name));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",null);
@@ -103,16 +106,20 @@ public class MeasureController {
 
     }
 
-    //获取repo每月的commitBaseInfo
-    @GetMapping("/measure/repository/commitBaseInfo-monthly")
+    //按照不同时间段（since、until），不同聚合粒度（granularity：天/周/月），不同开发者（developerName），获取工作量数据
+    @GetMapping("/measure/repository/commitBaseInfo-granularity")
     @CrossOrigin
-    public ResponseBean getCodeChangesByDuration(@RequestParam("repo_id")String repo_id){
+    public ResponseBean getCommitBaseInfoGranularity(@RequestParam("repo_id")String repo_id,
+                                                 @RequestParam(name = "granularity",required = false, defaultValue = "week")String granularity,
+                                                 @RequestParam(name = "since",required = false )String since,
+                                                 @RequestParam(name = "until",required = false )String until,
+                                                 @RequestParam(name = "developer_name",required = false, defaultValue = "" )String developer_name){
 
         try{
-            return new ResponseBean(200,"success",measureService.getCommitBaseInfoMonthly(repo_id));
+            return new ResponseBean(200,"success",measureService.getCommitBaseInfoGranularity(repo_id, granularity, since, until, developer_name));
         }catch (Exception e){
             e.printStackTrace();
-            return new ResponseBean(401,"failed",null);
+            return new ResponseBean(401,"failed",e.getMessage());
         }
 
     }

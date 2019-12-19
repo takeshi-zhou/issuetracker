@@ -1,9 +1,12 @@
 package cn.edu.fudan.measureservice.component;
 
 import cn.edu.fudan.measureservice.domain.CommitCountsMonthly;
+import cn.edu.fudan.measureservice.service.MeasureServiceImpl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -39,6 +42,8 @@ public class RestInterfaceManager {
     public RestInterfaceManager(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
+
+    private Logger logger = LoggerFactory.getLogger(RestInterfaceManager.class);
 
     //----------------------------------account service----------------------------------------------------
     public String getAccountId(String userToken){
@@ -91,13 +96,13 @@ public class RestInterfaceManager {
         if (response != null ){
             if(response.getString("status").equals("Successful")) {
                 repoPath=response.getString("content");
-                log.info("repoHome -> {} , repoId -->{} , commit_id -->{}" ,repoPath,repoId,commit_id);
+                logger.info("repoHome -> {} , repoId -->{} , commit_id -->{}" ,repoPath,repoId,commit_id);
             }else{
-                log.error("get repoHome fail -> {}",response.getString("content"));
-                log.error("repoId -> {} commitId -> {}",repoId,commit_id);
+                logger.error("get repoHome fail -> {}",response.getString("content"));
+                logger.error("repoId -> {} commitId -> {}",repoId,commit_id);
             }
         } else {
-            log.error("code service response null!");
+            logger.error("code service response null!");
         }
         return repoPath;
     }
@@ -105,9 +110,9 @@ public class RestInterfaceManager {
     public JSONObject freeRepoPath(String repoId,String repoPath){
         JSONObject response=restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId+"&path="+repoPath, JSONObject.class);
         if(response!=null&&response.getJSONObject("data").getString("status").equals("Successful")){
-            log.info("{} -> free success",repoPath);
+            logger.info("{} -> free success",repoPath);
         }else {
-            log.warn("{} -> free failed",repoPath);
+            logger.warn("{} -> free failed",repoPath);
         }
         return response;
     }
