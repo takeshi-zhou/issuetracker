@@ -22,6 +22,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.parser.Entity;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -256,37 +257,94 @@ public class MeasureServiceImpl implements MeasureService {
     @Override
     public List<RepoMeasure> getRepoMeasureByRepoId(String repoId,String since,String until,Granularity granularity) {
         List<RepoMeasure> result=new ArrayList<>();
+        LocalDate preTimeLimit= DateTimeUtil.parse(until).plusDays(1);
         //先统一把这个时间段的所有度量值对象都取出来，然后按照时间单位要求来过滤
         List<RepoMeasure> repoMeasures=repoMeasureMapper.getRepoMeasureBetween(repoId,since,until);
         if(repoMeasures==null||repoMeasures.isEmpty()) {
             return Collections.emptyList();
         }
-        repoMeasures= repoMeasures.stream().map(repoMeasure -> {
-            String date=repoMeasure.getCommit_time();
-            repoMeasure.setCommit_time(date.split(" ")[0]);
-            return repoMeasure;
-        }).collect(Collectors.toList());
-        LocalDate nextTimeLimit= DateTimeUtil.parse(since);
-        switch (granularity){
-            case week:
-                for(RepoMeasure measure:repoMeasures){
-                    LocalDate current=DateTimeUtil.parse(measure.getCommit_time());
-                    if(current.isAfter(nextTimeLimit)){
-                        result.add(measure);
-                        nextTimeLimit=nextTimeLimit.plusWeeks(1);
-                    }
+
+        //过滤符合要求的repoMeasure，并且按照日期归类
+        Map<LocalDate,List<RepoMeasure>> map=repoMeasures.stream()
+                .filter(rm -> rm.getCommit_time().compareTo(since)>0)
+        .collect(Collectors.groupingBy((RepoMeasure repoMeasure)->{
+            String dateStr=repoMeasure.getCommit_time().split(" ")[0];
+            return LocalDate.parse(dateStr,DateTimeUtil.Y_M_D_formatter);
+        }));
+
+
+        //对日期进行排序
+        List<LocalDate> dates=new ArrayList<>(map.keySet());
+        dates.sort(((o1, o2) -> {
+            if(o1.equals(o2)) {
+                return 0;
+            }
+            return o1.isBefore(o2)?1:-1;
+        }));
+
+
+        //将每个日期中的repo measure ，根据commit time进行排序为降序。
+        for(Map.Entry<LocalDate,List<RepoMeasure>> entry : map.entrySet()){
+            List<RepoMeasure> repoMeasuresOfDate = entry.getValue();
+            repoMeasuresOfDate.sort( (o1, o2) -> {
+                if(o1.getCommit_time().compareTo(o2.getCommit_time()) < 0){
+                    return 1;
+                }else{
+                    return -1;
                 }
+
+            });
+        }
+
+
+        switch (granularity){
+            case day:
+                for(LocalDate localDate : dates){
+                    RepoMeasure dayOfLatest = map.get(localDate).get(0);
+                    result.add(dayOfLatest);
+                }
+                break;
+            case week:
+                for(LocalDate localDate : dates){
+                    if(localDate.isAfter(preTimeLimit) || DateTimeUtil.isTheSameDay(localDate,preTimeLimit)){
+                        continue;
+                    }
+                    while(!(localDate.isBefore(preTimeLimit) && localDate.isAfter(preTimeLimit.minusWeeks(1)))){
+
+                        preTimeLimit = preTimeLimit.minusWeeks(1);
+                    }
+                    result.add(map.get(localDate).get(0));
+                    preTimeLimit = preTimeLimit.minusWeeks(1);
+
+                }
+
                 break;
             case month:
-                for(RepoMeasure measure:repoMeasures){
-                    LocalDate current=DateTimeUtil.parse(measure.getCommit_time());
-                    if(current.isAfter(nextTimeLimit)){
-                        result.add(measure);
-                        nextTimeLimit=nextTimeLimit.plusMonths(1);
+                for(LocalDate localDate : dates){
+                    if(localDate.isAfter(preTimeLimit)){
+                        continue;
                     }
+                    while(!(localDate.isBefore(preTimeLimit) && localDate.isAfter(preTimeLimit.minusMonths(1)))){
+
+                        preTimeLimit = preTimeLimit.minusMonths(1);
+                    }
+                    result.add(map.get(localDate).get(0));
+                    preTimeLimit = preTimeLimit.minusMonths(1);
+
                 }
+
                 break;
+            default:
+                throw new RuntimeException("please input correct granularity !");
         }
+
+        result= result.stream().map(rm -> {
+            String date=rm.getCommit_time();
+            rm.setCommit_time(date.split(" ")[0]);
+            return rm;
+        }).collect(Collectors.toList());
+
+
         return result;
     }
 

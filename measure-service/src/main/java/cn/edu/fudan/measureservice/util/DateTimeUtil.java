@@ -75,4 +75,11 @@ public class DateTimeUtil {
         return null;
     }
 
+
+    public static boolean isTheSameDay(LocalDate a,LocalDate b){
+        if(a.getYear()==b.getYear() && a.getMonthValue()==b.getMonthValue() && a.getDayOfMonth()==b.getDayOfMonth()){
+            return true;
+        }
+        return false;
+    }
 }

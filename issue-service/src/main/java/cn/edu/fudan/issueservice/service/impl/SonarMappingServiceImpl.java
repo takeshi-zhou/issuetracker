@@ -27,6 +27,8 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
 
     private LocationDao locationDao;
 
+    private int judgeChangedLines = 10;
+
     @Autowired
     public void setLocationDao(LocationDao locationDao) {
         this.locationDao = locationDao;
@@ -37,7 +39,8 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
     public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category, String committer) {
         int pageSize = 100;
         String repoPath = null;
-        JSONArray ignoreTypes=restInterfaceManager.getIgnoreTypesOfRepo(repo_id);//获取该项目ignore的issue类型
+        //获取该项目ignore的issue类型
+        JSONArray ignoreTypes=restInterfaceManager.getIgnoreTypesOfRepo(repo_id);
         //准备要插入的tag类型
         List<JSONObject> tags = new ArrayList<>();
         //当前时间
@@ -200,7 +203,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                             Boolean locationsHaveChanged =false;
                             if(rawIssue.getLocations().size()==flows.size()+1){
                                 //先判断issue的textRange中的行内代码是否发生过变化
-                                JSONObject codeSourceMaster = restInterfaceManager.getSonarSourceLines(sonarIssue.getString("component"),textRange.getIntValue("startLine"),textRange.getIntValue("endLine"));
+                                JSONObject codeSourceMaster = restInterfaceManager.getSonarSourceLines(sonarIssue.getString("component"),textRange.getIntValue("startLine")-judgeChangedLines,textRange.getIntValue("endLine")+judgeChangedLines);
                                 if(codeSourceMaster ==null){
                                    continue;
                                 }

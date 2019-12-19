@@ -334,6 +334,9 @@ public class RestInterfaceManager {
         if(to<from){
             logger.error("lines {} can not greater {} ",from,to);
         }
+        if(from <= 0){
+            from = 1;
+        }
         Map<String, String> map = new HashMap<>();
 
         String baseRequestUrl = sonarServicePath + "/api/sources/lines?key={key}&from={from}&to={to}";

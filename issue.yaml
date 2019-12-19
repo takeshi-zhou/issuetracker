@@ -1,0 +1,21 @@
+openapi: 3.0.0
+info:
+  description: ""
+  version: "1.0.0"
+  title: "issueTracker"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "pyu17@fudan.edu.cn"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+servers:
+- url: http://127.0.0.1:8000
+  description: 接口测试地址
+
+
+tags:
+- name: "项目度量API"
+- name: "开发者度量API"
+- name: "项目管理API"
