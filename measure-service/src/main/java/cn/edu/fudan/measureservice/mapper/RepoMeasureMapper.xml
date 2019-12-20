@@ -139,6 +139,7 @@
             and developer_name = #{developer_name}
         </if>
         GROUP BY developer_name
+        order by developer_name
     </select>
 
     <select id="getStartDateOfRepo" resultType="String">
