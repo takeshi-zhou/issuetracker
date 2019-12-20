@@ -139,7 +139,7 @@
             and developer_name = #{developer_name}
         </if>
         GROUP BY developer_name
-        order by developer_name
+        order by developer_name collate utf8mb4_bin
     </select>
 
     <select id="getStartDateOfRepo" resultType="String">
