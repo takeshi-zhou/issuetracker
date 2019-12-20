@@ -250,6 +250,9 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
                 }
 
                 codeQualityResponse.addDeveloperQuality(developerQuality);
+                List<DeveloperQuality> developersQualities = codeQualityResponse.getDevelopers();
+
+                developersQualities.sort(Comparator.comparing(DeveloperQuality::getDeveloperName));
 
             }
         }
