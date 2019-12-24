@@ -65,7 +65,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
             repoPath = repoPathJson.getJSONObject("data").getString("content");
 
 
-            //获取与sonnar-scanner 扫描时对应的repo name
+            //获取与sonar-scanner 扫描时对应的repo name
             JSONObject currentRepo = restInterfaceManager.getRepoById(repo_id);
             String localAddress=currentRepo.getJSONObject("data").getString("local_addr");
             String repoName = localAddress.substring(localAddress.lastIndexOf("/")+1);
@@ -89,6 +89,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                         insertLocations(rawIssueUUID,sonarIssue,repoPath);
                         //获取rawIssue
                         RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,issueUUID,sonarIssue);
+                        rawIssue.setStatus(RawIssueStatus.ADD.getType());
                         insertRawIssues.add(rawIssue);
                         //获取issue
                         Issue issue = generateOneNewIssue(rawIssue,issueUUID,pre_commit_id,sonarIssue,date);
@@ -126,7 +127,6 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                         //当index=-1 表示未匹配上，不为-1时表示匹配上了
                         if(index==-1){
 
-
                             Issue confirmIssue = issueDao.getIssueBySonarIssueKey(sonarIssueKey);
                             if(confirmIssue != null){
                                 //判断是否是缺陷重新打开了,但是目前没有标志位表示这个缺陷是否属于缺陷重新打开，或者在某个版本已经修复了，哪个版本又重新引入
@@ -147,6 +147,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                                         insertLocations(rawIssueUUID,sonarIssue,repoPath);
                                         //获取rawIssue
                                         RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,confirmIssue.getUuid(),sonarIssue);
+                                        rawIssue.setStatus(RawIssueStatus.ADD.getType());
                                         insertRawIssues.add(rawIssue);
 
                                         continue;
@@ -158,21 +159,6 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
 
                             }
 
-
-//                            //如果未匹配上先判断是否是REOPENED
-//                            if("REOPENED".equals(sonarIssue.getString("status"))){
-//                                Issue issueReopened = issueDao.getIssueBySonarIssueKey(sonarIssueKey);
-//                                if(issueReopened != null){
-//                                    issueReopened.setEnd_commit(current_commit_id);
-//                                    issueReopened.setEnd_commit_date(commitDate);
-//                                    issueReopened.setUpdate_time(new Date());
-//                                    issueReopened.setStatus("REOPENED");
-//                                    issueReopened.setResolution(null);
-//                                    updateIssueList.add(issueReopened);
-//                                    continue;
-//                                }
-//
-//                            }
                             issueUUID = UUID.randomUUID().toString();
                             newIssueCount++;
 
@@ -181,6 +167,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                             insertLocations(rawIssueUUID,sonarIssue,repoPath);
                             //获取rawIssue
                             RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,issueUUID,sonarIssue);
+                            rawIssue.setStatus(RawIssueStatus.ADD.getType());
                             insertRawIssues.add(rawIssue);
                             //获取issue
                             Issue issue = generateOneNewIssue(rawIssue,issueUUID,pre_commit_id,sonarIssue,date);
@@ -192,7 +179,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                             sonarIssueIsMappedList[index]=1;
                             //然后分析issue的内容是否发生变化
                             //首先获取issue的最新版本rawIssue的location
-                            RawIssue rawIssue = rawIssueDao.getRawIssueByIssueId(issueUUID).get(0);
+                            RawIssue rawIssue = rawIssueDao.getChangedRawIssues(issueUUID).get(0);
                             //先判断flow的size是否变化。
                             JSONArray flows = sonarIssue.getJSONArray("flows");
                             JSONObject textRange = sonarIssue.getJSONObject("textRange");
@@ -200,7 +187,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                                 continue;
                             }
                             //判断代码是否更改过的标志
-                            Boolean locationsHaveChanged =false;
+                            boolean locationsHaveChanged =false;
                             if(rawIssue.getLocations().size()==flows.size()+1){
                                 //先判断issue的textRange中的行内代码是否发生过变化
                                 JSONObject codeSourceMaster = restInterfaceManager.getSonarSourceLines(sonarIssue.getString("component"),textRange.getIntValue("startLine")-judgeChangedLines,textRange.getIntValue("endLine")+judgeChangedLines);
@@ -210,7 +197,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                                 JSONArray sourcesMaster = codeSourceMaster.getJSONArray("sources");
                                 for(int m=0;m<sourcesMaster.size();m++){
                                     JSONObject source = sourcesMaster.getJSONObject(m);
-                                    Boolean isNew = source.getBoolean("isNew");
+                                    boolean isNew = source.getBoolean("isNew");
                                     if(isNew){
                                         locationsHaveChanged=true;
                                         break;
@@ -231,7 +218,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                                         for(int k=0;k<sourcesFlow.size();k++){
                                             JSONObject source = sourcesFlow.getJSONObject(k);
                                             Boolean isNew = source.getBoolean("isNew");
-                                            if(isNew){
+                                            if(Boolean.TRUE.equals(isNew)){
                                                 locationsHaveChanged=true;
                                                 break;
                                             }
@@ -242,15 +229,18 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                                     }
                                 }
                             }
-                            //如果有改变则记录更改后的location以及rawIssue
+
+                            String rawIssueUUID = UUID.randomUUID().toString();
+                            //获取rawIssue
+                            RawIssue newRawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,issueUUID,sonarIssue);
                             if(locationsHaveChanged){
-                                String rawIssueUUID = UUID.randomUUID().toString();
+                                //如果有改变则记录更改后的location以及rawIssue
                                 insertLocations(rawIssueUUID,sonarIssue,repoPath);
-                                //获取rawIssue
-                                RawIssue newRawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,issueUUID,sonarIssue);
-                                insertRawIssues.add(newRawIssue);
+                                newRawIssue.setStatus(RawIssueStatus.CHANGED.getType());
+                            }else{
 
                             }
+                            insertRawIssues.add(newRawIssue);
 
                             //更新issue的状态
                             Issue updateIssue = issueList.get(index);
@@ -316,6 +306,11 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                                 if(solvedIssue.getSonar_issue_id().equals(solvedSonarIssue.getString("key"))){
                                     solvedIssue.setStatus(solvedSonarIssue.getString("status"));
                                     solvedIssue.setResolution(solvedSonarIssue.getString("resolution"));
+                                    String rawIssueUUID = UUID.randomUUID().toString();
+                                    //获取rawIssue
+                                    RawIssue newRawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,solvedIssue.getUuid(),solvedSonarIssue);
+                                    newRawIssue.setStatus(RawIssueStatus.SOLVED.getType());
+                                    insertRawIssues.add(newRawIssue);
                                     break;
                                 }
                             }
@@ -537,10 +532,10 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
         }
         //获取文件路径
         String[] sonarComponents;
-        String sonar_path =issue.getString("component");
+        String sonarPath =issue.getString("component");
         String filePath= null;
-        if(sonar_path != null) {
-            sonarComponents = sonar_path.split(":");
+        if(sonarPath != null) {
+            sonarComponents = sonarPath.split(":");
             if (sonarComponents.length >= 2) {
                 filePath = sonarComponents[sonarComponents.length - 1];
             }
@@ -551,6 +546,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
         rawIssue.setUuid(rawIssueUUID);
         rawIssue.setType(issueName);
         rawIssue.setFile_name(filePath);
+        rawIssue.setDetail(issue.getString("message"));
         //待改，因为数据库不可为空
         rawIssue.setScan_id("sonar");
         rawIssue.setIssue_id(issueUUID);

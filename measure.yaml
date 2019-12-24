@@ -1,0 +1,156 @@
+openapi: 3.0.0
+info:
+  description: ""
+  version: "1.0.0"
+  title: "issueTracker"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "pyu17@fudan.edu.cn"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+servers:
+- url: http://10.141.221.85:8000
+  description: 接口测试地址
+
+
+tags:
+- name: "项目度量接口"
+- name: "开发者度量接口"
+
+
+paths:
+  /measure/repository:
+    get:
+      tags:
+      - "项目度量接口"
+      summary: "获取一段时间内最新的项目度量列表"
+      description: "根据时间粒度，获取每天或者每周最新的项目度量信息。"
+      operationId: "getMeasureDataByRepoId"
+      parameters:
+      - in: "query"
+        name: "repo_id"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
+      - in: "query"
+        name: "granularity"
+        description: "时间粒度 "
+        required: true
+        schema:
+          type: "string"
+          enum: ["day","week","month"]
+      - in: "query"
+        name: "since"
+        description: "从什么时候开始统计"
+        required: true
+        schema:
+          type: "string"
+          example: "2019-06-08"
+      - in: "query"
+        name: "until"
+        description: "统计到什么时候结束"
+        required: true
+        schema:
+          type: "string"
+          example: "2019-06-09"
+      responses:
+        '200':
+          description: "successful operation"
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/RepoMeasureResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepoMeasureResponse'
+        400:
+          description: "failed"
+
+
+components:
+  schemas:
+    RepoMeasureResponse:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          example: 200
+          description: "如果响应成功则返回200状态码，响应失败返回返回其他状态码。"
+        msg:
+          type: "string"
+          description: "响应返回的基本消息"
+        data:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/RepoMeasure'
+
+    RepoMeasure:
+      type: "object"
+      properties:
+        uuid:
+          type: "string"
+          description: "repo measure表的唯一ID"
+        files:
+          type: "integer"
+          description: "项目文件数"
+        ncss:
+          type: "integer"
+          description: "有效代码行"
+        classes:
+          type: "integer"
+          description: "项目类的数量"
+        functions:
+          type: "integer"
+          description: "项目方法数"
+        ccn:
+          type: "number"
+          format: "double"
+          description: "圈复杂度"
+        java_docs:
+          type: "integer"
+          description: "java doc 文档数"
+        java_doc_lines:
+          type: "integer"
+          description: "java doc 注释行数"
+        single_comment_lines:
+          type: "integer"
+          description: "单行注释行数"
+        multi_comment_lines:
+          type: "integer"
+          description: "多行注释行数"
+        commit_id:
+          type: "string"
+          description: "commit 的sh值"
+        commit_time:
+          type: "string"
+          description: "commit提交时间"
+        repo_id:
+          type: "string"
+          description: "repo 的唯一id"
+        developer_name:
+          type: "string"
+          description: "开发者姓名"
+        developer_email:
+          type: "string"
+          description: "开发者邮箱"
+        add_lines:
+          type: "integer"
+          description: "增加行数"
+        del_lines:
+          type: "string"
+          description: "删除行数"
+
+
+
+
+
+
+
+
+
+
+

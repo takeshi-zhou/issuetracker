@@ -86,4 +86,13 @@ public class RawIssueDao {
     public List<RawIssue> getRawIssueListByIssueId(Map<String, Object> map) {
         return rawIssueMapper.getRawIssueListByIssueId(map);
     }
+
+    /**
+     * 根据issue uuid 获取 location发生变化的rawIssue列表
+     * @param issueId
+     * @return
+     */
+    public List<RawIssue> getChangedRawIssues(String issueId) {
+        return rawIssueMapper.getChangedRawIssues(issueId);
+    }
 }

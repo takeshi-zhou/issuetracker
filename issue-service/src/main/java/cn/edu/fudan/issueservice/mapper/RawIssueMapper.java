@@ -47,4 +47,6 @@ public interface RawIssueMapper {
 
     List<RawIssue> getRawIssueListByIssueId(Map<String, Object> map);
 
+    List<RawIssue> getChangedRawIssues(@Param("issueId") String issueId);
+
 }

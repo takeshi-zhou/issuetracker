@@ -16,6 +16,7 @@
         <result property="code_lines" column="code_lines"/>
         <result property="commit_time" column="commit_time"/>
         <result property="developer_email" column="developer_email"/>
+        <result property="status" column="status"/>
         <collection property="locations" column="uuid"
                     select="cn.edu.fudan.issueservice.mapper.LocationMapper.getLocations"/>
     </resultMap>
@@ -65,7 +66,8 @@
         issue_id,
         commit_id,
         repo_id,
-        code_lines
+        code_lines,
+        status
         )
         VALUES
         <foreach collection="list" item="item" index="index"
@@ -80,7 +82,8 @@
             #{item.issue_id},
             #{item.commit_id},
             #{item.repo_id},
-            #{item.code_lines}
+            #{item.code_lines},
+            #{item.status}
             )
         </foreach>
     </insert>
@@ -186,5 +189,17 @@
             limit #{start},#{size}
         </if>
         ;
+    </select>
+
+    <select id="getChangedRawIssues" resultMap="rawIssue">
+        select distinct a.* ,b.commit_time as commit_time , b.developer_email as developer_email from
+        rawIssue as a
+        inner join commit as b
+        on a.commit_id = b.commit_id
+        where a.uuid in
+        (select distinct rawIssue_id from location where rawIssue_id in
+          (select uuid from rawIssue where issue_id = #{issueId})
+        )
+        order by commit_time desc
     </select>
 </mapper>

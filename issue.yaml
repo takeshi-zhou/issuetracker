@@ -11,11 +11,194 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
 servers:
-- url: http://127.0.0.1:8000
+- url: http://10.141.221.85:8000
   description: 接口测试地址
 
 
 tags:
-- name: "项目度量API"
-- name: "开发者度量API"
-- name: "项目管理API"
+- name: "缺陷度量接口"
+- name: "issue接口"
+- name: "raw issue接口"
+
+
+paths:
+  /measurement/code-quality:
+    get:
+      tags:
+      - "缺陷度量接口"
+      summary: "获取缺陷质量统计结果"
+      description: "根据参数获取缺陷质量统计结果，其中repoId 是必填参数，其他都是可选参数。"
+      operationId: "getCodeQuality"
+      parameters:
+      - in: "query"
+        name: "repoId"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
+      - in: "query"
+        name: "developer"
+        description: "开发者名字"
+        required: false
+        schema:
+          type: "string"
+          example: "xiaomi"
+      - in: "query"
+        name: "timeGranularity"
+        description: "时间粒度 "
+        required: false
+        schema:
+          type: "string"
+          enum: ["day","week","month"]
+      - in: "query"
+        name: "since"
+        description: "从什么时候开始统计"
+        required: false
+        schema:
+          type: "string"
+          example: "2019-06-08"
+      - in: "query"
+        name: "until"
+        description: "统计到什么时候结束"
+        required: false
+        schema:
+          type: "string"
+          example: "2019-06-09"
+      - in: "query"
+        name: "tool"
+        description: "统计何种工具的数据结果"
+        required: false
+        schema:
+          type: "string"
+          example: "bug"
+      - in: "query"
+        name: "page"
+        description: "显示按时间段统计代码缺陷质量的第几页数据"
+        required: false
+        schema:
+          type: "integer"
+      - in: "query"
+        name: "ps"
+        description: "显示一页缺陷质量数据的条数"
+        required: false
+        schema:
+          type: "integer"
+
+      responses:
+        '200':
+          description: "successful operation"
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/CodeQualityResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeQualityResponse'
+        400:
+          description: "failed"
+
+
+
+components:
+  schemas:
+    CodeQualityResponse:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          example: 200
+          description: "如果响应成功则返回200状态码，响应失败返回返回其他状态码。"
+        msg:
+          type: "string"
+          description: "响应返回的基本消息"
+        data:
+          $ref: '#/components/schemas/TotalCodeQuality'
+
+
+    TotalCodeQuality:
+      type: "object"
+      properties:
+        totalCountQualities:
+          type: "integer"
+          description: "返回的代码缺陷质量统计，基于时间粒度的条数。"
+        page:
+          type: "integer"
+          description: "第几页缺陷质量统计"
+        ps:
+          type: "integer"
+          description: "每页的条数"
+        totalQuality:
+          $ref: '#/components/schemas/CodeQuality'
+        qualities:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/TimeCodeQuality'
+        developers:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/DeveloperCodeQuality'
+
+
+
+    CodeQuality:
+      type: "object"
+      properties:
+        newIssues:
+          type: "integer"
+          description: "新增缺陷数量"
+        eliminateIssues:
+          type: "integer"
+          description: "消除缺陷数量"
+        eliminateIssueQuality:
+          type: "number"
+          description: "消除缺陷代码质量"
+        addIssueQuality:
+          type: "number"
+          description: "新增缺陷代码质量"
+
+
+
+
+    TimeCodeQuality:
+      allOf:
+      - $ref: '#/components/schemas/CodeQuality'
+      - type: "object"
+        properties:
+          date:
+            type: "string"
+            format: "date"
+            example: "2019-06-09"
+
+    DeveloperCodeQuality:
+      allOf:
+      - $ref: '#/components/schemas/CodeQuality'
+      - type: "object"
+        properties:
+          developerName:
+            type: "string"
+            description: "开发者姓名"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
