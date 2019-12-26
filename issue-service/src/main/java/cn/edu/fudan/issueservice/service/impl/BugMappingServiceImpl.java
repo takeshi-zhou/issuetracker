@@ -101,6 +101,11 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                         insertIssueList.add(issue);
                         continue;
                     }
+                    //
+                    if(preRawIssue.isMapped() || currentRawIssue.isMapped()){
+                        logger.error("repeat map raw issue , raw issue id --> {}",preRawIssue.getUuid());
+                    }
+
                     // 匹配上
                     preRawIssue.setMapped(true);
                     currentRawIssue.setMapped(true);
@@ -150,6 +155,9 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
 
         int eliminatedIssueCount = preRawIssues.size() - (currentRawIssues.size()  - insertIssueList.size()) ;
+        if(eliminatedIssueCount < 0){
+            logger.error("mapping failed");
+        }
         int remainingIssueCount = currentRawIssues.size();
         int newIssueCount = insertIssueList.size();
         logger.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount, remainingIssueCount, eliminatedIssueCount);
@@ -175,18 +183,26 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             lcs = LocationCompare.getLcs();
             if (commonality > maxCommonality && commonality > LocationCompare.getThresholdCommonality()) {
                 maxCommonality = commonality;
-                target = rawIssue;
+                maxOverLapping = overLapping;
+                maxLcs = lcs;
+                if(!rawIssue.isMapped()){
+                    target = rawIssue;
+                }
                 continue;
             }
             if (overLapping > maxOverLapping && overLapping > LocationCompare.getThresholdOverlapping()) {
                 maxOverLapping = overLapping;
-                target = rawIssue;
+                if(!rawIssue.isMapped()){
+                    target = rawIssue;
+                }
                 continue;
             }
 
             if (lcs > maxLcs && lcs > LocationCompare.getThresholdLcs()) {
                 maxLcs = lcs;
-                target = rawIssue;
+                if(!rawIssue.isMapped()){
+                    target = rawIssue;
+                }
             }
         }
         return target;
@@ -196,7 +212,8 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         Map<String, List<RawIssue>> map = new HashMap<>(2);
         for (RawIssue rawIssue : rawIssues) {
             Assert.notEmpty(rawIssue.getLocations(),"no location");
-            String key = rawIssue.getLocations().get(0).getFile_path() + rawIssue.getDetail();
+            Location location = rawIssue.getLocations().get(0);
+            String key = location.getFile_path() + " " + rawIssue.getDetail();
             if (map.containsKey(key)) {
                 map.get(key).add(rawIssue);
             } else {
