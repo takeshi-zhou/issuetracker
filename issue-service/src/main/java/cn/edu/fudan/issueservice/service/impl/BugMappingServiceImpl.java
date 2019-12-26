@@ -169,22 +169,27 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         double overLapping ;
         double lcs ;
         for (RawIssue rawIssue : preList) {
+            if (rawIssue.isMapped()) {
+                continue;
+            }
             LocationCompare.computeSimilarity(currentRawIssue, rawIssue);
             commonality = LocationCompare.getCommonality();
             overLapping = LocationCompare.getOverLapping();
             lcs = LocationCompare.getLcs();
+            boolean isCommonalityDone = true;
+            boolean isOverLappingDone = true;
             if (commonality > maxCommonality && commonality > LocationCompare.getThresholdCommonality()) {
                 maxCommonality = commonality;
                 target = rawIssue;
-                continue;
+                isCommonalityDone = false;
             }
-            if (overLapping > maxOverLapping && overLapping > LocationCompare.getThresholdOverlapping()) {
+            if (isCommonalityDone && overLapping > maxOverLapping && overLapping > LocationCompare.getThresholdOverlapping()) {
                 maxOverLapping = overLapping;
                 target = rawIssue;
-                continue;
+                isOverLappingDone = false;
             }
 
-            if (lcs > maxLcs && lcs > LocationCompare.getThresholdLcs()) {
+            if (isCommonalityDone && isOverLappingDone && lcs > maxLcs && lcs > LocationCompare.getThresholdLcs()) {
                 maxLcs = lcs;
                 target = rawIssue;
             }
