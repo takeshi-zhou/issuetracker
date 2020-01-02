@@ -74,7 +74,7 @@ public class LocationCompare {
         List<Location> intersectLocations1 = intersect(rawIssue1.getLocations(), rawIssue2.getLocations());
         List<Location> intersectLocations2 = intersect(rawIssue2.getLocations(), rawIssue1.getLocations());
         List<Location> unionLocations = union(rawIssue1.getLocations(), rawIssue2.getLocations());
-        commonality = (double) Math.min(intersectLocations1.size(), intersectLocations2.size()) / unionLocations.size();
+        commonality = intersectLocations1.size() / unionLocations.size();
 
 
         int countOverlapping = 0;
