@@ -180,13 +180,13 @@ public class IssueMeasurementController {
         return issueMeasureInfoService.getNotSolvedIssueCountByCategoryAndRepoId(repoId, category,commitId);
     }
 
-    @GetMapping("/CloneRateInfo")
+    @GetMapping("/cloneRateInfo")
     public Object getCloneRate(@RequestParam("repo_id") String  repoId) {
 
         return issueMeasureInfoService.getCloneLines(repoId);
     }
 
-    @GetMapping("/LatestCloneLines")
+    @GetMapping("/latestCloneLines")
     public Object getLatestScannedCommitCloneLines(@RequestParam("repo_id") String  repoId) {
 
         return issueMeasureInfoService.getLatestScannedCommitCloneLines(repoId);
