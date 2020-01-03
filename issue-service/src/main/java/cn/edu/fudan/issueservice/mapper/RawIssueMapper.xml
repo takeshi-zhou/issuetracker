@@ -202,4 +202,13 @@
         )
         order by commit_time desc
     </select>
+
+    <select id="getRawIssueIdByCommitId" resultType="String">
+        select uuid from rawIssue where commit_id = #{commit_id} and repo_id = #{repo_id} and category = #{category};
+    </select>
+
+    <select id="getLatestScannedCommitId" parameterType="String" resultType="String">
+        select commit_id from scan where repo_id = #{repo_id} and category = #{category} and end_time = (select max(end_time) from scan where
+        repo_id = #{repo_id} and category = #{category});
+    </select>
 </mapper>

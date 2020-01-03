@@ -55,4 +55,8 @@ public interface IssueMeasureInfoService {
      * @return  返回符合条件的代码质量
      */
     Object getQualityChangesByCondition(String developer, String timeGranularity, String since, String until, String repoId, String tool, int page, int ps);
+
+    Object getCloneLines(String repoId);
+
+    Object getLatestScannedCommitCloneLines(String repoId);
 }

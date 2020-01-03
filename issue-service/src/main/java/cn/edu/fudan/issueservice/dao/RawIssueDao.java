@@ -87,6 +87,14 @@ public class RawIssueDao {
         return rawIssueMapper.getRawIssueListByIssueId(map);
     }
 
+    public List<String> getRawIssueIdByCommitId(String repoId, String commit, String category){
+        return rawIssueMapper.getRawIssueIdByCommitId(repoId,commit,category);
+    }
+
+    public String getLatestScannedCommitId(String repoId, String category){
+        return rawIssueMapper.getLatestScannedCommitId(repoId,category);
+    }
+
     /**
      * 根据issue uuid 获取 location发生变化的rawIssue列表
      * @param issueId

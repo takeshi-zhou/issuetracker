@@ -49,4 +49,7 @@ public interface RawIssueMapper {
 
     List<RawIssue> getChangedRawIssues(@Param("issueId") String issueId);
 
+    List<String> getRawIssueIdByCommitId(@Param("repo_id") String repoId,@Param("commit_id") String commit, @Param("category")String category);
+
+    String getLatestScannedCommitId(@Param("repo_id") String repo_id,@Param("category")String category);
 }
