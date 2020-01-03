@@ -142,4 +142,8 @@ public class IssueDao {
     public List<Issue> getIssuesByIssueIds(List<String> issueIds) {
         return issueMapper.getIssuesByIssueIds(issueIds);
     }
+
+    public List<String> getCommitId(String repoId) {
+        return issueMapper.getCommitIds(repoId);
+    }
 }

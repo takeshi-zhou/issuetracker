@@ -108,7 +108,7 @@ paths:
   /measure/repository/duration:
     get:
       tags:
-        - "项目度量接口"
+        - "开发者度量接口"
       summary: "获取一个repo在一段时间内的某个开发者的commit信息"
       description: "获取一个repo在一段时间内的某个开发者的commit信息，如果不指定开发者参数，则返回所有开发者commit信息"
       operationId: "getCommitBaseInformationByDuration"
@@ -126,21 +126,21 @@ paths:
           required: true
           schema:
             type: "string"
-            example: "2019-11-11"
+            example: "2019-10-11"
         - in: "query"
           name: "until"
           description: "统计到什么时候结束"
           required: true
           schema:
             type: "string"
-            example: "2019-12-12"
+            example: "2019-12-25"
         - in: "query"
           name: "developer_name"
           description: "开发者姓名"
           required: false
           schema:
             type: "string"
-            example: "jstylejf"
+            example: "linwangzai"
       responses:
         '200':
           description: "successful operation"
@@ -157,7 +157,7 @@ paths:
   /measure/repository/commitBaseInfo-granularity:
     get:
       tags:
-        - "项目度量接口"
+        - "开发者度量接口"
       summary: "获取工作量数据"
       description: "按照不同时间段（since、until），不同聚合粒度（granularity：天/周/月），不同开发者（developerName），获取工作量数据"
       operationId: "getCommitBaseInfoGranularity"
@@ -175,21 +175,21 @@ paths:
           required: false
           schema:
             type: "string"
-            example: "2019-11-11"
+            example: "2019-10-11"
         - in: "query"
           name: "until"
           description: "统计到什么时候结束"
           required: false
           schema:
             type: "string"
-            example: "2019-12-12"
+            example: "2019-12-25"
         - in: "query"
           name: "developer_name"
           description: "开发者姓名"
           required: false
           schema:
             type: "string"
-            example: "jstylejf"
+            example: "linwangzai"
         - in: "query"
           name: "granularity"
           description: "时间聚合粒度"

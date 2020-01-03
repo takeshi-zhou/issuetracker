@@ -440,21 +440,42 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
 
     }
 
+    @Autowired
+    private LocationDao locationDao;
 
+    @Override
+    public Object getCloneLines(String repoId) {
 
+        List<String> commitIds = issueDao.getCommitId(repoId);
 
+        ArrayList cloneLineList = new ArrayList();
 
+        for(String commit :commitIds){
+            cloneLineList.add(getCloneLinesByCommit(repoId,commit));
+        }
+        return cloneLineList;
+    }
 
+    @Override
+    public Object getLatestScannedCommitCloneLines(String repoId) {
+        String latestCommitId = rawIssueDao.getLatestScannedCommitId(repoId,"clone");
+        return getCloneLinesByCommit(repoId,latestCommitId);
+    }
 
-
-
-
-
-
-
-
-
-
+    private Integer getCloneLinesByCommit(String repoId, String commitId){
+        List<String> rawIssueIdList = rawIssueDao.getRawIssueIdByCommitId(repoId,commitId,"clone");
+        int cloneLines = 0;
+        for(String rawIssue:rawIssueIdList){
+            List<Location> locations = locationDao.getLocations(rawIssue);
+            for(Location location: locations){
+                int startLine = location.getStart_line();
+                int endLine = location.getEnd_line();
+                int clone = endLine - startLine + 1;
+                cloneLines += clone;
+            }
+        }
+        return cloneLines;
+    }
 
 
 }
