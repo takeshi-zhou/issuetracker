@@ -52,8 +52,8 @@
     </insert>
 
     <delete id="deleteLocationByRepoIdAndCategory" parameterType="String">
-        delete from location where rawIssue_id in (select uuid from rawIssue where scan_id in (select uuid from scan
-        where repo_id=#{repo_id} and category = #{category}))
+        DELETE a FROM location a INNER JOIN rawIssue c ON a.rawIssue_id= c.uuid WHERE c.repo_id=#{repo_id} and c.category = #{category};
+
     </delete>
 
     <select id="getLocations" parameterType="Location" resultMap="location">

@@ -74,11 +74,16 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
     private void issueMapping(String repoId, String category, String preCommitId, String currentCommitId, Date commitDate,
                               Date date, List<Issue> insertIssueList, List<JSONObject> tags, JSONArray ignoreTypes, String committer, String developer) {
         //不是第一次扫描，需要和前一次的commit产生的issue进行mapping
+        if(preCommitId == null || preCommitId.isEmpty()){
+            preCommitId = rawIssueDao.getPreCommitIdByCurrentCommitId(repoId,category,currentCommitId);
+        }
         List<RawIssue> preRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repoId, category, preCommitId);
         List<RawIssue> currentRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repoId, category, currentCommitId);
         if (currentRawIssues == null || currentRawIssues.isEmpty()) {
-            return;
+            logger.info("all issues were solved or raw issue insert error , commit id -->  {}", currentCommitId);
         }
+
+
         logger.info("not first mapping!");
         //mapping开始之前end commit是上一个commit的表示是上个commit存活的issue
         Set<String> existsIssueIds = issueDao.getIssuesByEndCommit(repoId, category, preCommitId).stream().map(Issue::getUuid).collect(Collectors.toSet());
@@ -87,57 +92,75 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         List<String> mappedIssueIds = new ArrayList<>();
         int equalsCount = 0;
         int ignoreCountInNewIssues = 0;
+        int mappedCount = 0;
+        int eliminatedIssueCount = 0;
+
         // key filePath + detail; value rawIssues
         Map<String, List<RawIssue>> curRawIssueMap = classifyRawIssue(currentRawIssues);
         Map<String, List<RawIssue>> preRawIssueMap = classifyRawIssue(preRawIssues);
+
+        Map<String,List<RawIssueMappingSort>>  currentRawIssueMappedRawIssueList= new HashMap<>();
+        //用来判断匹配上的preRawIssue的下标位置，-1表示未匹配上。
+        Map<String,Integer> currentRawIssueMappedIndex = new HashMap<>();
+        //key 是preRawIssue的uuid,value是current raw issue的uuid,用来记录preRawIssue匹配了哪个currentRawIssue
+        Map<String,RawIssue> preRawIssueMappedCurrentRawIssue = new HashMap<>();
         for (Map.Entry<String, List<RawIssue>> entry : curRawIssueMap.entrySet()) {
             if (preRawIssueMap.containsKey(entry.getKey())) {
                 List<RawIssue> preList = preRawIssueMap.get(entry.getKey());
                 for (RawIssue currentRawIssue : entry.getValue()) {
-                    RawIssue preRawIssue = findMostSimilarRawIssue(currentRawIssue, preList);
-                    // 没有匹配上 当前是新增的issue
-                    if (preRawIssue == null) {
-                        Issue issue = generateOneNewIssue(repoId,currentRawIssue,category,currentCommitId,commitDate,date);
-                        insertIssueList.add(issue);
-                        continue;
+                    List<RawIssueMappingSort> mappedRawIssues = findMostSimilarRawIssues(currentRawIssue,preList);
+                    currentRawIssueMappedRawIssueList.put(currentRawIssue.getUuid(),mappedRawIssues);
+                    if(mappedRawIssues.isEmpty()){
+                        currentRawIssueMappedIndex.put(currentRawIssue.getUuid(),-1);
+                    }else{
+                        currentRawIssueMappedIndex.put(currentRawIssue.getUuid(),0);
                     }
-                    //
-                    if(preRawIssue.isMapped() || currentRawIssue.isMapped()){
-                        logger.error("repeat map raw issue , raw issue id --> {}",preRawIssue.getUuid());
-                    }
-
-                    // 匹配上
-                    preRawIssue.setMapped(true);
-                    currentRawIssue.setMapped(true);
-                    String preIssueId = preRawIssue.getIssue_id();
-                    //只有和上个commit存活的issue匹配上才算真正匹配上
-                    if(existsIssueIds.contains(preIssueId)){
-                        equalsCount++;
-                        currentRawIssue.setIssue_id(preIssueId);
-                        Issue issue = issueDao.getIssueByID(preIssueId);
-                        issue.setEnd_commit(currentCommitId);
-                        issue.setEnd_commit_date(commitDate);
-                        issue.setRaw_issue_end(currentRawIssue.getUuid());
-                        issue.setUpdate_time(new Date());
-                        issues.add(issue);
-                        mappedIssueIds.add(preIssueId);
-                        continue;
-                    }
-                    //匹配到上一个commit的一个rawIssue，但是这个rawIssue对应的issue已经被solved 或者ignore,此时应该作为新的issue插入 ？？有争议
-                    //如果匹配上，但是匹配到的是已经solved的，
-                    Issue issue = generateOneNewIssue(repoId,currentRawIssue,category,currentCommitId,commitDate,date);
-                    insertIssueList.add(issue);
-                    ignoreCountInNewIssues += addTag(tags,ignoreTypes,currentRawIssue,issue);
 
                 }
-                continue;
-            }
-            // 新增issue处理：如果当前commit的某个rawIssue没有在上个commit的rawIssue列表里面找到匹配，将它作为新的issue插入
-            for (RawIssue rawIssue :entry.getValue() ) {
-                Issue issue = generateOneNewIssue(repoId, rawIssue, category, currentCommitId, commitDate, date);
-                insertIssueList.add(issue);
             }
         }
+
+        for (RawIssue currentRawIssue : currentRawIssues) {
+            findBestMatching(preRawIssueMappedCurrentRawIssue,currentRawIssueMappedIndex,currentRawIssueMappedRawIssueList,currentRawIssue,-1);
+        }
+
+
+        for (RawIssue currentRawIssue : currentRawIssues) {
+            int mappedPreRawIssueIndex = currentRawIssueMappedIndex.get(currentRawIssue.getUuid());
+            if( mappedPreRawIssueIndex == -1){
+                Issue issue = generateOneNewIssue(repoId,currentRawIssue,category,currentCommitId,commitDate,date);
+                insertIssueList.add(issue);
+            }else{
+                RawIssue preRawIssue = currentRawIssueMappedRawIssueList.get(currentRawIssue.getUuid()).get(mappedPreRawIssueIndex).getRawIssue();
+                String preIssueId = preRawIssue.getIssue_id();
+                //只有和上个commit存活的issue匹配上才算真正匹配上
+                if(existsIssueIds.contains(preIssueId)){
+                    equalsCount++;
+                    currentRawIssue.setIssue_id(preIssueId);
+                    Issue issue = issueDao.getIssueByID(preIssueId);
+                    issue.setEnd_commit(currentCommitId);
+                    issue.setEnd_commit_date(commitDate);
+                    issue.setRaw_issue_end(currentRawIssue.getUuid());
+                    issue.setUpdate_time(new Date());
+                    issues.add(issue);
+                    mappedIssueIds.add(preIssueId);
+                    continue;
+                }
+            }
+        }
+
+
+        for(RawIssue preRawIssue : preRawIssues){
+            if(preRawIssue.isMapped()){
+                mappedCount++;
+            }else{
+                eliminatedIssueCount++;
+            }
+        }
+
+
+
+
         //存储上个commit没匹配上的，也就是被solved的rawIssue的信息
         List<RawIssue> list = preRawIssues.stream().filter(rawIssue -> !rawIssue.isMapped()).collect(Collectors.toList());
         saveSolvedInfo(list,repoId,preCommitId,currentCommitId);
@@ -154,9 +177,12 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 //        int newIssueCount = currentRawIssues.size() - equalsCount-ignoreCountInNewIssues;
 
 
-        int eliminatedIssueCount = preRawIssues.size() - (currentRawIssues.size()  - insertIssueList.size()) ;
-        if(eliminatedIssueCount < 0){
-            logger.error("mapping failed");
+        if(eliminatedIssueCount !=  preRawIssues.size() - (currentRawIssues.size()  - insertIssueList.size())){
+            logger.error(" eliminatedIssueCount calculate error, mapping failed");
+        }
+
+        if(equalsCount !=  mappedCount){
+            logger.error(" mappedCount calculate error, mapping failed");
         }
         int remainingIssueCount = currentRawIssues.size();
         int newIssueCount = insertIssueList.size();
@@ -168,45 +194,227 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,currentCommitId,commitDate,developer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
     }
 
+
+    private void findBestMatching(Map<String,RawIssue> preRawIssueMappedCurrentRawIssue , Map<String,Integer> currentRawIssueMappedIndex ,
+                                      Map<String,List<RawIssueMappingSort>>  currentRawIssueMappedRawIssueList ,
+                                      RawIssue currentRawIssue,
+                                      int mappingIndex){
+        String currentRawIssueId = currentRawIssue.getUuid();
+        if(currentRawIssueMappedIndex.get(currentRawIssueId) == null){
+            currentRawIssueMappedIndex.put(currentRawIssueId,-1);
+        }
+        if(currentRawIssueMappedIndex.get(currentRawIssueId) == -1){
+            return ;
+        }
+
+        List<RawIssueMappingSort> mappedPreRawIssues = currentRawIssueMappedRawIssueList.get(currentRawIssueId);
+        for(int i = mappingIndex+1 ; i < mappedPreRawIssues.size() ; i++){
+            RawIssueMappingSort rawIssueMappingSort  = mappedPreRawIssues.get(i);
+            RawIssue rawIssue = rawIssueMappingSort.getRawIssue();
+            //如果已经匹配过则比对两个的比对值的大小
+            if(rawIssue.isMapped()){
+                RawIssue otherMatchedCurrentRawIssue = preRawIssueMappedCurrentRawIssue.get(rawIssue.getUuid());
+                Integer otherMatchedCurrentRawIssueIndex = currentRawIssueMappedIndex.get(otherMatchedCurrentRawIssue.getUuid());
+                Double otherMatchedCurrentRawIssueMatchedDegree = currentRawIssueMappedRawIssueList.get(otherMatchedCurrentRawIssue.getUuid()).get(otherMatchedCurrentRawIssueIndex).getMappingSort();
+
+                if(otherMatchedCurrentRawIssueMatchedDegree.compareTo(rawIssueMappingSort.getMappingSort()) >= 0){
+                    continue;
+                }else{
+                    preRawIssueMappedCurrentRawIssue.put(rawIssue.getUuid(),currentRawIssue);
+                    currentRawIssueMappedIndex.put(currentRawIssue.getUuid(),i);
+                    //匹配度不高的current raw issue重新匹配
+                    findBestMatching(preRawIssueMappedCurrentRawIssue,currentRawIssueMappedIndex,currentRawIssueMappedRawIssueList,otherMatchedCurrentRawIssue,otherMatchedCurrentRawIssueIndex);
+                    return;
+                }
+            }else{
+                rawIssue.setMapped(true);
+                preRawIssueMappedCurrentRawIssue.put(rawIssue.getUuid(),currentRawIssue);
+                currentRawIssueMappedIndex.put(currentRawIssue.getUuid(),i);
+                return;
+            }
+
+        }
+
+        currentRawIssueMappedIndex.put(currentRawIssue.getUuid(),-1);
+
+    }
+
+
+    /*
+        废弃
+     */
+    @Deprecated
     private RawIssue findMostSimilarRawIssue(RawIssue currentRawIssue, List<RawIssue> preList) {
+
         RawIssue target = null;
+
+        //获取currentRawIssue的location
+        Location currentLocation = currentRawIssue.getLocations().isEmpty() ? null : currentRawIssue.getLocations().get(0);
+        if(currentLocation == null){
+            return null;
+        }
+
         double maxCommonality = 0;
+        //OverLapping，由于目前只有1条location，所以非0即1，暂不考虑使用。
         double maxOverLapping = 0;
         double maxLcs = 0;
         double commonality ;
         double overLapping ;
         double lcs ;
+        boolean isFirstLevMapped = false;
+        boolean isOverLappingHadAnalyzed = false;
         for (RawIssue rawIssue : preList) {
+
             LocationCompare.computeSimilarity(currentRawIssue, rawIssue);
             commonality = LocationCompare.getCommonality();
             overLapping = LocationCompare.getOverLapping();
             lcs = LocationCompare.getLcs();
-            if (commonality > maxCommonality && commonality > LocationCompare.getThresholdCommonality()) {
-                maxCommonality = commonality;
-                maxOverLapping = overLapping;
-                maxLcs = lcs;
-                if(!rawIssue.isMapped()){
-                    target = rawIssue;
+
+
+            //判断是否是同一个文件，同一个类，同一个方法名，bug lines的数目相同------此时的mapping的优先级最高
+            //目前commonality 不是0就是1，所以不存在错误，当存在多个location时，下面的逻辑需要修改。
+            if(commonality > LocationCompare.getThresholdCommonality()){
+                if(commonality > maxCommonality && lcs == 1.0){
+                    if (!rawIssue.isMapped()) {
+                        maxCommonality = commonality;
+                        maxLcs = lcs;
+                        isOverLappingHadAnalyzed = true;
+                        target = rawIssue;
+                        isFirstLevMapped = true;
+                        continue;
+                    }
+
+
+                }else if (commonality == maxCommonality && lcs == 1.0){
+                    if (!rawIssue.isMapped()) {
+                        maxCommonality = commonality;
+                        maxLcs = lcs;
+                        isOverLappingHadAnalyzed = true;
+                        isFirstLevMapped = true;
+                        continue;
+                    }
                 }
-                continue;
-            }
-            if (overLapping > maxOverLapping && overLapping > LocationCompare.getThresholdOverlapping()) {
-                maxOverLapping = overLapping;
-                if(!rawIssue.isMapped()){
-                    target = rawIssue;
+
+                if(!isOverLappingHadAnalyzed && lcs > maxLcs && lcs > LocationCompare.getThresholdLcs()){
+                    if (!rawIssue.isMapped()) {
+                        maxCommonality = commonality;
+                        maxLcs = lcs;
+                        isFirstLevMapped = true;
+                        target = rawIssue;
+                        continue;
+                    }
+
                 }
-                continue;
+
+            }else {
+                Location preLocation = rawIssue.getLocations().isEmpty() ? null : rawIssue.getLocations().get(0);
+                if(  !isFirstLevMapped && currentLocation.isInSameClass(preLocation)  && lcs > maxLcs && lcs > LocationCompare.getDiffMethodsThresholdLcs()){
+
+                    if(!rawIssue.isMapped()){
+                        maxLcs = lcs;
+                        target = rawIssue;
+                    }
+                }
             }
 
-            if (lcs > maxLcs && lcs > LocationCompare.getThresholdLcs()) {
-                maxLcs = lcs;
-                if(!rawIssue.isMapped()){
-                    target = rawIssue;
-                }
-            }
         }
         return target;
     }
+
+
+    private List<RawIssueMappingSort> findMostSimilarRawIssues(RawIssue currentRawIssue, List<RawIssue> preList) {
+
+
+        //因为重写了RawIssue的hashcode 以及equals方法，故可以使用RawIssue作为key
+        List<RawIssueMappingSort> similarRawIssues = new ArrayList<>();
+
+
+        //获取currentRawIssue的location
+        Location currentLocation = currentRawIssue.getLocations().isEmpty() ? null : currentRawIssue.getLocations().get(0);
+        if(currentLocation == null){
+            return null;
+        }
+
+        double maxCommonality = 0;
+        double maxLcs = 0;
+        double commonality ;
+        double overLapping ;
+        double lcs ;
+        boolean isFirstLevMapped = false;
+        boolean isOverLappingHadAnalyzed = false;
+        for (RawIssue rawIssue : preList) {
+
+            LocationCompare.computeSimilarity(currentRawIssue, rawIssue);
+            overLapping = LocationCompare.getOverLapping();
+            commonality = LocationCompare.getCommonality();
+            lcs = LocationCompare.getLcs();
+
+
+            //判断是否是同一个文件，同一个类，同一个方法名，bug lines的数目相同------此时的mapping的优先级最高
+            //目前commonality 不是0就是1，所以不存在错误，当存在多个location时，下面的逻辑需要修改。
+            if(commonality > LocationCompare.getThresholdCommonality()){
+                if(commonality > maxCommonality && overLapping == 1.0 ){
+
+                    maxCommonality = commonality;
+                    isOverLappingHadAnalyzed = true;
+                    RawIssueMappingSort rawIssueMappingSort = new RawIssueMappingSort();
+                    rawIssueMappingSort.setRawIssue(rawIssue);
+                    rawIssueMappingSort.setMappingSort(lcs + overLapping + commonality);
+                    similarRawIssues.add(rawIssueMappingSort);
+                    isFirstLevMapped = true;
+                    continue;
+
+
+
+                }else if (commonality == maxCommonality && overLapping == 1.0){
+
+                    maxCommonality = commonality;
+                    isOverLappingHadAnalyzed = true;
+                    isFirstLevMapped = true;
+                    RawIssueMappingSort rawIssueMappingSort = new RawIssueMappingSort();
+                    rawIssueMappingSort.setRawIssue(rawIssue);
+                    rawIssueMappingSort.setMappingSort(lcs + overLapping + commonality);
+                    similarRawIssues.add(rawIssueMappingSort);
+                    continue;
+
+                }
+
+                if(!isOverLappingHadAnalyzed  && lcs > LocationCompare.getThresholdLcs()){
+
+                    maxCommonality = commonality;
+                    RawIssueMappingSort rawIssueMappingSort = new RawIssueMappingSort();
+                    rawIssueMappingSort.setRawIssue(rawIssue);
+                    rawIssueMappingSort.setMappingSort(lcs + overLapping + commonality);
+                    similarRawIssues.add(rawIssueMappingSort);
+                    continue;
+
+
+                }
+
+            }else {
+                Location preLocation = rawIssue.getLocations().isEmpty() ? null : rawIssue.getLocations().get(0);
+                if(  !isFirstLevMapped && currentLocation.isInSameClass(preLocation)  && lcs > LocationCompare.getDiffMethodsThresholdLcs()){
+
+
+                    RawIssueMappingSort rawIssueMappingSort = new RawIssueMappingSort();
+                    rawIssueMappingSort.setRawIssue(rawIssue);
+                    rawIssueMappingSort.setMappingSort(lcs + overLapping + commonality);
+                    similarRawIssues.add(rawIssueMappingSort);
+
+                }
+            }
+
+        }
+
+        List<RawIssueMappingSort> similarRawIssueSorted = similarRawIssues.stream().sorted(Comparator.comparing(RawIssueMappingSort :: getMappingSort).reversed()).collect(Collectors.toList());
+
+
+
+        return similarRawIssueSorted;
+    }
+
+
+
 
     private Map<String, List<RawIssue>> classifyRawIssue(List<RawIssue> rawIssues) {
         Map<String, List<RawIssue>> map = new HashMap<>(2);
@@ -244,5 +452,28 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 rawIssue.getUuid(), repoId, targetFiles,addTime,addTime,++currentDisplayId);
         issue.setPriority(priority);
         return issue;
+    }
+}
+
+
+
+class RawIssueMappingSort {
+    private RawIssue rawIssue;
+    private double mappingSort;
+
+    public RawIssue getRawIssue() {
+        return rawIssue;
+    }
+
+    public void setRawIssue(RawIssue rawIssue) {
+        this.rawIssue = rawIssue;
+    }
+
+    public double getMappingSort() {
+        return mappingSort;
+    }
+
+    public void setMappingSort(double mappingSort) {
+        this.mappingSort = mappingSort;
     }
 }

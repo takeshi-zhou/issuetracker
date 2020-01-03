@@ -95,4 +95,17 @@ public class RawIssueDao {
     public List<RawIssue> getChangedRawIssues(String issueId) {
         return rawIssueMapper.getChangedRawIssues(issueId);
     }
+
+
+    /**
+     * 获取rawIssue 表中指定commit的前一条commit id
+     * @param repoId
+     * @param category
+     * @param currentCommitId
+     * @return
+     */
+    public String getPreCommitIdByCurrentCommitId(String repoId,String category,String currentCommitId){
+        String commitTime = rawIssueMapper.getRawIssueCommitTimeByRepoIdAndCategory(repoId,currentCommitId,category);
+        return rawIssueMapper.getCommitIdWhichBeforeDesignatedTime(repoId,commitTime,category);
+    }
 }

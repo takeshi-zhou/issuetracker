@@ -3,9 +3,9 @@ package cn.edu.fudan.issueservice.util;
 import cn.edu.fudan.issueservice.domain.Location;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * @auther : fancying
  */
@@ -19,6 +19,10 @@ public class LocationCompare {
         return THRESHOLD_OVERLAPPING;
     }
 
+    public static double getDiffMethodsThresholdLcs() {
+        return DIFF_METHODS_THRESHOLD_LCS;
+    }
+
     public static double getThresholdLcs() {
         return THRESHOLD_LCS;
     }
@@ -26,6 +30,9 @@ public class LocationCompare {
     private static final double THRESHOLD_COMMONALITY = 0.6;
     private static final double THRESHOLD_OVERLAPPING = 0.6;
     private static final double THRESHOLD_LCS = 0.4;
+    private static final double DIFF_METHODS_THRESHOLD_LCS = 0.85;
+    private static final double SAME_CODE_LCS = 1.0;
+
     /**
      * 单线程
      */
@@ -74,13 +81,13 @@ public class LocationCompare {
         List<Location> intersectLocations1 = intersect(rawIssue1.getLocations(), rawIssue2.getLocations());
         List<Location> intersectLocations2 = intersect(rawIssue2.getLocations(), rawIssue1.getLocations());
         List<Location> unionLocations = union(rawIssue1.getLocations(), rawIssue2.getLocations());
-        commonality = (double) Math.min(intersectLocations1.size(), intersectLocations2.size()) / unionLocations.size();
+        commonality = intersectLocations1.size() / unionLocations.size();
 
 
         int countOverlapping = 0;
         for (Location location : intersectLocations1) {
             for (Location location2 : intersectLocations2) {
-                if (location2.equals(location) && theSameItem(location.getCode(), location2.getCode())) {
+                if (location2.equals(location) && theSameItemCalculate(location.getCode(), location2.getCode()) && analyzeLocationBugLines(location,location2)) {
                     ++countOverlapping;
                 }
             }
@@ -128,6 +135,43 @@ public class LocationCompare {
     private static boolean theSameItem(String content1, String content2) {
         lcs += ((double) lcs(content1, content2)) / (double) Math.max(content1.length(), content2.length());
         return lcs > THRESHOLD_LCS;
+    }
+
+    private static boolean theSameItemCalculate(String content1, String content2) {
+        lcs = ((double) lcs(content1, content2)) / (double) Math.max(content1.length(), content2.length());
+        return lcs == SAME_CODE_LCS;
+    }
+
+    private static boolean analyzeLocationBugLines(Location location1, Location location2) {
+        String bugLines1 = location1.getBug_lines();
+        String bugLines2 = location2.getBug_lines();
+
+        if(bugLines1 == null && bugLines2 == null){
+            return true;
+        }
+        String[] bugLinesFir;
+        String[] bugLinesSec;
+        StringBuilder bugLinesFirSortedBuilder = new StringBuilder();
+        StringBuilder bugLinesSecSortedBuilder = new StringBuilder();
+        if(bugLines1 != null){
+            bugLinesFir = bugLines1.split(",");
+            List<String> bugLinesFirSorted = Arrays.stream(bugLinesFir).sorted(Comparator.comparing(String::toString)).collect(Collectors.toList());
+
+            for(String s : bugLinesFirSorted){
+                bugLinesFirSortedBuilder.append(s+",");
+            }
+        }
+        if(bugLines2 != null){
+            bugLinesSec = bugLines2.split(",");
+            List<String> bugLinesSecSorted = Arrays.stream(bugLinesSec).sorted(Comparator.comparing(String::toString)).collect(Collectors.toList());
+
+            for(String s : bugLinesSecSorted){
+                bugLinesSecSortedBuilder.append(s+",");
+            }
+        }
+
+
+        return bugLinesFirSortedBuilder.toString().equals(bugLinesSecSortedBuilder.toString());
     }
 
     /**

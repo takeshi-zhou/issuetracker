@@ -163,6 +163,10 @@ public class RawIssue {
         this.issue = issue;
     }
 
+    /**
+     * 因为在bugMapping中被作为key，故不可以随意删除,且不可加入mapped
+     * @return
+     */
     @Override
     public int hashCode() {
         int result = 17;
@@ -174,6 +178,10 @@ public class RawIssue {
         return result;
     }
 
+    /**
+     * 因为在bugMapping中被作为key，故不可以随意删除，且不可加入mapped
+     * @return
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

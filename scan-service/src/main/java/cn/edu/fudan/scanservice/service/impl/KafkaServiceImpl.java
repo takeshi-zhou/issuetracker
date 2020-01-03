@@ -264,7 +264,7 @@ public class KafkaServiceImpl implements KafkaService {
         if(existedForBug){
             List<ScanMessageWithTime> bugFilterCommits = filteredCommits;
             if(bugResultMap.get("location") != null){
-                bugFilterCommits =updateFilterCommits(filteredCommits,Integer.parseInt(bugResultMap.get("location")));
+                bugFilterCommits = updateFilterCommits(filteredCommits,Integer.parseInt(bugResultMap.get("location")));
             }
             logger.info("start auto scan bug -> {}",repoId);
             for(ScanMessageWithTime message:bugFilterCommits){

@@ -310,7 +310,7 @@ public class MeasureServiceImpl implements MeasureService {
                     if(localDate.isAfter(preTimeLimit) || DateTimeUtil.isTheSameDay(localDate,preTimeLimit)){
                         continue;
                     }
-                    while(!(localDate.isBefore(preTimeLimit) && localDate.isAfter(preTimeLimit.minusWeeks(1)))){
+                    while(!(localDate.isBefore(preTimeLimit) && localDate.isAfter(preTimeLimit.minusWeeks(1))) && !DateTimeUtil.isTheSameDay(localDate,preTimeLimit)){
 
                         preTimeLimit = preTimeLimit.minusWeeks(1);
                     }
@@ -322,7 +322,7 @@ public class MeasureServiceImpl implements MeasureService {
                 break;
             case month:
                 for(LocalDate localDate : dates){
-                    if(localDate.isAfter(preTimeLimit)){
+                    if(localDate.isAfter(preTimeLimit) || DateTimeUtil.isTheSameDay(localDate,preTimeLimit) && !DateTimeUtil.isTheSameDay(localDate,preTimeLimit)){
                         continue;
                     }
                     while(!(localDate.isBefore(preTimeLimit) && localDate.isAfter(preTimeLimit.minusMonths(1)))){
@@ -374,6 +374,7 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     @Override
+    @Deprecated
     public List<ActiveMeasure> getActiveMeasureChange(String repoId, String since, String until,Granularity granularity) {
         List<ActiveMeasure> result=new ArrayList<>();
         String repoPath=getRepoPath(repoId);
@@ -425,6 +426,7 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     @Override
+    @Deprecated
     public ActiveMeasure getOneActiveMeasure(String repoId,String since,String until){
             ActiveMeasure activeMeasure=new ActiveMeasure();
             String repoPath=null;
