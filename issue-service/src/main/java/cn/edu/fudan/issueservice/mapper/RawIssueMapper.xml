@@ -217,6 +217,8 @@
         inner join
         commit as b
         on a.commit_id=b.commit_id where  <![CDATA[ b.commit_time < #{commit_time} ]]> order by b.commit_time desc limit 1
+    </select>
+
     <select id="getRawIssueIdByCommitId" resultType="String">
         select uuid from rawIssue where commit_id = #{commit_id} and repo_id = #{repo_id} and category = #{category};
     </select>

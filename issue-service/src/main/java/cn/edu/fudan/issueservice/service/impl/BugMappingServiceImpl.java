@@ -130,6 +130,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             if( mappedPreRawIssueIndex == -1){
                 Issue issue = generateOneNewIssue(repoId,currentRawIssue,category,currentCommitId,commitDate,date);
                 insertIssueList.add(issue);
+                addTag(tags, ignoreTypes, currentRawIssue,issue);
             }else{
                 RawIssue preRawIssue = currentRawIssueMappedRawIssueList.get(currentRawIssue.getUuid()).get(mappedPreRawIssueIndex).getRawIssue();
                 String preIssueId = preRawIssue.getIssue_id();
