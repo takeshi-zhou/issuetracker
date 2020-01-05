@@ -87,6 +87,14 @@ public class RawIssueDao {
         return rawIssueMapper.getRawIssueListByIssueId(map);
     }
 
+    public List<String> getRawIssueIdByCommitId(String repoId, String commit, String category){
+        return rawIssueMapper.getRawIssueIdByCommitId(repoId,commit,category);
+    }
+
+    public String getLatestScannedCommitId(String repoId, String category){
+        return rawIssueMapper.getLatestScannedCommitId(repoId,category);
+    }
+
     /**
      * 根据issue uuid 获取 location发生变化的rawIssue列表
      * @param issueId
@@ -94,5 +102,18 @@ public class RawIssueDao {
      */
     public List<RawIssue> getChangedRawIssues(String issueId) {
         return rawIssueMapper.getChangedRawIssues(issueId);
+    }
+
+
+    /**
+     * 获取rawIssue 表中指定commit的前一条commit id
+     * @param repoId
+     * @param category
+     * @param currentCommitId
+     * @return
+     */
+    public String getPreCommitIdByCurrentCommitId(String repoId,String category,String currentCommitId){
+        String commitTime = rawIssueMapper.getRawIssueCommitTimeByRepoIdAndCategory(repoId,currentCommitId,category);
+        return rawIssueMapper.getCommitIdWhichBeforeDesignatedTime(repoId,commitTime,category);
     }
 }

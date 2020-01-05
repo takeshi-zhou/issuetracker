@@ -259,4 +259,12 @@ public interface IssueMapper {
      * @param list get issue list
      */
     void batchUpdateSonarIssues(List<Issue> list);
+
+    /**
+     * get all commit by repo id
+     *
+     * @param repoId
+     * @return commit id list
+     */
+    List<String> getCommitIds(@Param("repo_id") String repoId);
 }

@@ -452,4 +452,9 @@
             #{issue_id}
         </foreach>
     </select>
+
+    <select id="getCommitIds" parameterType="String" resultType="String">
+        select commit_id from commit where repo_id = #{repo_id}
+    </select>
+
 </mapper>

@@ -75,6 +75,10 @@ public class KafkaServiceImpl implements KafkaService {
         this.commitFilter = commitFilter;
     }
 
+    @Autowired
+    @Qualifier("EveryCommit")
+    private CommitFilterStrategy<ScanMessageWithTime> cloneCommitFilter;
+
     //初始化project的一些状态,表示目前正在scan
     private void initialProject(String projectId) {
         JSONObject postData = new JSONObject();
@@ -231,6 +235,8 @@ public class KafkaServiceImpl implements KafkaService {
             e.printStackTrace();
         }
         List<ScanMessageWithTime> filteredCommits=commitFilter.filter(map,dates);
+
+        List<ScanMessageWithTime> cloneFilteredCommits = cloneCommitFilter.filter(map,dates);
         if(filteredCommits.isEmpty()){
             return ;
         }
@@ -239,7 +245,7 @@ public class KafkaServiceImpl implements KafkaService {
         logger.info(filteredCommits.size()+" commits need to scan after filtered!");
 
         Map<String,String> bugResultMap = analyzeProjectIsScanned(repoId,"bug",filteredCommits);
-        Map<String,String> cloneResultMap = analyzeProjectIsScanned(repoId,"clone",filteredCommits);
+        Map<String,String> cloneResultMap = analyzeProjectIsScanned(repoId,"clone",cloneFilteredCommits);
         Map<String,String> sonarResultMap = analyzeProjectIsScanned(repoId,"sonar",filteredCommits);
 
 
@@ -264,7 +270,7 @@ public class KafkaServiceImpl implements KafkaService {
         if(existedForBug){
             List<ScanMessageWithTime> bugFilterCommits = filteredCommits;
             if(bugResultMap.get("location") != null){
-                bugFilterCommits =updateFilterCommits(filteredCommits,Integer.parseInt(bugResultMap.get("location")));
+                bugFilterCommits = updateFilterCommits(filteredCommits,Integer.parseInt(bugResultMap.get("location")));
             }
             logger.info("start auto scan bug -> {}",repoId);
             for(ScanMessageWithTime message:bugFilterCommits){
@@ -279,7 +285,7 @@ public class KafkaServiceImpl implements KafkaService {
         //clone扫描
         boolean existedForClone = (existProject(repoId,"clone",false)||existProject(repoId,"clone",true))&&Boolean.parseBoolean(cloneResultMap.get("isFirst"));
         if(existedForClone){
-            List<ScanMessageWithTime> cloneFilterCommits = filteredCommits;
+            List<ScanMessageWithTime> cloneFilterCommits = cloneFilteredCommits;
             if(cloneResultMap.get("location") != null){
                 cloneFilterCommits =updateFilterCommits(filteredCommits,Integer.parseInt(cloneResultMap.get("location")));
             }
