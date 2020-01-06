@@ -349,7 +349,7 @@ paths:
       operationId: "getCodeChangesByCommit"
       parameters:
       - in: "query"
-        name: "repoId"
+        name: "repo_id"
         description: "repo的唯一ID"
         required: true
         schema:
@@ -384,7 +384,7 @@ paths:
       operationId: "getCodeChangesByDuration"
       parameters:
       - in: "query"
-        name: "repoId"
+        name: "repo_id"
         description: "repo的唯一ID"
         required: true
         schema:

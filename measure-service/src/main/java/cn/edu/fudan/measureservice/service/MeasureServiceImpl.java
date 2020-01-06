@@ -723,11 +723,11 @@ public class MeasureServiceImpl implements MeasureService {
             double changeLines = commitBase.getAddLines() + commitBase.getDelLines();
 
             int addedIssues = restInterfaceManager.getNumberOfNewIssueByCommit(repo_id,commit_id,category,spaceType,token);
-            if(addedIssues!=-1){
-                if(addedIssues != 0 ){
-                    changes.put("addedQuantity",changeLines/addedIssues);
+            if (addedIssues != -1){
+                if (addedIssues != 0 ){
+                    changes.put("addedQuantity", changeLines/addedIssues);
                 }else{
-                    changes.put("addedQuantity",-1);
+                    changes.put("addedQuantity", -1);
                 }
             }else{
                 logger.error("ScanResult 未记录该commit");
@@ -736,9 +736,9 @@ public class MeasureServiceImpl implements MeasureService {
             int eliminatedIssues = restInterfaceManager.getNumberOfEliminateIssueByCommit(repo_id,commit_id,category,spaceType,token);
 
             if(eliminatedIssues != 0){
-                changes.put("eliminatedQuantity",changeLines/eliminatedIssues);
+                changes.put("eliminatedQuantity", changeLines/eliminatedIssues);
             }else{
-                changes.put("eliminatedQuantity",-1);
+                changes.put("eliminatedQuantity", -1);
             }
         }else {
             logger.error("not get repo path!");
