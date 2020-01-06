@@ -156,9 +156,10 @@ public interface MeasureService {
      * @param until 提交的终止时间
      * @param token 用户token
      * @param category 工具类别
+     * @param repoId repo唯一ID
      * @return 提交次数
      */
-    int getCommitCountByDurationAndDeveloperName(String developer_name,String since,String until,String token,String category);
+    int getCommitCountByDurationAndDeveloperName(String developer_name,String since,String until,String token,String category,String repoId);
 
     /**
      * 获取在issueTracker用户下，该用户参与过的项目列表，以及各个项目的活跃度

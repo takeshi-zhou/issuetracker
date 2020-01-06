@@ -26,7 +26,7 @@ public interface RepoMeasureMapper {
 
     Integer getDelLinesByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
 
-    int getCommitCountsByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
+    int getCommitCountsByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until,@Param("developer_name")String developerName);
 
     String getStartDateOfRepo(@Param("repo_id")String repo_id);
 
