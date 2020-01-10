@@ -378,42 +378,49 @@ paths:
   /measure/repository/duration:
     get:
       tags:
-      - "项目度量API"
-      summary: "获取开发者基本信息与提交涉及的代码行数--指定时段"
-      description: "根据repo与commit的唯一ID获取开发者基本信息与提交涉及的代码行数"
-      operationId: "getCodeChangesByDuration"
+        - "开发者度量接口"
+      summary: "获取一个repo在一段时间内的某个开发者的commit信息"
+      description: "获取一个repo在一段时间内的某个开发者的commit信息，如果不指定开发者参数，则返回所有开发者commit信息"
+      operationId: "getCommitBaseInformationByDuration"
       parameters:
-      - in: "query"
-        name: "repo_id"
-        description: "repo的唯一ID"
-        required: true
-        schema:
-          type: "string"
-          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
-      - in: "query"
-        name: "since"
-        description: "指定时段的起始时间"
-        required: true
-        schema:
-          type: "string"
-          example: "2018.08.08"
-      - in: "query"
-        name: "until"
-        description: "指定时段的终止时间"
-        required: true
-        schema:
-          type: "string"
-          example: "2019.08.08"
+        - in: "query"
+          name: "repo_id"
+          description: "repo的唯一ID"
+          required: true
+          schema:
+            type: "string"
+            example: "4e21a81e-1efb-11ea-9fbe-11bdb9e75ae6"
+        - in: "query"
+          name: "since"
+          description: "从什么时候开始统计"
+          required: true
+          schema:
+            type: "string"
+            example: "2019-10-11"
+        - in: "query"
+          name: "until"
+          description: "统计到什么时候结束"
+          required: true
+          schema:
+            type: "string"
+            example: "2019-12-25"
+        - in: "query"
+          name: "developer_name"
+          description: "开发者姓名"
+          required: false
+          schema:
+            type: "string"
+            example: "linwangzai"
       responses:
-        200:
+        '200':
           description: "successful operation"
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CodeChangesResponseBean'
             text/plain:
               schema:
-                $ref: '#/components/schemas/CodeChangesResponseBean'
+                $ref: '#/components/schemas/CommitInfoDurationResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommitInfoDurationResponse'
         400:
           description: "failed"
 
@@ -1317,6 +1324,50 @@ components:
               type: "string"
             token:
               type: "string"
+
+    #    --------------------------------以下是接口/measure/repository/duration:所需信息---------------------------
+    CommitInfoDurationResponse:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          example: 200
+          description: "如果响应成功则返回200状态码，响应失败返回返回其他状态码。"
+        msg:
+          type: "string"
+          description: "响应返回的基本消息"
+        data:
+          type: "object"
+          items:
+            $ref: '#/components/schemas/CommitInfoDuration'
+
+    CommitInfoDuration:
+      type: "object"
+      properties:
+        commitInfoList:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/CommitInfoList'
+        sumAddLines:
+          type: "integer"
+        sumDelLines:
+          type: "integer"
+        sumCommitCounts:
+          type: "integer"
+
+    CommitInfoList:
+      type: "object"
+      properties:
+        author:
+          type: "string"
+        email:
+          type: "string"
+        commit_counts:
+          type: "integer"
+        add:
+          type: "integer"
+        del:
+          type: "integer"
 
 
 externalDocs:
