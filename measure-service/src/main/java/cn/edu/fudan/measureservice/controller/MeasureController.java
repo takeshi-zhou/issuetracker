@@ -22,7 +22,7 @@ public class MeasureController {
     @GetMapping("/measure/repository")
     @CrossOrigin
     public ResponseBean getMeasureDataByRepoId(@RequestParam("repo_id")String repo_id,
-                                               @RequestParam("since")String since,
+                                               @RequestParam(name="since",required = false)String since,
                                                @RequestParam("until")String until,
                                                @RequestParam("granularity") Granularity granularity){
         try{
@@ -262,15 +262,16 @@ public class MeasureController {
     @GetMapping("/measure/developer/commit-count")
     @CrossOrigin
     public ResponseBean getCommitCountByDurationAndDeveloperName(
-                                                                 @RequestParam("developer_name")String developer_name,
+                                                                 @RequestParam("developer_name")String developerName,
                                                                  @RequestParam("since")String since,
                                                                  @RequestParam("until")String until,
                                                                  @RequestParam("category")String category,
+                                                                 @RequestParam(value="repo_id",required=false)String repoId,
                                                                  HttpServletRequest request
     ){
         try{
             String token = request.getHeader("token");
-            return new ResponseBean(200,"success",measureService.getCommitCountByDurationAndDeveloperName(developer_name,since,until,token,category));
+            return new ResponseBean(200,"success",measureService.getCommitCountByDurationAndDeveloperName(developerName,since,until,token,category,repoId));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",null);

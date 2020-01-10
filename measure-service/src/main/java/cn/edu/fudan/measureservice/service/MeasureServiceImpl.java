@@ -325,7 +325,7 @@ public class MeasureServiceImpl implements MeasureService {
                     if(localDate.isAfter(preTimeLimit) || DateTimeUtil.isTheSameDay(localDate,preTimeLimit) && !DateTimeUtil.isTheSameDay(localDate,preTimeLimit)){
                         continue;
                     }
-                    while(!(localDate.isBefore(preTimeLimit) && localDate.isAfter(preTimeLimit.minusMonths(1)))){
+                    while(!(localDate.isBefore(preTimeLimit) && localDate.isAfter(preTimeLimit.minusMonths(1))) && !DateTimeUtil.isTheSameDay(localDate,preTimeLimit) ){
 
                         preTimeLimit = preTimeLimit.minusMonths(1);
                     }
@@ -542,7 +542,7 @@ public class MeasureServiceImpl implements MeasureService {
         List<CommitInfoDeveloper> CommitInfoDeveloper = repoMeasureMapper.getCommitInfoDeveloperListByDuration(repo_id, sinceDay, untilDay, developer_name);
         int addLines = repoMeasureMapper.getAddLinesByDuration(repo_id, sinceDay, untilDay);
         int delLines = repoMeasureMapper.getDelLinesByDuration(repo_id, sinceDay, untilDay);
-        int sumCommitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceDay, untilDay);
+        int sumCommitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceDay, untilDay,null);
         commitBaseInfoDuration.setCommitInfoList(CommitInfoDeveloper);
         commitBaseInfoDuration.setSumAddLines(addLines);
         commitBaseInfoDuration.setSumDelLines(delLines);
@@ -681,7 +681,7 @@ public class MeasureServiceImpl implements MeasureService {
         String sinceday = dateFormatChange(since);
         String untilday = dateFormatChange(until);
 
-        int commitCountsByDuration = repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceday, untilday);
+        int commitCountsByDuration = repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceday, untilday,null);
         return commitCountsByDuration;
     }
 
@@ -864,30 +864,26 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     @Override
-    public int getCommitCountByDurationAndDeveloperName(String developer_name, String since, String until, String token, String category) {
+    public int getCommitCountByDurationAndDeveloperName(String developerName, String since, String until, String token, String category,String repoId) {
         String repoPath=null;
         int commitTotalCount = 0;
-        List<JSONObject> projectList = restInterfaceManager.getProjectListByCategory(token,category);
-        for(Object project:projectList){
-            JSONObject protectJson = (JSONObject)project;
-            if(protectJson.get("download_status").toString().equals("Downloading")){
-                continue;
-            }
-            String repo_id = protectJson.get("repo_id").toString();
-            try{
-                repoPath=restInterfaceManager.getRepoPath(repo_id,"");
-                if(repoPath!=null){
-                    int commitCount = gitUtil.getCommitCount(repoPath,since,until,developer_name);
-                    commitTotalCount += commitCount;
-
+        if(repoId != null && !repoId.isEmpty()){
+            return repoMeasureMapper.getCommitCountsByDuration(repoId,since,until,developerName);
+        }else{
+            List<JSONObject> projectList = restInterfaceManager.getProjectListByCategory(token,category);
+            for(Object project:projectList){
+                JSONObject protectJson = (JSONObject)project;
+                if(protectJson.get("download_status").toString().equals("Downloading")){
+                    continue;
                 }
-            }finally {
-                if(repoPath!=null) {
-                    restInterfaceManager.freeRepoPath(repo_id,repoPath);
-                }
-            }
+                String repo_id = protectJson.get("repo_id").toString();
 
+                int commitCount = repoMeasureMapper.getCommitCountsByDuration(repo_id,since,until,developerName);
+                commitTotalCount += commitCount;
+
+            }
         }
+
         return commitTotalCount;
     }
 
