@@ -143,7 +143,7 @@ public class IssueDao {
         return issueMapper.getIssuesByIssueIds(issueIds);
     }
 
-    public List<String> getCommitId(String repoId) {
-        return issueMapper.getCommitIds(repoId);
+    public List<String> getCommitId(String repoId, String since, String until) {
+        return issueMapper.getCommitIds(repoId,since,until);
     }
 }

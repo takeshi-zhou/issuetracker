@@ -444,9 +444,9 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
     private LocationDao locationDao;
 
     @Override
-    public Object getCloneLines(String repoId) {
+    public Object getCloneLines(String repoId, String since, String until) {
 
-        List<String> commitIds = issueDao.getCommitId(repoId);
+        List<String> commitIds = issueDao.getCommitId(repoId,since,until);
 
         ArrayList cloneLineList = new ArrayList();
 
