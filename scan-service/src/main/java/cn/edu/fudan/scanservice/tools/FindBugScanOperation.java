@@ -201,6 +201,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         logger.info("start to compile the repository ->" + repoPath);
         if (!compile(repoPath)) {
             logger.error("Project Compile Failed!");
+            scanInitialInfo.getScan().setStatus("compile failed");
             return new ScanResult("findbug","failed", "compile failed");
         }
         logger.info("compile complete");
@@ -208,6 +209,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         //如果编译成功,调用findBug得到输出的XML文件
         if (!executeAnalyzeTool(repoPath, repoName)) {
             logger.error("Invoke Analyze Tool Failed!");
+            scanInitialInfo.getScan().setStatus("tool invoke failed");
             return new ScanResult("findbug","failed", "tool invoke failed");
         }
         logger.info("scan complete");
@@ -216,6 +218,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         String xmlPath = resultFileHome + repoName + ".xml";
         if (!analyzeXML(scan, repoPath, xmlPath)) {
             logger.error("Result File Analyze Failed!");
+            scanInitialInfo.getScan().setStatus("analyze failed");
             return new ScanResult("findbug","failed", "analyze failed");
         }
         logger.info("resultFile analyze complete");

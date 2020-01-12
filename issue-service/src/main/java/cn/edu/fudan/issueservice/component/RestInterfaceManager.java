@@ -396,6 +396,26 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(scanServicePath + "/inner/scan/commit?repo_id=" + repoId+"&commit_id="+commitId+"&category="+category, JSONObject.class);
     }
 
+    public List<String> getPreScannedCommitByCurrentCommit(String repoId,String commitId ,String category){
+        JSONArray preCommits = restTemplate.getForObject(scanServicePath + "/inner/scan/pre-scanned-commit?repo_id=" + repoId+"&commit_id="+commitId+"&category="+category, JSONArray.class);
+        List<String> parentCommits = new ArrayList<>();
+        if(preCommits != null){
+            parentCommits = preCommits.toJavaList(String.class);
+        }
+
+
+        return parentCommits;
+    }
+
+    public String getLatestScanFailedCommitId(String repoId,String commitId ,String category){
+        JSONObject failedCommitId = restTemplate.getForObject(scanServicePath + "/inner/scan/pre-scanned-commit?repo_id=" + repoId+"&commit_id="+commitId+"&category="+category, JSONObject.class);
+        if(failedCommitId != null){
+            return failedCommitId.toString();
+        }
+        return null;
+
+    }
+
     // --------------------------------------------------------measure api ---------------------------------------------------------
 
 
@@ -456,7 +476,30 @@ public class RestInterfaceManager {
     }
 
 
+    public JSONObject getDeveloperListByDuration(String developerName,String since ,String until,String repoId){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("token",null);
+        HttpEntity request = new HttpEntity(headers);
+        StringBuilder urlBuilder = new StringBuilder();
+        boolean isFirstPram =true;
+        urlBuilder.append(measureServicePath + "/measure/repository/duration?");
+        urlBuilder.append("repo_id=" + repoId);
+        urlBuilder.append("&since=" + since);
+        urlBuilder.append("&until=" + until);
 
+        if(developerName != null){
+            urlBuilder.append("&developer_name=" + developerName);
+        }
+
+        String url = urlBuilder.toString();
+        ResponseEntity responseEntity = restTemplate.exchange(url , HttpMethod.GET,request,JSONObject.class);
+        String body = responseEntity.getBody().toString();
+        JSONObject result = JSONObject.parseObject(body,JSONObject.class);
+        if(result == null){
+            logger.error("request /measure/repository/duration failed");
+        }
+        return result;
+    }
 
 
 }

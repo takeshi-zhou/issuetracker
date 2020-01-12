@@ -39,6 +39,8 @@ public class RestInterfaceManager {
     private String codeServicePath;
     @Value("${sonar.service.path}")
     private String sonarServicePath;
+    @Value("${code-tracker.service.path}")
+    private String codeTrackerServicePath;
 
     private RestTemplate restTemplate;
 
@@ -224,6 +226,17 @@ public class RestInterfaceManager {
             logger.error("repo name : {}  ----> request sonar api failed", repoName);
             throw e;
         }
+    }
+
+
+    public JSONObject startCodeTracker(String repoId, String branch, int beginCommit) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("repoId",repoId);
+        jsonObject.put("branch",branch);
+        jsonObject.put("beginCommit",beginCommit);
+        JSONObject result = restTemplate.postForObject(codeTrackerServicePath+"/project/auto", jsonObject, JSONObject.class);
+
+        return null;
     }
 }
 

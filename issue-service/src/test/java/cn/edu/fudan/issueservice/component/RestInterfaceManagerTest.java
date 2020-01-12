@@ -95,4 +95,12 @@ public class RestInterfaceManagerTest extends IssueServiceApplicationTests {
             System.out.println((index++)+": "+code);
         }
     }
+
+    @Test
+    public void getDeveloperListByDuration(){
+        JSONObject resultList = restInterfaceManager.getDeveloperListByDuration(null,"2019-01-09","2020-01-10","8aeccc72-337a-11ea-8e39-871d7ac5caa9");
+        int  a=1;
+        a= a+1;
+        System.out.println(a);
+    }
 }
