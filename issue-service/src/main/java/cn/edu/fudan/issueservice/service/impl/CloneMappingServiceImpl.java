@@ -39,7 +39,8 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
     private int newCloneInsert(boolean isFirst,Map<String,List<RawIssue>> map,Set<String> groupsNeedInsert,String repo_id,String developer,String current_commit_id,Date commitDate,String category,String committer,Date date){
         List<Issue> insertIssueList = new ArrayList<>();
         List<JSONObject> tags = new ArrayList<>();
-        JSONArray ignoreTypes=restInterfaceManager.getIgnoreTypesOfRepo(repo_id);//获取该项目ignore的issue类型
+        //获取该项目ignore的issue类型
+        JSONArray ignoreTypes=restInterfaceManager.getIgnoreTypesOfRepo(repo_id);
         int ignoreCountInNewIssues=0;
         for(String group:groupsNeedInsert){
             //所有新的group，每一个都是一个新的issue
@@ -65,8 +66,8 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
                     issue.setRaw_issue_end(rawIssue.getUuid());
                 }
                 rawIssue.setIssue_id(new_IssueId);
-                insertIssueList.add(issue);
             }
+            insertIssueList.add(issue);
         }
         //新的issue
         if (!insertIssueList.isEmpty()) {
@@ -118,8 +119,10 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             //装需要更新的Issue
             List<Issue> issues = new ArrayList<>();
             List<String> mappedIssueIds=new ArrayList<>();
-            Map<String,List<RawIssue>> map1=rawIssues1.stream().collect(Collectors.groupingBy(RawIssue::getType));//前一个版本
-            Map<String,List<RawIssue>> map2=rawIssues2.stream().collect(Collectors.groupingBy(RawIssue::getType));//当前版本
+            //前一个版本
+            Map<String,List<RawIssue>> map1=rawIssues1.stream().collect(Collectors.groupingBy(RawIssue::getType));
+            //当前版本
+            Map<String,List<RawIssue>> map2=rawIssues2.stream().collect(Collectors.groupingBy(RawIssue::getType));
             Set<String> preGroups=map1.keySet();
             Set<String> currentGroups=map2.keySet();
             Set<String> newGroups=new HashSet<>();
@@ -135,7 +138,8 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
                         mappedIssueIds.add(issue.getUuid());
                         for(int i=0;i<rawIssuesInCurrentGroup.size();i++){
                             RawIssue rawIssue=rawIssuesInCurrentGroup.get(i);
-                            rawIssue.setIssue_id(issue.getUuid());//当前group的所有rawIssue都对应到匹配到的group的issue
+                            //当前group的所有rawIssue都对应到匹配到的group的issue
+                            rawIssue.setIssue_id(issue.getUuid());
                             if(i==rawIssuesInCurrentGroup.size()-1){
                                 issue.setEnd_commit(current_commit_id);
                                 issue.setEnd_commit_date(commitDate);

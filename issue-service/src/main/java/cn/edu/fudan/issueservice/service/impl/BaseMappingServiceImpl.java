@@ -185,7 +185,7 @@ public class BaseMappingServiceImpl implements MappingService {
         //mapping完后end commit还是上一个commit说明被solved
         List<Issue> issues=issueDao.getIssuesByEndCommit(repo_id,category,pre_commit_id);
         if(issues != null) {
-            issueEventManager.sendIssueEvent(eventType, issues, committer, repo_id,currentCommitTime);
+            issueEventManager.sendIssueEvent(eventType, issues, committer, repo_id, currentCommitTime);
             if (!issues.isEmpty()) {
                 eliminatedInfoUpdate(issues, category, repo_id);
                 List<JSONObject> taggeds = new ArrayList<>();

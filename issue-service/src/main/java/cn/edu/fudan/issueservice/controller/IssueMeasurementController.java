@@ -181,9 +181,11 @@ public class IssueMeasurementController {
     }
 
     @GetMapping("/cloneRateInfo")
-    public Object getCloneRate(@RequestParam("repo_id") String  repoId) {
+    public Object getCloneRate(@RequestParam("repo_id") String  repoId,
+                               @RequestParam("since") String since,
+                               @RequestParam("until")String until) {
 
-        return issueMeasureInfoService.getCloneLines(repoId);
+        return issueMeasureInfoService.getCloneLines(repoId, since, until);
     }
 
     @GetMapping("/latestCloneLines")

@@ -1,0 +1,924 @@
+openapi: 3.0.0
+info:
+  description: ""
+  version: "1.0.0"
+  title: "issueTracker"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "pyu17@fudan.edu.cn"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+servers:
+- url: http://10.141.221.85:8000
+  description: 接口测试地址
+
+
+tags:
+- name: "项目度量API"
+- name: "开发者度量API"
+- name: "项目管理API"
+
+paths:
+  /measure/repository:
+    get:
+      tags:
+        - "项目度量API"
+      summary: "获取一段时间内最新的项目度量列表"
+      description: "根据时间粒度，获取每天或者每周最新的项目度量信息。"
+      operationId: "getMeasureDataByRepoId"
+      parameters:
+        - in: "query"
+          name: "repo_id"
+          description: "repo的唯一ID"
+          required: true
+          schema:
+            type: "string"
+            example: "4e21a81e-1efb-11ea-9fbe-11bdb9e75ae6"
+        - in: "query"
+          name: "granularity"
+          description: "时间粒度 "
+          required: true
+          schema:
+            type: "string"
+            enum: ["day","week","month"]
+        - in: "query"
+          name: "since"
+          description: "从什么时候开始统计"
+          required: true
+          schema:
+            type: "string"
+            example: "2019-11-08"
+        - in: "query"
+          name: "until"
+          description: "统计到什么时候结束"
+          required: true
+          schema:
+            type: "string"
+            example: "2019-11-20"
+      responses:
+        '200':
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepoMeasureResponse'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/RepoMeasureResponse'
+        400:
+          description: "failed"
+
+  /measure/repository/commit:
+    get:
+      tags:
+      - "项目度量API"
+      summary: "获取开发者基本信息与提交涉及的代码行数--快照"
+      description: "根据repo与commit的唯一ID获取开发者基本信息与提交涉及的代码行数"
+      operationId: "getCodeChangesByCommit"
+      parameters:
+      - in: "query"
+        name: "repo_id"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "4e21a81e-1efb-11ea-9fbe-11bdb9e75ae6"
+      - in: "query"
+        name: "commit_id"
+        description: "commit的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "53abe6a581d013f5f92b775c9bd6f6396a8ab27b"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeChangesResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/CodeChangesResponseBean'
+        400:
+          description: "failed"
+
+  /measure/repository/duration:
+    get:
+      tags:
+      - "项目度量API"
+      summary: "获取开发者基本信息与提交涉及的代码行数--指定时段"
+      description: "根据repo与commit的唯一ID获取开发者基本信息与提交涉及的代码行数，如果不指定开发者参数，则返回所有开发者commit信息"
+      operationId: "getCommitBaseInformationByDuration"
+      parameters:
+      - in: "query"
+        name: "repo_id"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "4e21a81e-1efb-11ea-9fbe-11bdb9e75ae6"
+      - in: "query"
+        name: "since"
+        description: "指定时段的起始时间"
+        required: true
+        schema:
+          type: "string"
+          example: "2019.10.12"
+      - in: "query"
+        name: "until"
+        description: "指定时段的截止时间"
+        required: true
+        schema:
+          type: "string"
+          example: "2019.12.30"
+      - in: "query"
+        name: "developer_name"
+        description: "开发者姓名"
+        required: false
+        schema:
+          type: "string"
+          example: "linwangzai"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommitInfoDurationResponse'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/CommitInfoDurationResponse'
+        400:
+          description: "failed"
+
+  /measure/repository/commitBaseInfo-granularity:
+    get:
+      tags:
+        - "项目度量API"
+      summary: "获取工作量数据"
+      description: "按照不同时间段（since、until），不同聚合粒度（granularity：天/周/月），不同开发者（developerName），获取工作量数据"
+      operationId: "getCommitBaseInfoGranularity"
+      parameters:
+        - in: "query"
+          name: "repo_id"
+          description: "repo的唯一ID"
+          required: true
+          schema:
+            type: "string"
+            example: "4e21a81e-1efb-11ea-9fbe-11bdb9e75ae6"
+        - in: "query"
+          name: "since"
+          description: "从什么时候开始统计"
+          required: false
+          schema:
+            type: "string"
+            example: "2019-10-11"
+        - in: "query"
+          name: "until"
+          description: "统计到什么时候结束"
+          required: false
+          schema:
+            type: "string"
+            example: "2019-12-25"
+        - in: "query"
+          name: "developer_name"
+          description: "开发者姓名"
+          required: false
+          schema:
+            type: "string"
+            example: "linwangzai"
+        - in: "query"
+          name: "granularity"
+          description: "时间聚合粒度"
+          required: false
+          schema:
+            type: "string"
+            enum: ["day","week","month"]
+      responses:
+        '200':
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommitInfoGranularityResponse'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/CommitInfoGranularityResponse'
+        400:
+          description: "failed"
+
+  /measure/repo-information:
+    get:
+      tags:
+      - "项目度量API"
+      summary: "获取指定commit版本的项目度量基本信息"
+      description: "根据repo与commit的唯一ID获取项目度量的基本信息，包括总代码行数，文件和类的的数量，圈复杂度"
+      operationId: "getRepoMeasureByAnalysis"
+      parameters:
+      - in: "query"
+        name: "repo_id"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "4e21a81e-1efb-11ea-9fbe-11bdb9e75ae6"
+      - in: "query"
+        name: "commit_id"
+        description: "commit的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "53abe6a581d013f5f92b775c9bd6f6396a8ab27b"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepoMeasureResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/RepoMeasureResponseBean'
+        400:
+          description: "failed"
+
+  /measure/repository/commit-counts:
+    get:
+      tags:
+      - "项目度量API"
+      summary: "获取提交次数--指定时段"
+      description: "根据repo获取指定时段的提交次数"
+      operationId: "getRepoCommitCountsByCommit"
+      parameters:
+      - in: "query"
+        name: "repo_id"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
+      - in: "query"
+        name: "since"
+        description: "指定时段的起始时间"
+        required: true
+        schema:
+          type: "string"
+          example: "2018.08.08"
+      - in: "query"
+        name: "until"
+        description: "指定时段的终止时间"
+        required: true
+        schema:
+          type: "string"
+          example: "2019.08.08"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommitCountsResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/CommitCountsResponseBean'
+        400:
+          description: "failed"
+
+  /measure/repository/quality:
+    get:
+      tags:
+      - "项目度量API"
+      summary: "获取代码质量指数"
+      description: "根据repo以及commit的唯一ID获取代码质量指数，代码质量指数为代码行数/问题数，如果分母问题数为0，则返回-1"
+      operationId: "getRepoQualityByCommit"
+      parameters:
+      - in: "query"
+        name: "repo_id"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
+      - in: "query"
+        name: "commit_id"
+        description: "commit的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "18c74e4ad86de23c41ea57abc1e88ebed3140fe3"
+      - in: "query"
+        name: "category"
+        description: "工具选择，findbugs则选择'bug' "
+        required: true
+        schema:
+          type: "string"
+          example: "bug"
+      - in: "header"
+        name: "token"
+        description: "用户token，用于验证用户"
+        required: true
+        schema:
+          type: "string"
+          example: "ec15d79e36e14dd258cfff3d48b73d35"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantityResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/QuantityResponseBean'
+        400:
+          description: "failed"
+
+  /measure/repository/quality-change:
+    get:
+      tags:
+      - "项目度量API"
+      summary: "获取代码质量变化指数"
+      description: "根据repo以及commit的唯一ID获取代码质量变化指数：每改变100行代码新增或消除的问题数量"
+      operationId: "getRepoQualityChangesByCommit"
+      parameters:
+      - in: "query"
+        name: "repo_id"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "f6d6201c-6514-11e9-9ddc-f93dfaa9da61"
+      - in: "query"
+        name: "commit_id"
+        description: "commit的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "0f9103672d2e8ef5977795e9fe2ef788d6ce24a2"
+      - in: "query"
+        name: "category"
+        description: "工具选择，findbugs则选择'bug' "
+        required: true
+        schema:
+          type: "string"
+          example: "bug"
+      - in: "header"
+        name: "token"
+        description: "用户token，用于验证用户"
+        required: true
+        schema:
+          type: "string"
+          example: "ec15d79e36e14dd258cfff3d48b73d35"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantityChangesResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/QuantityChangesResponseBean'
+        400:
+          description: "failed"
+
+  /measure/repository/active:
+    get:
+      tags:
+      - "项目度量API"
+      summary: "获取repo活跃度"
+      description: "根据repoID获取repo的活跃度--活跃度根据过去90天的commit次数进行判定"
+      operationId: "getRepoActivityByCommit"
+      parameters:
+      - in: "query"
+        name: "repo_id"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ActiveResponseBean'
+        400:
+          description: "failed"
+
+  /measure/developer/repository-list:
+    get:
+      tags:
+      - "开发者度量API"
+      summary: "获取用户参与项目信息"
+      description: "根据用户token以及用户名获取该用户参与的项目列表"
+      operationId: "getRepoListByDeveloperName"
+      parameters:
+      - in: "query"
+        name: "category"
+        description: "工具选择，findbugs则选择'bug' "
+        required: true
+        schema:
+          type: "string"
+          example: "bug"
+      - in: "query"
+        name: "developer_name"
+        description: "开发者姓名"
+        required: true
+        schema:
+          type: "string"
+          example: "linwangzai"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperRepoListResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/DeveloperRepoListResponseBean'
+        400:
+          description: "failed"
+
+  /measure/developer/commit-count:
+    get:
+      tags:
+      - "开发者度量API"
+      summary: "获取用户一段时间内的提交次数"
+      description: "根据用户token以及用户名获取一段时间内用户的提交次数"
+      operationId: "getCommitCountByDurationAndDeveloperName"
+      parameters:
+      - in: "query"
+        name: "category"
+        description: "工具选择，findbugs则选择'bug' "
+        required: true
+        schema:
+          type: "string"
+          example: "bug"
+      - in: "query"
+        name: "developer_name"
+        description: "开发者姓名"
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "since"
+        description: "指定时段的起始时间"
+        required: true
+        schema:
+          type: "string"
+          example: "2018.08.08"
+      - in: "query"
+        name: "until"
+        description: "指定时段的终止时间"
+        required: true
+        schema:
+          type: "string"
+          example: "2019.08.08"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperCommitCountResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/DeveloperCommitCountResponseBean'
+        400:
+          description: "failed"
+
+  /measure/developer/code-change:
+    get:
+      tags:
+      - "开发者度量API"
+      summary: "获取用户一段时间内提交的代码行数"
+      description: "根据用户token以及用户名获取一段时间内用户提交的代码行数"
+      operationId: "getCodeChangesByDurationAndDeveloperName"
+      parameters:
+      - in: "query"
+        name: "category"
+        description: "工具选择，findbugs则选择'bug' "
+        required: true
+        schema:
+          type: "string"
+          example: "bug"
+      - in: "query"
+        name: "developer_name"
+        description: "开发者姓名"
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "since"
+        description: "指定时段的起始时间"
+        required: true
+        schema:
+          type: "string"
+          example: "2018.08.08"
+      - in: "query"
+        name: "until"
+        description: "指定时段的终止时间"
+        required: true
+        schema:
+          type: "string"
+          example: "2019.08.08"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperCodeChangeResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/DeveloperCodeChangeResponseBean'
+        400:
+          description: "failed"
+
+  /measure/developer/quality-changes:
+    get:
+      tags:
+      - "开发者度量API"
+      summary: "获取用户最近一定次数commit的代码提交质量"
+      description: "根据开发者名字获取开发者最近一定次数commit的代码提交质量"
+      operationId: "getQualityChangesByDeveloperName"
+      parameters:
+      - in: "query"
+        name: "category"
+        description: "工具选择，findbugs则选择'bug' "
+        required: true
+        schema:
+          type: "string"
+          example: "bug"
+      - in: "query"
+        name: "developer_name"
+        description: "开发者姓名"
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "counts"
+        description: "提交次数"
+        required: false
+        schema:
+          type: "integer"
+          default: 0
+      - in: "query"
+        name: "project_name"
+        description: "指定特定的项目名字"
+        required: false
+        schema:
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperQualityChangesResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/DeveloperQualityChangesResponseBean'
+        400:
+          description: "failed"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBean'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBean'
+
+components:
+  schemas:
+    Developer:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        email:
+          type: "string"
+
+    CommitBase:
+      type: "object"
+      properties:
+        authors:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/Developer'
+        addLines:
+          type: "integer"
+        delLines:
+          type: "integer"
+
+    CodeChangesResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        msg:
+          type: "string"
+        data:
+          $ref: '#/components/schemas/CommitBase'
+
+    RepoMeasure:
+      type: "object"
+      properties:
+        uuid:
+          type: "string"
+          description: "唯一id"
+        files:
+          type: "integer"
+          format: int32
+          description: "文件数量"
+        ncss:
+          type: "integer"
+          format: int32
+          description: "不包含注释与空行的总代码行数"
+        classes:
+          type: "integer"
+          format: int32
+          description: "类数量"
+        functions:
+          type: "integer"
+          format: int32
+          description: "方法数量"
+        java_docs:
+          type: "integer"
+          format: int32
+          description: "java文档数量"
+        java_doc_lines:
+          type: "integer"
+          format: int32
+          description: "java文档行数"
+        single_comment_lines:
+          type: "integer"
+          format: int32
+          description: "单行注释行数"
+        multi_comment_lines:
+          type: "integer"
+          format: int32
+          description: "多行注释行数"
+        ccn:
+          type: "number"
+          format: double
+          description: "圈复杂度"
+        commit_id:
+          type: "string"
+        commit_time:
+          type: "string"
+        repo_id:
+          type: "string"
+        developer_name:
+          type: "string"
+        developer_email:
+          type: "string"
+        add_lines:
+          type: "integer"
+          format: int32
+          description: "代码增加行数"
+        del_lines:
+          type: "integer"
+          format: int32
+          description: "代码删除行数"
+
+    RepoMeasureResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        msg:
+          type: "string"
+        data:
+          $ref: '#/components/schemas/RepoMeasure'
+
+    RepoMeasureResponse:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          example: 200
+          description: "如果响应成功则返回200状态码，响应失败返回返回其他状态码。"
+        msg:
+          type: "string"
+          description: "响应返回的基本消息"
+        data:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/RepoMeasure'
+
+    CommitCountsResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        msg:
+          type: "string"
+        data:
+          type: "integer"
+
+    QuantityResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        msg:
+          type: "string"
+        data:
+          type: "number"
+          format: double
+
+    QuantityChangesResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        msg:
+          type: "string"
+        data:
+          type: "object"
+          properties:
+            addedQuantity:
+              type: "number"
+              format: double
+            eliminatedQuantity:
+              type: "number"
+              format: double
+
+    ActiveResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        msg:
+          type: "string"
+        data:
+          type: "string"
+          example: "inactive"
+          description: "inactive代表不活跃，lessActive代表较不活跃，relativelyActive代表较活跃，active代表活跃"
+
+
+    DeveloperRepoListResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        msg:
+          type: "string"
+        data:
+          type: "object"
+          additionalProperties:
+            type: "string"
+          example:
+            spotify: "inactive"
+
+    DeveloperCommitCountResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        msg:
+          type: "string"
+        data:
+          type: "integer"
+          format: int32
+
+    DeveloperCodeChangeResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        msg:
+          type: "string"
+        data:
+          $ref: '#/components/schemas/CommitBase'
+
+    DeveloperQualityChangesResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        msg:
+          type: "string"
+        data:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/CodeQualityBean'
+
+    CodeQualityBean:
+      type: "object"
+      properties:
+        expression:
+          type: "string"
+          description: "代码质量结果的公式"
+        date:
+          type: "string"
+          description: "代码提交时间"
+        result:
+          type: "number"
+          description: "代码质量结果"
+        commitId:
+          type: "string"
+          description: "commit的唯一ID"
+        projectName:
+          type: "string"
+          description: "项目名"
+
+    ErrorResponseBean:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          description: "状态码"
+        msg:
+          type: "string"
+        data:
+          type: "string"
+          description: "错误信息"
+
+
+
+    #    --------------------------------以下是接口/measure/repository/duration:所需信息---------------------------
+    CommitInfoDurationResponse:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          example: 200
+          description: "如果响应成功则返回200状态码，响应失败返回返回其他状态码。"
+        msg:
+          type: "string"
+          description: "响应返回的基本消息"
+        data:
+          type: "object"
+          items:
+            $ref: '#/components/schemas/CommitInfoDuration'
+
+    CommitInfoDuration:
+      type: "object"
+      properties:
+        commitInfoList:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/CommitInfoList'
+        sumAddLines:
+          type: "integer"
+        sumDelLines:
+          type: "integer"
+        sumCommitCounts:
+          type: "integer"
+
+    CommitInfoList:
+      type: "object"
+      properties:
+        author:
+          type: "string"
+        email:
+          type: "string"
+        commit_counts:
+          type: "integer"
+        add:
+          type: "integer"
+        del:
+          type: "integer"
+
+    #    --------------------------------以下是接口/measure/repository/commitBaseInfo-granularity:所需信息---------------------------
+    CommitInfoGranularityResponse:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          example: 200
+          description: "如果响应成功则返回200状态码，响应失败返回返回其他状态码。"
+        msg:
+          type: "string"
+          description: "响应返回的基本消息"
+        data:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/CommitInfoGranularity'
+
+    CommitInfoGranularity:
+      type: "object"
+      properties:
+        date:
+          type: "string"
+          example: "2019-10-10"
+        commitBaseInfoDuration:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/CommitInfoDuration'
+
+
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"

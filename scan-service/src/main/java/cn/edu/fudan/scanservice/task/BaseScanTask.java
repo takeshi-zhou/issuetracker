@@ -80,8 +80,8 @@ public class BaseScanTask {
         }
 
         logger.info("scan complete ->" + scanResult.getDescription());
-        if(!category.equals("clone")){
-            logger.info("start to mapping ......");
+
+        logger.info("start to mapping ......");
             if (!scanOperation.mapping(repoId, commitId,category)) {
                 send(repoId, commitId, category,"failed", "Mapping failed");
                 scanInitialInfo.getScan().setStatus("Mapping Failed!");
@@ -90,8 +90,8 @@ public class BaseScanTask {
                 restInterfaceManager.freeRepoPath(scanInitialInfo.getRepoId(),scanInitialInfo.getRepoPath());
                 return;
             }
-            logger.info("mapping complete");
-        }
+        logger.info("mapping complete");
+
         //映射结束，更新当前scan
         logger.info("start to update scan status");
         if (!scanOperation.updateScan(scanInitialInfo)) {

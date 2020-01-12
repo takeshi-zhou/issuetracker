@@ -703,6 +703,7 @@ public class MeasureServiceImpl implements MeasureService {
 
     @Override
     public double getQuantityByCommitAndCategory(String repo_id, String commit_id, String category,String token ) {
+        //代码质量指数：代码行数/问题数 若问题数为0，则返回-1
         double ratio = -1;
 
         //获取代码行数
@@ -730,24 +731,35 @@ public class MeasureServiceImpl implements MeasureService {
             double changeLines = commitBase.getAddLines() + commitBase.getDelLines();
 
             int addedIssues = restInterfaceManager.getNumberOfNewIssueByCommit(repo_id,commit_id,category,spaceType,token);
+//            System.out.println("addedIssues:" + addedIssues);
             if (addedIssues != -1){
                 if (addedIssues != 0 ){
-                    changes.put("addedQuantity", changeLines/addedIssues);
+                    //新增问题质量指数：每改变100行代码，新增的问题数量
+                    changes.put("addedQuantity", addedIssues*100/changeLines);
                 }else{
                     changes.put("addedQuantity", -1);
                 }
             }else{
+                changes.put("未取得结果","ScanResult 未记录该commit");
                 logger.error("ScanResult 未记录该commit");
             }
 
             int eliminatedIssues = restInterfaceManager.getNumberOfEliminateIssueByCommit(repo_id,commit_id,category,spaceType,token);
-
-            if(eliminatedIssues != 0){
-                changes.put("eliminatedQuantity", changeLines/eliminatedIssues);
+//            System.out.println("eliminatedIssues:" + eliminatedIssues);
+            if(eliminatedIssues != -1){
+                if(eliminatedIssues != 0){
+                    //消除问题质量指数：每改变100行代码，消除的问题数量
+                    changes.put("eliminatedQuantity", eliminatedIssues*100/changeLines);
+                }else{
+                    changes.put("eliminatedQuantity", -1);
+                }
             }else{
-                changes.put("eliminatedQuantity", -1);
+                changes.put("未取得结果","ScanResult 未记录该commit");
+                logger.error("ScanResult 未记录该commit");
             }
+
         }else {
+            changes.put("未取得结果","未取得repo_measure记录");
             logger.error("not get repo path!");
         }
 

@@ -117,7 +117,7 @@ public interface MeasureService {
      * 获取一个项目在某个特定commit快照下代码质量指数
      * @param repo_id repo的唯一标识
      * @param commit_id commit的唯一标识
-     * @param category 问题类型
+     * @param category 问题类型，工具类型
      * @return 代码质量指数为代码行数/问题数
      */
     double getQuantityByCommitAndCategory(String repo_id,String commit_id,String category,String token);

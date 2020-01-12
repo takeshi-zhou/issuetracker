@@ -56,7 +56,7 @@ public interface IssueMeasureInfoService {
      */
     Object getQualityChangesByCondition(String developer, String timeGranularity, String since, String until, String repoId, String tool, int page, int ps);
 
-    Object getCloneLines(String repoId);
+    Object getCloneLines(String repoId, String since, String until);
 
     Object getLatestScannedCommitCloneLines(String repoId);
 }
