@@ -5,11 +5,13 @@ import cn.edu.fudan.scanservice.component.rest.RestInterfaceManager;
 import cn.edu.fudan.scanservice.dao.ScanDao;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.service.ScanService;
+import cn.edu.fudan.scanservice.util.JGitHelper;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -158,4 +160,89 @@ public class ScanServiceImpl implements ScanService {
         return  scanDao.getScanByCategoryAndRepoIdAndCommitId(repo_id, category,commit_id);
     }
 
+    @Override
+    public List<String> getPreScannedCommitByCurrentCommit(String repoId, String category, String commitId) {
+        String repoPath = null;
+        List<String> result = null;
+        try{
+            repoPath = restInterfaceManager.getRepoPath(repoId,commitId);
+            if(repoPath == null){
+                return null;
+            }
+            JGitHelper jGitHelper = new JGitHelper(repoPath);
+            result = getPreScannedCommitByJGit(jGitHelper,null,repoId,category,commitId);
+        }finally{
+            restInterfaceManager.freeRepoPath(repoId,repoPath);
+        }
+        return result;
+    }
+
+
+
+
+    private List<String> getPreScannedCommitByJGit(JGitHelper jGitHelper, List<String> scannedParents, String repoId, String category, String commitId) {
+        if(scannedParents == null){
+            scannedParents = new ArrayList<>();
+        }
+
+        String[] parents = jGitHelper.getCommitParents(commitId);
+        for(String parent : parents){
+            Scan  scan = scanDao.getScanByCategoryAndRepoIdAndCommitId(repoId,category,commitId);
+            if(scan == null ){
+                continue;
+            }
+            if("done".equals(scan.getStatus())){
+                if(!scannedParents.contains(parent)){
+                    scannedParents.add(parent);
+                }
+            }else{
+                getPreScannedCommitByJGit(jGitHelper,scannedParents,repoId,category,commitId);
+            }
+        }
+
+        return scannedParents;
+    }
+
+
+    @Override
+    public String getLatestScanFailedCommitIdAndDeveloper(String repoId, String category, String commitId) {
+        String repoPath = null;
+        String result = null;
+        try{
+            repoPath = restInterfaceManager.getRepoPath(repoId,commitId);
+            if(repoPath == null){
+                return null;
+            }
+            JGitHelper jGitHelper = new JGitHelper(repoPath);
+            result = getPreScannedFailedCommitByJGit(jGitHelper,repoId,category,commitId);
+        }finally{
+            restInterfaceManager.freeRepoPath(repoId,repoPath);
+        }
+        return result;
+    }
+
+    /**
+     * 目前只是选取第一个未扫描或者编译未成功的commit作为返回值。 后面仍需改进。
+     * @param jGitHelper
+     * @param repoId
+     * @param category
+     * @param commitId
+     * @return
+     */
+    private String getPreScannedFailedCommitByJGit(JGitHelper jGitHelper, String repoId, String category, String commitId) {
+
+        String[] parents = jGitHelper.getCommitParents(commitId);
+        for(String parent : parents){
+            Scan  scan = scanDao.getScanByCategoryAndRepoIdAndCommitId(repoId,category,commitId);
+            if(scan == null ){
+                return parent;
+            }
+            if("done".equals(scan.getStatus())){
+                continue;
+            }else{
+                return parent;
+            }
+        }
+        return null;
+    }
 }

@@ -73,6 +73,7 @@ public class BaseScanTask {
         ScanResult scanResult = scanOperation.doScan(scanInitialInfo);
         if (scanResult.getStatus().equals("failed")) {
             send(repoId, commitId, category,"failed", scanResult.getDescription());
+            scanOperation.updateScan(scanInitialInfo);
             logger.error(scanResult.getDescription());
             restInterfaceManager.freeRepoPath(scanInitialInfo.getRepoId(),scanInitialInfo.getRepoPath());
             return;
@@ -83,6 +84,8 @@ public class BaseScanTask {
         logger.info("start to mapping ......");
             if (!scanOperation.mapping(repoId, commitId,category)) {
                 send(repoId, commitId, category,"failed", "Mapping failed");
+                scanInitialInfo.getScan().setStatus("Mapping Failed!");
+                scanOperation.updateScan(scanInitialInfo);
                 logger.error("Mapping Failed!");
                 restInterfaceManager.freeRepoPath(scanInitialInfo.getRepoId(),scanInitialInfo.getRepoPath());
                 return;
@@ -101,5 +104,7 @@ public class BaseScanTask {
         send(repoId, commitId, category,"success", "all complete");
         restInterfaceManager.freeRepoPath(scanInitialInfo.getRepoId(),scanInitialInfo.getRepoPath());
     }
+
+
 
 }

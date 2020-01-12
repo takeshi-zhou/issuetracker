@@ -109,4 +109,29 @@ public class InnerController {
     public Object getScanByCategoryAndRepoIdAndCommitId(@RequestParam("repo_id") String repo_id,@RequestParam("category")String category,@RequestParam("commit_id")String commit_id){
         return scanService.getScanByCategoryAndRepoIdAndCommitId(repo_id, category,commit_id);
     }
+
+
+    /**
+     * 通过当前的commit id ，获取前一条扫描成功的commit id
+     * @param repoId
+     * @param category
+     * @param commitId
+     * @return
+     */
+    @GetMapping(value = "/inner/scan/pre-scanned-commit")
+    public Object getPreScannedCommitByCurrentCommit(@RequestParam("repo_id") String repoId,@RequestParam("category")String category,@RequestParam("commit_id")String commitId){
+        return scanService.getPreScannedCommitByCurrentCommit(repoId, category,commitId);
+    }
+
+    /**
+     * 通过当前的commit id ，获取最近的一条未扫描或未扫描成功的commit id
+     * @param repoId
+     * @param category
+     * @param commitId
+     * @return
+     */
+    @GetMapping(value = "/inner/scan/pre-failed-commit")
+    public Object getLatestScanFailedCommitId(@RequestParam("repo_id") String repoId,@RequestParam("category")String category,@RequestParam("commit_id")String commitId){
+        return scanService.getLatestScanFailedCommitIdAndDeveloper(repoId, category,commitId);
+    }
 }
