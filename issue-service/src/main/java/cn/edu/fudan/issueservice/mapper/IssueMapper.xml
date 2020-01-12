@@ -455,6 +455,12 @@
 
     <select id="getCommitIds" parameterType="String" resultType="String">
         select commit_id from commit where repo_id = #{repo_id}
+        <if test="since != null">
+            and <![CDATA[ commit_time >= #{since} ]]>
+        </if>
+        <if test="until != null">
+            and <![CDATA[ commit_time <= #{until} ]]>
+        </if>
     </select>
 
 </mapper>

@@ -266,5 +266,5 @@ public interface IssueMapper {
      * @param repoId
      * @return commit id list
      */
-    List<String> getCommitIds(@Param("repo_id") String repoId);
+    List<String> getCommitIds(@Param("repo_id") String repoId,@Param("since") String since,@Param("until") String until);
 }
