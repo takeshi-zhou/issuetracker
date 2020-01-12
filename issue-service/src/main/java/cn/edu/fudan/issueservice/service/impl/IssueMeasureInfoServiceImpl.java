@@ -160,7 +160,7 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
     @Override
     public Object getNotSolvedIssueCountByCategoryAndRepoId(String repoId, String category,String commitId) {
         Map<String,Integer> issueCount = new HashMap<>();
-        Map<String,Integer> result = new LinkedHashMap<>();
+        List<JSONObject> result = new ArrayList<JSONObject>();
 
         if(commitId == null){
             List<Issue> issues = issueDao.getNotSolvedIssueAllListByCategoryAndRepoId(repoId,category);
@@ -182,11 +182,14 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
         }
 
         List<Map.Entry<String,Integer>> list = new ArrayList<Map.Entry<String,Integer>>(issueCount.entrySet());
-        Collections.sort(list,(o1, o2) -> o1.getValue().compareTo(o2.getValue()));
-        for(Map.Entry<String,Integer> entry : list){
-            result.put(entry.getKey(),entry.getValue());
-        }
+        Collections.sort(list,(o1, o2) -> o2.getValue().compareTo(o1.getValue()));
 
+        for(Map.Entry<String,Integer> entry : list){
+            JSONObject obj = new JSONObject();
+            obj.put("Issue_Type",entry.getKey());
+            obj.put("Total",entry.getValue());
+            result.add(obj);
+        }
         return result;
     }
 
