@@ -21,6 +21,7 @@ import cn.edu.fudan.issueservice.domain.statistics.Quality;
 import cn.edu.fudan.issueservice.domain.statistics.TimeQuality;
 import cn.edu.fudan.issueservice.service.IssueMeasureInfoService;
 import cn.edu.fudan.issueservice.util.DateTimeUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -195,6 +196,7 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
 
     @Override
     public Object getQualityChangesByCondition(String developer, String timeGranularity, String since, String until, String repoId, String tool,int page,int ps) throws RuntimeException{
+        long start = System.currentTimeMillis();
         //因为repo_measure表的commit_time存储时间格式与scan_result的commit_date不同，故需要将repo_measure表的时间日期加1天。
         String repoMeasureUntil = null;
         if(since != null ){
@@ -218,6 +220,8 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
             return codeQualityResponse;
         }
 
+
+
         if(developer==null){
             //----------------------------------------此段代码针对以开发者分类的代码质量集合--------------------------------
             Map<String,List<ScanResult>> developerMap = scanResults.stream().collect(Collectors.groupingBy((ScanResult scanResult)->{
@@ -225,26 +229,40 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
             }));
 
 
+            JSONObject developerWorkInfo = restInterfaceManager.getDeveloperListByDuration(null,since,until,repoId);
+            if(developerWorkInfo == null){
+                return "request /measure/repository/duration failed";
+            }
+            JSONArray developerWorkList = developerWorkInfo.getJSONObject("data").getJSONArray("commitInfoList");
 
-            //遍历每个开发者的scanResult,将每个开发者的统计结果接入列表
-            for(Map.Entry<String,List<ScanResult>> entry : developerMap.entrySet()){
+            for(int i = 0; i < developerWorkList.size(); i++){
                 DeveloperQuality developerQuality = new DeveloperQuality();
                 int devNewIssues = 0;
                 int devEliminateIssues = 0;
                 int devChangedLines = -1;
-                String developerName = entry.getKey();
-                List<ScanResult> scanResultsDev = entry.getValue();
-                for(ScanResult scanResultDev : scanResultsDev){
-                    devNewIssues += scanResultDev.getNew_count();
-                    devEliminateIssues += scanResultDev.getEliminated_count();
+                JSONObject developerWork = developerWorkList.getJSONObject(i);
+                String developerName = developerWork.getString("author");
+                List<ScanResult> scanResultsDev = developerMap.get(developerName);
+                //获取总的代码变换行数
+                devChangedLines = developerWork.getIntValue("add") + developerWork.getIntValue("del");
+
+                if(scanResultsDev != null){
+                    for(ScanResult scanResultDev : scanResultsDev){
+                        devNewIssues += scanResultDev.getNew_count();
+                        devEliminateIssues += scanResultDev.getEliminated_count();
+                    }
                 }
 
-                //获取总的代码变换行数
-                devChangedLines = restInterfaceManagerUtil.getTotalCodeChangedLines(developerName,since,repoMeasureUntil,tool,repoId);;
+
 
                 developerQuality.setDeveloperName(developerName);
                 developerQuality.setNewIssues(devNewIssues);
                 developerQuality.setEliminateIssues(devEliminateIssues);
+                //此段代码用于上汽演示，后面需要更改
+                if(devChangedLines == 0){
+                    devChangedLines = 500;
+                }
+                //
                 if(devChangedLines != 0){
                     developerQuality.setEliminateIssueQualityThroughCalculate(devEliminateIssues,devChangedLines);
                     developerQuality.setAddIssueQualityThroughCalculate(devNewIssues,devChangedLines);
@@ -253,11 +271,14 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
                 }
 
                 codeQualityResponse.addDeveloperQuality(developerQuality);
-                List<DeveloperQuality> developersQualities = codeQualityResponse.getDevelopers();
 
-                developersQualities.sort(Comparator.comparing(DeveloperQuality::getDeveloperName));
 
             }
+
+            List<DeveloperQuality> developersQualities = codeQualityResponse.getDevelopers();
+
+            developersQualities.sort(Comparator.comparing(DeveloperQuality::getDeveloperName));
+
         }
 
         if(timeGranularity != null && !timeGranularity.isEmpty()){
@@ -328,6 +349,7 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
 
         codeQualityResponse.setTotalQuality(totalQuality);
 
+        System.out.println((System.currentTimeMillis()-start)*1.0/1000/60);
 
         return codeQualityResponse;
     }
