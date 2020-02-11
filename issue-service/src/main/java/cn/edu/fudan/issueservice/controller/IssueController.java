@@ -33,7 +33,7 @@ public class IssueController {
         return issueService.getIssueList(project_id, page, size,category);
     }
 
-    @GetMapping(value={"issue/one-issue"})
+    @GetMapping(value={"/issue/one-issue"})
     public Object getSpecificIssue(@RequestParam("issue_id") String issue_id){
         return issueService.getIssueByID(issue_id);
     }
