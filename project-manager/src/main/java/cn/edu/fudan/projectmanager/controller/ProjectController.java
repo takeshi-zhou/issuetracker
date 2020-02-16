@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController
 @EnableAutoConfiguration
@@ -31,6 +32,17 @@ public class ProjectController {
         } catch (Exception e) {
             return new ResponseBean(401, "add failed :" + e.getMessage(), null);
         }
+    }
+
+    // List ： url isPrivate username password name type branch
+    @PostMapping(value = {"/project/addProjectList"})
+    public Object addProjectList(HttpServletRequest request, @RequestBody List<JSONObject> projectListInfo) {
+        String userToken = request.getHeader("token");
+        if (projectService.addProjectList(userToken, projectListInfo)){
+            return new ResponseBean(200, "All projects were added successfully!", null);
+        }
+        return new ResponseBean(401, "At least one project was not added successfully. For details, you could check the log file.", null);
+
     }
 
     //get project list
