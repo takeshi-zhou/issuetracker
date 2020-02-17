@@ -28,6 +28,8 @@ public class ProjectServiceImpl implements ProjectService {
     private String githubAPIPath;
     @Value("${repo.url.pattern}")
     private String repoUrlPattern;
+//    @Value("${repo.url.patternGitlab}")
+//    private String repoUrlPatternGitlab;
     @Value("${clone.result.pre.home}")
     private String cloneResPreHome;
 
@@ -125,22 +127,30 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public boolean addProjectList(String userToken, List<JSONObject> projectListInfo){
+    public JSONObject addProjectList(String userToken, List<JSONObject> projectListInfo){
+        JSONObject result = new JSONObject();
         boolean flag = true;
+        String logInfo = "";
         for (int i = 0; i < projectListInfo.size(); i++){
             JSONObject projectInfo = projectListInfo.get(i);
             logger.info("开始导入第" + (i+1) + "个项目：" + projectInfo.getString("url"));
+            logInfo = logInfo + "开始导入第" + (i+1) + "个项目：" + projectInfo.getString("url");
             try {
                 addOneProject(userToken,projectInfo);
                 logger.info("导入第" + (i+1) + "个项目成功！");
+                logInfo = logInfo + "导入第" + (i+1) + "个项目成功！";
             }catch (Exception e){
                 logger.info("导入第" + (i+1) + "个项目失败：");
+                logInfo = logInfo + "导入第" + (i+1) + "个项目失败：";
                 logger.info(e.getMessage());
+                logInfo = logInfo + e.getMessage();
                 flag = false;
                 continue;
             }
         }
-        return flag;
+        result.put("isSuccessful", flag);
+        result.put("logInfo", logInfo);
+        return result;
     }
 
     @Override
@@ -288,6 +298,8 @@ public class ProjectServiceImpl implements ProjectService {
     private void checkProjectURL( String url,boolean isPrivate) {
         Pattern pattern = Pattern.compile(repoUrlPattern);
         Matcher matcher = pattern.matcher(url);
+//        Pattern pattern2 = Pattern.compile(repoUrlPatternGitlab);
+//        Matcher matcher2 = pattern2.matcher(url);
         if (!matcher.matches()) {
             throw new RuntimeException("invalid url!");
         }

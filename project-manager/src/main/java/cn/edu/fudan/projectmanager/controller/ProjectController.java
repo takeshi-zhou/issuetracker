@@ -38,10 +38,13 @@ public class ProjectController {
     @PostMapping(value = {"/project/addProjectList"})
     public Object addProjectList(HttpServletRequest request, @RequestBody List<JSONObject> projectListInfo) {
         String userToken = request.getHeader("token");
-        if (projectService.addProjectList(userToken, projectListInfo)){
+        JSONObject obj = projectService.addProjectList(userToken, projectListInfo);
+        boolean flag = obj.getBoolean("isSuccessful");
+        String lofInfo = obj.getString("logInfo");
+        if (flag){
             return new ResponseBean(200, "All projects were added successfully!", null);
         }
-        return new ResponseBean(401, "At least one project was not added successfully. For details, you could check the log file.", null);
+        return new ResponseBean(401, "At least one project was not added successfully. Logging info is showed as follow:/n" + lofInfo, null);
 
     }
 
