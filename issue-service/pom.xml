@@ -117,6 +117,18 @@
             <version>42.2.6</version>
         </dependency>
 
+        <!-- JGit -->
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>5.2.1.201812262042-r</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit.archive</artifactId>
+            <version>5.2.1.201812262042-r</version>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>

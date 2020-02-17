@@ -1,5 +1,6 @@
 package cn.edu.fudan.issueservice.util;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -53,6 +54,14 @@ public class DateTimeUtil {
         return dateTime.format(Y_M_D_formatter);
     }
 
+    public static String timeTotimeStamp(String s) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = simpleDateFormat.parse(s);
+        long ts = date.getTime();
+        //除以1000是将毫秒转成秒
+        String res = String.valueOf(ts/1000);
+        return res;
+    }
 
     public static LocalDate dateToLocalDate(Date date){
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();

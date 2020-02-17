@@ -33,7 +33,12 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         String developer = getDeveloper(currentCommitId);
         //获取该项目ignore的issue类型
         JSONArray ignoreTypes = restInterfaceManager.getIgnoreTypesOfRepo(repoId);
-        if (preCommitId.equals(currentCommitId)) {
+
+
+        List<String> parentCommits =  restInterfaceManager.getPreScannedCommitByCurrentCommit(repoId,currentCommitId,category);
+
+
+        if (parentCommits.isEmpty()) {
             //当前project第一次扫描，所有的rawIssue都是issue
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repoId, category, currentCommitId);
             if (rawIssues == null || rawIssues.isEmpty()) {
@@ -52,7 +57,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             dashboardUpdate(repoId, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
             logger.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(rawIssues);
-            scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,currentCommitId,commitDate,developer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
+            scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,currentCommitId,commitDate,developer,0,eliminatedIssueCount,remainingIssueCount));
         } else {
             issueMapping(repoId, category, preCommitId, currentCommitId, commitDate,
                     date, insertIssueList, tags, ignoreTypes, committer, developer);
@@ -454,7 +459,46 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         issue.setPriority(priority);
         return issue;
     }
+
+    /**
+     * 更改中，比对两个raw issue列表
+     * @param preRawIssues
+     * @param currentRawIssues
+     */
+
+    private void mappingTwoRawIssueList(List<RawIssue> preRawIssues,List<RawIssue> currentRawIssues){
+        Map<String, List<RawIssue>> curRawIssueMap = classifyRawIssue(currentRawIssues);
+        Map<String, List<RawIssue>> preRawIssueMap = classifyRawIssue(preRawIssues);
+
+        Map<String,List<RawIssueMappingSort>>  currentRawIssueMappedRawIssueList= new HashMap<>();
+        //用来判断匹配上的preRawIssue的下标位置，-1表示未匹配上。key是currentRawIssue的uuid，value是相匹配的preRawIssue的下标。
+        Map<String,Integer> currentRawIssueMappedIndex = new HashMap<>();
+        //key 是preRawIssue的uuid,value是current raw issue的uuid,用来记录preRawIssue匹配了哪个currentRawIssue
+        Map<String,RawIssue> preRawIssueMappedCurrentRawIssue = new HashMap<>();
+        for (Map.Entry<String, List<RawIssue>> entry : curRawIssueMap.entrySet()) {
+            if (preRawIssueMap.containsKey(entry.getKey())) {
+                List<RawIssue> preList = preRawIssueMap.get(entry.getKey());
+                for (RawIssue currentRawIssue : entry.getValue()) {
+                    List<RawIssueMappingSort> mappedRawIssues = findMostSimilarRawIssues(currentRawIssue,preList);
+                    currentRawIssueMappedRawIssueList.put(currentRawIssue.getUuid(),mappedRawIssues);
+                    if(mappedRawIssues.isEmpty()){
+                        currentRawIssueMappedIndex.put(currentRawIssue.getUuid(),-1);
+                    }else{
+                        currentRawIssueMappedIndex.put(currentRawIssue.getUuid(),0);
+                    }
+
+                }
+            }
+        }
+
+        for (RawIssue currentRawIssue : currentRawIssues) {
+            findBestMatching(preRawIssueMappedCurrentRawIssue,currentRawIssueMappedIndex,currentRawIssueMappedRawIssueList,currentRawIssue,-1);
+        }
+
+    }
 }
+
+
 
 
 

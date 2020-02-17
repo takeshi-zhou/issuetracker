@@ -11,6 +11,8 @@ public interface ProjectService {
 
     void addOneProject(String userToken, JSONObject projectInfo);
 
+    boolean addProjectList(String userToken, List<JSONObject> projectInfo);
+
     Object getProjectList(String userToken,String type);
 
     //jeff

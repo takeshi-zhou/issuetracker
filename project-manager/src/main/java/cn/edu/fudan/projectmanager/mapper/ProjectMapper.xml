@@ -187,10 +187,10 @@
             <if test="type != null and type != '' ">
                 and type = #{type}
             </if>
-            <if test="name != null and name != ''">
+            <if test="name != null and name != '' and name != 'null'">
                 and name = #{name}
             </if>
-            <if test="module != null and module != ''">
+            <if test="module != null and module != '' and module != 'null'">
                 and module = #{module}
             </if>
         </where>

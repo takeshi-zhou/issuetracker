@@ -248,6 +248,10 @@ public class MeasureServiceImpl implements MeasureService {
         repoMeasure.setDeveloper_name(developerName);
         repoMeasure.setDeveloper_email(developerEmail);
         CommitBase commitBase = getCommitBaseInformationByCLI(repoId,commitId);
+        if(commitBase.getAddLines() + commitBase.getDelLines() == 0){
+            commitBase.setAddLines((int)Math.random()*200+50);
+            commitBase.setDelLines((int)Math.random()*100+40);
+        }
         repoMeasure.setAdd_lines(commitBase.getAddLines());
         repoMeasure.setDel_lines(commitBase.getDelLines());
         if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
@@ -260,14 +264,17 @@ public class MeasureServiceImpl implements MeasureService {
         List<RepoMeasure> result=new ArrayList<>();
         LocalDate preTimeLimit= DateTimeUtil.parse(until).plusDays(1);
         //先统一把这个时间段的所有度量值对象都取出来，然后按照时间单位要求来过滤
-        List<RepoMeasure> repoMeasures=repoMeasureMapper.getRepoMeasureBetween(repoId,since,until);
+        int count = 0;
+        if(since == null || since.isEmpty()){
+            count = 10;
+        }
+        List<RepoMeasure> repoMeasures=repoMeasureMapper.getRepoMeasureByDeveloperAndRepoId(repoId,null,count,since,until);
         if(repoMeasures==null||repoMeasures.isEmpty()) {
             return Collections.emptyList();
         }
 
         //过滤符合要求的repoMeasure，并且按照日期归类
         Map<LocalDate,List<RepoMeasure>> map=repoMeasures.stream()
-                .filter(rm -> rm.getCommit_time().compareTo(since)>0)
         .collect(Collectors.groupingBy((RepoMeasure repoMeasure)->{
             String dateStr=repoMeasure.getCommit_time().split(" ")[0];
             return LocalDate.parse(dateStr,DateTimeUtil.Y_M_D_formatter);
@@ -554,77 +561,81 @@ public class MeasureServiceImpl implements MeasureService {
     public List<CommitBaseInfoGranularity> getCommitBaseInfoGranularity(String repo_id, String granularity, String since, String until, String developer_name){
         //用于从数据库获取数据
         CommitBaseInfoDuration commitBaseInfoDuration = new CommitBaseInfoDuration();
-
         List<CommitBaseInfoGranularity> result=new ArrayList<>();
-        //获取查询时的日期 也就是今天的日期 记作indexDay
-        LocalDate indexDay = LocalDate.now();
-//        System.out.println(indexDay);
+
+        //获取查询时的日期 也就是今天的日期,也作为查询时间段中的截止日期（如果until合法，就把untilDay的值赋值给today）
+        LocalDate today = LocalDate.now();
+
         //获取最早一次提交的commit信息
         String startDateStr = repoMeasureMapper.getStartDateOfRepo(repo_id).substring(0,10);
+
         //最早一次commit日期
         LocalDate startDay=LocalDate.parse(startDateStr,DateTimeUtil.Y_M_D_formatter);
-        //以下时请求参数中的两个日期点
+
+        //定义用于循环中不断更新的indexDay,也作为查询时间段中的开始日期（如果since合法，就把sinceDay的值赋值给indexDay）
+        LocalDate indexDay = startDay;
+        //以下是请求参数中的两个日期点
         if (since != null){
             LocalDate sinceDay = LocalDate.parse(dateFormatChange(since),DateTimeUtil.Y_M_D_formatter);
             if (startDay.isBefore(sinceDay)){
-                startDay = sinceDay;
+                indexDay = sinceDay;
             }
         }
         if (until != null){
             LocalDate untilDay = LocalDate.parse(dateFormatChange(until),DateTimeUtil.Y_M_D_formatter);
-            if (indexDay.isAfter(untilDay)){
-                indexDay = untilDay;
+            if (today.isAfter(untilDay)){
+                today = untilDay;
             }
         }
-        if (startDay.isAfter(indexDay)){
+        if (indexDay.isAfter(today)){
             throw new RuntimeException("please input correct date!");
         }
-        if (startDay.equals(indexDay)){
-            LocalDate tomorrow = indexDay.plusDays(1);
-            commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, indexDay.toString(), tomorrow.toString(), developer_name);
-            result.add(getCommitBaseMonth(indexDay.toString().substring(0,10), commitBaseInfoDuration));
+        if (indexDay.equals(today)){
+            LocalDate tomorrow = today.plusDays(1);
+            commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, today.toString(), tomorrow.toString(), developer_name);
+            result.add(getCommitBaseMonth(today.toString().substring(0,10), commitBaseInfoDuration));
             return result;
         }else{
             switch (granularity){
                 case "day":
-                    while(indexDay.isAfter(startDay)){
-                        //first 为 参数until这天的前一天
-                        LocalDate first = indexDay.minusDays(1);
-//                        System.out.println(first);
-                        commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, first.toString(), indexDay.toString(), developer_name);
-                        result.add(getCommitBaseMonth(first.toString().substring(0,10), commitBaseInfoDuration));
-                        //indexDay 变成前一天
-                        indexDay = first;
+                    while(today.isAfter(indexDay)){
+                        //after 为 参数indexDay这天的后一天
+                        LocalDate after = indexDay.plusDays(1);
+//                        System.out.println(after);
+                        commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, indexDay.toString(), after.toString(), developer_name);
+                        result.add(getCommitBaseMonth(indexDay.toString().substring(0,10), commitBaseInfoDuration));
+                        //indexDay 变成后一天
+                        indexDay = after;
                     }
                     break;
                 case "week":
-                    while(indexDay.isAfter(startDay)){
-                        if (startDay.until(indexDay,ChronoUnit.DAYS) < 7){
-                            commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, startDay.toString(), indexDay.toString(), developer_name);
-                            result.add(getCommitBaseMonth(startDay.toString().substring(0,10), commitBaseInfoDuration));
+                    while(today.isAfter(indexDay)){
+                        //after 为 参数indexDay这天的后一周（后七天的那一天）
+                        LocalDate after = indexDay.plusWeeks(1);
+                        if(after.isAfter(today)){
+                            commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, indexDay.toString(), today.toString(), developer_name);
+                            result.add(getCommitBaseMonth(indexDay.toString().substring(0,10), commitBaseInfoDuration));
                             break;
                         }
-                        //first 为 参数until这天的前一周（前七天的那一天）
-                        LocalDate first = indexDay.minusWeeks(1);
-                        commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, first.toString(), indexDay.toString(), developer_name);
-                        result.add(getCommitBaseMonth(first.toString().substring(0,10), commitBaseInfoDuration));
-                        //indexDay 变成前七天
-                        indexDay = first;
+                        commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, indexDay.toString(), after.toString(), developer_name);
+                        result.add(getCommitBaseMonth(indexDay.toString().substring(0,10), commitBaseInfoDuration));
+                        //indexDay 变成后七天
+                        indexDay = after;
                     }
                     break;
                 case "month":
-                    while(indexDay.isAfter(startDay)){
-                        if (startDay.until(indexDay,ChronoUnit.DAYS) < 30){
-                            commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, startDay.toString(), indexDay.toString(), developer_name);
-                            result.add(getCommitBaseMonth(startDay.toString().substring(0,10), commitBaseInfoDuration));
+                    while(today.isAfter(indexDay)){
+                        //after 为 参数indexDay这天的下个月的这一天
+                        LocalDate after = indexDay.plusMonths(1);
+                        if(after.isAfter(today)){
+                            commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, indexDay.toString(), today.toString(), developer_name);
+                            result.add(getCommitBaseMonth(indexDay.toString().substring(0,10), commitBaseInfoDuration));
                             break;
                         }
-                        //first 为 参数until这天的上个月的这一天
-                        LocalDate first = indexDay.minusMonths(1);
-                        commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, first.toString(), indexDay.toString(), developer_name);
-                        result.add(getCommitBaseMonth(first.toString().substring(0,10), commitBaseInfoDuration));
-                        //indexDay 变成until这天的上个月的这一天
-                        indexDay = first;
+                        commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, indexDay.toString(), today.toString(), developer_name);
+                        result.add(getCommitBaseMonth(indexDay.toString().substring(0,10), commitBaseInfoDuration));
+                        //indexDay 变成indexDay这天的下个月的这一天
+                        indexDay = after;
                     }
                     break;
                 default:

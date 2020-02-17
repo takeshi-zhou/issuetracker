@@ -45,8 +45,8 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
         List<JSONObject> tags = new ArrayList<>();
         //当前时间
         Date date = new Date();
-        Date commitDate=getCommitDate(current_commit_id);
-        String developer=getDeveloper(current_commit_id);
+        Date commitDate = getCommitDate(current_commit_id);
+        String developer = getDeveloper(current_commit_id);
         //当前扫描的问题数变化
         int newIssueCount = 0;
         int remainingIssueCount = 0;

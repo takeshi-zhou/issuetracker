@@ -262,6 +262,9 @@ public class KafkaServiceImpl implements KafkaService {
         //bug扫描
         boolean existedForBug =(existProject(repoId,"bug",false)||existProject(repoId,"bug",true))&&Boolean.parseBoolean(bugResultMap.get("isFirst"));
         if(existedForBug){
+            if(existProject(repoId,"bug",true)){
+
+            }
             List<ScanMessageWithTime> bugFilterCommits = filteredCommits;
             if(bugResultMap.get("location") != null){
                 bugFilterCommits = updateFilterCommits(filteredCommits,Integer.parseInt(bugResultMap.get("location")));

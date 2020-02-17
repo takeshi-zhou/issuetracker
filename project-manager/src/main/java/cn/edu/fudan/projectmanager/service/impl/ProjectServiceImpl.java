@@ -81,7 +81,7 @@ public class ProjectServiceImpl implements ProjectService {
         String username=projectInfo.getString("username");
         String password=projectInfo.getString("password");
         if(isPrivate){
-            if(username==null||password==null){
+            if(username==null||password==null|| username.equals("") || password.equals("")){
                 throw new RuntimeException("this project is private,please provide your git username and password!");
             }
         }
@@ -122,6 +122,25 @@ public class ProjectServiceImpl implements ProjectService {
         projectDao.addOneProject(project);
         //向RepoManager这个Topic发送消息，请求开始下载
         send(projectId, url,isPrivate,username,password,branch);
+    }
+
+    @Override
+    public boolean addProjectList(String userToken, List<JSONObject> projectListInfo){
+        boolean flag = true;
+        for (int i = 0; i < projectListInfo.size(); i++){
+            JSONObject projectInfo = projectListInfo.get(i);
+            logger.info("开始导入第" + (i+1) + "个项目：" + projectInfo.getString("url"));
+            try {
+                addOneProject(userToken,projectInfo);
+                logger.info("导入第" + (i+1) + "个项目成功！");
+            }catch (Exception e){
+                logger.info("导入第" + (i+1) + "个项目失败：");
+                logger.info(e.getMessage());
+                flag = false;
+                continue;
+            }
+        }
+        return flag;
     }
 
     @Override

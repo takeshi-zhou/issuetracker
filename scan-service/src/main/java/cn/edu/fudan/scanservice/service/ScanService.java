@@ -4,6 +4,8 @@ package cn.edu.fudan.scanservice.service;
 import cn.edu.fudan.scanservice.domain.Scan;
 import com.alibaba.fastjson.JSONArray;
 
+import java.util.List;
+
 public interface ScanService {
 
     void insertOneScan(Scan scan);
@@ -23,4 +25,22 @@ public interface ScanService {
     String getPreviousScannedCommitID(String repo_id,String category,String commitId);
 
     Scan getScanByCategoryAndRepoIdAndCommitId(String repo_id,String category,String commit_id);
+
+    /**
+     * 通过当前的commit id ，获取parent commit扫描成功的commit id
+     * @param repoId
+     * @param category
+     * @param commitId
+     * @return
+     */
+    List<String> getPreScannedCommitByCurrentCommit( String repoId, String category, String commitId);
+
+    /**
+     * 通过当前的commit id ，获取最新一条扫描失败的commit id以及开发者名字
+     * @param repoId
+     * @param category
+     * @param commitId
+     * @return
+     */
+    String getLatestScanFailedCommitIdAndDeveloper( String repoId, String category, String commitId);
 }
