@@ -7,6 +7,12 @@ import cn.edu.fudan.projectmanager.domain.NeedDownload;
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.service.ProjectService;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +20,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -152,6 +162,90 @@ public class ProjectServiceImpl implements ProjectService {
         result.put("logInfo", logInfo);
         return result;
     }
+
+
+    @Override
+    public List<JSONObject> getProjectListInfoFromExcelFile(MultipartFile file) throws IOException {
+        List<JSONObject> result = new ArrayList<>();
+
+        String fileName = file.getOriginalFilename();
+        String dir=System.getProperty("user.dir");
+        System.out.println(dir);
+        String destFileName=dir+ File.separator + "project-manager" + File.separator + "uploadedfiles"+ File.separator + fileName;
+        System.out.println(destFileName);
+        File destFile = new File(destFileName);
+        file.transferTo(destFile);
+
+        System.out.println("文件上传成功");
+        logger.info("文件上传成功");
+        System.out.println("开始读取EXCEL内容");
+        logger.info("开始读取EXCEL内容");
+
+        Sheet sheet;
+        InputStream fis = null;
+
+        fis = new FileInputStream(destFileName);
+
+        Workbook workbook = null;
+        try {
+            workbook= new XSSFWorkbook(destFile);
+        } catch (Exception ex) {
+            workbook = new HSSFWorkbook(fis);
+        }
+        sheet = workbook.getSheetAt(0);
+
+        int totalRowNum = sheet.getLastRowNum();
+
+        System.out.println("当前表格共有："+totalRowNum+"行");
+        logger.info("当前表格共有："+totalRowNum+"行");
+
+
+        for(int i = 13;i <= totalRowNum; i++){
+            JSONObject projectInfo = new JSONObject();
+            Row row = sheet.getRow(i);
+            if(row!=null){
+                int columnNum=row.getPhysicalNumberOfCells();
+                System.out.println("该行共有列数："+columnNum);
+                logger.info("该行共有列数："+columnNum);
+                for(int j=1;j<columnNum;j++){
+                    System.out.println("当前处理第"+i+"行，第"+j+"列");
+                    logger.info("当前处理第"+i+"行，第"+j+"列");
+                    Cell cell = row.getCell(j);
+                    String cellValue="";
+                    if(cell!=null){
+                        switch (cell.getCellType()) {
+                            case STRING:
+                                cellValue = cell.getStringCellValue();
+                                break;
+                            case NUMERIC:
+                                cellValue = String.valueOf(cell.getNumericCellValue());
+                                break;
+                            case BOOLEAN:
+                                cellValue = String.valueOf(cell.getBooleanCellValue());
+                                break;
+                            default:
+                                cellValue = cell.getStringCellValue();
+                                break;
+                        }
+                    }
+                    System.out.println(cellValue);
+                    if (j == 1){projectInfo.put("url",cellValue);System.out.println("url:"+cellValue);}
+                    if (j == 2){projectInfo.put("branch",cellValue);}
+                    if (j == 3){projectInfo.put("name",cellValue);}
+                    if (j == 4){projectInfo.put("isPrivate",cellValue);}
+                    if (j == 5){projectInfo.put("username",cellValue);}
+                    if (j == 6){projectInfo.put("password",cellValue);}
+                    if (j == 7){projectInfo.put("module",cellValue);}
+                }
+
+            }
+            //Jason对象中必须有"type"字段,默认是bug工具来检测
+            projectInfo.put("type","bug");
+            result.add(projectInfo);
+        }
+        return result;
+    }
+
 
     @Override
     public Object getProjectList(String userToken,String type) {
