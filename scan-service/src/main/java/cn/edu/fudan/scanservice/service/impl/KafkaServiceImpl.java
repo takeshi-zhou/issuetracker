@@ -230,86 +230,107 @@ public class KafkaServiceImpl implements KafkaService {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        List<ScanMessageWithTime> filteredCommits=commitFilter.filter(map,dates);
-        if(filteredCommits.isEmpty()){
-            return ;
-        }
-        String repoId=filteredCommits.get(0).getRepoId();
-        logger.info("{} need to auto scan!",repoId);
-        logger.info(filteredCommits.size()+" commits need to scan after filtered!");
+        List<ScanMessageWithTime> filteredCommits;
 
-        Map<String,String> bugResultMap = analyzeProjectIsScanned(repoId,"bug",filteredCommits);
-        Map<String,String> cloneResultMap = analyzeProjectIsScanned(repoId,"clone",filteredCommits);
-        Map<String,String> sonarResultMap = analyzeProjectIsScanned(repoId,"sonar",filteredCommits);
+        String repoId=map.get(dates.get(0)).get(0).getRepoId();
 
 
-//        //当前repo_id和type的project存在，并且没被自动扫描过
-//        boolean existBugProject=existProject(repoId,"bug",true);
-//        //为了吉利跑项目暂时修改
-//        if(!existBugProject){
-//            existBugProject=existProject(repoId,"bug",false);
-//        }
-//        logger.info("existBugProject -> {}",existBugProject);
-//        boolean existCloneProject=existProject(repoId,"clone",true);
-//        logger.info("existCloneProject -> {}",existCloneProject);
-//
-//        boolean existSonarProject=existProject(repoId,"sonar",true);
-//        //为了吉利跑项目暂时修改
-//        if(!existSonarProject){
-//            existSonarProject=existProject(repoId,"sonar",false);
-//        }
-//        logger.info("existSonarProject -> {}",existSonarProject);
+
         //bug扫描
-        boolean existedForBug =(existProject(repoId,"bug",false)||existProject(repoId,"bug",true))&&Boolean.parseBoolean(bugResultMap.get("isFirst"));
+        boolean existedForBug =(existProject(repoId,"bug",false)||existProject(repoId,"bug",true));
         if(existedForBug){
             if(existProject(repoId,"bug",true)){
+                filteredCommits=commitFilter.filter(map,dates);
+            }else{
+                filteredCommits = addAllCommits(map,dates);
+            }
+            logger.info("{} need to auto scan!",repoId);
+            logger.info(filteredCommits.size()+" commits need to scan after filtered!");
 
+            if(filteredCommits.isEmpty()){
+                return ;
             }
-            List<ScanMessageWithTime> bugFilterCommits = filteredCommits;
-            if(bugResultMap.get("location") != null){
-                bugFilterCommits = updateFilterCommits(filteredCommits,Integer.parseInt(bugResultMap.get("location")));
+            Map<String,String> bugResultMap = analyzeProjectIsScanned(repoId,"bug",filteredCommits);
+
+            if(Boolean.parseBoolean(bugResultMap.get("isFirst"))){
+                List<ScanMessageWithTime> bugFilterCommits = filteredCommits;
+                if(bugResultMap.get("location") != null){
+                    bugFilterCommits = updateFilterCommits(filteredCommits,Integer.parseInt(bugResultMap.get("location")));
+                }
+                logger.info("start auto scan bug -> {}",repoId);
+                for(ScanMessageWithTime message:bugFilterCommits){
+                    String commitId = message.getCommitId();
+                    findBugScanTask.runSynchronously(repoId,commitId,"bug");
+                }
+                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
+                sendMessageToMeasure(repoId,bugFilterCommits);
             }
-            logger.info("start auto scan bug -> {}",repoId);
-            for(ScanMessageWithTime message:bugFilterCommits){
-                String commitId = message.getCommitId();
-                findBugScanTask.runSynchronously(repoId,commitId,"bug");
-            }
-            restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
-            sendMessageToMeasure(repoId,bugFilterCommits);
+
         }else{
             logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
         //clone扫描
-        boolean existedForClone = (existProject(repoId,"clone",false)||existProject(repoId,"clone",true))&&Boolean.parseBoolean(cloneResultMap.get("isFirst"));
+        boolean existedForClone = (existProject(repoId,"clone",false)||existProject(repoId,"clone",true));
         if(existedForClone){
-            List<ScanMessageWithTime> cloneFilterCommits = filteredCommits;
-            if(cloneResultMap.get("location") != null){
-                cloneFilterCommits =updateFilterCommits(filteredCommits,Integer.parseInt(cloneResultMap.get("location")));
+            if(existProject(repoId,"clone",true)){
+                filteredCommits=commitFilter.filter(map,dates);
+            }else{
+                filteredCommits = addAllCommits(map,dates);
             }
-            logger.info("start auto scan clone -> {}",repoId);
-            for(ScanMessageWithTime message:cloneFilterCommits){
-                String commitId = message.getCommitId();
-                cloneScanTask.runSynchronously(repoId,commitId,"clone");
+            logger.info("{} need to auto scan!",repoId);
+            logger.info(filteredCommits.size()+" commits need to scan after filtered!");
+
+            if(filteredCommits.isEmpty()){
+                return ;
             }
-            restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
-            sendMessageToClone(repoId,cloneFilterCommits);
+            Map<String,String> cloneResultMap = analyzeProjectIsScanned(repoId,"clone",filteredCommits);
+
+            if(Boolean.parseBoolean(cloneResultMap.get("isFirst"))){
+                List<ScanMessageWithTime> cloneFilterCommits = filteredCommits;
+                if(cloneResultMap.get("location") != null){
+                    cloneFilterCommits = updateFilterCommits(filteredCommits,Integer.parseInt(cloneResultMap.get("location")));
+                }
+                logger.info("start auto scan clone -> {}",repoId);
+                for(ScanMessageWithTime message:cloneFilterCommits){
+                    String commitId = message.getCommitId();
+                    cloneScanTask.runSynchronously(repoId,commitId,"clone");
+                }
+                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
+                sendMessageToClone(repoId,cloneFilterCommits);
+            }
+
+
         }else{
             logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
         //sonar扫描
-        boolean existedForSonar = (existProject(repoId,"sonar",false)||existProject(repoId,"sonar",true))&&Boolean.parseBoolean(sonarResultMap.get("isFirst"));
+        boolean existedForSonar = (existProject(repoId,"sonar",false)||existProject(repoId,"sonar",true));
         if(existedForSonar){
-        List<ScanMessageWithTime> sonarFilterCommits = filteredCommits;
-        if(sonarResultMap.get("location") != null){
-            sonarFilterCommits =updateFilterCommits(filteredCommits,Integer.parseInt(sonarResultMap.get("location")));
-        }
-        logger.info("start auto scan sonar -> {}",repoId);
-        for(ScanMessageWithTime message:sonarFilterCommits){
-            String commitId = message.getCommitId();
-            sonarScanTask.runSynchronously(repoId,commitId,"sonar");
-        }
-        restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"sonar");
+            if(existProject(repoId,"sonar",true)){
+                filteredCommits=commitFilter.filter(map,dates);
+            }else{
+                filteredCommits = addAllCommits(map,dates);
+            }
+            logger.info("{} need to auto scan!",repoId);
+            logger.info(filteredCommits.size()+" commits need to scan after filtered!");
 
+            if(filteredCommits.isEmpty()){
+                return ;
+            }
+            Map<String,String> sonarResultMap = analyzeProjectIsScanned(repoId,"sonar",filteredCommits);
+
+            if(Boolean.parseBoolean(sonarResultMap.get("isFirst"))){
+                List<ScanMessageWithTime> sonarFilterCommits = filteredCommits;
+                if(sonarResultMap.get("location") != null){
+                    sonarFilterCommits = updateFilterCommits(filteredCommits,Integer.parseInt(sonarResultMap.get("location")));
+                }
+                logger.info("start auto scan sonar -> {}",repoId);
+                for(ScanMessageWithTime message:sonarFilterCommits){
+                    String commitId = message.getCommitId();
+                    sonarScanTask.runSynchronously(repoId,commitId,"sonar");
+                }
+                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"sonar");
+            }
         }else{
             logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
@@ -378,6 +399,22 @@ public class KafkaServiceImpl implements KafkaService {
             logger.info("response is null");
             return false;
         }
+    }
+
+    private LinkedList<ScanMessageWithTime> addAllCommits(Map<LocalDate,List<ScanMessageWithTime>> map,List<LocalDate> dates){
+        int i = 0;
+        int sourceSize = dates.size();
+        LinkedList<ScanMessageWithTime> result=new LinkedList<>();
+        while(i<sourceSize){
+            LocalDate date=dates.get(sourceSize-1-i);
+            List<ScanMessageWithTime> list=map.get(date);
+            List<ScanMessageWithTime> sortedList = list.stream().sorted(Comparator.comparing(ScanMessageWithTime::getCommitTime).reversed()).collect(Collectors.toList());
+            for(ScanMessageWithTime scanMessageWithTime : sortedList){
+                result.addFirst(scanMessageWithTime);
+            }
+            i++;
+        }
+        return result;
     }
 
     /**

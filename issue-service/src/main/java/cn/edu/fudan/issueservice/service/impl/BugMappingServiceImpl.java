@@ -1,6 +1,7 @@
 package cn.edu.fudan.issueservice.service.impl;
 
 import cn.edu.fudan.issueservice.domain.*;
+import cn.edu.fudan.issueservice.util.JGitHelper;
 import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -39,7 +40,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
 
         if (parentCommits.isEmpty()) {
-            //当前project第一次扫描，所有的rawIssue都是issue
+            //当前project第一次扫描，所有的rawIssue都 是issue
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repoId, category, currentCommitId);
             if (rawIssues == null || rawIssues.isEmpty()) {
                 return;
@@ -59,8 +60,16 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             rawIssueDao.batchUpdateIssueId(rawIssues);
             scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,currentCommitId,commitDate,developer,0,eliminatedIssueCount,remainingIssueCount));
         } else {
-            issueMapping(repoId, category, preCommitId, currentCommitId, commitDate,
-                    date, insertIssueList, tags, ignoreTypes, committer, developer);
+
+            if(parentCommits.size() == 1){
+                preCommitId = parentCommits.get(0);
+                issueMapping(repoId, category, preCommitId, currentCommitId, commitDate,
+                        date, insertIssueList, tags, ignoreTypes, committer, developer);
+            }else{
+                issueMapping(repoId, category, parentCommits, currentCommitId, commitDate,
+                        date, insertIssueList, tags, ignoreTypes, committer, developer);
+            }
+
         }
         //新的issue
         if (!insertIssueList.isEmpty()) {
@@ -99,36 +108,20 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         int ignoreCountInNewIssues = 0;
         int mappedCount = 0;
         int eliminatedIssueCount = 0;
+        int remainingIssueChangedCount = 0;
+        int notAdoptEliminateCount = 0;
 
-        // key filePath + detail; value rawIssues
-        Map<String, List<RawIssue>> curRawIssueMap = classifyRawIssue(currentRawIssues);
-        Map<String, List<RawIssue>> preRawIssueMap = classifyRawIssue(preRawIssues);
 
         Map<String,List<RawIssueMappingSort>>  currentRawIssueMappedRawIssueList= new HashMap<>();
         //用来判断匹配上的preRawIssue的下标位置，-1表示未匹配上。
         Map<String,Integer> currentRawIssueMappedIndex = new HashMap<>();
         //key 是preRawIssue的uuid,value是current raw issue的uuid,用来记录preRawIssue匹配了哪个currentRawIssue
         Map<String,RawIssue> preRawIssueMappedCurrentRawIssue = new HashMap<>();
-        for (Map.Entry<String, List<RawIssue>> entry : curRawIssueMap.entrySet()) {
-            if (preRawIssueMap.containsKey(entry.getKey())) {
-                List<RawIssue> preList = preRawIssueMap.get(entry.getKey());
-                for (RawIssue currentRawIssue : entry.getValue()) {
-                    List<RawIssueMappingSort> mappedRawIssues = findMostSimilarRawIssues(currentRawIssue,preList);
-                    currentRawIssueMappedRawIssueList.put(currentRawIssue.getUuid(),mappedRawIssues);
-                    if(mappedRawIssues.isEmpty()){
-                        currentRawIssueMappedIndex.put(currentRawIssue.getUuid(),-1);
-                    }else{
-                        currentRawIssueMappedIndex.put(currentRawIssue.getUuid(),0);
-                    }
 
-                }
-            }
-        }
+        //两个rawIssue进行mapping
+        mappingTwoRawIssueList(preRawIssues,currentRawIssues,currentRawIssueMappedRawIssueList,currentRawIssueMappedIndex,preRawIssueMappedCurrentRawIssue);
 
-        for (RawIssue currentRawIssue : currentRawIssues) {
-            findBestMatching(preRawIssueMappedCurrentRawIssue,currentRawIssueMappedIndex,currentRawIssueMappedRawIssueList,currentRawIssue,-1);
-        }
-
+        List<RawIssue> mappedPreSolvedRawIssues  = new ArrayList<>();
 
         for (RawIssue currentRawIssue : currentRawIssues) {
             int mappedPreRawIssueIndex = currentRawIssueMappedIndex.get(currentRawIssue.getUuid());
@@ -144,6 +137,19 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                     equalsCount++;
                     currentRawIssue.setIssue_id(preIssueId);
                     Issue issue = issueDao.getIssueByID(preIssueId);
+                    int priority = issue.getPriority();
+                    if(priority == 6){
+                        mappedPreSolvedRawIssues.add(preRawIssue);
+                        issue.setStatus("HAVE_SOLVED");
+                        String resolution = issue.getResolution();
+                        if(resolution == null){
+                            issue.setResolution(String.valueOf(1));
+                        }else{
+                            issue.setResolution(String.valueOf(Integer.parseInt(resolution) + 1));
+                        }
+
+                    }
+
                     issue.setEnd_commit(currentCommitId);
                     issue.setEnd_commit_date(commitDate);
                     issue.setRaw_issue_end(currentRawIssue.getUuid());
@@ -154,6 +160,8 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 }
             }
         }
+
+        modifyToOriginalPriorityTag(mappedPreSolvedRawIssues,ignoreTypes);
 
 
         for(RawIssue preRawIssue : preRawIssues){
@@ -169,6 +177,13 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
         //存储上个commit没匹配上的，也就是被solved的rawIssue的信息
         List<RawIssue> list = preRawIssues.stream().filter(rawIssue -> !rawIssue.isMapped()).collect(Collectors.toList());
+        for(RawIssue solvedRawIssue : list){
+            Issue issue = issueDao.getIssueByID(solvedRawIssue.getIssue_id());
+            if(issue.getPriority() == 6){
+                notAdoptEliminateCount++;
+            }
+
+        }
         saveSolvedInfo(list,repoId,preCommitId,currentCommitId);
         if (!issues.isEmpty()) {
             //更新issue
@@ -183,23 +198,220 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 //        int newIssueCount = currentRawIssues.size() - equalsCount-ignoreCountInNewIssues;
 
 
-        if(eliminatedIssueCount !=  preRawIssues.size() - (currentRawIssues.size()  - insertIssueList.size())){
-            logger.error(" eliminatedIssueCount calculate error, mapping failed");
-        }
 
-        if(equalsCount !=  mappedCount){
-            logger.error(" mappedCount calculate error, mapping failed");
-        }
-        int remainingIssueCount = currentRawIssues.size();
         int newIssueCount = insertIssueList.size();
-        logger.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount, remainingIssueCount, eliminatedIssueCount);
-        dashboardUpdate(repoId, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
+        remainingIssueChangedCount = mappedPreSolvedRawIssues.size() + newIssueCount - eliminatedIssueCount + notAdoptEliminateCount;
+        logger.info("finish mapping -> new:{},remainingChangedCount:{},eliminated:{}",newIssueCount, remainingIssueChangedCount, eliminatedIssueCount);
+        dashboardUpdateForMergeVersion(repoId, newIssueCount, remainingIssueChangedCount, eliminatedIssueCount,category);
         logger.info("dashboard info updated!");
         rawIssueDao.batchUpdateIssueId(currentRawIssues);
         modifyToSolvedTag(repoId, category, preCommitId, EventType.ELIMINATE_BUG, committer, commitDate);
-        scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,currentCommitId,commitDate,developer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
+        scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,currentCommitId,commitDate,developer,newIssueCount,eliminatedIssueCount,currentRawIssues.size()));
     }
 
+
+    private void issueMapping(String repoId, String category, List<String> parentCommits, String currentCommitId, Date commitDate,
+                              Date date, List<Issue> insertIssueList, List<JSONObject> tags, JSONArray ignoreTypes, String committer, String developer) {
+
+        int equalsCount = 0;
+        int ignoreCountInNewIssues = 0;
+        int mappedCount = 0;
+        int eliminatedIssueCount = 0;
+        int actualEliminatedIssueCount = 0;
+        int notAdoptEliminateCount = 0;
+        int remainingIssueChangedCount = 0;
+
+        List<Issue> issues = new ArrayList<>();
+        List<String> mappedIssueIds = new ArrayList<>();
+
+        int parentCommitsSize = parentCommits.size();
+        List<Map<String,List<RawIssueMappingSort>>> currentRawIssueMappedRawIssueLists = new ArrayList<>();
+        List<Map<String,Integer>> currentRawIssueMappedIndexes = new ArrayList<>();
+        List<Map<String,RawIssue>> preRawIssueMappedCurrentRawIssues = new ArrayList<>();
+        List<List<RawIssue>> parentCommitRawIssueList = new ArrayList<>();
+
+        for(int i = 0; i < parentCommitsSize ; i++){
+            currentRawIssueMappedRawIssueLists.add(new HashMap<String,List<RawIssueMappingSort>>());
+            currentRawIssueMappedIndexes.add(new HashMap<>());
+            preRawIssueMappedCurrentRawIssues.add(new HashMap<>());
+        }
+        List<RawIssue> currentRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repoId, category, currentCommitId);
+        if (currentRawIssues == null || currentRawIssues.isEmpty()) {
+            logger.info("all issues were solved or raw issue insert error , commit id -->  {}", currentCommitId);
+        }
+        for(int j = 0; j < parentCommitsSize ; j++){
+            List<RawIssue> parentRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repoId, category, parentCommits.get(j));
+            parentRawIssues = filterRawIssue(parentRawIssues);
+            parentCommitRawIssueList.add(parentRawIssues);
+
+            Map<String,List<RawIssueMappingSort>>  currentRawIssueMappedRawIssueList= currentRawIssueMappedRawIssueLists.get(j);
+            //用来判断匹配上的preRawIssue的下标位置，-1表示未匹配上。
+            Map<String,Integer> currentRawIssueMappedIndex = currentRawIssueMappedIndexes.get(j);
+            //key 是preRawIssue的uuid,value是current raw issue的uuid,用来记录preRawIssue匹配了哪个currentRawIssue
+            Map<String,RawIssue> preRawIssueMappedCurrentRawIssue = preRawIssueMappedCurrentRawIssues.get(j);
+
+
+            mappingTwoRawIssueList(parentRawIssues,currentRawIssues,currentRawIssueMappedRawIssueList,currentRawIssueMappedIndex,preRawIssueMappedCurrentRawIssue);
+        }
+
+        Map<String,Integer> mostMappingParentCommit = new HashMap<>();
+
+        for(RawIssue currentRawIssue : currentRawIssues){
+            String currentRawIssueUUid = currentRawIssue.getUuid();
+            int mostLikelyIndex = -1;
+            double matchingDegree = 0;
+            for(int m = 0 ; m < parentCommitsSize ; m++){
+                int index = currentRawIssueMappedIndexes.get(m).get(currentRawIssueUUid);
+                if(index == -1){
+                    continue;
+                }
+                double oneMatchingDegree = currentRawIssueMappedRawIssueLists.get(m).get(currentRawIssueUUid).get(index).getMappingSort() ;
+                if(oneMatchingDegree > matchingDegree){
+                    matchingDegree = oneMatchingDegree;
+                    mostLikelyIndex = m;
+                }
+
+            }
+            mostMappingParentCommit.put(currentRawIssueUUid,mostLikelyIndex);
+        }
+
+        //对未匹配上的parentCommit的相应的current raw issue 的下标置为-1,同时移除pre raw issue 匹配的current raw issue id,同时将is mapped置为false
+        for(RawIssue currentRawIssue : currentRawIssues){
+            String currentRawIssueUUid = currentRawIssue.getUuid();
+            int mostLikelyIndex = mostMappingParentCommit.get(currentRawIssueUUid);
+            if(mostLikelyIndex == -1){
+                continue;
+            }
+            for(int n = 0 ; n < parentCommitsSize ; n++){
+                if(mostLikelyIndex != n){
+                    int earlyIndex = currentRawIssueMappedIndexes.get(n).get(currentRawIssueUUid);
+                    if(earlyIndex != -1){
+                        currentRawIssueMappedIndexes.get(n).put(currentRawIssueUUid,-1);
+                        currentRawIssueMappedRawIssueLists.get(n).get(currentRawIssueUUid).get(earlyIndex).getRawIssue().setMapped(false);
+                        preRawIssueMappedCurrentRawIssues.get(n).entrySet().removeIf(value -> value.equals(currentRawIssueUUid));
+                    }
+                }
+            }
+        }
+
+        //缺陷变化commit
+        String causeIssueChangedCommit = null;
+
+        // ----------------获取缺陷引入commit ---------------------
+        //此时先获取parent commit 是否存在编译失败的情况，如果存在就归给编译失败的commit
+        //1.先判断当前commit是否是merge 点
+        String[] verifyParentCommitsIsMerge = getParentCommits(repoId,currentCommitId);
+        if(verifyParentCommitsIsMerge.length < 2){
+            causeIssueChangedCommit = currentCommitId;
+        }else{
+
+            String latestFailedCommit = restInterfaceManager.getLatestScanFailedCommitId(repoId,currentCommitId,category);
+            String latestFailedCommitAndIsNotMerge = getCompileFailedParentCommit(repoId,latestFailedCommit,category);
+
+            if(latestFailedCommitAndIsNotMerge == null){
+                causeIssueChangedCommit = currentCommitId;
+            }else{
+                causeIssueChangedCommit = latestFailedCommitAndIsNotMerge;
+            }
+
+
+        }
+
+        Date causeIssueChangedCommitDate = getCommitDate(causeIssueChangedCommit);
+        String causeIssueChangedCommitDeveloper = getDeveloper(causeIssueChangedCommit);
+
+        // -------------------------------------------------
+
+        for (RawIssue currentRawIssue : currentRawIssues) {
+            String currentRawIssueUUid = currentRawIssue.getUuid();
+            int mostLikelyIndex = mostMappingParentCommit.get(currentRawIssueUUid);
+            if(mostLikelyIndex == -1){
+
+                //按理merge不存在修改代码的情况，此时不应该引入新的缺陷。
+
+                Issue issue = generateOneNewIssue(repoId,currentRawIssue,category,causeIssueChangedCommit,causeIssueChangedCommitDate,date);
+                issue.setEnd_commit(currentCommitId);
+                issue.setEnd_commit_date(commitDate);
+                issue.setRaw_issue_start(null);
+                insertIssueList.add(issue);
+                addTag(tags, ignoreTypes, currentRawIssue,issue);
+
+            }else{
+                Map<String,List<RawIssueMappingSort>> currentRawIssueMappedRawIssueList = currentRawIssueMappedRawIssueLists.get(mostLikelyIndex);
+                Map<String,Integer> currentRawIssueMappedIndex = currentRawIssueMappedIndexes.get(mostLikelyIndex);
+
+                int mappedPreRawIssueIndex = currentRawIssueMappedIndex.get(currentRawIssue.getUuid());
+                RawIssue preRawIssue = currentRawIssueMappedRawIssueList.get(currentRawIssue.getUuid()).get(mappedPreRawIssueIndex).getRawIssue();
+                String preIssueId = preRawIssue.getIssue_id();
+
+                equalsCount++;
+                currentRawIssue.setIssue_id(preIssueId);
+                Issue issue = issueDao.getIssueByID(preIssueId);
+                if("HAVE_SOLVED".equals(issue.getStatus())){
+                    String resolution = issue.getResolution();
+
+                    issue.setResolution(String.valueOf(Integer.parseInt(resolution) - 1));
+                    notAdoptEliminateCount++;
+
+                }
+                issue.setEnd_commit(currentCommitId);
+                issue.setEnd_commit_date(commitDate);
+                issue.setRaw_issue_end(currentRawIssue.getUuid());
+                issue.setUpdate_time(new Date());
+                issues.add(issue);
+                mappedIssueIds.add(preIssueId);
+
+            }
+        }
+
+
+        for(int l = 0; l < parentCommitsSize ; l++){
+
+            //存储上个commit没匹配上的，也就是被solved的rawIssue的信息
+            List<RawIssue> list = parentCommitRawIssueList.get(l).stream().filter(rawIssue -> !rawIssue.isMapped()).collect(Collectors.toList());
+            saveSolvedInfo(list,repoId,parentCommits.get(l),currentCommitId);
+
+            actualEliminatedIssueCount  += list.size();
+            for(RawIssue rawIssue : list){
+                Issue issue = issueDao.getIssueByID(rawIssue.getUuid());
+                if("HAVE_SOLVED".equals(issue.getStatus())){
+                    String resolution = issue.getResolution();
+
+                    issue.setResolution(String.valueOf(Integer.parseInt(resolution) - 1));
+                    eliminatedIssueCount++;
+
+                }else{
+                    logger.info("repo id -->{} , issue id --> {}, mapping maybe exists error!",repoId,issue.getUuid());
+                }
+            }
+
+
+        }
+
+
+
+        if (!issues.isEmpty()) {
+            //更新issue
+            issueDao.batchUpdateIssue(issues);
+            logger.info("issue update success!");
+        }
+
+
+        int newIssueCount = insertIssueList.size();
+        remainingIssueChangedCount = notAdoptEliminateCount + newIssueCount - (actualEliminatedIssueCount - eliminatedIssueCount);
+        logger.info("finish mapping -> new:{},remainingChangedCount:{},eliminated:{}",newIssueCount, remainingIssueChangedCount, eliminatedIssueCount);
+        dashboardUpdateForMergeVersion(repoId, newIssueCount, remainingIssueChangedCount, eliminatedIssueCount,category);
+        logger.info("dashboard info updated!");
+        rawIssueDao.batchUpdateIssueId(currentRawIssues);
+
+        for(int p = 0 ; p < parentCommitsSize ;p++){
+            modifyToSolvedTag(repoId, category, parentCommits.get(p), EventType.ELIMINATE_BUG, causeIssueChangedCommitDeveloper, causeIssueChangedCommitDate);
+        }
+        scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,causeIssueChangedCommit,causeIssueChangedCommitDate,causeIssueChangedCommitDeveloper,newIssueCount,actualEliminatedIssueCount - eliminatedIssueCount,currentRawIssues.size()));
+
+
+
+    }
 
     private void findBestMatching(Map<String,RawIssue> preRawIssueMappedCurrentRawIssue , Map<String,Integer> currentRawIssueMappedIndex ,
                                       Map<String,List<RawIssueMappingSort>>  currentRawIssueMappedRawIssueList ,
@@ -245,87 +457,6 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
     }
 
-
-    /*
-        废弃
-     */
-    @Deprecated
-    private RawIssue findMostSimilarRawIssue(RawIssue currentRawIssue, List<RawIssue> preList) {
-
-        RawIssue target = null;
-
-        //获取currentRawIssue的location
-        Location currentLocation = currentRawIssue.getLocations().isEmpty() ? null : currentRawIssue.getLocations().get(0);
-        if(currentLocation == null){
-            return null;
-        }
-
-        double maxCommonality = 0;
-        //OverLapping，由于目前只有1条location，所以非0即1，暂不考虑使用。
-        double maxOverLapping = 0;
-        double maxLcs = 0;
-        double commonality ;
-        double overLapping ;
-        double lcs ;
-        boolean isFirstLevMapped = false;
-        boolean isOverLappingHadAnalyzed = false;
-        for (RawIssue rawIssue : preList) {
-
-            LocationCompare.computeSimilarity(currentRawIssue, rawIssue);
-            commonality = LocationCompare.getCommonality();
-            overLapping = LocationCompare.getOverLapping();
-            lcs = LocationCompare.getLcs();
-
-
-            //判断是否是同一个文件，同一个类，同一个方法名，bug lines的数目相同------此时的mapping的优先级最高
-            //目前commonality 不是0就是1，所以不存在错误，当存在多个location时，下面的逻辑需要修改。
-            if(commonality > LocationCompare.getThresholdCommonality()){
-                if(commonality > maxCommonality && lcs == 1.0){
-                    if (!rawIssue.isMapped()) {
-                        maxCommonality = commonality;
-                        maxLcs = lcs;
-                        isOverLappingHadAnalyzed = true;
-                        target = rawIssue;
-                        isFirstLevMapped = true;
-                        continue;
-                    }
-
-
-                }else if (commonality == maxCommonality && lcs == 1.0){
-                    if (!rawIssue.isMapped()) {
-                        maxCommonality = commonality;
-                        maxLcs = lcs;
-                        isOverLappingHadAnalyzed = true;
-                        isFirstLevMapped = true;
-                        continue;
-                    }
-                }
-
-                if(!isOverLappingHadAnalyzed && lcs > maxLcs && lcs > LocationCompare.getThresholdLcs()){
-                    if (!rawIssue.isMapped()) {
-                        maxCommonality = commonality;
-                        maxLcs = lcs;
-                        isFirstLevMapped = true;
-                        target = rawIssue;
-                        continue;
-                    }
-
-                }
-
-            }else {
-                Location preLocation = rawIssue.getLocations().isEmpty() ? null : rawIssue.getLocations().get(0);
-                if(  !isFirstLevMapped && currentLocation.isInSameClass(preLocation)  && lcs > maxLcs && lcs > LocationCompare.getDiffMethodsThresholdLcs()){
-
-                    if(!rawIssue.isMapped()){
-                        maxLcs = lcs;
-                        target = rawIssue;
-                    }
-                }
-            }
-
-        }
-        return target;
-    }
 
 
     private List<RawIssueMappingSort> findMostSimilarRawIssues(RawIssue currentRawIssue, List<RawIssue> preList) {
@@ -466,15 +597,14 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
      * @param currentRawIssues
      */
 
-    private void mappingTwoRawIssueList(List<RawIssue> preRawIssues,List<RawIssue> currentRawIssues){
+    private void mappingTwoRawIssueList(List<RawIssue> preRawIssues,List<RawIssue> currentRawIssues,Map<String,
+                                        List<RawIssueMappingSort>>  currentRawIssueMappedRawIssueList,
+                                        Map<String,Integer> currentRawIssueMappedIndex,
+                                        Map<String,RawIssue> preRawIssueMappedCurrentRawIssue){
         Map<String, List<RawIssue>> curRawIssueMap = classifyRawIssue(currentRawIssues);
         Map<String, List<RawIssue>> preRawIssueMap = classifyRawIssue(preRawIssues);
 
-        Map<String,List<RawIssueMappingSort>>  currentRawIssueMappedRawIssueList= new HashMap<>();
-        //用来判断匹配上的preRawIssue的下标位置，-1表示未匹配上。key是currentRawIssue的uuid，value是相匹配的preRawIssue的下标。
-        Map<String,Integer> currentRawIssueMappedIndex = new HashMap<>();
-        //key 是preRawIssue的uuid,value是current raw issue的uuid,用来记录preRawIssue匹配了哪个currentRawIssue
-        Map<String,RawIssue> preRawIssueMappedCurrentRawIssue = new HashMap<>();
+
         for (Map.Entry<String, List<RawIssue>> entry : curRawIssueMap.entrySet()) {
             if (preRawIssueMap.containsKey(entry.getKey())) {
                 List<RawIssue> preList = preRawIssueMap.get(entry.getKey());
@@ -496,7 +626,74 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         }
 
     }
+
+    /**
+     * 筛选出raw issue 所属的 issue 的最新commit 与 raw issue commit 相同的 raw issue
+     * @return
+     */
+    private List<RawIssue> filterRawIssue(List<RawIssue> originalRawIssues){
+        List<RawIssue>  rawIssueList = new ArrayList<>();
+        for(RawIssue rawIssue : originalRawIssues){
+
+            Issue issue = issueDao.getIssueByID(rawIssue.getIssue_id());
+            if(rawIssue.getCommit_id().equals(issue.getEnd_commit())){
+                rawIssueList.add(rawIssue);
+            }
+        }
+
+        return rawIssueList;
+    }
+
+
+    private String[] getParentCommits(String repoId,String commitId){
+        String repoPath = null;
+        JSONObject repoPathJson = null;
+        JGitHelper jGitHelper = null;
+        try{
+            repoPathJson = restInterfaceManager.getRepoPath(repoId,commitId);
+            if(repoPathJson == null){
+                throw new RuntimeException("can not get repo path");
+            }
+            repoPath = repoPathJson.getJSONObject("data").getString("content");
+            if(repoPath != null){
+                jGitHelper = new JGitHelper(repoPath);
+                String[] verifyParentCommitsIsMerge = jGitHelper.getCommitParents(commitId);
+                return verifyParentCommitsIsMerge;
+            }
+
+
+        }finally{
+            if(repoPath!= null){
+                restInterfaceManager.freeRepoPath(repoId,repoPath);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 获取不是merge点的编译失败的commit
+     * @param repoId
+     * @param commit
+     * @param category
+     * @return
+     */
+    private String getCompileFailedParentCommit(String repoId,String commit,String category){
+        String[] parentCommits = getParentCommits(repoId,commit);
+        if(parentCommits.length < 2){
+            return commit;
+        }else{
+            String latestFailedCommit = restInterfaceManager.getLatestScanFailedCommitId(repoId,commit,category);
+            if(latestFailedCommit == null ){
+                return null;
+            }
+            return getCompileFailedParentCommit(repoId,latestFailedCommit,category);
+        }
+
+
+    }
 }
+
+
 
 
 

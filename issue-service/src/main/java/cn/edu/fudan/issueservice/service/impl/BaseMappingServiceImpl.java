@@ -137,6 +137,32 @@ public class BaseMappingServiceImpl implements MappingService {
         stringRedisTemplate.exec();
     }
 
+    void dashboardUpdateForMergeVersion(String repo_id, int newIssueCount, int remainingIssueCountChanged, int eliminatedIssueCount, String category) {
+        //注意只有remaining是覆盖的，其余是累增的
+        String todayKey = "dashboard:"+category+":day:" + repo_id;
+        String weekKey = "dashboard:"+category+":week:" + repo_id;
+        String monthKey = "dashboard:"+category+":month:" + repo_id;
+        stringRedisTemplate.setEnableTransactionSupport(true);
+        stringRedisTemplate.multi();
+
+        stringRedisTemplate.opsForHash().increment(todayKey, "new", newIssueCount);
+        int todayRemaining = Integer.parseInt(String.valueOf(stringRedisTemplate.opsForHash().get(todayKey,"remaining")));
+        stringRedisTemplate.opsForHash().put(todayKey, "remaining", String.valueOf(todayRemaining+remainingIssueCountChanged));
+        stringRedisTemplate.opsForHash().increment(todayKey, "eliminated", eliminatedIssueCount);
+
+
+        stringRedisTemplate.opsForHash().increment(weekKey, "new", newIssueCount);
+        int weekRemaining = Integer.parseInt(String.valueOf(stringRedisTemplate.opsForHash().get(weekKey,"remaining")));
+        stringRedisTemplate.opsForHash().put(todayKey, "remaining", String.valueOf(weekRemaining+remainingIssueCountChanged));
+        stringRedisTemplate.opsForHash().increment(weekKey, "eliminated", eliminatedIssueCount);
+
+        stringRedisTemplate.opsForHash().increment(monthKey, "new", newIssueCount);
+        int monthRemaining = Integer.parseInt(String.valueOf(stringRedisTemplate.opsForHash().get(todayKey,"remaining")));
+        stringRedisTemplate.opsForHash().put(monthKey, "remaining", String.valueOf(monthRemaining+remainingIssueCountChanged));
+        stringRedisTemplate.opsForHash().increment(monthKey, "eliminated", eliminatedIssueCount);
+        stringRedisTemplate.exec();
+    }
+
     Date getCommitDate(String commitId){
         JSONObject response=restInterfaceManager.getCommitTime(commitId);
         if(response!=null && response.getJSONObject("data") != null){
@@ -199,6 +225,42 @@ public class BaseMappingServiceImpl implements MappingService {
                 restInterfaceManager.modifyTags(taggeds);
             }
         }
+    }
+
+
+    void modifyToOriginalPriorityTag(List<RawIssue> rawIssues,JSONArray ignoreTypes) {
+        List<JSONObject> taggeds = new ArrayList<>();
+        for(RawIssue rawIssue : rawIssues){
+            String issueId = rawIssue.getIssue_id();
+            Issue issue = issueDao.getIssueByID(issueId);
+            int originalPriority =  Integer.parseInt(JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class).getRank())/5 + 1 ;
+            int priority = originalPriority == 5 ? 4 : originalPriority ;
+            issue.setPriority(priority);
+            JSONObject tagged = new JSONObject();
+            tagged.put("item_id", issue.getUuid());
+
+            String tagID = null;
+            if(ignoreTypes!=null&&!ignoreTypes.isEmpty()&&ignoreTypes.contains(rawIssue.getType())){
+                //如果新增的issue的类型包含在ignore的类型之中，打ignore的tag
+                tagID=ignoreTagId;
+                issue.setPriority(5);
+            }else if (rawIssue.getCategory().equals(Scanner.FINDBUGS.getType())){
+                RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
+                tagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
+            }else if(rawIssue.getCategory().equals(Scanner.SONAR.getType())){
+                tagID = tagMapHelper.getTagIdByPriority(issue.getPriority());
+            }
+            if(tagID!=null){
+                tagged.put("tag_id", tagID);
+
+            }
+
+            taggeds.add(tagged);
+        }
+        restInterfaceManager.modifyTags(taggeds);
+
+
+
     }
 
     @SuppressWarnings("unchecked")

@@ -263,8 +263,8 @@ public class JGitHelper {
         return MERGE_WITHOUT_CONFLICT;
     }
 
-    public List<String> getAggregationCommit(String startTime){
-        List<String> aggregationCommits = new ArrayList<>();
+    public List<RevCommit> getAggregationCommit(String startTime){
+        List<RevCommit> aggregationCommits = new ArrayList<>();
         try {
             int startTimeStamp = Integer.valueOf(timeTotimeStamp(startTime));
             int branch = 0;
@@ -283,7 +283,7 @@ public class JGitHelper {
 
             for (RevCommit revCommit : commitList) {
                 branch -= revCommit.getParentCount()-1;
-                if (startTimeStamp<revCommit.getCommitTime()&&branch==1) {aggregationCommits.add(revCommit.getName());}
+                if (startTimeStamp<revCommit.getCommitTime()&&branch==1) {aggregationCommits.add(revCommit);}
                 branch += Optional.ofNullable(sonCommitsMap.get(revCommit.getName())).orElse(0)-1;
             }
         } catch (GitAPIException e) {
@@ -302,7 +302,7 @@ public class JGitHelper {
         String repoPath = "G:\\新建文件夹 - 副本\\jackson-databind";
 //        String commitId = "75c6507e2139e9bb663abf35037b31478e44c616";
         JGitHelper jGitHelper = new JGitHelper(repoPath);
-        List<String> list = jGitHelper.getAggregationCommit("2019-1-1 00:00:00");
+        List<RevCommit> list = jGitHelper.getAggregationCommit("2019-1-1 00:00:00");
         list.stream().forEach(System.out::println);
 
         //String s[] = jGitHelper.getCommitParents(commitId);

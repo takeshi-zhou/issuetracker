@@ -408,7 +408,7 @@ public class RestInterfaceManager {
     }
 
     public String getLatestScanFailedCommitId(String repoId,String commitId ,String category){
-        JSONObject failedCommitId = restTemplate.getForObject(scanServicePath + "/inner/scan/pre-scanned-commit?repo_id=" + repoId+"&commit_id="+commitId+"&category="+category, JSONObject.class);
+        JSONObject failedCommitId = restTemplate.getForObject(scanServicePath + "/inner/scan/pre-failed-commit?repo_id=" + repoId+"&commit_id="+commitId+"&category="+category, JSONObject.class);
         if(failedCommitId != null){
             return failedCommitId.toString();
         }
