@@ -489,18 +489,22 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
 
     private Integer getCloneLinesByCommit(String repoId, String commitId){
         List<String> rawIssueIdList = rawIssueDao.getRawIssueIdByCommitId(repoId,commitId,"clone");
-        int cloneLines = 0;
+        int cloneLinesWithOutTest = 0;
+        List<String> list = null;
+        String className = null;
+        String fullName = null;
         for(String rawIssue:rawIssueIdList){
             List<Location> locations = locationDao.getLocations(rawIssue);
             for(Location location: locations){
-                int startLine = location.getStart_line();
-                int endLine = location.getEnd_line();
-                int clone = endLine - startLine + 1;
-                cloneLines += clone;
+                className = location.getFile_path().toLowerCase();
+                fullName = className.substring(className.lastIndexOf("/") + 1);
+                if(className.contains("/test/") || fullName.startsWith("test") || fullName.endsWith("test.java") || fullName.endsWith("tests.java")){
+                    continue;
+                }
+                list = Arrays.asList(location.getBug_lines().split(",")).stream().map(s -> String.format(s.trim())).collect(Collectors.toList());
+                cloneLinesWithOutTest += list.size();
             }
         }
-        return cloneLines;
+        return cloneLinesWithOutTest;
     }
-
-
 }

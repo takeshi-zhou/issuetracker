@@ -248,10 +248,12 @@ public class MeasureServiceImpl implements MeasureService {
         repoMeasure.setDeveloper_name(developerName);
         repoMeasure.setDeveloper_email(developerEmail);
         CommitBase commitBase = getCommitBaseInformationByCLI(repoId,commitId);
+        //
         if(commitBase.getAddLines() + commitBase.getDelLines() == 0){
             commitBase.setAddLines((int)Math.random()*200+50);
             commitBase.setDelLines((int)Math.random()*100+40);
         }
+
         repoMeasure.setAdd_lines(commitBase.getAddLines());
         repoMeasure.setDel_lines(commitBase.getDelLines());
         if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {

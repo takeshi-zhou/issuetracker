@@ -4,11 +4,23 @@ import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.domain.ResponseBean;
 import cn.edu.fudan.projectmanager.service.ProjectService;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -35,15 +47,39 @@ public class ProjectController {
     }
 
     // List ： url isPrivate username password name type branch
+//    @PostMapping(value = {"/project/addProjectList"})
+//    public Object addProjectList(HttpServletRequest request, @RequestBody List<JSONObject> projectListInfo) {
+//        String userToken = request.getHeader("token");
+//        JSONObject obj = projectService.addProjectList(userToken, projectListInfo);
+//        boolean flag = obj.getBoolean("isSuccessful");
+//        String lofInfo = obj.getString("logInfo");
+//        if (flag){
+//            return new ResponseBean(200, "All projects were added successfully!", null);
+//        }
+//        return new ResponseBean(401, "At least one project was not added successfully. Logging info is showed as follow:/n" + lofInfo, null);
+//
+//    }
+
+    // List ： url isPrivate username password name type branch
     @PostMapping(value = {"/project/addProjectList"})
-    public Object addProjectList(HttpServletRequest request, @RequestBody List<JSONObject> projectListInfo) {
+    @ResponseBody
+    public Object addProjectList(HttpServletRequest request, @RequestBody MultipartFile file) throws IOException {
         String userToken = request.getHeader("token");
-        if (projectService.addProjectList(userToken, projectListInfo)){
+        if (file.isEmpty()) {
+            return "上传失败，请选择文件";
+        }
+        List<JSONObject> projectListInfo = projectService.getProjectListInfoFromExcelFile(file);
+        JSONObject obj = projectService.addProjectList(userToken, projectListInfo);
+        boolean flag = obj.getBoolean("isSuccessful");
+        String lofInfo = obj.getString("logInfo");
+        if (flag){
             return new ResponseBean(200, "All projects were added successfully!", null);
         }
-        return new ResponseBean(401, "At least one project was not added successfully. For details, you could check the log file.", null);
+        return new ResponseBean(401, "At least one project was not added successfully. Logging info is showed as follow:" + lofInfo, null);
 
     }
+
+
 
     //get project list
     @GetMapping(value = {"/project"})

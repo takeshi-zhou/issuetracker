@@ -4,16 +4,20 @@ package cn.edu.fudan.projectmanager.service;
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.domain.RepoBasicInfo;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ProjectService {
 
     void addOneProject(String userToken, JSONObject projectInfo);
 
-    boolean addProjectList(String userToken, List<JSONObject> projectInfo);
+    JSONObject addProjectList(String userToken, List<JSONObject> projectInfo);
 
     Object getProjectList(String userToken,String type);
+
+    List<JSONObject> getProjectListInfoFromExcelFile(MultipartFile file) throws IOException;
 
     //jeff
     Object getProjectListByModule(String userToken, String type, String module);
