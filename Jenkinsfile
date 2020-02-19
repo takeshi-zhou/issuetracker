@@ -27,5 +27,5 @@ pipeline {
                 sh './deliver.sh' 
             }
         }
+    }
 }
-
