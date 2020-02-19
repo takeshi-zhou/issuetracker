@@ -13,16 +13,16 @@ pipeline {
                 sh "'${mvnHome}/bin/mvn' clean package -DskipTests"
             }
         }
-    }
     
-    stage('Test') {
+    
+        stage('Test') {
             steps {
                 echo 'Skip Tests'
                 //sh "'${mvnHome}/bin/mvn' test"
             }
         }
         
-    stage('Deliver') { 
+        stage('Deliver') { 
             steps {
                 sh './deliver.sh' 
             }
