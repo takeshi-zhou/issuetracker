@@ -10,26 +10,29 @@ import cn.edu.fudan.measureservice.mapper.PackageMeasureMapper;
 import cn.edu.fudan.measureservice.mapper.RepoMeasureMapper;
 import cn.edu.fudan.measureservice.util.DateTimeUtil;
 import cn.edu.fudan.measureservice.util.GitUtil;
+import cn.edu.fudan.measureservice.util.JGitHelper;
+import cn.edu.fudan.measureservice.util.JGitUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.protocol.types.Field;
-import org.apache.tomcat.jni.Local;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.parser.Entity;
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -58,8 +61,9 @@ public class MeasureServiceImpl implements MeasureService {
     private PackageMeasureMapper packageMeasureMapper;
     private GitUtil gitUtil;
 
+
     public MeasureServiceImpl(MeasureAnalyzer measureAnalyzer,
-                             ResultHandler resultHandler,
+                              ResultHandler resultHandler,
                               RestInterfaceManager restInterfaceManager,
                               RepoMeasureMapper repoMeasureMapper,
                               PackageMeasureMapper packageMeasureMapper,
@@ -70,6 +74,7 @@ public class MeasureServiceImpl implements MeasureService {
         this.repoMeasureMapper=repoMeasureMapper;
         this.packageMeasureMapper=packageMeasureMapper;
         this.gitUtil=gitUtil;
+
     }
 
     @Override
@@ -248,14 +253,23 @@ public class MeasureServiceImpl implements MeasureService {
         repoMeasure.setDeveloper_name(developerName);
         repoMeasure.setDeveloper_email(developerEmail);
         CommitBase commitBase = getCommitBaseInformationByCLI(repoId,commitId);
-        //
-        if(commitBase.getAddLines() + commitBase.getDelLines() == 0){
-            commitBase.setAddLines((int)Math.random()*200+50);
-            commitBase.setDelLines((int)Math.random()*100+40);
-        }
 
+        //获取该commit是否是merge
+        repoMeasure.setIs_merge(isMergeByJGit(repoId,commitId));
+        logger.info("is_merge:"+isMergeByJGit(repoId,commitId));
+
+        //如果时merge的情况，通过JGit获取修改行数数据
+        if(isMergeByJGit(repoId,commitId)){
+            commitBase.setAddLines(getAddLinesByJGit(repoId,commitId));
+            commitBase.setDelLines(getDelLinesByJGit(repoId,commitId));
+        }
         repoMeasure.setAdd_lines(commitBase.getAddLines());
         repoMeasure.setDel_lines(commitBase.getDelLines());
+        logger.info("addlines:"+commitBase.getAddLines());
+        logger.info("dellines:"+commitBase.getDelLines());
+
+        repoMeasure.setChanged_files(getChangedFilesCount(repoId,commitId));
+        logger.info("changedFiles:"+getChangedFilesCount(repoId,commitId));
         if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
             repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
         }
@@ -1008,6 +1022,128 @@ public class MeasureServiceImpl implements MeasureService {
         }
         return "success";
     }
+
+    @Override
+    public boolean isMerge(String repo_id, String commit_id){
+        String repo_path = restInterfaceManager.getRepoPath(repo_id,commit_id);
+        System.out.println(repo_path);
+//        String repo_path = "E:\\Project\\FDSELab\\IssueTracker-Master";
+        JGitHelper jGitHelper = new JGitHelper(repo_path);
+        RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
+        return jGitHelper.isMerge(revCommit);
+    }
+
+
+
+
+
+    /**
+     *
+     * @param repo_id
+     * @param commit_id
+     * @return 利用JGit工具获取commit是否是merge
+     */
+    public boolean isMergeByJGit(String repo_id, String commit_id){
+        String repo_path = restInterfaceManager.getRepoPath(repo_id,commit_id);
+        System.out.println(repo_path);
+        JGitHelper jGitHelper = new JGitHelper(repo_path);
+        RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
+        return jGitHelper.isMerge(revCommit);
+    }
+
+
+    /**
+     *
+     * @param repo_id
+     * @param commit_id
+     * @return 通过JGit获取merge情况时的addLines
+     */
+    public int getAddLinesByJGit(String repo_id, String commit_id){
+        int result = 0;
+        String repo_path = restInterfaceManager.getRepoPath(repo_id,commit_id);
+        System.out.println(repo_path);
+        JGitHelper jGitHelper = new JGitHelper(repo_path);
+
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        builder.setMustExist(true);
+        builder.addCeilingDirectory(new File(repo_path));
+        builder.findGitDir(new File(repo_path));
+        try {
+            Repository repository = builder.build();
+            RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
+            List<DiffEntry> diffFix = JGitHelper.getChangedFileList(revCommit,repository);//获取变更的文件列表
+            result = JGitHelper.getAddLines(diffFix);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     *
+     * @param repo_id
+     * @param commit_id
+     * @return 通过JGit获取merge情况时的delLines
+     */
+    public int getDelLinesByJGit(String repo_id, String commit_id){
+        int result = 0;
+        String repo_path = restInterfaceManager.getRepoPath(repo_id,commit_id);
+        System.out.println(repo_path);
+        JGitHelper jGitHelper = new JGitHelper(repo_path);
+
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        builder.setMustExist(true);
+        builder.addCeilingDirectory(new File(repo_path));
+        builder.findGitDir(new File(repo_path));
+        try {
+            Repository repository = builder.build();
+            RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
+            List<DiffEntry> diffFix = JGitHelper.getChangedFileList(revCommit,repository);//获取变更的文件列表
+            result = JGitHelper.getDelLines(diffFix);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+    /**
+     *
+     * @param repo_id
+     * @param commit_id
+     * @return 通过JGit获取本次commit修改的文件数量
+     */
+    public int getChangedFilesCount(String repo_id, String commit_id){
+        int result = 0;
+        String repo_path = restInterfaceManager.getRepoPath(repo_id,commit_id);
+        System.out.println(repo_path);
+        JGitHelper jGitHelper = new JGitHelper(repo_path);
+
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        builder.setMustExist(true);
+        builder.addCeilingDirectory(new File(repo_path));
+        builder.findGitDir(new File(repo_path));
+        try {
+            Repository repository = builder.build();
+            RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
+            List<DiffEntry> diffFix = JGitHelper.getChangedFileList(revCommit,repository);//获取变更的文件列表
+            result = JGitHelper.getChangedFilesCount(diffFix);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+
+
+
+
+
+
 
 
 }

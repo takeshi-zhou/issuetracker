@@ -89,7 +89,9 @@
                developer_name,
                developer_email,
                add_lines,
-               del_lines
+               del_lines,
+               changed_files,
+               is_merge
             )
         values
            (
@@ -109,7 +111,9 @@
               #{developer_name},
               #{developer_email},
               #{add_lines},
-              #{del_lines}
+              #{del_lines},
+              #{changed_files},
+              #{is_merge}
            )
     </insert>
 
