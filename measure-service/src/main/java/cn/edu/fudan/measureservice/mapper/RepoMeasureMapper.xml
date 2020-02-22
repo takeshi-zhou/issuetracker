@@ -56,6 +56,7 @@
         <result property="commit_counts" column="commit_counts"/>
         <result property="add" column="sumAdd"/>
         <result property="del" column="sumDel"/>
+        <result property="changed_files" column="sumChangedFiles"/>
     </resultMap>
 
 
@@ -135,7 +136,7 @@
 
     <select id="getCommitInfoDeveloperListByDuration" resultMap="CommitInfoDeveloperListByDuration">
         select
-            developer_name,developer_email,SUM(add_lines) as sumAdd, SUM(del_lines) as sumDel, COUNT(*) as commit_counts
+            developer_name,developer_email,SUM(add_lines) as sumAdd, SUM(del_lines) as sumDel, COUNT(*) as commit_counts, SUM(changed_files) as sumChangedFiles
         from repo_measure
         where
          repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until}
@@ -161,6 +162,15 @@
     <select id="getCommitCountsByDuration" resultType="int">
         select
              COUNT(*) as commit_counts
+        from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until}
+        <if test="developer_name != null and developer_name != ''" >
+            and developer_name = #{developer_name}
+        </if>
+    </select>
+
+    <select id="getChangedFilesByDuration" resultType="int">
+        select
+        IFNULL(SUM(changed_files),0)
         from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until}
         <if test="developer_name != null and developer_name != ''" >
             and developer_name = #{developer_name}

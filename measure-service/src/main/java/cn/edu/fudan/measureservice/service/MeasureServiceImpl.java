@@ -566,10 +566,12 @@ public class MeasureServiceImpl implements MeasureService {
         int addLines = repoMeasureMapper.getAddLinesByDuration(repo_id, sinceDay, untilDay);
         int delLines = repoMeasureMapper.getDelLinesByDuration(repo_id, sinceDay, untilDay);
         int sumCommitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceDay, untilDay,null);
+        int sumChangedFiles = repoMeasureMapper.getChangedFilesByDuration(repo_id, sinceDay, untilDay,null);
         commitBaseInfoDuration.setCommitInfoList(CommitInfoDeveloper);
         commitBaseInfoDuration.setSumAddLines(addLines);
         commitBaseInfoDuration.setSumDelLines(delLines);
         commitBaseInfoDuration.setSumCommitCounts(sumCommitCounts);
+        commitBaseInfoDuration.setSumChangedFiles(sumChangedFiles);
         return commitBaseInfoDuration;
     }
 
@@ -607,9 +609,8 @@ public class MeasureServiceImpl implements MeasureService {
             throw new RuntimeException("please input correct date!");
         }
         if (indexDay.equals(today)){
-            LocalDate tomorrow = today.plusDays(1);
-            commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, today.toString(), tomorrow.toString(), developer_name);
-            result.add(getCommitBaseMonth(today.toString().substring(0,10), commitBaseInfoDuration));
+            commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, today.toString(), today.toString(), developer_name);
+            result.add(getCommitBaseInfoGranularityData(today.toString().substring(0,10), commitBaseInfoDuration));
             return result;
         }else{
             switch (granularity){
@@ -618,8 +619,8 @@ public class MeasureServiceImpl implements MeasureService {
                         //after 为 参数indexDay这天的后一天
                         LocalDate after = indexDay.plusDays(1);
 //                        System.out.println(after);
-                        commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, indexDay.toString(), after.toString(), developer_name);
-                        result.add(getCommitBaseMonth(indexDay.toString().substring(0,10), commitBaseInfoDuration));
+                        commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, indexDay.toString(), indexDay.toString(), developer_name);
+                        result.add(getCommitBaseInfoGranularityData(indexDay.toString().substring(0,10), commitBaseInfoDuration));
                         //indexDay 变成后一天
                         indexDay = after;
                     }
@@ -630,11 +631,11 @@ public class MeasureServiceImpl implements MeasureService {
                         LocalDate after = indexDay.plusWeeks(1);
                         if(after.isAfter(today)){
                             commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, indexDay.toString(), today.toString(), developer_name);
-                            result.add(getCommitBaseMonth(indexDay.toString().substring(0,10), commitBaseInfoDuration));
+                            result.add(getCommitBaseInfoGranularityData(indexDay.toString().substring(0,10), commitBaseInfoDuration));
                             break;
                         }
                         commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, indexDay.toString(), after.toString(), developer_name);
-                        result.add(getCommitBaseMonth(indexDay.toString().substring(0,10), commitBaseInfoDuration));
+                        result.add(getCommitBaseInfoGranularityData(indexDay.toString().substring(0,10), commitBaseInfoDuration));
                         //indexDay 变成后七天
                         indexDay = after;
                     }
@@ -645,11 +646,11 @@ public class MeasureServiceImpl implements MeasureService {
                         LocalDate after = indexDay.plusMonths(1);
                         if(after.isAfter(today)){
                             commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, indexDay.toString(), today.toString(), developer_name);
-                            result.add(getCommitBaseMonth(indexDay.toString().substring(0,10), commitBaseInfoDuration));
+                            result.add(getCommitBaseInfoGranularityData(indexDay.toString().substring(0,10), commitBaseInfoDuration));
                             break;
                         }
-                        commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, indexDay.toString(), today.toString(), developer_name);
-                        result.add(getCommitBaseMonth(indexDay.toString().substring(0,10), commitBaseInfoDuration));
+                        commitBaseInfoDuration = getCommitBaseInformationByDuration(repo_id, indexDay.toString(), after.toString(), developer_name);
+                        result.add(getCommitBaseInfoGranularityData(indexDay.toString().substring(0,10), commitBaseInfoDuration));
                         //indexDay 变成indexDay这天的下个月的这一天
                         indexDay = after;
                     }
@@ -661,8 +662,8 @@ public class MeasureServiceImpl implements MeasureService {
         return result;
     }
 
-    private CommitBaseInfoGranularity getCommitBaseMonth(String time, CommitBaseInfoDuration commitBaseInfoDuration){
-        CommitBaseInfoGranularity commitBaseInfoGranularity=new CommitBaseInfoGranularity();
+    private CommitBaseInfoGranularity getCommitBaseInfoGranularityData(String time, CommitBaseInfoDuration commitBaseInfoDuration){
+        CommitBaseInfoGranularity commitBaseInfoGranularity = new CommitBaseInfoGranularity();
         commitBaseInfoGranularity.setDate(time);
         commitBaseInfoGranularity.setCommitBaseInfoDuration(commitBaseInfoDuration);
         return commitBaseInfoGranularity;
