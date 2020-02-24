@@ -48,7 +48,7 @@ public class ScanOperationAdapter implements ScanOperation {
         }
         JSONObject jsonObject = restInterfaceManager.getCommitTime(commitId);
         Date commit_time = jsonObject.getJSONObject("data").getDate("commit_time");
-        return lastScannedCommitTime.before(commit_time);
+        return !lastScannedCommitTime.after(commit_time) ;
     }
 
     @Override
@@ -79,6 +79,7 @@ public class ScanOperationAdapter implements ScanOperation {
         JSONObject jsonObject = restInterfaceManager.getCommitTime(commitId);
         Date commit_time = jsonObject.getJSONObject("data").getDate("commit_time");
         scan.setCommit_time(commit_time);
+        scanDao.insertOneScan(scan);
         return new ScanInitialInfo(scan, repoName, repoId, repoPath,true);
     }
 
@@ -109,9 +110,8 @@ public class ScanOperationAdapter implements ScanOperation {
     public boolean updateScan(ScanInitialInfo scanInitialInfo) {
         Scan scan = scanInitialInfo.getScan();
         //更新当前Scan的状态
-        scan.setStatus("done");//设为结束状态
         scan.setEnd_time(new Date());
-        scanDao.insertOneScan(scan);
+        scanDao.updateOneScan(scan);
         return true;
     }
 }

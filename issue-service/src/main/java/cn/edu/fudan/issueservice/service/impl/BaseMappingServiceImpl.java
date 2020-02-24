@@ -146,19 +146,25 @@ public class BaseMappingServiceImpl implements MappingService {
         stringRedisTemplate.multi();
 
         stringRedisTemplate.opsForHash().increment(todayKey, "new", newIssueCount);
-        int todayRemaining = Integer.parseInt(String.valueOf(stringRedisTemplate.opsForHash().get(todayKey,"remaining")));
-        stringRedisTemplate.opsForHash().put(todayKey, "remaining", String.valueOf(todayRemaining+remainingIssueCountChanged));
+        stringRedisTemplate.opsForHash().increment(todayKey, "remaining", remainingIssueCountChanged);
+//        Object todayRemainingObject=stringRedisTemplate.opsForHash().get(todayKey,"remaining");
+//        int todayRemaining = todayRemainingObject==null?0:Integer.parseInt((String)todayRemainingObject);
+//        stringRedisTemplate.opsForHash().put(todayKey, "remaining", String.valueOf(todayRemaining+remainingIssueCountChanged));
         stringRedisTemplate.opsForHash().increment(todayKey, "eliminated", eliminatedIssueCount);
 
 
         stringRedisTemplate.opsForHash().increment(weekKey, "new", newIssueCount);
-        int weekRemaining = Integer.parseInt(String.valueOf(stringRedisTemplate.opsForHash().get(weekKey,"remaining")));
-        stringRedisTemplate.opsForHash().put(todayKey, "remaining", String.valueOf(weekRemaining+remainingIssueCountChanged));
+        stringRedisTemplate.opsForHash().increment(weekKey, "remaining", remainingIssueCountChanged);
+//        Object weekRemainingObject=stringRedisTemplate.opsForHash().get(todayKey,"remaining");
+//        int weekRemaining = weekRemainingObject==null?0:Integer.parseInt((String)weekRemainingObject);
+//        stringRedisTemplate.opsForHash().put(todayKey, "remaining", String.valueOf(weekRemaining+remainingIssueCountChanged));
         stringRedisTemplate.opsForHash().increment(weekKey, "eliminated", eliminatedIssueCount);
 
         stringRedisTemplate.opsForHash().increment(monthKey, "new", newIssueCount);
-        int monthRemaining = Integer.parseInt(String.valueOf(stringRedisTemplate.opsForHash().get(todayKey,"remaining")));
-        stringRedisTemplate.opsForHash().put(monthKey, "remaining", String.valueOf(monthRemaining+remainingIssueCountChanged));
+        stringRedisTemplate.opsForHash().increment(monthKey, "remaining", remainingIssueCountChanged);
+//        Object monthRemainingObject=stringRedisTemplate.opsForHash().get(todayKey,"remaining");
+//        int monthRemaining = monthRemainingObject==null?0:Integer.parseInt((String)monthRemainingObject);
+//        stringRedisTemplate.opsForHash().put(monthKey, "remaining", String.valueOf(monthRemaining+remainingIssueCountChanged));
         stringRedisTemplate.opsForHash().increment(monthKey, "eliminated", eliminatedIssueCount);
         stringRedisTemplate.exec();
     }

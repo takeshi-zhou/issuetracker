@@ -299,7 +299,7 @@ public class JGitHelper {
     public static void main(String[] args) throws ParseException {
         //gitCheckout("E:\\Lab\\project\\IssueTracker-Master", "f8263335ef380d93d6bb93b2876484e325116ac2");
         //String repoPath = "E:\\Lab\\iec-wepm-develop";
-        String repoPath = "G:\\新建文件夹 - 副本\\jackson-databind";
+        String repoPath = "E:\\school\\laboratory\\test-samples\\maven-surefire";
 //        String commitId = "75c6507e2139e9bb663abf35037b31478e44c616";
         JGitHelper jGitHelper = new JGitHelper(repoPath);
         List<RevCommit> list = jGitHelper.getAggregationCommit("2019-1-1 00:00:00");
