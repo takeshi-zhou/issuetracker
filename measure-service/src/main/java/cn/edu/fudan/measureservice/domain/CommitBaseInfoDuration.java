@@ -12,6 +12,9 @@ public class CommitBaseInfoDuration {
     private int sumAddLines;
     private int sumDelLines;
     private int sumCommitCounts;
+    private int sumChangedFiles;
+
+
 
     public int getSumCommitCounts() {
         return sumCommitCounts;
@@ -46,5 +49,13 @@ public class CommitBaseInfoDuration {
 
     public void setSumDelLines(int sumDelLines) {
         this.sumDelLines = sumDelLines;
+    }
+
+    public int getSumChangedFiles() {
+        return sumChangedFiles;
+    }
+
+    public void setSumChangedFiles(int sumChangedFiles) {
+        this.sumChangedFiles = sumChangedFiles;
     }
 }

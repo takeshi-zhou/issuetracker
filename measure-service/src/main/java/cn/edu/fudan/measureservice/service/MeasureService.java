@@ -88,11 +88,14 @@ public interface MeasureService {
     CommitBaseInfoDuration getCommitBaseInformationByDuration(String repo_id,String since,String until, String developer_name);
 
 
-
     /**
-     * 获取一个项目每个月的commitBaseInfo
-     * @param repo_id repo的唯一标识
-     * @return 一个repo每月的代码变化信息以及提交者的信息
+     *
+     * @param repo_id
+     * @param granularity
+     * @param since
+     * @param until
+     * @param developer_name
+     * @return 按照不同时间段（since、until），不同聚合粒度（granularity：天/周/月），不同开发者（developerName），获取工作量数据
      */
     List<CommitBaseInfoGranularity> getCommitBaseInfoGranularity(String repo_id, String granularity, String since, String until, String developer_name);
 
@@ -183,6 +186,15 @@ public interface MeasureService {
     Object getQualityChangesByDeveloperName(String developer_name,String token,String category,int counts,String project_name );
 
 
-
     Object InsertData(String repoId);
+
+
+
+    /**
+     根据repo_id和commit_id 判断该commit是否是merge的情况
+     */
+    public boolean isMerge(String repo_id, String commit_id);
+
+
+
 }

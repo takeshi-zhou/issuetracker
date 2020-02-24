@@ -229,7 +229,7 @@ public class ProjectServiceImpl implements ProjectService {
                         }
                     }
                     System.out.println(cellValue);
-                    if (j == 1){projectInfo.put("url",cellValue);System.out.println("url:"+cellValue);}
+                    if (j == 1){projectInfo.put("url",cellValue);}
                     if (j == 2){projectInfo.put("branch",cellValue);}
                     if (j == 3){projectInfo.put("name",cellValue);}
                     if (j == 4){projectInfo.put("isPrivate",cellValue);}

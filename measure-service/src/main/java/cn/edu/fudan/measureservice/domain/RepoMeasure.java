@@ -20,6 +20,8 @@ public class RepoMeasure {
     private String developer_email;
     private int add_lines;
     private int del_lines;
+    private int changed_files;
+    private boolean is_merge;
 
     public String getUuid() {
         return uuid;
@@ -155,5 +157,21 @@ public class RepoMeasure {
 
     public void setDel_lines(int del_lines) {
         this.del_lines = del_lines;
+    }
+
+    public int getChanged_files() {
+        return changed_files;
+    }
+
+    public void setChanged_files(int changed_files) {
+        this.changed_files = changed_files;
+    }
+
+    public boolean getIs_merge() {
+        return is_merge;
+    }
+
+    public void setIs_merge(boolean is_merge) {
+        this.is_merge = is_merge;
     }
 }
