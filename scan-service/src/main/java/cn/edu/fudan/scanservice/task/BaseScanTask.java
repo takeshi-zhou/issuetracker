@@ -94,6 +94,7 @@ public class BaseScanTask {
 
         //映射结束，更新当前scan
         logger.info("start to update scan status");
+        scanInitialInfo.getScan().setStatus("done");
         if (!scanOperation.updateScan(scanInitialInfo)) {
             send(repoId, commitId, category,"failed", "scan update failed");
             logger.error("Scan Update Failed!");

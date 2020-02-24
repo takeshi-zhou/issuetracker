@@ -4,6 +4,7 @@ import cn.edu.fudan.scanservice.component.rest.RestInterfaceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -74,6 +75,25 @@ public class DateTimeUtil {
         return LocalDateTime.parse(dateString,dateTimeFormatter);
     }
 
+
+    /**
+     * 10位时间戳转Date
+     * @param time
+     * @return
+     */
+    public static Date timestampToDate(Integer time) {
+        long temp = (long) time * 1000;
+        Timestamp ts = new Timestamp(temp);
+        Date date = new Date();
+        try {
+            date = ts;
+            //System.out.println(date);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return date;
+
+    }
 
 
 }

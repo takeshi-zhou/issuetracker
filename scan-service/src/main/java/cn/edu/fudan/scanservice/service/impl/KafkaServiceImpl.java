@@ -70,7 +70,7 @@ public class KafkaServiceImpl implements KafkaService {
     private CommitFilterStrategy<ScanMessageWithTime> commitFilter;
 
     @Autowired
-    @Qualifier("RAS")
+    @Qualifier("AACS")
     public void setCommitFilter(CommitFilterStrategy<ScanMessageWithTime> commitFilter) {
         this.commitFilter = commitFilter;
     }
