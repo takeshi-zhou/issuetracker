@@ -120,12 +120,12 @@
             <version>5.4.0.201906121030-r</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>cn.edu.fudan</groupId>
-            <artifactId>issue-service</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>cn.edu.fudan</groupId>-->
+<!--            <artifactId>issue-service</artifactId>-->
+<!--            <version>0.0.1-SNAPSHOT</version>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
 
         <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit &ndash;&gt;-->
         <!--<dependency>-->

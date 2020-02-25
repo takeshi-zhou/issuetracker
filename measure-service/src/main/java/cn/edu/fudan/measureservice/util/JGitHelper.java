@@ -36,7 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static cn.edu.fudan.issueservice.util.DateTimeUtil.timeTotimeStamp;
+import static cn.edu.fudan.measureservice.util.DateTimeUtil.timeTotimeStamp;
 
 @SuppressWarnings("Duplicates")
 @Slf4j
@@ -348,7 +348,7 @@ public class JGitHelper {
                             .setOldTree(oldTreeIter)
                             .call();
                     for (DiffEntry entry : diffs) {
-//                        System.out.println("Entry: " + entry);
+                        System.out.println("Entry: " + entry);
                     }
                     returnDiffs=diffs;
                 } catch (GitAPIException e) {
@@ -502,8 +502,8 @@ public class JGitHelper {
 //            jGitHelper.checkout(s);
 //        }
 //        String versionTag="v2.6.19";//定位到某一次Commi，既可以使用Tag，也可以使用其hash
-        String versionTag="7be1bdf47e02b52b77dc39726e7d27781cc04865";
-        String path="E:\\Project\\FDSELab\\IssueTracker-Master";
+        String versionTag="d5c2a8e98e7a21881d9b16a7f56c9e0435bb8386";
+        String path="E:\\Project\\FDSELab\\平台相关文档\\开源项目列表\\测试项目\\javafx-maven-plugin";
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
         builder.addCeilingDirectory(new File(path));

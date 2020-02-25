@@ -9,6 +9,16 @@
         <result property="password" column="password"/>
         <result property="name" column="name"/>
         <result property="email" column="email"/>
+        <result property="right" column="account_right"/>
+        <result property="groups" column="groups"/>
+    </resultMap>
+
+    <resultMap id="tool" type="Tool">
+        <id property="uuid" column="uuid"/>
+        <result property="toolType" column="tool_type"/>
+        <result property="toolName" column="tool_name"/>
+        <result property="description" column="description"/>
+        <result property="enabled" column="enabled"/>
     </resultMap>
 
     <insert id="addAccount" parameterType="Account">
@@ -18,7 +28,9 @@
         accountName,
         password,
         name,
-        email
+        email,
+        account_right,
+        groups
         )
         values
         (
@@ -26,7 +38,9 @@
         #{accountName},
         #{password},
         #{name},
-        #{email}
+        #{email},
+        #{right},
+        #{groups}
         )
     </insert>
 
@@ -52,5 +66,28 @@
 
     <select id="getAllAccountId" resultType="String">
         select uuid from account;
+    </select>
+
+    <update id="updateToolsEnable" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update tool
+            <set >
+                <if test="item.enabled != null" >
+                    enabled = #{item.enabled},
+                </if>
+                <if test="item.toolName != null" >
+                    tool_name = #{item.toolName},
+                </if>
+                <if test="item.description != null" >
+                    description = #{item.description},
+                </if>
+            </set>
+            where uuid = #{item.uuid}
+        </foreach>
+
+    </update>
+
+    <select id="getTools" resultMap="tool">
+        select * from tool;
     </select>
 </mapper>

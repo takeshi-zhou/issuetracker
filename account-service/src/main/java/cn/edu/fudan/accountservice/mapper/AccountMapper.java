@@ -2,6 +2,7 @@ package cn.edu.fudan.accountservice.mapper;
 
 
 import cn.edu.fudan.accountservice.domain.Account;
+import cn.edu.fudan.accountservice.domain.Tool;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -56,5 +57,9 @@ public interface AccountMapper {
      * @return List<String>
      */
     List<String> getAllAccountId();
+
+    void updateToolsEnable(List<Tool> tools);
+
+    List<Tool> getTools();
 
 }
