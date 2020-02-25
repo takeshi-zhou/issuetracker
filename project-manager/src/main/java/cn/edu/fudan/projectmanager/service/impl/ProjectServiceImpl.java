@@ -82,6 +82,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void addOneProject(String userToken, JSONObject projectInfo) {
         String url = projectInfo.getString("url");
+        String repo_source = projectInfo.getString("repo_source");
         if (url == null) {
             throw new RuntimeException("please input the project url!");
         }
@@ -125,7 +126,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setName(name);
         project.setUrl(url);
         project.setType(type);
-        project.setVcs_type("git");
+        project.setRepo_source(repo_source);
         project.setAccount_id(accountId);
         project.setDownload_status("Downloading");
         project.setAdd_time(new Date());

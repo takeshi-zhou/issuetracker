@@ -225,6 +225,11 @@ public class ScanServiceImpl implements ScanService {
         return result;
     }
 
+    @Override
+    public Object getScanByRepoIdAndStatus(String repoId, String status) {
+        return scanDao.getScanByRepoIdAndStatus(repoId,status);
+    }
+
     /**
      * 目前只是选取第一个未扫描或者编译未成功的commit作为返回值。 后面仍需改进。
      * @param jGitHelper
@@ -237,7 +242,7 @@ public class ScanServiceImpl implements ScanService {
 
         String[] parents = jGitHelper.getCommitParents(commitId);
         for(String parent : parents){
-            Scan  scan = scanDao.getScanByCategoryAndRepoIdAndCommitId(repoId,category,commitId);
+            Scan  scan = scanDao.getScanByCategoryAndRepoIdAndCommitId(repoId,category,parent);
             if(scan == null ){
                 return parent;
             }

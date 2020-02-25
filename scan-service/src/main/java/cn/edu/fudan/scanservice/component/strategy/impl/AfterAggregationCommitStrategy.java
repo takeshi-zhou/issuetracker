@@ -81,7 +81,7 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
 
 
                 latestCommitTime = DateTimeUtil.stringToLocalDate(completeCommitTime);
-                firstScanCommitTime = latestCommitTime.minusMonths(6);
+                firstScanCommitTime = latestCommitTime.minusMonths(3).minusDays(5);
 
 
                 JGitHelper jGitHelper = new JGitHelper(repoPath);

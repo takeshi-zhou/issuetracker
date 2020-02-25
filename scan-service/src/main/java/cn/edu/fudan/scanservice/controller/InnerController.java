@@ -134,4 +134,16 @@ public class InnerController {
     public Object getLatestScanFailedCommitId(@RequestParam("repo_id") String repoId,@RequestParam("category")String category,@RequestParam("commit_id")String commitId){
         return scanService.getLatestScanFailedCommitIdAndDeveloper(repoId, category,commitId);
     }
+
+
+    /**
+     * 根据 repo id 与 status 获取相应的scan列表
+     * @param repoId
+     * @param status
+     * @return
+     */
+    @GetMapping(value = "/inner/scan/get-by-status")
+    public Object getScanByStatus(@RequestParam("repo_id") String repoId,@RequestParam("status")String status){
+        return scanService.getScanByRepoIdAndStatus(repoId, status);
+    }
 }

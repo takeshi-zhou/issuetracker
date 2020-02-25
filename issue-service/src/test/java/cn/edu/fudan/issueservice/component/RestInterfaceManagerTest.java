@@ -116,7 +116,7 @@ public class RestInterfaceManagerTest extends IssueServiceApplicationTests {
 
     @Test
     public void getLatestScanFailedCommitId(){
-        String resultList = restInterfaceManager.getLatestScanFailedCommitId("7e35f5ae-544e-11ea-9837-31458decacbe",  "220652a04acf12f02245ef51b740b82c64d16c15","bug");
+        String resultList = restInterfaceManager.getLatestScanFailedCommitId("294b6600-56b0-11ea-807d-2b3ae82c4553",  "ffb7104917c7caf4b841c3c8e6cbff84199013a5","bug");
         int  a=1;
         a= a+1;
         System.out.println(a);
@@ -124,7 +124,7 @@ public class RestInterfaceManagerTest extends IssueServiceApplicationTests {
 
     @Test
     public void getOneCommitByCommitId(){
-        JSONObject result = restInterfaceManager.getOneCommitByCommitId("bdf2e832ff49fc032ace956ebcf4ac9e9b2eb3ca");
+        JSONObject result = restInterfaceManager.getOneCommitByCommitId("71b599686d8cc73ad71db9f4497823cbd7926705");
         int  a=1;
         a= a+1;
         System.out.println(a);
