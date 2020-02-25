@@ -10,12 +10,23 @@ public class AccountInfo {
 
     private String token;
 
+    private int right;
+
+    public int getRight() {
+        return right;
+    }
+
+    public void setRight(int right) {
+        this.right = right;
+    }
+
     public AccountInfo() {
     }
 
-    public AccountInfo(String username, String token) {
+    public AccountInfo(String username, String token, int right) {
         this.username = username;
         this.token = token;
+        this.right = right;
     }
 
     public String getUsername() {

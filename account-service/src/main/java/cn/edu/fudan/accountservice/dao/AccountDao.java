@@ -1,6 +1,7 @@
 package cn.edu.fudan.accountservice.dao;
 
 import cn.edu.fudan.accountservice.domain.Account;
+import cn.edu.fudan.accountservice.domain.Tool;
 import cn.edu.fudan.accountservice.mapper.AccountMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -44,5 +45,13 @@ public class AccountDao {
 
     public List<String> getAllAccountId() {
         return accountMapper.getAllAccountId();
+    }
+
+    public void updateToolsEnable(List<Tool> tools){
+        accountMapper.updateToolsEnable(tools);
+    }
+
+    public List<Tool> getTools(){
+        return accountMapper.getTools();
     }
 }

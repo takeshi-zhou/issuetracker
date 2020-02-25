@@ -83,7 +83,7 @@ public class AccountControllerTest extends AccountServiceApplicationTests {
         String password = "admin";
 
         responseBean.setCode(200);
-        responseBean.setData(new AccountInfo(username,  MD5Util.md5(MD5Util.md5(username + password))));
+        responseBean.setData(new AccountInfo(username,  MD5Util.md5(MD5Util.md5(username + password)),1));
         responseBean.setMsg("登录成功");
         PowerMockito.when(service.login(username,password)).thenReturn(responseBean);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/user/login")
