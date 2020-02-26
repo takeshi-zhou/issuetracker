@@ -322,7 +322,19 @@ public class JGitHelper {
         List<DiffEntry> returnDiffs = null;
 
         try {
+            //默认比较时间轴上最近的那个commit
             RevCommit previsouCommit=getPrevHash(revCommit,repo);
+
+            String currentName = revCommit.getAuthorIdent().getName();
+            RevCommit[] parents = revCommit.getParents();
+            //merge的情况，获取与当前commit开发者相同的那个commit
+            if (parents.length == 2){
+                if (parents[0].getAuthorIdent().getName().equals(currentName) && !parents[1].getAuthorIdent().getName().equals(currentName)){
+                    previsouCommit=parents[0];
+                }else if (!parents[0].getAuthorIdent().getName().equals(currentName) && parents[1].getAuthorIdent().getName().equals(currentName)){
+                    previsouCommit=parents[1];
+                }
+            }
             if(previsouCommit==null)
                 return null;
             ObjectId head=revCommit.getTree().getId();
@@ -435,19 +447,8 @@ public class JGitHelper {
                 EditList editList = hunkHeader.toEditList();
                 for(Edit edit : editList){
 //                    System.out.println(edit);
-                    if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("REPLACE")){
-                        subSize += edit.getEndA()-edit.getBeginA();
-                        addSize += edit.getEndB()-edit.getBeginB();
-                    }
-                    if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("INSERT")){
-                        subSize += 0;
-                        addSize += edit.getEndB()-edit.getBeginB() - (edit.getEndA() - edit.getBeginA() + 1);
-                    }
-                    if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("DELETE")){
-                        subSize += edit.getEndA()-edit.getBeginA() - (edit.getEndB() - edit.getBeginB() + 1);
-                        addSize += 0;
-                    }
-
+                    subSize += edit.getEndA()-edit.getBeginA();
+                    addSize += edit.getEndB()-edit.getBeginB();
                 }
             }
             result = result + addSize;
@@ -481,19 +482,8 @@ public class JGitHelper {
                 EditList editList = hunkHeader.toEditList();
                 for(Edit edit : editList){
 //                    System.out.println(edit);
-                    if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("REPLACE")){
-                        subSize += edit.getEndA()-edit.getBeginA();
-                        addSize += edit.getEndB()-edit.getBeginB();
-                    }
-                    if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("INSERT")){
-                        subSize += 0;
-                        addSize += edit.getEndB()-edit.getBeginB() - (edit.getEndA() - edit.getBeginA() + 1);
-                    }
-                    if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("DELETE")){
-                        subSize += edit.getEndA()-edit.getBeginA() - (edit.getEndB() - edit.getBeginB() + 1);
-                        addSize += 0;
-                    }
-
+                    subSize += edit.getEndA()-edit.getBeginA();
+                    addSize += edit.getEndB()-edit.getBeginB();
                 }
             }
             result = result + subSize;
@@ -543,7 +533,7 @@ public class JGitHelper {
             int verCommitTime=verCommit.getCommitTime();
             printTime(verCommitTime);//打印出本次Commit的时间
 
-            System.out.println("The author is: "+verCommit.getAuthorIdent().getEmailAddress());//获得本次Commit Author的邮箱
+            System.out.println("The author is: "+verCommit.getAuthorIdent().getName());//获得本次Commit Author的邮箱
 
             List<DiffEntry> diffFix=getChangedFileList(verCommit,repository);//获取变更的文件列表
 
@@ -567,19 +557,8 @@ public class JGitHelper {
                     EditList editList = hunkHeader.toEditList();
                     for(Edit edit : editList){
                         System.out.println(edit);
-                        if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("REPLACE")){
-                            subSize += edit.getEndA()-edit.getBeginA();
-                            addSize += edit.getEndB()-edit.getBeginB();
-                        }
-                        if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("INSERT")){
-                            subSize += 0;
-                            addSize += edit.getEndB()-edit.getBeginB() - (edit.getEndA() - edit.getBeginA() + 1);
-                        }
-                        if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("DELETE")){
-                            subSize += edit.getEndA()-edit.getBeginA() - (edit.getEndB() - edit.getBeginB() + 1);
-                            addSize += 0;
-                        }
-
+                        subSize += edit.getEndA()-edit.getBeginA();
+                        addSize += edit.getEndB()-edit.getBeginB();
                     }
                 }
                 System.out.println("addSize="+addSize);//增加和减少的代码行数统计，我和Git Log核对了一下，还挺准确的。
