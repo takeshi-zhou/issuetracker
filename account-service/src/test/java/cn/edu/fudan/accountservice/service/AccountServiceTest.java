@@ -73,7 +73,7 @@ public class AccountServiceTest extends AccountServiceApplicationTests {
         PowerMockito.when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
         doNothing().when(valueOperations).set("login:" + token, username);
         responseBean.setCode(200);
-        responseBean.setData(new AccountInfo(username,  MD5Util.md5(encodePassword)));
+        responseBean.setData(new AccountInfo(username,  MD5Util.md5(encodePassword),1));
         responseBean.setMsg("登录成功!");
         PowerMockito.when(accountDao.login(username,encodePassword)).thenReturn(account);
         ResponseBean responseBeanCorrect = accountService.login(username, password);

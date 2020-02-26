@@ -229,7 +229,7 @@ public class RestInterfaceManager {
     }
 
 
-    public boolean startCodeTracker(String repoId, String branch, int beginCommit) {
+    public boolean startCodeTracker(String repoId, String branch, String beginCommit) {
         boolean result = false;
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("repoId",repoId);
@@ -245,7 +245,7 @@ public class RestInterfaceManager {
         return result;
     }
 
-    public boolean updateCodeTracker(String repoId, String branch, int beginCommit) {
+    public boolean updateCodeTracker(String repoId, String branch) {
         boolean result = false;
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("repoId",repoId);

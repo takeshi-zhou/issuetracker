@@ -11,7 +11,7 @@ public class Project {
     private String name;
     private String language;
     private String url;
-    private String vcs_type;
+    private String repo_source;
     private String type;
     private String account_id;
     private String download_status;
@@ -26,20 +26,20 @@ public class Project {
     private String module;
 
     public static Project createOneProjectByRepoBasicInfo(RepoBasicInfo r,String type) throws ParseException {
-        return new Project(UUID.randomUUID().toString(), r.getName(), r.getLanguage(), r.getUrl(), r.getVcs_type(), type,"superAccount","Downloaded",
+        return new Project(UUID.randomUUID().toString(), r.getName(), r.getLanguage(), r.getUrl(), r.getRepo_source(), type,"superAccount","Downloaded",
                 "Not Scan",(new SimpleDateFormat("yyyy-MM-dd")).parse(r.getAdd_time()) , (new SimpleDateFormat("yyyy-MM-dd")).parse(r.getTill_commit_time()), r.getDescription(), r.getRepo_id(), r.getBranch());
     }
 
     public Project() {
     }
 
-    public Project(String uuid, String name, String language, String url, String vcs_type, String type, String account_id, String download_status,
+    public Project(String uuid, String name, String language, String url, String repo_source, String type, String account_id, String download_status,
                    String scan_status, Date add_time, Date till_commit_time, String description, String repo_id, String branch) {
         this.uuid = uuid;
         this.name = name;
         this.language = language;
         this.url = url;
-        this.vcs_type = vcs_type;
+        this.repo_source = repo_source;
         this.type = type;
         this.account_id = account_id;
         this.download_status = download_status;
@@ -114,12 +114,12 @@ public class Project {
         this.url = url;
     }
 
-    public String getVcs_type() {
-        return vcs_type;
+    public String getRepo_source() {
+        return repo_source;
     }
 
-    public void setVcs_type(String vcs_type) {
-        this.vcs_type = vcs_type;
+    public void setRepo_source(String repo_source) {
+        this.repo_source = repo_source;
     }
 
     public String getAccount_id() {

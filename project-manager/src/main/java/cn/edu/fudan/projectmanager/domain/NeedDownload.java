@@ -4,6 +4,7 @@ public class NeedDownload {
 
 
     private String projectId;
+    private String repoSource;
     private String url;
     private boolean isPrivate;
     private String username;
@@ -28,6 +29,14 @@ public class NeedDownload {
 
     public void setProjectId(String projectId) {
         this.projectId = projectId;
+    }
+
+    public String getRepoSource() {
+        return repoSource;
+    }
+
+    public void setRepoSource(String repoSource) {
+        this.repoSource = repoSource;
     }
 
     public String getUrl() {

@@ -43,4 +43,7 @@ public interface ScanService {
      * @return
      */
     String getLatestScanFailedCommitIdAndDeveloper( String repoId, String category, String commitId);
+
+
+    Object getScanByRepoIdAndStatus(String repoId,String status);
 }
