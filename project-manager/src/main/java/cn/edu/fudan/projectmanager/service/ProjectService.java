@@ -53,4 +53,14 @@ public interface ProjectService {
      * @return 返回符合条件的project列表
      */
     List<Project> getProjectsByCondition(String userToken,String category,String name,String module);
+
+    /**
+     * 每当用户添加项目时，若管理员没有此项目，也为管理员添加一次
+     * @param projectId
+     */
+    void addRootProject(String projectId);
+
+    void removeNonAdminProject(String projectId,String type, String userToken);
+
+    List<Project> getAllProject(String userToken);
 }

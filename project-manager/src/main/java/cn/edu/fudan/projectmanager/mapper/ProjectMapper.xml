@@ -157,6 +157,9 @@
             <if test="repo_id != null">
                 repo_id = #{repo_id}
             </if>
+            <if test="module != null">
+                module = #{module}
+            </if>
         </set>
         where uuid = #{uuid}
     </update>
@@ -196,5 +199,8 @@
         </where>
     </select>
 
-
+    <select id="getProjects" resultMap="project">
+        select *
+        from project
+    </select>
 </mapper>

@@ -97,4 +97,7 @@ public class ProjectDao {
         return projectMapper.getProjectsByCondition(account_id, category,name,module);
     }
 
+    public List<Project> getAllProjects(){
+        return projectMapper.getProjects();
+    }
 }

@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 @Service
 public class ProjectServiceImpl implements ProjectService {
 
@@ -135,6 +137,8 @@ public class ProjectServiceImpl implements ProjectService {
         //向RepoManager这个Topic发送消息，请求开始下载
         send(projectId, url,isPrivate,username,password,branch);
     }
+
+
 
     @Override
     public JSONObject addProjectList(String userToken, List<JSONObject> projectListInfo){
@@ -299,6 +303,13 @@ public class ProjectServiceImpl implements ProjectService {
         projectDao.updateProjectStatus(project);
     }
 
+    /**
+     * 若非管理员，先判断是非为唯一repo，若唯一，则将project的accountID改为adminID；若不唯一，则和之前处理相同，只删除project表对应数据
+     * 若是管理员，则不需要考虑是否还有其他人拥有此项目，直接删除所有repoId相同的项目
+     * @param projectId
+     * @param type
+     * @param userToken
+     */
     @Override
     public void remove(String projectId, String type,String userToken) {
         updateProjectStatus(projectId,"deleting");
@@ -307,7 +318,8 @@ public class ProjectServiceImpl implements ProjectService {
             String account_id = restInterfaceManager.getAccountId(userToken);
             //如果当前repoId和type只有这一个projectId与其对应，那么删除project的同时会删除repo的相关内容
             //否则还有其他project与当前repoId和type对应，该repo的相关内容就不删
-            if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type)) {
+            //if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
+            if(account_id.equals("1")){
                 restInterfaceManager.deleteIssuesOfRepo(repoId, type);
                 restInterfaceManager.deleteRawIssueOfRepo(repoId, type);
                 restInterfaceManager.deleteScanOfRepo(repoId, type);
@@ -343,9 +355,19 @@ public class ProjectServiceImpl implements ProjectService {
                 stringRedisTemplate.delete("trend:" + type + ":week:remaining:" + account_id + ":" + repoId);
                 stringRedisTemplate.delete("trend:" + type + ":week:eliminated:" + account_id + ":" + repoId);
                 stringRedisTemplate.exec();
+                List<Project> projects = projectDao.getProjectByRepoId(repoId);
+                List<String> projectIds = projects.stream().map(Project::getUuid).collect(Collectors.toList());
+                for(String id : projectIds){
+                    projectDao.remove(id);
+                }
+            }else if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
+                Project project = projectDao.getProjectByID(projectId);
+                project.setAccount_id("1");
+                projectDao.updateProjectStatus(project);
+            }else {
+                projectDao.remove(projectId);
             }
         }
-        projectDao.remove(projectId);
         logger.info("project delete success!");
     }
 
@@ -434,5 +456,32 @@ public class ProjectServiceImpl implements ProjectService {
         String account_id = restInterfaceManager.getAccountId(userToken);
         List<Project> projects = projectDao.getProjectsByCondition(account_id,category,name,module);
         return projects;
+    }
+
+    @Override
+    public void addRootProject(String projectId) {
+        Project project = getProjectByID(projectId);
+
+        if(!projectDao.getProjectList("1","bug").stream().
+                map(Project::getRepo_id).collect(Collectors.toList()).contains(project.getRepo_id())){
+            String uuid = UUID.randomUUID().toString();
+            project.setUuid(uuid);
+            project.setAccount_id("1");
+            projectDao.addOneProject(project);
+        }
+
+    }
+
+    @Override
+    public void removeNonAdminProject(String projectId, String type, String userToken) {
+        projectDao.remove(projectId);
+    }
+
+    @Override
+    public List<Project> getAllProject(String userToken) {
+        if("1".equals(restInterfaceManager.getAccountId(userToken))){
+            return projectDao.getAllProjects();
+        }
+        return null;
     }
 }

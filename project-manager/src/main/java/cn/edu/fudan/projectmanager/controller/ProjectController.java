@@ -152,7 +152,17 @@ public class ProjectController {
 
     }
 
+    @GetMapping(value = {"/project/all"})
+    public Object getAllProjects(HttpServletRequest request){
+        String userToken = request.getHeader("token");
+        try {
+            return new ResponseBean(200, "success", projectService.getAllProject(userToken));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "failed", null);
+        }
 
+    }
     //下面是其它服务调用的内部接口
 
     @PutMapping(value = {"/inner/project"})
@@ -209,6 +219,15 @@ public class ProjectController {
         }
     }
 
-
+    @GetMapping(value = "/inner/project/addRootProject")
+    public Object addRootProject(@RequestParam("projectId") String projectId){
+        try {
+            projectService.addRootProject(projectId);
+            return new ResponseBean(200, "project add success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "project add failed!", null);
+        }
+    }
 
 }
