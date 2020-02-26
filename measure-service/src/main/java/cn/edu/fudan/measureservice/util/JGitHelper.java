@@ -10,10 +10,7 @@ import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.diff.Edit;
-import org.eclipse.jgit.diff.EditList;
+import org.eclipse.jgit.diff.*;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
@@ -437,8 +434,20 @@ public class JGitHelper {
             for(HunkHeader hunkHeader:hunks){
                 EditList editList = hunkHeader.toEditList();
                 for(Edit edit : editList){
-                    subSize += edit.getEndA()-edit.getBeginA();
-                    addSize += edit.getEndB()-edit.getBeginB();
+//                    System.out.println(edit);
+                    if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("REPLACE")){
+                        subSize += edit.getEndA()-edit.getBeginA();
+                        addSize += edit.getEndB()-edit.getBeginB();
+                    }
+                    if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("INSERT")){
+                        subSize += 0;
+                        addSize += edit.getEndB()-edit.getBeginB() - (edit.getEndA() - edit.getBeginA() + 1);
+                    }
+                    if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("DELETE")){
+                        subSize += edit.getEndA()-edit.getBeginA() - (edit.getEndB() - edit.getBeginB() + 1);
+                        addSize += 0;
+                    }
+
                 }
             }
             result = result + addSize;
@@ -471,8 +480,20 @@ public class JGitHelper {
             for(HunkHeader hunkHeader:hunks){
                 EditList editList = hunkHeader.toEditList();
                 for(Edit edit : editList){
-                    subSize += edit.getEndA()-edit.getBeginA();
-                    addSize += edit.getEndB()-edit.getBeginB();
+//                    System.out.println(edit);
+                    if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("REPLACE")){
+                        subSize += edit.getEndA()-edit.getBeginA();
+                        addSize += edit.getEndB()-edit.getBeginB();
+                    }
+                    if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("INSERT")){
+                        subSize += 0;
+                        addSize += edit.getEndB()-edit.getBeginB() - (edit.getEndA() - edit.getBeginA() + 1);
+                    }
+                    if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("DELETE")){
+                        subSize += edit.getEndA()-edit.getBeginA() - (edit.getEndB() - edit.getBeginB() + 1);
+                        addSize += 0;
+                    }
+
                 }
             }
             result = result + subSize;
@@ -502,8 +523,8 @@ public class JGitHelper {
 //            jGitHelper.checkout(s);
 //        }
 //        String versionTag="v2.6.19";//定位到某一次Commi，既可以使用Tag，也可以使用其hash
-        String versionTag="d5c2a8e98e7a21881d9b16a7f56c9e0435bb8386";
-        String path="E:\\Project\\FDSELab\\平台相关文档\\开源项目列表\\测试项目\\javafx-maven-plugin";
+        String versionTag="cdc146a0e1958c56466847868270ea61737c5777";
+        String path="E:\\Project\\FDSELab\\IssueTracker-Master";
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
         builder.addCeilingDirectory(new File(path));
@@ -535,8 +556,7 @@ public class JGitHelper {
 
                 df.format(entry);
                 String diffText = out.toString("UTF-8");
-//				System.out.println(diffText);
-
+//                System.out.println(diffText);
                 System.out.println(entry.getNewPath());//变更文件的路径
 
                 FileHeader fileHeader = df.toFileHeader(entry);
@@ -546,8 +566,20 @@ public class JGitHelper {
                 for(HunkHeader hunkHeader:hunks){
                     EditList editList = hunkHeader.toEditList();
                     for(Edit edit : editList){
-                        subSize += edit.getEndA()-edit.getBeginA();
-                        addSize += edit.getEndB()-edit.getBeginB();
+                        System.out.println(edit);
+                        if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("REPLACE")){
+                            subSize += edit.getEndA()-edit.getBeginA();
+                            addSize += edit.getEndB()-edit.getBeginB();
+                        }
+                        if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("INSERT")){
+                            subSize += 0;
+                            addSize += edit.getEndB()-edit.getBeginB() - (edit.getEndA() - edit.getBeginA() + 1);
+                        }
+                        if (edit.toString().substring(0,edit.toString().indexOf('(')).equals("DELETE")){
+                            subSize += edit.getEndA()-edit.getBeginA() - (edit.getEndB() - edit.getBeginB() + 1);
+                            addSize += 0;
+                        }
+
                     }
                 }
                 System.out.println("addSize="+addSize);//增加和减少的代码行数统计，我和Git Log核对了一下，还挺准确的。

@@ -100,7 +100,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                 //更新dashboard
                 newIssueCount = insertIssueList.size();
                 remainingIssueCount = insertIssueList.size();
-                log.info("finish mapping -> new:{},remaining:{},eliminated:{} . category --> {}",newIssueCount,remainingIssueCount,eliminatedIssueCount,category);
+                logger.info("finish mapping -> new:{},remaining:{},eliminated:{} . category --> {}",newIssueCount,remainingIssueCount,eliminatedIssueCount,category);
                 dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
                 scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,current_commit_id,commitDate,developer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
             }else{
