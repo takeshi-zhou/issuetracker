@@ -234,6 +234,32 @@ public class BaseMappingServiceImpl implements MappingService {
     }
 
 
+    void modifyToSolvedTag(List<Issue> issues,boolean isSendToEvent,boolean isUpdateIssueIdsToDashboard,
+                           EventType eventType,String committer,Date currentCommitTime,String repo_id,String category) {
+        if(issues != null) {
+            //暂不发送event消息
+            if(isSendToEvent){
+                issueEventManager.sendIssueEvent(eventType, issues, committer, repo_id, currentCommitTime);
+            }
+            if (!issues.isEmpty()) {
+                //暂不更新消除缺陷的id到dashboard
+                if(isUpdateIssueIdsToDashboard){
+                    eliminatedInfoUpdate(issues, category, repo_id);
+                }
+
+                List<JSONObject> taggeds = new ArrayList<>();
+                for (Issue issue : issues) {
+                    JSONObject tagged = new JSONObject();
+                    tagged.put("item_id", issue.getUuid());
+                    tagged.put("tag_id", solvedTagId);
+                    taggeds.add(tagged);
+                }
+                restInterfaceManager.modifyTags(taggeds);
+            }
+        }
+    }
+
+
     void modifyToOriginalPriorityTag(List<RawIssue> rawIssues,JSONArray ignoreTypes) {
         List<JSONObject> taggeds = new ArrayList<>();
         for(RawIssue rawIssue : rawIssues){

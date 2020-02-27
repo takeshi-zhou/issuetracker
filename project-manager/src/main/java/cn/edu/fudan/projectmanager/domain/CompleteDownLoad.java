@@ -4,7 +4,6 @@ public class CompleteDownLoad {
 
     private String projectId;
     private String language;
-    private String vcs_type;
     private String status;
     private String description;
 
@@ -34,13 +33,6 @@ public class CompleteDownLoad {
         this.language = language;
     }
 
-    public String getVcs_type() {
-        return vcs_type;
-    }
-
-    public void setVcs_type(String vcs_type) {
-        this.vcs_type = vcs_type;
-    }
 
     public String getStatus() {
         return status;

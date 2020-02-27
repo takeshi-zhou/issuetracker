@@ -12,7 +12,7 @@ public class RepoBasicInfo {
     private String name;
     private String language;
     private String url;
-    private String vcs_type;
+    private String repo_source;
     private String add_time;
     private String till_commit_time;
     private String description;
@@ -35,12 +35,12 @@ public class RepoBasicInfo {
         this.url = url;
     }
 
-    public String getVcs_type() {
-        return vcs_type;
+    public String getRepo_source() {
+        return repo_source;
     }
 
-    public void setVcs_type(String vcs_type) {
-        this.vcs_type = vcs_type;
+    public void setRepo_source(String repo_source) {
+        this.repo_source = repo_source;
     }
 
     public String getAdd_time() {

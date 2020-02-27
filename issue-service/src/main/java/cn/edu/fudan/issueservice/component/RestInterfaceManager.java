@@ -416,6 +416,18 @@ public class RestInterfaceManager {
 
     }
 
+
+    public JSONArray getScanByRepoIdAndStatus(String repoId,String status){
+        JSONArray scans = restTemplate.getForObject(scanServicePath + "/inner/scan/get-by-status?repo_id=" + repoId+"&status=" + status, JSONArray.class);
+        if(scans != null){
+            return scans;
+        }
+        return null;
+
+    }
+
+
+
     // --------------------------------------------------------measure api ---------------------------------------------------------
 
 

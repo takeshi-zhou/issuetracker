@@ -56,6 +56,15 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
         List<Issue> insertIssueList = new ArrayList<>();
         List<Issue> updateIssueList = new ArrayList<>();
         List<Issue> solvedIssues = new ArrayList<>();
+
+        String scanId = null;
+
+        JSONArray scans = restInterfaceManager.getScanByRepoIdAndStatus(repo_id,"doing...");
+        if(scans.size() == 1){
+            JSONObject scan = scans.getJSONObject(0);
+            scanId = scan.getString("uuid");
+        }
+
         try{
             JSONObject repoPathJson = restInterfaceManager.getRepoPath(repo_id,current_commit_id);
             if(repoPathJson == null){
@@ -90,6 +99,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                         //获取rawIssue
                         RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,issueUUID,sonarIssue);
                         rawIssue.setStatus(RawIssueStatus.ADD.getType());
+                        rawIssue.setScan_id(scanId);
                         insertRawIssues.add(rawIssue);
                         //获取issue
                         Issue issue = generateOneNewIssue(rawIssue,issueUUID,pre_commit_id,sonarIssue,date);
@@ -100,7 +110,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                 //更新dashboard
                 newIssueCount = insertIssueList.size();
                 remainingIssueCount = insertIssueList.size();
-                log.info("finish mapping -> new:{},remaining:{},eliminated:{} . category --> {}",newIssueCount,remainingIssueCount,eliminatedIssueCount,category);
+                logger.info("finish mapping -> new:{},remaining:{},eliminated:{} . category --> {}",newIssueCount,remainingIssueCount,eliminatedIssueCount,category);
                 dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
                 scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,current_commit_id,commitDate,developer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
             }else{
@@ -148,6 +158,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                                         //获取rawIssue
                                         RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,confirmIssue.getUuid(),sonarIssue);
                                         rawIssue.setStatus(RawIssueStatus.ADD.getType());
+                                        rawIssue.setScan_id(scanId);
                                         insertRawIssues.add(rawIssue);
 
                                         continue;
@@ -168,6 +179,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                             //获取rawIssue
                             RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,issueUUID,sonarIssue);
                             rawIssue.setStatus(RawIssueStatus.ADD.getType());
+                            rawIssue.setScan_id(scanId);
                             insertRawIssues.add(rawIssue);
                             //获取issue
                             Issue issue = generateOneNewIssue(rawIssue,issueUUID,pre_commit_id,sonarIssue,date);
@@ -236,6 +248,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                             if(locationsHaveChanged){
                                 //如果有改变则记录更改后的location以及rawIssue
                                 insertLocations(rawIssueUUID,sonarIssue,repoPath);
+                                newRawIssue.setScan_id(scanId);
                                 newRawIssue.setStatus(RawIssueStatus.CHANGED.getType());
                             }else{
 
@@ -310,6 +323,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                                     //获取rawIssue
                                     RawIssue newRawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,solvedIssue.getUuid(),solvedSonarIssue);
                                     newRawIssue.setStatus(RawIssueStatus.SOLVED.getType());
+                                    newRawIssue.setScan_id(scanId);
                                     insertRawIssues.add(newRawIssue);
                                     break;
                                 }
@@ -596,6 +610,8 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
 
         issue.setPriority(priority);
         issue.setSonar_issue_id(sonarIssue.getString("key"));
+        issue.setRaw_issue_start(rawIssue.getUuid());
+        issue.setRaw_issue_end(rawIssue.getUuid());
         return issue;
     }
 
