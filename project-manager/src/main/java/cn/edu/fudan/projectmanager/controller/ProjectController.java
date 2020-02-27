@@ -84,9 +84,10 @@ public class ProjectController {
     //get project list
     @GetMapping(value = {"/project"})
     public Object query(HttpServletRequest request,
-                        @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
+                        @RequestParam(name = "type",required = false,defaultValue = "bug")String type,
+                        @RequestParam(name = "isRecycled",required = true,defaultValue = "0") int isRecycled) {
         String userToken = request.getHeader("token");
-        return projectService.getProjectList(userToken,type);
+        return projectService.getProjectList(userToken,type,isRecycled);
     }
 
     //jeff get project list by module
@@ -163,6 +164,23 @@ public class ProjectController {
         }
 
     }
+
+    @GetMapping(value = {"/project/recycle"})
+    public Object projectRecycle(HttpServletRequest request,
+                                 @RequestParam(name = "projectId")String projectId,
+                                 @RequestParam(name = "isRecycled",required = true,defaultValue = "0") int isRecycled
+    ){
+        String userToken = request.getHeader("token");
+        try {
+            projectService.recycle(projectId,userToken,isRecycled);
+            return new ResponseBean(200, "success", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "failed", null);
+        }
+
+    }
+
     //下面是其它服务调用的内部接口
 
     @PutMapping(value = {"/inner/project"})

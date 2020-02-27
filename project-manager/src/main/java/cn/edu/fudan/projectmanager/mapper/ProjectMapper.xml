@@ -20,7 +20,7 @@
         <result property="repo_id" column="repo_id"/>
         <result property="branch" column="branch"/>
         <result property="first_auto_scan" column="first_auto_scan"/>
-
+        <result property="recycled" column="recycled"/>
         <result property="module" column="module"/>
     </resultMap>
 
@@ -159,6 +159,9 @@
             </if>
             <if test="module != null">
                 module = #{module}
+            </if>
+            <if test="recycled != null">
+                recycled = #{recycled}
             </if>
         </set>
         where uuid = #{uuid}

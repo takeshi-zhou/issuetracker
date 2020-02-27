@@ -253,16 +253,19 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Override
-    public Object getProjectList(String userToken,String type) {
+    public Object getProjectList(String userToken,String type,int isRecycled) {
+        if("1".equals(restInterfaceManager.getAccountId(userToken))){
+            return projectDao.getAllProjects().stream().filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
+        }
         String account_id = restInterfaceManager.getAccountId(userToken);
-        return projectDao.getProjectList(account_id,type);
+        return projectDao.getProjectList(account_id,type).stream().filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
     }
 
     //jeff
     @Override
     public Object getProjectListByModule(String userToken,String type, String module) {
         String account_id = restInterfaceManager.getAccountId(userToken);
-        return projectDao.getProjectListByModule(account_id,type,module);
+        return projectDao.getProjectListByModule(account_id,type,module).stream().filter(project -> project.getRecycled()==0).collect(Collectors.toList());
     }
 
     @Override
@@ -478,11 +481,33 @@ public class ProjectServiceImpl implements ProjectService {
         projectDao.remove(projectId);
     }
 
+
+    /**
+     * 功能已合并到getProjectList接口
+     * @param userToken
+     * @return
+     */
     @Override
     public List<Project> getAllProject(String userToken) {
         if("1".equals(restInterfaceManager.getAccountId(userToken))){
-            return projectDao.getAllProjects();
+            return projectDao.getAllProjects().stream().filter(project -> project.getRecycled()==0).collect(Collectors.toList());
         }
         return null;
+    }
+
+    /**
+     * 功能不完善，没有考虑dashboard
+     * @param projectId
+     * @param userToken
+     */
+    @Override
+    public void recycle(String projectId, String userToken, int isRecycled) {
+//        String accountId = restInterfaceManager.getAccountId(userToken);
+//        if("1".equals(accountId)){
+//
+//        }
+        Project project = getProjectByID(projectId);
+        project.setRecycled(isRecycled);
+        projectDao.updateProjectStatus(project);
     }
 }
