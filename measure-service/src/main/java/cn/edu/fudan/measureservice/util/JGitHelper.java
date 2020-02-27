@@ -10,10 +10,7 @@ import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.diff.Edit;
-import org.eclipse.jgit.diff.EditList;
+import org.eclipse.jgit.diff.*;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
@@ -325,7 +322,19 @@ public class JGitHelper {
         List<DiffEntry> returnDiffs = null;
 
         try {
+            //默认比较时间轴上最近的那个commit
             RevCommit previsouCommit=getPrevHash(revCommit,repo);
+
+            String currentName = revCommit.getAuthorIdent().getName();
+            RevCommit[] parents = revCommit.getParents();
+            //merge的情况，获取与当前commit开发者相同的那个commit
+            if (parents.length == 2){
+                if (parents[0].getAuthorIdent().getName().equals(currentName) && !parents[1].getAuthorIdent().getName().equals(currentName)){
+                    previsouCommit=parents[0];
+                }else if (!parents[0].getAuthorIdent().getName().equals(currentName) && parents[1].getAuthorIdent().getName().equals(currentName)){
+                    previsouCommit=parents[1];
+                }
+            }
             if(previsouCommit==null)
                 return null;
             ObjectId head=revCommit.getTree().getId();
@@ -437,6 +446,7 @@ public class JGitHelper {
             for(HunkHeader hunkHeader:hunks){
                 EditList editList = hunkHeader.toEditList();
                 for(Edit edit : editList){
+//                    System.out.println(edit);
                     subSize += edit.getEndA()-edit.getBeginA();
                     addSize += edit.getEndB()-edit.getBeginB();
                 }
@@ -471,6 +481,7 @@ public class JGitHelper {
             for(HunkHeader hunkHeader:hunks){
                 EditList editList = hunkHeader.toEditList();
                 for(Edit edit : editList){
+//                    System.out.println(edit);
                     subSize += edit.getEndA()-edit.getBeginA();
                     addSize += edit.getEndB()-edit.getBeginB();
                 }
@@ -502,8 +513,8 @@ public class JGitHelper {
 //            jGitHelper.checkout(s);
 //        }
 //        String versionTag="v2.6.19";//定位到某一次Commi，既可以使用Tag，也可以使用其hash
-        String versionTag="d5c2a8e98e7a21881d9b16a7f56c9e0435bb8386";
-        String path="E:\\Project\\FDSELab\\平台相关文档\\开源项目列表\\测试项目\\javafx-maven-plugin";
+        String versionTag="cdc146a0e1958c56466847868270ea61737c5777";
+        String path="E:\\Project\\FDSELab\\IssueTracker-Master";
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
         builder.addCeilingDirectory(new File(path));
@@ -522,7 +533,7 @@ public class JGitHelper {
             int verCommitTime=verCommit.getCommitTime();
             printTime(verCommitTime);//打印出本次Commit的时间
 
-            System.out.println("The author is: "+verCommit.getAuthorIdent().getEmailAddress());//获得本次Commit Author的邮箱
+            System.out.println("The author is: "+verCommit.getAuthorIdent().getName());//获得本次Commit Author的邮箱
 
             List<DiffEntry> diffFix=getChangedFileList(verCommit,repository);//获取变更的文件列表
 
@@ -535,8 +546,7 @@ public class JGitHelper {
 
                 df.format(entry);
                 String diffText = out.toString("UTF-8");
-//				System.out.println(diffText);
-
+//                System.out.println(diffText);
                 System.out.println(entry.getNewPath());//变更文件的路径
 
                 FileHeader fileHeader = df.toFileHeader(entry);
@@ -546,6 +556,7 @@ public class JGitHelper {
                 for(HunkHeader hunkHeader:hunks){
                     EditList editList = hunkHeader.toEditList();
                     for(Edit edit : editList){
+                        System.out.println(edit);
                         subSize += edit.getEndA()-edit.getBeginA();
                         addSize += edit.getEndB()-edit.getBeginB();
                     }
