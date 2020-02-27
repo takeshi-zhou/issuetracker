@@ -267,4 +267,12 @@ public interface IssueMapper {
      * @return commit id list
      */
     List<String> getCommitIds(@Param("repo_id") String repoId,@Param("since") String since,@Param("until") String until);
+
+    /**
+     * 获取指定repo 与 category 存在无效消除的 issue 列表
+     * @param repoId
+     * @param category
+     * @return
+     */
+    List<Issue> getHaveNotAdoptEliminateIssuesByCategoryAndRepoId(@Param("repo_id") String repoId,@Param("category")String category);
 }

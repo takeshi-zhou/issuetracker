@@ -73,8 +73,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @SuppressWarnings("unchecked")
-    private void send(String projectId, String url,boolean isPrivate,String username,String password, String branch) {
-        NeedDownload needDownload = new NeedDownload(projectId, url,isPrivate,username,password ,branch);
+    private void send(String projectId, String url,boolean isPrivate,String username,String password, String branch,String repoSource) {
+        NeedDownload needDownload = new NeedDownload(projectId, url,isPrivate,username,password ,branch,repoSource);
         kafkaTemplate.send("ProjectManager", JSONObject.toJSONString(needDownload));
         logger.info("send message to topic ProjectManage ---> " + JSONObject.toJSONString(needDownload));
     }
@@ -134,7 +134,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setModule(module);
         projectDao.addOneProject(project);
         //向RepoManager这个Topic发送消息，请求开始下载
-        send(projectId, url,isPrivate,username,password,branch);
+        send(projectId, url,isPrivate,username,password,branch,repo_source);
     }
 
     @Override

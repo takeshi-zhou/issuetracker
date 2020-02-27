@@ -175,6 +175,10 @@ public class KafkaServiceImpl implements KafkaService {
         //串行扫
         if(existProject(repoId,"bug",false)){
             findBugScanTask.runSynchronously(repoId, commitId,"bug");
+
+            updateCodeTracker(repoId);
+            checkOutCodeTrackerStatus(repoId);
+
             sendMessageToMeasure(repoId,list);
         }
         if(existProject(repoId,"clone",false)){
@@ -239,17 +243,23 @@ public class KafkaServiceImpl implements KafkaService {
         //bug扫描
         boolean existedForBug =(existProject(repoId,"bug",false)||existProject(repoId,"bug",true));
         if(existedForBug){
+            boolean isSendMsgToCodeTracker = false;
+            String firstScanCommit = null;
             if(existProject(repoId,"bug",true)){
                 filteredCommits=commitFilter.filter(map,dates);
+                if(filteredCommits.isEmpty()){
+                    return ;
+                }
+                isSendMsgToCodeTracker = true;
+                firstScanCommit = filteredCommits.get(0).getCommitId();
+
             }else{
                 filteredCommits = addAllCommits(map,dates);
             }
             logger.info("{} need to auto scan!",repoId);
             logger.info(filteredCommits.size()+" commits need to scan after filtered!");
 
-            if(filteredCommits.isEmpty()){
-                return ;
-            }
+
             Map<String,String> bugResultMap = analyzeProjectIsScanned(repoId,"bug",filteredCommits);
 
             if(Boolean.parseBoolean(bugResultMap.get("isFirst"))){
@@ -263,6 +273,11 @@ public class KafkaServiceImpl implements KafkaService {
                     findBugScanTask.runSynchronously(repoId,commitId,"bug");
                 }
                 restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
+
+                sendMsgToCodeTracker(isSendMsgToCodeTracker,firstScanCommit,repoId);
+
+                checkOutCodeTrackerStatus(repoId);
+
                 sendMessageToMeasure(repoId,bugFilterCommits);
             }
 
@@ -388,7 +403,63 @@ public class KafkaServiceImpl implements KafkaService {
     }
 
 
+    private boolean sendMsgToCodeTracker(boolean isSendMsgToCodeTracker , String firstScanCommit,String repoId){
+        boolean  result = false;
+        if(isSendMsgToCodeTracker){
+            JSONArray projectList = restInterfaceManager.getProjectsOfRepo(repoId);
+            if(!projectList.isEmpty()){
+                JSONObject project = projectList.getJSONObject(0);
+                String branch = project.getString("branch");
+                result = restInterfaceManager.startCodeTracker(repoId,branch,firstScanCommit);
+            }
+        }
+        return result;
+    }
 
+    private boolean checkOutCodeTrackerStatus(String repoId){
+        boolean  result = true;
+        String status = null;
+        JSONArray projectList = restInterfaceManager.getProjectsOfRepo(repoId);
+        if(!projectList.isEmpty()){
+            JSONObject project = projectList.getJSONObject(0);
+            String branch = project.getString("branch");
+            status = restInterfaceManager.getCodeTrackerStatus(repoId,branch);
+            if(status == null  || "null".equals(status)){
+                logger.warn("repo id ---> {} , had not yet begun starting code tracker scanning!",repoId);
+            }else if("scanning".equals(status)){
+                logger.info("repo id ---> {} ,  code tracker is  scanning! ",repoId);
+                while("scanning".equals(status)){
+                    try {
+                        TimeUnit.MINUTES.sleep(10);
+                        status = restInterfaceManager.getCodeTrackerStatus(repoId,branch);
+                    }catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                logger.info("repo id ---> {} ,  code tracker finished scan! ",repoId);
+            }else if("scanned".equals(status)){
+                logger.info("repo id ---> {} ,  code tracker finished scan! ",repoId);
+            }else{
+                logger.info("repo id ---> {} ,  code tracker scan status -->{} ",repoId,status);
+            }
+        }
+
+        return result;
+    }
+
+
+    private boolean updateCodeTracker(String repoId){
+        boolean  result = false;
+
+        JSONArray projectList = restInterfaceManager.getProjectsOfRepo(repoId);
+        if(!projectList.isEmpty()){
+            JSONObject project = projectList.getJSONObject(0);
+            String branch = project.getString("branch");
+            result = restInterfaceManager.updateCodeTracker(repoId,branch);
+        }
+
+        return result;
+    }
 
     private boolean existProject(String repoId,String category,boolean isFirst){
         JSONObject response=restInterfaceManager.existThisProject(repoId, category,isFirst);

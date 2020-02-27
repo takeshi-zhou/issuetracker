@@ -484,4 +484,9 @@
         </if>
     </select>
 
+
+    <select id="getHaveNotAdoptEliminateIssuesByCategoryAndRepoId" parameterType="String" resultType="String">
+        select * from issue
+        where  repo_id = #{repo_id} and category = #{category} and resolution is not null and  resolution != '0';
+    </select>
 </mapper>

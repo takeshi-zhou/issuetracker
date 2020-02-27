@@ -445,7 +445,7 @@ public class MeasureServiceImpl implements MeasureService {
     private String getRepoPath(String repoId){
         JSONObject currentRepo = restInterfaceManager.getRepoById(repoId);
         String repoPath = currentRepo.getJSONObject("data").getString("local_addr");
-        return repoHome+repoPath;
+        return repoPath;
     }
 
     @Override
