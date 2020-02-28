@@ -64,6 +64,9 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
         if(scans.size() == 1){
             JSONObject scan = scans.getJSONObject(0);
             scanId = scan.getString("uuid");
+
+        }else{
+            logger.error("can not get scan id");
         }
 
         try{
