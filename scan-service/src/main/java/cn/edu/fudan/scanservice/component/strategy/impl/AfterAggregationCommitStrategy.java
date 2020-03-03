@@ -64,74 +64,20 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
         String checkCommitId = latestScanMessageWithTime.getString("commit_id");
 
 
-
-
         Scan scan = scanDao.getScanByCategoryAndRepoIdAndCommitId(repoId,"test", null);
 
         if(scan != null){
             baseCommitId = scan.getCommit_id();
         }else{
-            RevCommit  baseCommit = null;
-            try {
 
-                repoPath = restInterfaceManager.getRepoPath(repoId, checkCommitId);
-                if (repoPath == null) {
-                    return null;
-                }
+            baseCommitId = getBaseCommitId(completeCommitTime, repoId, checkCommitId);
 
-
-                latestCommitTime = DateTimeUtil.stringToLocalDate(completeCommitTime);
-                firstScanCommitTime = latestCommitTime.minusMonths(3).minusDays(5);
-
-
-                JGitHelper jGitHelper = new JGitHelper(repoPath);
-                String formatTime = DateTimeUtil.format(firstScanCommitTime);
-                List<RevCommit> listCommits = jGitHelper.getAggregationCommit(formatTime);
-                while (listCommits.isEmpty()) {
-                    firstScanCommitTime = firstScanCommitTime.minusMonths(6);
-                    formatTime = DateTimeUtil.format(firstScanCommitTime);
-                    listCommits = jGitHelper.getAggregationCommit(formatTime);
-                }
-
-                final LocalDateTime finalFirstScanCommitTime = firstScanCommitTime;
-                qualified = listCommits.stream().filter(revCommit -> String.valueOf(revCommit.getCommitTime()).compareTo(DateTimeUtil.timeTotimeStamp(DateTimeUtil.format(finalFirstScanCommitTime))) > 0).sorted(Comparator.comparing(RevCommit::getCommitTime)).collect(Collectors.toList());
-
-
-            } finally {
-                if (repoPath != null) {
-                    restInterfaceManager.freeRepoPath(repoId, repoPath);
-                }
-            }
-
-
-            if (qualified == null || qualified.isEmpty()) {
+            if(baseCommitId == null){
                 return null;
             }
-
-
-
-            for (RevCommit revCommit :
-                    qualified) {
-                String repoPathRevCommit = null;
-
-                try {
-                    repoPathRevCommit = restInterfaceManager.getRepoPath(repoId, revCommit.getName());
-                    boolean isCompiled = executeShellUtil.executeMvn(repoPathRevCommit);
-                    if (isCompiled) {
-                        baseCommit = revCommit;
-                        break;
-                    }
-                } finally {
-                    if (repoPath != null) {
-                        restInterfaceManager.freeRepoPath(repoId, repoPath);
-                    }
-                }
-            }
-
-            baseCommitId = baseCommit.getName();
             isHaveFindAggregation = true;
-        }
 
+        }
 
         int sourceSize = dates.size();
         LinkedList<ScanMessageWithTime> originalCommitList = new LinkedList<>();
@@ -173,6 +119,123 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
         }
         return result;
     }
+
+
+
+    private String getBaseCommitId(String  completeCommitTime, String  repoId, String checkCommitId){
+        String baseCommitId = null;
+        LocalDateTime latestCommitTime = null;
+        LocalDateTime firstScanCommitTime = null;
+
+
+        latestCommitTime = DateTimeUtil.stringToLocalDate(completeCommitTime);
+        firstScanCommitTime = latestCommitTime.minusMonths(3).minusDays(5);
+
+        int allAggregationCommitCount = getAllAggregationCommitCount(repoId,checkCommitId);
+        int lastListCommitsSize = 0;
+
+        while(baseCommitId == null){
+            List<RevCommit> qualified = null;
+            RevCommit  baseCommit = null;
+            String repoPath = null;
+
+            try {
+
+                repoPath = restInterfaceManager.getRepoPath(repoId, checkCommitId);
+                if (repoPath == null) {
+                    return null;
+                }
+
+
+                JGitHelper jGitHelper = new JGitHelper(repoPath);
+                String formatTime = DateTimeUtil.format(firstScanCommitTime);
+                List<RevCommit> listCommits = jGitHelper.getAggregationCommit(formatTime);
+                while (listCommits.isEmpty()) {
+                    firstScanCommitTime = firstScanCommitTime.minusMonths(6);
+                    formatTime = DateTimeUtil.format(firstScanCommitTime);
+                    listCommits = jGitHelper.getAggregationCommit(formatTime);
+                }
+
+                if(listCommits.size() > lastListCommitsSize){
+                    lastListCommitsSize = listCommits.size();
+                }else{
+                    continue;
+                }
+
+                final LocalDateTime finalFirstScanCommitTime = firstScanCommitTime;
+                qualified = listCommits.stream().filter(revCommit -> String.valueOf(revCommit.getCommitTime()).compareTo(DateTimeUtil.timeTotimeStamp(DateTimeUtil.format(finalFirstScanCommitTime))) > 0).sorted(Comparator.comparing(RevCommit::getCommitTime)).collect(Collectors.toList());
+
+
+            } finally {
+                if (repoPath != null) {
+                    restInterfaceManager.freeRepoPath(repoId, repoPath);
+                }
+            }
+
+
+            if (qualified == null || qualified.isEmpty()) {
+                return null;
+            }
+
+
+
+            for (RevCommit revCommit :
+                    qualified) {
+                String repoPathRevCommit = null;
+
+                try {
+                    repoPathRevCommit = restInterfaceManager.getRepoPath(repoId, revCommit.getName());
+                    boolean isCompiled = executeShellUtil.executeMvn(repoPathRevCommit);
+                    if (isCompiled) {
+                        baseCommit = revCommit;
+                        break;
+                    }
+                } finally {
+                    if (repoPath != null) {
+                        restInterfaceManager.freeRepoPath(repoId, repoPath);
+                    }
+                }
+            }
+
+            if(baseCommit != null){
+                baseCommitId = baseCommit.getName();
+
+            }
+            if(qualified.size() == allAggregationCommitCount){
+                break;
+            }
+
+            firstScanCommitTime = firstScanCommitTime.minusMonths(3);
+
+        }
+
+        return baseCommitId;
+
+    }
+
+    private int getAllAggregationCommitCount(String repoId, String checkCommitId){
+        int result = 0;
+        String repoPath = null;
+        try {
+            repoPath = restInterfaceManager.getRepoPath(repoId, checkCommitId);
+            if (repoPath == null) {
+                return 0;
+            }
+
+
+            JGitHelper jGitHelper = new JGitHelper(repoPath);
+            List<RevCommit> revCommits = jGitHelper.getAllAggregationCommit();
+            result = revCommits.size();
+
+        } finally {
+            if (repoPath != null) {
+                restInterfaceManager.freeRepoPath(repoId, repoPath);
+            }
+        }
+
+        return result;
+    }
+
 
 
 //        if(baseCommit != null){
