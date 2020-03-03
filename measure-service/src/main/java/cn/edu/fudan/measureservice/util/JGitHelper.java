@@ -132,7 +132,7 @@ public class JGitHelper {
             repository.close();
         }
     }
-    
+
 
     public List<String> getCommitListByBranchAndBeginCommit(String branchName, String beginCommit) {
         checkout(branchName);
@@ -303,7 +303,6 @@ public class JGitHelper {
         return aggregationCommits;
     }
 
-
     //打印commit时间
     static void printTime(int commitTime) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -326,9 +325,9 @@ public class JGitHelper {
             if (fullName.endsWith(".java")){
                 //并且去除其中的test文件
                 if (fullName.contains("/test/") ||
-                    fullName.endsWith("test.java") ||
-                    fullName.endsWith("tests.java") ||
-                    fullName.startsWith("test")){
+                        fullName.endsWith("test.java") ||
+                        fullName.endsWith("tests.java") ||
+                        fullName.startsWith("test")){
                     continue;
                 }else {
                     result += 1;
@@ -447,7 +446,6 @@ public class JGitHelper {
             return false;
         }
     }
-
 
     //判断该次commit是否是merge
     public boolean isMerge(RevCommit revCommit){
@@ -581,7 +579,7 @@ public class JGitHelper {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             DiffFormatter df = new DiffFormatter(out);
-			df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);//如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
+            df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);//如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
             df.setRepository(repository);
 
             for (DiffEntry entry : diffFix) {
@@ -612,8 +610,8 @@ public class JGitHelper {
             System.out.println("delLine:"+ getDelLines(diffFix));
 
 
-            
         }
+
         catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
