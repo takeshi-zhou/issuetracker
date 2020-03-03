@@ -610,6 +610,9 @@ public class JGitHelper {
             System.out.println("该commit修改的java文件且非test文件数量为：" + getChangedFilesCount(diffFix));
             System.out.println("addLine:"+ getAddLines(diffFix));
             System.out.println("delLine:"+ getDelLines(diffFix));
+
+
+            
         }
         catch (IOException e) {
             // TODO Auto-generated catch block
