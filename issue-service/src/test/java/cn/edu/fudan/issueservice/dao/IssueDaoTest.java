@@ -63,4 +63,11 @@ public class IssueDaoTest extends IssueServiceApplicationTests {
         System.out.println(1+1);
     }
 
+    @Test
+    public void getHaveNotAdoptEliminateIssuesByCategoryAndRepoId() {
+
+        List<Issue> issues = issueMapper.getHaveNotAdoptEliminateIssuesByCategoryAndRepoId("294b6600-56b0-11ea-807d-2b3ae82c4553","bug");
+        System.out.println(1+1);
+    }
+
 }

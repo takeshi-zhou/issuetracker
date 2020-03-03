@@ -155,6 +155,29 @@ public class RestInterfaceManager {
     public JSONObject getCommitTime(String commitId){
         return restTemplate.getForObject(commitServicePath+"/commit-time?commit_id="+commitId,JSONObject.class);
     }
+
+
+    public JSONObject getCommitsOfRepoByConditions(String repoId, Integer page, Integer pageSize,Boolean isWhole) {
+
+        String url = commitServicePath + "?repo_id=" + repoId;
+        if(page != null ){
+            if(pageSize != null){
+                if(pageSize<=0 || page<=0){
+                    logger.error("page size or page is not correct . page size --> {},page --> {}",pageSize,page);
+                    return null;
+                }
+                url += "&per_page=" + pageSize;
+            }
+            url += "&page=" + page;
+        }
+
+        if(isWhole != null){
+            url += "&is_whole=" + isWhole ;
+        }
+        return restTemplate.getForObject(url, JSONObject.class);
+
+    }
+
     //----------------------------------------------end-----------------------------------------------------------------
 
     //---------------------------------------------code service---------------------------------------------------------

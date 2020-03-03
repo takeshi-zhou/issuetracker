@@ -6,16 +6,18 @@ import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @author WZY
+ * @author LSW
  * @version 1.0
  **/
 @Slf4j
@@ -72,8 +74,9 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 issueMapping(repoId, category, preCommitId, currentCommitId, commitDate,
                         date, insertIssueList, tags, ignoreTypes, committer, developer);
             }else{
+                boolean isAggregation = verifyWhetherAggregation(repoId, currentCommitId);
                 issueMapping(repoId, category, parentCommits, currentCommitId, commitDate,
-                        date, insertIssueList, tags, ignoreTypes, committer, developer);
+                        date, insertIssueList, tags, ignoreTypes, committer, developer,isAggregation);
             }
 
         }
@@ -237,7 +240,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
 
     private void issueMapping(String repoId, String category, List<String> parentCommits, String currentCommitId, Date commitDate,
-                              Date date, List<Issue> insertIssueList, List<JSONObject> tags, JSONArray ignoreTypes, String committer, String developer) {
+                              Date date, List<Issue> insertIssueList, List<JSONObject> tags, JSONArray ignoreTypes, String committer, String developer, boolean isAggregation) {
 
         int equalsCount = 0;
         int ignoreCountInNewIssues = 0;
@@ -477,13 +480,32 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         }
 
 
+
         int newIssueCount = insertIssueList.size();
         if(causeIssueChangedCommit == currentCommitId && newIssueCount != 0 ){
             logger.error("issue mapping may exists bugs");
         }
         remainingIssueChangedCount = notAdoptEliminateCount + newIssueCount -  eliminatedIssueCount;
-        logger.info("finish mapping -> new:{},remainingChangedCount:{},eliminated:{}",newIssueCount, remainingIssueChangedCount, actualEliminatedIssueCount);
-        dashboardUpdateForMergeVersion(repoId, newIssueCount, remainingIssueChangedCount, actualEliminatedIssueCount,category);
+
+        int realNotAdoptEliminateCount = 0;
+        if(isAggregation){
+            List<Issue> haveNotAdoptEliminateIssues = issueDao.getHaveNotAdoptEliminateIssuesByCategoryAndRepoId(repoId,category);
+            for(Issue manyChangedIssue : haveNotAdoptEliminateIssues){
+                String resolution = manyChangedIssue.getResolution();
+                realNotAdoptEliminateCount += Integer.parseInt(resolution);
+                manyChangedIssue.setResolution("0");
+            }
+
+            if(!haveNotAdoptEliminateIssues.isEmpty()){
+                issueDao.batchUpdateIssue(haveNotAdoptEliminateIssues);
+                logger.info(" have not adopt eliminate issues update success!");
+            }
+
+        }
+
+
+        logger.info("finish mapping -> new:{},remainingChangedCount:{},eliminated:{}",newIssueCount, remainingIssueChangedCount, actualEliminatedIssueCount-realNotAdoptEliminateCount);
+        dashboardUpdateForMergeVersion(repoId, newIssueCount, remainingIssueChangedCount, actualEliminatedIssueCount-realNotAdoptEliminateCount,category);
         logger.info("dashboard info updated!");
         rawIssueDao.batchUpdateIssueId(currentRawIssues);
 
@@ -770,6 +792,39 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         return null;
     }
 
+    private boolean verifyWhetherAggregation(String repoId,String commitId){
+        boolean result = false;
+
+        JSONObject jsonObject = restInterfaceManager.getCommitsOfRepoByConditions(repoId, 1, 1, null);
+        JSONArray scanMessageWithTimeJsonArray = jsonObject.getJSONArray("data");
+        JSONObject latestScanMessageWithTime = scanMessageWithTimeJsonArray.getJSONObject(0);
+        String completeCommitTime = latestScanMessageWithTime.getString("commit_time");
+        String checkCommitId = latestScanMessageWithTime.getString("commit_id");
+
+
+        String repoPath = null;
+        JSONObject repoPathJson = null;
+        JGitHelper jGitHelper = null;
+        try{
+            repoPathJson = restInterfaceManager.getRepoPath(repoId,checkCommitId);
+            if(repoPathJson == null){
+                throw new RuntimeException("can not get repo path");
+            }
+            repoPath = repoPathJson.getJSONObject("data").getString("content");
+            if(repoPath != null){
+                jGitHelper = new JGitHelper(repoPath);
+                result = jGitHelper.verifyWhetherAggregationCommit(commitId);
+            }
+
+
+        }finally{
+            if(repoPath!= null){
+                restInterfaceManager.freeRepoPath(repoId,repoPath);
+            }
+        }
+        return result;
+    }
+
     /**
      * 获取不是merge点的编译失败的commit
      * @param repoId
@@ -791,6 +846,9 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
 
     }
+
+
+
 }
 
 

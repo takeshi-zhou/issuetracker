@@ -46,7 +46,7 @@ public class BaseMappingServiceImpl implements MappingService {
     RestInterfaceManager restInterfaceManager;
 
     private StringRedisTemplate stringRedisTemplate;
-    private TagMapHelper tagMapHelper;
+    protected TagMapHelper tagMapHelper;
     private KafkaTemplate kafkaTemplate;
 
     @Autowired
@@ -286,14 +286,14 @@ public class BaseMappingServiceImpl implements MappingService {
                 tagged.put("tag_id", tagID);
 
             }
-
             taggeds.add(tagged);
         }
         restInterfaceManager.modifyTags(taggeds);
 
-
-
     }
+
+
+
 
     @SuppressWarnings("unchecked")
     void saveSolvedInfo(List<RawIssue> rawIssues,String repo_id,String pre_commit_id,String current_commit_id){

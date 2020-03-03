@@ -263,6 +263,35 @@ public class JGitHelper {
         return MERGE_WITHOUT_CONFLICT;
     }
 
+    public List<RevCommit> getAllAggregationCommit(){
+        List<RevCommit> aggregationCommits = new ArrayList<>();
+        try {
+
+            int branch = 0;
+            Iterable<RevCommit> commits = git.log().call();
+            List<RevCommit> commitList = new ArrayList<>();
+            Map<String,Integer> sonCommitsMap = new HashMap<>();
+            for (RevCommit revCommit: commits) {
+                commitList.add(revCommit);
+                RevCommit[] parents = revCommit.getParents();
+                for (RevCommit parentCommit : parents) {
+                    int sonCount = Optional.ofNullable(sonCommitsMap.get(parentCommit.getName())).orElse(0);
+                    sonCommitsMap.put(parentCommit.getName(),++sonCount);
+                }
+            }
+            commitList.sort(Comparator.comparingInt(RevCommit::getCommitTime));
+
+            for (RevCommit revCommit : commitList) {
+                branch -= revCommit.getParentCount()-1;
+                if (branch==1) {aggregationCommits.add(revCommit);}
+                branch += Optional.ofNullable(sonCommitsMap.get(revCommit.getName())).orElse(0)-1;
+            }
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        }
+        return aggregationCommits;
+    }
+
     public List<RevCommit> getAggregationCommit(String startTime){
         List<RevCommit> aggregationCommits = new ArrayList<>();
         try {
@@ -292,6 +321,8 @@ public class JGitHelper {
 
         return aggregationCommits;
     }
+
+
 
 
     public static void main(String[] args) throws ParseException {
