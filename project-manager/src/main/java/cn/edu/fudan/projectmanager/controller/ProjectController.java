@@ -103,9 +103,10 @@ public class ProjectController {
     @GetMapping(value = {"/project/filter"})
     public Object keyWordQuery(HttpServletRequest request,
                                @RequestParam("keyWord") String keyWord,
-                               @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
+                               @RequestParam(name = "type",required = false,defaultValue = "bug")String type,
+                               @RequestParam(name = "isRecycled",required = false,defaultValue = "0") int isRecycled) {
         String userToken = request.getHeader("token");
-        return projectService.getProjectListByKeyWord(userToken, keyWord,type);
+        return projectService.getProjectListByKeyWord(userToken, keyWord,type,isRecycled);
     }
 
     @DeleteMapping(value = {"/project/{projectId}"})

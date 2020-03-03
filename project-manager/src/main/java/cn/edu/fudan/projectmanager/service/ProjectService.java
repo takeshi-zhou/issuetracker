@@ -26,7 +26,7 @@ public interface ProjectService {
 
     Object getProjectByAccountId(String account_id, int isRecycled);
 
-    Object getProjectListByKeyWord(String userToken, String keyWord,String type);
+    Object getProjectListByKeyWord(String userToken, String keyWord,String type,int isRecycled);
 
     List<String> getRepoIdsByAccountIdAndType(String account_id,String type, int isRecycled);
 

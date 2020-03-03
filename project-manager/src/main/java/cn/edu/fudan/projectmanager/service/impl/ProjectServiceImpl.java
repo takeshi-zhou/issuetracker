@@ -281,9 +281,15 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Object getProjectListByKeyWord(String userToken, String keyWord,String type) {
+    public Object getProjectListByKeyWord(String userToken, String keyWord,String type,int isRecycled) {
         String account_id = restInterfaceManager.getAccountId(userToken);
-        return projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim(),type);
+        if("1".equals(account_id)){
+            return projectDao.getAllProjectByKeyWord(keyWord,type).stream()
+                    .filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
+        }else {
+            return projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim(),type).stream()
+                    .filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
+        }
     }
 
     @Override
@@ -379,6 +385,7 @@ public class ProjectServiceImpl implements ProjectService {
             }else if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
                 Project project = projectDao.getProjectByID(projectId);
                 project.setAccount_id("1");
+                project.setScan_status("Scanned");
                 projectDao.updateProjectStatus(project);
             }else {
                 projectDao.remove(projectId);

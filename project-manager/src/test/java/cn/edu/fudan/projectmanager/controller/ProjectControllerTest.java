@@ -176,7 +176,7 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
         List<Project> list = new ArrayList<Project>();
         list.add(project);
         list.add(projectInitial);
-        PowerMockito.when(service.getProjectListByKeyWord(token, keyword,"bug")).thenReturn(list);
+        PowerMockito.when(service.getProjectListByKeyWord(token, keyword,"bug",0)).thenReturn(list);
         MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class, "preHandle")).toReturn(true);
 
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/project/filter")
