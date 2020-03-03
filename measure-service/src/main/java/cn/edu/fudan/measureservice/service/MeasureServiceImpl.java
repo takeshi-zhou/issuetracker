@@ -252,24 +252,21 @@ public class MeasureServiceImpl implements MeasureService {
         repoMeasure.setRepo_id(repoId);
         repoMeasure.setDeveloper_name(developerName);
         repoMeasure.setDeveloper_email(developerEmail);
-        CommitBase commitBase = getCommitBaseInformationByCLI(repoId,commitId);
+
+        //如果是最初始的那个commit，那么工作量记为0，否则  则进行git diff 对比获取工作量
+        if (isInitCommitByIGit(repoId,commitId)){
+            repoMeasure.setAdd_lines(0);
+            repoMeasure.setDel_lines(0);
+            repoMeasure.setChanged_files(0);
+        }else{
+            repoMeasure.setAdd_lines(getAddLinesByJGit(repoId,commitId));
+            repoMeasure.setDel_lines(getDelLinesByJGit(repoId,commitId));
+            repoMeasure.setChanged_files(getChangedFilesCount(repoId,commitId));
+        }
 
         //获取该commit是否是merge
         repoMeasure.setIs_merge(isMergeByJGit(repoId,commitId));
-        logger.info("is_merge:"+isMergeByJGit(repoId,commitId));
 
-        //如果时merge的情况，通过JGit获取修改行数数据
-        if(isMergeByJGit(repoId,commitId)){
-            commitBase.setAddLines(getAddLinesByJGit(repoId,commitId));
-            commitBase.setDelLines(getDelLinesByJGit(repoId,commitId));
-        }
-        repoMeasure.setAdd_lines(commitBase.getAddLines());
-        repoMeasure.setDel_lines(commitBase.getDelLines());
-        logger.info("addlines:"+commitBase.getAddLines());
-        logger.info("dellines:"+commitBase.getDelLines());
-
-        repoMeasure.setChanged_files(getChangedFilesCount(repoId,commitId));
-        logger.info("changedFiles:"+getChangedFilesCount(repoId,commitId));
         if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
             repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
         }
@@ -1042,6 +1039,21 @@ public class MeasureServiceImpl implements MeasureService {
      *
      * @param repo_id
      * @param commit_id
+     * @return 利用JGit工具获取commit是否是最初始的那个commit
+     */
+    public boolean isInitCommitByIGit(String repo_id, String commit_id){
+        String repo_path = restInterfaceManager.getRepoPath(repo_id,commit_id);
+        System.out.println(repo_path);
+        JGitHelper jGitHelper = new JGitHelper(repo_path);
+        RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
+        return jGitHelper.isInitCommit(revCommit);
+    }
+
+
+    /**
+     *
+     * @param repo_id
+     * @param commit_id
      * @return 利用JGit工具获取commit是否是merge
      */
     public boolean isMergeByJGit(String repo_id, String commit_id){
@@ -1137,12 +1149,6 @@ public class MeasureServiceImpl implements MeasureService {
         }
         return result;
     }
-
-
-
-
-
-
 
 
 
