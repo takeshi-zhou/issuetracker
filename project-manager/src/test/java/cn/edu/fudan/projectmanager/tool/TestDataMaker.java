@@ -11,7 +11,7 @@ public class TestDataMaker {
         project.setName("Java");
         project.setLanguage("Java");
         project.setUrl("https://github.com/DuGuQiuBai/Java");
-        project.setVcs_type("git");
+        //project.setVcs_type("git");
         project.setAccount_id("1");
         project.setDownload_status("Downloaded");
         project.setScan_status("Not Scanned");
@@ -27,7 +27,7 @@ public class TestDataMaker {
         project.setName("Java");
         project.setLanguage("Java");
         project.setUrl("https://github.com/spotify/docker-maven-plugin");
-        project.setVcs_type("git");
+        //project.setVcs_type("git");
         project.setAccount_id("1");
         project.setDownload_status("Downloaded");
         project.setScan_status("Not Scanned");
@@ -43,7 +43,7 @@ public class TestDataMaker {
         project.setName("UpdateData");
         project.setLanguage("Java");
         project.setUrl("https://github.com/spotify/docker-maven-plugin");
-        project.setVcs_type("git");
+        //project.setVcs_type("git");
         project.setAccount_id("1");
         project.setDownload_status("Downloaded");
         project.setScan_status("Not Scanned");

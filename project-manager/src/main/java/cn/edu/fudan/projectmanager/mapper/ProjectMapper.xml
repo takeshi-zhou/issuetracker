@@ -20,7 +20,7 @@
         <result property="repo_id" column="repo_id"/>
         <result property="branch" column="branch"/>
         <result property="first_auto_scan" column="first_auto_scan"/>
-
+        <result property="recycled" column="recycled"/>
         <result property="module" column="module"/>
     </resultMap>
 
@@ -88,6 +88,21 @@
         order by add_time desc
     </select>
 
+    <select id="getAllProjectByKeyWord" parameterType="String" resultMap="project">
+        select *
+        from project
+        <where>
+
+            <if test="keyWord != null and keyWord != '' ">
+                name like "%"#{keyWord}"%"
+            </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
+        </where>
+        order by add_time desc
+    </select>
+
     <select id="getProjectByRepoId" parameterType="String" resultMap="project">
         select * from project where repo_id = #{repo_id}
     </select>
@@ -142,6 +157,9 @@
             <if test="download_status != null">
                 download_status = #{download_status},
             </if>
+            <if test="account_id != null">
+                account_id = #{account_id},
+            </if>
             <if test="scan_status != null">
                 scan_status = #{scan_status},
             </if>
@@ -155,7 +173,13 @@
                 description = #{description},
             </if>
             <if test="repo_id != null">
-                repo_id = #{repo_id}
+                repo_id = #{repo_id},
+            </if>
+            <if test="module != null">
+                module = #{module},
+            </if>
+            <if test="recycled != null">
+                recycled = #{recycled}
             </if>
         </set>
         where uuid = #{uuid}
@@ -196,5 +220,8 @@
         </where>
     </select>
 
-
+    <select id="getProjects" resultMap="project">
+        select *
+        from project
+    </select>
 </mapper>

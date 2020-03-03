@@ -31,6 +31,10 @@ public class ProjectDao {
         return projectMapper.getProjectByKeyWordAndAccountId(account_id, keyWord,type);
     }
 
+    public List<Project> getAllProjectByKeyWord(String keyWord,String type) {
+        return projectMapper.getAllProjectByKeyWord(keyWord,type);
+    }
+
     public List<Project> getProjectByRepoId(String repo_id){
         return projectMapper.getProjectByRepoId(repo_id);
     }
@@ -97,4 +101,7 @@ public class ProjectDao {
         return projectMapper.getProjectsByCondition(account_id, category,name,module);
     }
 
+    public List<Project> getAllProjects(){
+        return projectMapper.getProjects();
+    }
 }

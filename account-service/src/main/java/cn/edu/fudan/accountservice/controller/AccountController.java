@@ -86,11 +86,13 @@ public class AccountController {
     }
 
     @GetMapping(value = "/accountGroups")
+    @CrossOrigin
     public Object getGroupsByAccountName(@RequestParam("accountName") String accountName){
         return accountService.getGroupsByAccountName(accountName);
     }
 
     @PostMapping(value = "/updateTools")
+    @CrossOrigin
     public Object updateToolsEnable(@RequestBody List<Tool> tools){
         try{
             accountService.updateToolsEnable(tools);
@@ -102,6 +104,7 @@ public class AccountController {
     }
 
     @GetMapping(value = "/tools")
+    @CrossOrigin
     public Object getTools(){
         return accountService.getTools();
     }

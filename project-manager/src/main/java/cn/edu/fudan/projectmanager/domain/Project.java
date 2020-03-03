@@ -24,6 +24,7 @@ public class Project {
     private String branch;
     private int first_auto_scan;
     private String module;
+    private int recycled;
 
     public static Project createOneProjectByRepoBasicInfo(RepoBasicInfo r,String type) throws ParseException {
         return new Project(UUID.randomUUID().toString(), r.getName(), r.getLanguage(), r.getUrl(), r.getRepo_source(), type,"superAccount","Downloaded",
@@ -206,5 +207,13 @@ public class Project {
 
     public void setModule(String module) {
         this.module = module;
+    }
+
+    public int getRecycled() {
+        return recycled;
+    }
+
+    public void setRecycled(int recycled) {
+        this.recycled = recycled;
     }
 }
