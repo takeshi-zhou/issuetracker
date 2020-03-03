@@ -5,6 +5,7 @@
  **/
 package cn.edu.fudan.measureservice.util;
 
+import ch.qos.logback.classic.pattern.SyslogStartConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.Git;
@@ -313,8 +314,31 @@ public class JGitHelper {
     }
 
     //获取某次commit修改的文件数量
-    public static int getChangedFilesCount(List<DiffEntry> diffEntryList){
-        return diffEntryList.size();
+    public static int getChangedFilesCount(List<DiffEntry> diffEntryList) throws IOException {
+        int result = 0;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for (DiffEntry entry : diffEntryList) {
+            String diffText = out.toString("UTF-8");
+//                System.out.println(diffText);
+            String fullName = entry.getNewPath();
+            System.out.println(fullName);//变更文件的路径
+            //只统计java文件
+            if (fullName.endsWith(".java")){
+                //并且去除其中的test文件
+                if (fullName.contains("/test/") ||
+                    fullName.endsWith("test.java") ||
+                    fullName.endsWith("tests.java") ||
+                    fullName.startsWith("test")){
+                    continue;
+                }else {
+                    result += 1;
+                }
+            }else {
+                continue;
+            }
+            out.reset();
+        }
+        return result;
     }
 
     //    获取某次commit的修改文件列表
@@ -414,13 +438,24 @@ public class JGitHelper {
 
     }
 
+    //判断当前commit是否是最初始的那个commit
+    public boolean isInitCommit(RevCommit revCommit){
+        RevCommit[] parents = revCommit.getParents();
+        if (parents.length == 0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+
     //判断该次commit是否是merge
     public boolean isMerge(RevCommit revCommit){
         RevCommit[] parents = revCommit.getParents();
-        if (parents.length == 1){
-            return false;
-        }else{
+        if (parents.length == 2){
             return true;
+        }else{
+            return false;
         }
     }
 
@@ -429,7 +464,10 @@ public class JGitHelper {
         int result = 0;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         DiffFormatter df = new DiffFormatter(out);
-//			df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);//如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
+
+        //如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
+        df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);
+
         df.setRepository(repository);
         for (DiffEntry entry : diffEntryList) {
 
@@ -439,6 +477,7 @@ public class JGitHelper {
 
 //            System.out.println(entry.getNewPath());//变更文件的路径
 
+            // 获取文件差异位置，从而统计差异的行数，如增加行数，减少行数
             FileHeader fileHeader = df.toFileHeader(entry);
             List<HunkHeader> hunks = (List<HunkHeader>) fileHeader.getHunks();
             int addSize = 0;
@@ -464,7 +503,9 @@ public class JGitHelper {
         int result = 0;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         DiffFormatter df = new DiffFormatter(out);
-//			df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);//如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
+
+        //如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
+        df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);
         df.setRepository(repository);
         for (DiffEntry entry : diffEntryList) {
 
@@ -474,6 +515,7 @@ public class JGitHelper {
 
 //            System.out.println(entry.getNewPath());//变更文件的路径
 
+            // 获取文件差异位置，从而统计差异的行数，如增加行数，减少行数
             FileHeader fileHeader = df.toFileHeader(entry);
             List<HunkHeader> hunks = (List<HunkHeader>) fileHeader.getHunks();
             int addSize = 0;
@@ -513,7 +555,7 @@ public class JGitHelper {
 //            jGitHelper.checkout(s);
 //        }
 //        String versionTag="v2.6.19";//定位到某一次Commi，既可以使用Tag，也可以使用其hash
-        String versionTag="cdc146a0e1958c56466847868270ea61737c5777";
+        String versionTag="3d40ff80";
         String path="E:\\Project\\FDSELab\\IssueTracker-Master";
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
@@ -539,7 +581,7 @@ public class JGitHelper {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             DiffFormatter df = new DiffFormatter(out);
-//			df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);//如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
+			df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);//如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
             df.setRepository(repository);
 
             for (DiffEntry entry : diffFix) {
@@ -556,7 +598,7 @@ public class JGitHelper {
                 for(HunkHeader hunkHeader:hunks){
                     EditList editList = hunkHeader.toEditList();
                     for(Edit edit : editList){
-                        System.out.println(edit);
+//                        System.out.println(edit);
                         subSize += edit.getEndA()-edit.getBeginA();
                         addSize += edit.getEndB()-edit.getBeginB();
                     }
@@ -565,7 +607,7 @@ public class JGitHelper {
                 System.out.println("subSize="+subSize);
                 out.reset();
             }
-            System.out.println("该commit修改的文件数量为：" + getChangedFilesCount(diffFix));
+            System.out.println("该commit修改的java文件且非test文件数量为：" + getChangedFilesCount(diffFix));
             System.out.println("addLine:"+ getAddLines(diffFix));
             System.out.println("delLine:"+ getDelLines(diffFix));
         }
