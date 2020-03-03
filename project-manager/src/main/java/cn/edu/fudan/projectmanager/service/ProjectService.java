@@ -24,11 +24,11 @@ public interface ProjectService {
 
     Object getProjectByRepoId(String repo_id);
 
-    Object getProjectByAccountId(String account_id);
+    Object getProjectByAccountId(String account_id, int isRecycled);
 
     Object getProjectListByKeyWord(String userToken, String keyWord,String type);
 
-    List<String> getRepoIdsByAccountIdAndType(String account_id,String type);
+    List<String> getRepoIdsByAccountIdAndType(String account_id,String type, int isRecycled);
 
     Project getProjectByID(String projectId);
 
@@ -62,10 +62,14 @@ public interface ProjectService {
 
     void removeNonAdminProject(String projectId,String type, String userToken);
 
-    List<Project> getAllProject(String userToken);
+    /**
+     *
+     * @return
+     */
+    List<Project> getAllProject(int isRecycled);
 
     /**
-     * 项目回收功能，即删除项目进入回收站，管理员：将项目repo相同的项目全部进入回收站；非管理员：将对应projectId的项目并入回收站（存疑）
+     * 管理员：项目回收功能，即删除项目进入回收站，将项目repo相同的项目全部进入回收站；
      * 由项目表中recycled字段表示，1已回收状态，0表示没有被回收
      * @param projectId
      * @param userToken

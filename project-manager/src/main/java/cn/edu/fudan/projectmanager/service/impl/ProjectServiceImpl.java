@@ -274,8 +274,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Object getProjectByAccountId(String account_id) {
-        return projectDao.getProjectByAccountId(account_id);
+    public Object getProjectByAccountId(String account_id,int isRecycled) {
+
+        return projectDao.getProjectByAccountId(account_id).stream().filter(project ->
+                project.getRecycled()==isRecycled).collect(Collectors.toList());
     }
 
     @Override
@@ -285,8 +287,18 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<String> getRepoIdsByAccountIdAndType(String account_id,String type) {
-        return projectDao.getRepoIdsByAccountIdAndType(account_id,type);
+    public List<String> getRepoIdsByAccountIdAndType(String account_id, String type, int isRecycled) {
+        List<String> repoIds;
+        if("1".equals(account_id)){
+            repoIds = projectDao.getAllProjects().stream()
+                    .filter(project -> project.getRecycled()==isRecycled)
+                    .map(Project::getRepo_id).collect(Collectors.toList());
+        }else {
+            repoIds = projectDao.getRepoIdsByAccountIdAndType(account_id,type).stream().filter(repoId -> projectDao.getProjectByRepoIdAndCategory(account_id,repoId,type)
+                    .getRecycled()==isRecycled).collect(Collectors.toList());
+        }
+        return repoIds;
+
     }
 
     @Override
@@ -484,15 +496,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     /**
      * 功能已合并到getProjectList接口
-     * @param userToken
+     * @param
      * @return
      */
     @Override
-    public List<Project> getAllProject(String userToken) {
-        if("1".equals(restInterfaceManager.getAccountId(userToken))){
-            return projectDao.getAllProjects().stream().filter(project -> project.getRecycled()==0).collect(Collectors.toList());
-        }
-        return null;
+    public List<Project> getAllProject(int isRecycled) {
+        return projectDao.getAllProjects().stream().
+                filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
+
     }
 
     /**
@@ -502,10 +513,6 @@ public class ProjectServiceImpl implements ProjectService {
      */
     @Override
     public void recycle(String projectId, String userToken, int isRecycled) {
-//        String accountId = restInterfaceManager.getAccountId(userToken);
-//        if("1".equals(accountId)){
-//
-//        }
         Project project = getProjectByID(projectId);
         project.setRecycled(isRecycled);
         projectDao.updateProjectStatus(project);

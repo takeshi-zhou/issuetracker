@@ -153,7 +153,7 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
         List<Project> list = new ArrayList<Project>();
         list.add(project);
         list.add(projectInitial);
-        PowerMockito.when(service.getProjectList(token,"bug")).thenReturn(list);
+        //PowerMockito.when(service.getProjectList(token,"bug")).thenReturn(list);
         MemberModifier.stub(MemberMatcher.method(AuthTokenInterceptor.class, "preHandle")).toReturn(true);
 
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/project")
@@ -291,7 +291,7 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
         List<String> projectIds = new ArrayList<String>();
         projectIds.add(proId1);
         projectIds.add(proId2);
-        Mockito.when(service.getRepoIdsByAccountIdAndType(accountId,type)).thenReturn(projectIds);
+        Mockito.when(service.getRepoIdsByAccountIdAndType(accountId,type,0)).thenReturn(projectIds);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/inner/project/repo-ids")
                 .param("account_id", accountId)
                 .param("type", type)
@@ -327,7 +327,7 @@ public class ProjectControllerTest extends ProjectManagerApplicationTests {
         String account_id = "account_id";
         List<Project> projects = new ArrayList<Project>();
         projects.add(project);
-        Mockito.when(service.getProjectByAccountId(account_id)).thenReturn(projects);
+        Mockito.when(service.getProjectByAccountId(account_id,0)).thenReturn(projects);
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/inner/projects")
                 .param("account_id", account_id)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)

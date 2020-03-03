@@ -133,6 +133,7 @@ public class RestInterfaceManager {
     public JSONArray getProjectList(String account_id) {
         return restTemplate.getForObject(projectServicePath + "/inner/projects?account_id=" + account_id,JSONArray.class);
     }
+
     //-------------------------------------------------end-------------------------------------------------------------
 
     //---------------------------------------------commit service------------------------------------------------------

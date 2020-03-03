@@ -166,7 +166,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         PowerMockito.when(projectDao.getProjectList(account_id,type)).thenReturn(list);
         PowerMockito.when(restInterfaceManager.getAccountId(userToken)).thenReturn(account_id);
 
-        List<Project> listResult = (List<Project>) projectService.getProjectList(userToken,type);
+        List<Project> listResult = (List<Project>) projectService.getProjectList(userToken,type,0);
         Assert.assertEquals(list.size(), listResult.size());
         for (int i = 0; i < listResult.size(); ++i) {
             Assert.assertEquals(list.get(i).getUuid(), listResult.get(i).getUuid());
@@ -193,7 +193,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         List<Project> projects = new ArrayList<Project>();
         projects.add(project);
         Mockito.when(projectDao.getProjectByAccountId(account_id)).thenReturn(projects);
-        List<Project> projectsResult = (List<Project>) projectService.getProjectByAccountId(account_id);
+        List<Project> projectsResult = (List<Project>) projectService.getProjectByAccountId(account_id,0);
         Assert.assertEquals(projects.size(), projectsResult.size());
         for(int i=0;i<projectsResult.size();i++){
             Assert.assertEquals(projects.get(i).getUuid(), projectsResult.get(i).getUuid());
@@ -227,7 +227,7 @@ public class ProjectServiceTest extends ProjectManagerApplicationTests {
         repoIds.add("repo2");
         PowerMockito.when(projectDao.getRepoIdsByAccountIdAndType(accountId,type)).thenReturn(repoIds);
 
-        List<String> result = (List<String>) projectService.getRepoIdsByAccountIdAndType(accountId,type);
+        List<String> result = (List<String>) projectService.getRepoIdsByAccountIdAndType(accountId,type,0);
         Assert.assertEquals(repoIds.size(), result.size());
         for(int i=0;i<result.size();i++){
             Assert.assertEquals(repoIds.get(i), result.get(i));
