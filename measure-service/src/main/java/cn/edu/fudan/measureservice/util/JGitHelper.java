@@ -553,7 +553,7 @@ public class JGitHelper {
 //            jGitHelper.checkout(s);
 //        }
 //        String versionTag="v2.6.19";//定位到某一次Commi，既可以使用Tag，也可以使用其hash
-        String versionTag="3d40ff80";
+        String versionTag="a2cb227b8911cffe2797e3414c6b0fdaefc6dcf8";
         String path="E:\\Project\\FDSELab\\IssueTracker-Master";
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
@@ -586,7 +586,7 @@ public class JGitHelper {
 
                 df.format(entry);
                 String diffText = out.toString("UTF-8");
-//                System.out.println(diffText);
+                System.out.println(diffText);
                 System.out.println(entry.getNewPath());//变更文件的路径
 
                 FileHeader fileHeader = df.toFileHeader(entry);
@@ -596,7 +596,7 @@ public class JGitHelper {
                 for(HunkHeader hunkHeader:hunks){
                     EditList editList = hunkHeader.toEditList();
                     for(Edit edit : editList){
-//                        System.out.println(edit);
+                        System.out.println(edit);
                         subSize += edit.getEndA()-edit.getBeginA();
                         addSize += edit.getEndB()-edit.getBeginB();
                     }
@@ -605,7 +605,7 @@ public class JGitHelper {
                 System.out.println("subSize="+subSize);
                 out.reset();
             }
-            System.out.println("该commit修改的java文件且非test文件数量为：" + getChangedFilesCount(diffFix));
+               System.out.println("该commit修改的java文件且非test文件数量为：" + getChangedFilesCount(diffFix));
             System.out.println("addLine:"+ getAddLines(diffFix));
             System.out.println("delLine:"+ getDelLines(diffFix));
 
