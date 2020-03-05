@@ -185,16 +185,7 @@ public interface MeasureService {
      */
     Object getQualityChangesByDeveloperName(String developer_name,String token,String category,int counts,String project_name );
 
-
     Object InsertData(String repoId);
-
-
-
-    /**
-     根据repo_id和commit_id 判断该commit是否是merge的情况
-     */
-    public boolean isMerge(String repo_id, String commit_id);
-
 
 
 }

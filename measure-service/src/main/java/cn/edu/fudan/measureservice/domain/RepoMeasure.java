@@ -20,6 +20,8 @@ public class RepoMeasure {
     private String developer_email;
     private int add_lines;
     private int del_lines;
+    private int add_comment_lines;
+    private int del_comment_lines;
     private int changed_files;
     private boolean is_merge;
 
@@ -157,6 +159,22 @@ public class RepoMeasure {
 
     public void setDel_lines(int del_lines) {
         this.del_lines = del_lines;
+    }
+
+    public int getAdd_comment_lines() {
+        return add_comment_lines;
+    }
+
+    public void setAdd_comment_lines(int add_comment_lines) {
+        this.add_comment_lines = add_comment_lines;
+    }
+
+    public int getDel_comment_lines() {
+        return del_comment_lines;
+    }
+
+    public void setDel_comment_lines(int del_comment_lines) {
+        this.del_comment_lines = del_comment_lines;
     }
 
     public int getChanged_files() {

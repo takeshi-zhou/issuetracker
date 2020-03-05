@@ -457,23 +457,61 @@ public class JGitHelper {
         }
     }
 
-    //获取本次commit的AddLines
-    public static int getAddLines(List<DiffEntry> diffEntryList) throws IOException {
-        int result = 0;
+    //获取本次commit工作量行数数据（包括新增行数、删除行数、新增注释行、删除注释行）
+    public static Map<String, Integer> getLinesData(List<DiffEntry> diffEntryList) throws IOException{
+        Map<String,Integer> map = new HashMap<>();
+        int sumAddLines = 0;
+        int sumDelLines = 0;
+        int sumAddCommentLines = 0;
+        int sumDelCommentLines = 0;
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         DiffFormatter df = new DiffFormatter(out);
 
         //如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
         df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);
-
         df.setRepository(repository);
-        for (DiffEntry entry : diffEntryList) {
 
+        //以下循环是针对每一个有变动的文件
+        for (DiffEntry entry : diffEntryList) {
             df.format(entry);
             String diffText = out.toString("UTF-8");
-//				System.out.println(diffText);
+            int addWhiteLines = 0;
+            int delWhiteLines = 0;
+            int addCommentLines = 0;
+            int delCommentLines = 0;
+            String[] diffLines = diffText.split("\n");
+            for (String line : diffLines){
+                //若是增加的行，则执行以下筛选语句
+                if (line.startsWith("+") && ! line.startsWith("+++")){
+                    //去掉开头的"+"
+                    line = line.substring(1);
+                    //去掉头尾的空白符
+                    line = line.trim();
+                    if (line.matches("^[\\s]*$")){//匹配空白行
+                        addWhiteLines++;
+                    }else if(line.startsWith("//") || line.startsWith("/*")  || line.startsWith("*") || line.endsWith("*/")){//匹配注释行
+                        addCommentLines++;
+                    }
+                }
+                //若是删除的行，则执行以下筛选语句
+                if (line.startsWith("-") && ! line.startsWith("---")){
+                    //去掉开头的"-"
+                    line = line.substring(1);
+                    //去掉头尾的空白符
+                    line = line.trim();
+                    if (line.matches("^[\\s]*$")){//匹配空白行
+                        delWhiteLines++;
+                    }else if(line.startsWith("//") || line.startsWith("/*")  || line.startsWith("*") || line.endsWith("*/")){//匹配注释行
+                        delCommentLines++;
+                    }
+                }
+            }
 
-//            System.out.println(entry.getNewPath());//变更文件的路径
+            //对单个文件中的注释行数进行累加，计算到总的注释行当中去
+            sumAddCommentLines = sumAddCommentLines + addCommentLines;
+            sumDelCommentLines = sumDelCommentLines + delCommentLines;
+
 
             // 获取文件差异位置，从而统计差异的行数，如增加行数，减少行数
             FileHeader fileHeader = df.toFileHeader(entry);
@@ -483,57 +521,20 @@ public class JGitHelper {
             for(HunkHeader hunkHeader:hunks){
                 EditList editList = hunkHeader.toEditList();
                 for(Edit edit : editList){
-//                    System.out.println(edit);
                     subSize += edit.getEndA()-edit.getBeginA();
                     addSize += edit.getEndB()-edit.getBeginB();
                 }
             }
-            result = result + addSize;
-//            System.out.println("addSize="+addSize);//增加和减少的代码行数统计，我和Git Log核对了一下，还挺准确的。
-//            System.out.println("subSize="+subSize);
+            sumAddLines = sumAddLines + addSize - addCommentLines - addWhiteLines;
+            sumDelLines = sumDelLines + subSize - delCommentLines - delWhiteLines;
             out.reset();
         }
-        return result;
+        map.put("addLines", sumAddLines);
+        map.put("delLines", sumDelLines);
+        map.put("addCommentLines", sumAddCommentLines);
+        map.put("delCommentLines", sumDelCommentLines);
+        return map;
     }
-
-    //获取本次commit的DelLines
-    public static int getDelLines(List<DiffEntry> diffEntryList) throws IOException {
-        int result = 0;
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        DiffFormatter df = new DiffFormatter(out);
-
-        //如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
-        df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);
-        df.setRepository(repository);
-        for (DiffEntry entry : diffEntryList) {
-
-            df.format(entry);
-            String diffText = out.toString("UTF-8");
-//				System.out.println(diffText);
-
-//            System.out.println(entry.getNewPath());//变更文件的路径
-
-            // 获取文件差异位置，从而统计差异的行数，如增加行数，减少行数
-            FileHeader fileHeader = df.toFileHeader(entry);
-            List<HunkHeader> hunks = (List<HunkHeader>) fileHeader.getHunks();
-            int addSize = 0;
-            int subSize = 0;
-            for(HunkHeader hunkHeader:hunks){
-                EditList editList = hunkHeader.toEditList();
-                for(Edit edit : editList){
-//                    System.out.println(edit);
-                    subSize += edit.getEndA()-edit.getBeginA();
-                    addSize += edit.getEndB()-edit.getBeginB();
-                }
-            }
-            result = result + subSize;
-//            System.out.println("addSize="+addSize);//增加和减少的代码行数统计，我和Git Log核对了一下，还挺准确的。
-//            System.out.println("subSize="+subSize);
-            out.reset();
-        }
-        return result;
-    }
-
 
     public static void main(String[] args) throws ParseException {
         //gitCheckout("E:\\Lab\\project\\IssueTracker-Master", "f8263335ef380d93d6bb93b2876484e325116ac2");
@@ -553,7 +554,7 @@ public class JGitHelper {
 //            jGitHelper.checkout(s);
 //        }
 //        String versionTag="v2.6.19";//定位到某一次Commi，既可以使用Tag，也可以使用其hash
-        String versionTag="a2cb227b8911cffe2797e3414c6b0fdaefc6dcf8";
+        String versionTag="c5c9467dd5dfed84b738957625e0facc901ec58d";
         String path="E:\\Project\\FDSELab\\IssueTracker-Master";
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
@@ -582,34 +583,85 @@ public class JGitHelper {
             df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);//如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
             df.setRepository(repository);
 
-            for (DiffEntry entry : diffFix) {
+//            String dir=System.getProperty("user.dir");
+//            System.out.println(dir);
+//            String destFileName=dir+ File.separator + "measure-service" + File.separator + "raw-text-analyze"+ File.separator + "difftext.txt";
+//            System.out.println(destFileName);
+//            File destFile = new File(destFileName);
 
-                df.format(entry);
-                String diffText = out.toString("UTF-8");
-                System.out.println(diffText);
-                System.out.println(entry.getNewPath());//变更文件的路径
-
-                FileHeader fileHeader = df.toFileHeader(entry);
-                List<HunkHeader> hunks = (List<HunkHeader>) fileHeader.getHunks();
-                int addSize = 0;
-                int subSize = 0;
-                for(HunkHeader hunkHeader:hunks){
-                    EditList editList = hunkHeader.toEditList();
-                    for(Edit edit : editList){
-                        System.out.println(edit);
-                        subSize += edit.getEndA()-edit.getBeginA();
-                        addSize += edit.getEndB()-edit.getBeginB();
-                    }
-                }
-                System.out.println("addSize="+addSize);//增加和减少的代码行数统计，我和Git Log核对了一下，还挺准确的。
-                System.out.println("subSize="+subSize);
-                out.reset();
-            }
-               System.out.println("该commit修改的java文件且非test文件数量为：" + getChangedFilesCount(diffFix));
-            System.out.println("addLine:"+ getAddLines(diffFix));
-            System.out.println("delLine:"+ getDelLines(diffFix));
-
-
+//            for (DiffEntry entry : diffFix) {
+//
+//                df.format(entry);
+//                String diffText = out.toString("UTF-8");
+//                System.out.println(entry.getNewPath());//变更文件的路径
+//                System.out.println(diffText);
+//
+//                int addWhiteLines = 0;
+//                int delWhiteLines = 0;
+//                int addCommentLines = 0;
+//                int delCommentLines = 0;
+//                String[] diffLines = diffText.split("\n");
+//                for (String line : diffLines){
+//                    //若是增加的行，则执行以下筛选语句
+//                    if (line.startsWith("+") && ! line.startsWith("+++")){
+//                        //去掉开头的"+"
+//                        line = line.substring(1);
+//                        //去掉头尾的空白符
+//                        line = line.trim();
+//                        if (line.matches("^[\\s]*$")){//匹配空白行
+//                            System.out.println(line);
+//                            System.out.println("+成功匹配一个空行");
+//                            addWhiteLines++;
+//                        }else if(line.startsWith("//") || line.startsWith("/*")  || line.startsWith("*") || line.endsWith("*/")){//匹配注释行
+//                            addCommentLines++;
+//                            System.out.println(line);
+//                            System.out.println("+成功匹配一个注释行");
+//                        }
+//                    }
+//                    //若是删除的行，则执行以下筛选语句
+//                    if (line.startsWith("-") && ! line.startsWith("---")){
+//                        //去掉开头的"-"
+//                        line = line.substring(1);
+//                        //去掉头尾的空白符
+//                        line = line.trim();
+//                        if (line.matches("^[\\s]*$")){//匹配空白行
+//                            System.out.println(line);
+//                            System.out.println("-成功匹配一个空行");
+//                            delWhiteLines++;
+//                        }else if(line.startsWith("//") || line.startsWith("/*")  || line.startsWith("*") || line.endsWith("*/")){//匹配注释行
+//                            delCommentLines++;
+//                            System.out.println(line);
+//                            System.out.println("-成功匹配一个注释行");
+//                        }
+//                    }
+//                }
+//                System.out.println(entry.getNewPath()+": addWhiteLines = "+addWhiteLines);
+//                System.out.println(entry.getNewPath()+": delWhiteLines = "+delWhiteLines);
+//                System.out.println(entry.getNewPath()+": addCommentLines = "+addCommentLines);
+//                System.out.println(entry.getNewPath()+": delCommentLines = "+delCommentLines);
+//
+//                FileHeader fileHeader = df.toFileHeader(entry);
+//                List<HunkHeader> hunks = (List<HunkHeader>) fileHeader.getHunks();
+//                int addSize = 0;
+//                int subSize = 0;
+//                for(HunkHeader hunkHeader:hunks){
+//                    EditList editList = hunkHeader.toEditList();
+//                    for(Edit edit : editList){
+//                        System.out.println(edit);
+//                        subSize += edit.getEndA()-edit.getBeginA();
+//                        addSize += edit.getEndB()-edit.getBeginB();
+//                    }
+//                }
+//                System.out.println("addSize="+addSize);//增加和减少的代码行数统计，我和Git Log核对了一下，还挺准确的。
+//                System.out.println("subSize="+subSize);
+//                out.reset();
+//            }
+            Map<String, Integer> map = getLinesData(diffFix);
+            System.out.println("该commit修改的java文件且非test文件数量为：" + getChangedFilesCount(diffFix));
+            System.out.println("addLines:"+ map.get("addLines"));
+            System.out.println("delLines:"+ map.get("delLines"));
+            System.out.println("addCommentLines:"+ map.get("addCommentLines"));
+            System.out.println("delCommentLines:"+ map.get("delCommentLines"));
         }
 
         catch (IOException e) {
