@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.protocol.types.Field;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -257,10 +258,15 @@ public class MeasureServiceImpl implements MeasureService {
         if (isInitCommitByIGit(repoId,commitId)){
             repoMeasure.setAdd_lines(0);
             repoMeasure.setDel_lines(0);
+            repoMeasure.setAdd_comment_lines(0);
+            repoMeasure.setDel_comment_lines(0);
             repoMeasure.setChanged_files(0);
         }else{
-            repoMeasure.setAdd_lines(getAddLinesByJGit(repoId,commitId));
-            repoMeasure.setDel_lines(getDelLinesByJGit(repoId,commitId));
+            Map<String, Integer> map = getLinesDataByJGit(repoId,commitId);
+            repoMeasure.setAdd_lines(map.get("addLines"));
+            repoMeasure.setDel_lines(map.get("delLines"));
+            repoMeasure.setAdd_comment_lines(map.get("addCommentLines"));
+            repoMeasure.setDel_comment_lines(map.get("delCommentLines"));
             repoMeasure.setChanged_files(getChangedFilesCount(repoId,commitId));
         }
 
@@ -1021,20 +1027,6 @@ public class MeasureServiceImpl implements MeasureService {
         return "success";
     }
 
-    @Override
-    public boolean isMerge(String repo_id, String commit_id){
-        String repo_path = restInterfaceManager.getRepoPath(repo_id,commit_id);
-        System.out.println(repo_path);
-//        String repo_path = "E:\\Project\\FDSELab\\IssueTracker-Master";
-        JGitHelper jGitHelper = new JGitHelper(repo_path);
-        RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
-        return jGitHelper.isMerge(revCommit);
-    }
-
-
-
-
-
     /**
      *
      * @param repo_id
@@ -1069,10 +1061,10 @@ public class MeasureServiceImpl implements MeasureService {
      *
      * @param repo_id
      * @param commit_id
-     * @return 通过JGit获取merge情况时的addLines
+     * @return 通过JGit获取一次commit中开发者的新增行数，删除行数，新增注释行数，删除注释行数
      */
-    public int getAddLinesByJGit(String repo_id, String commit_id){
-        int result = 0;
+    public Map<String, Integer> getLinesDataByJGit(String repo_id, String commit_id){
+        Map<String, Integer> map = new HashMap<>();
         String repo_path = restInterfaceManager.getRepoPath(repo_id,commit_id);
         System.out.println(repo_path);
         JGitHelper jGitHelper = new JGitHelper(repo_path);
@@ -1085,42 +1077,13 @@ public class MeasureServiceImpl implements MeasureService {
             Repository repository = builder.build();
             RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
             List<DiffEntry> diffFix = JGitHelper.getChangedFileList(revCommit,repository);//获取变更的文件列表
-            result = JGitHelper.getAddLines(diffFix);
+            map = JGitHelper.getLinesData(diffFix);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return result;
+        return map;
     }
-
-    /**
-     *
-     * @param repo_id
-     * @param commit_id
-     * @return 通过JGit获取merge情况时的delLines
-     */
-    public int getDelLinesByJGit(String repo_id, String commit_id){
-        int result = 0;
-        String repo_path = restInterfaceManager.getRepoPath(repo_id,commit_id);
-        System.out.println(repo_path);
-        JGitHelper jGitHelper = new JGitHelper(repo_path);
-
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        builder.setMustExist(true);
-        builder.addCeilingDirectory(new File(repo_path));
-        builder.findGitDir(new File(repo_path));
-        try {
-            Repository repository = builder.build();
-            RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
-            List<DiffEntry> diffFix = JGitHelper.getChangedFileList(revCommit,repository);//获取变更的文件列表
-            result = JGitHelper.getDelLines(diffFix);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
 
     /**
      *
