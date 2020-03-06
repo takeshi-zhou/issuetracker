@@ -334,7 +334,7 @@ public class ProjectServiceImpl implements ProjectService {
      */
     @Override
     public void remove(String projectId, String type,String userToken) {
-        updateProjectStatus(projectId,"deleting");
+        //updateProjectStatus(projectId,"deleting");
         String repoId = projectDao.getRepoId(projectId);
         if(repoId!=null){
             String account_id = restInterfaceManager.getAccountId(userToken);
@@ -342,6 +342,11 @@ public class ProjectServiceImpl implements ProjectService {
             //否则还有其他project与当前repoId和type对应，该repo的相关内容就不删
             //if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
             if(account_id.equals("1")){
+                List<Project> projects = projectDao.getProjectByRepoId(repoId);
+                List<String> projectIds = projects.stream().map(Project::getUuid).collect(Collectors.toList());
+                for(String id : projectIds){
+                    projectDao.remove(id);
+                }
                 restInterfaceManager.deleteIssuesOfRepo(repoId, type);
                 restInterfaceManager.deleteRawIssueOfRepo(repoId, type);
                 restInterfaceManager.deleteScanOfRepo(repoId, type);
@@ -377,19 +382,17 @@ public class ProjectServiceImpl implements ProjectService {
                 stringRedisTemplate.delete("trend:" + type + ":week:remaining:" + account_id + ":" + repoId);
                 stringRedisTemplate.delete("trend:" + type + ":week:eliminated:" + account_id + ":" + repoId);
                 stringRedisTemplate.exec();
-                List<Project> projects = projectDao.getProjectByRepoId(repoId);
-                List<String> projectIds = projects.stream().map(Project::getUuid).collect(Collectors.toList());
-                for(String id : projectIds){
-                    projectDao.remove(id);
-                }
+
             }else if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
                 Project project = projectDao.getProjectByID(projectId);
                 project.setAccount_id("1");
-                project.setScan_status("Scanned");
+                //project.setScan_status("Scanned");
                 projectDao.updateProjectStatus(project);
             }else {
                 projectDao.remove(projectId);
             }
+        }else{
+            projectDao.remove(projectId);
         }
         logger.info("project delete success!");
     }
