@@ -84,9 +84,10 @@ public class ProjectController {
     //get project list
     @GetMapping(value = {"/project"})
     public Object query(HttpServletRequest request,
-                        @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
+                        @RequestParam(name = "type",required = false,defaultValue = "bug")String type,
+                        @RequestParam(name = "isRecycled",required = false,defaultValue = "0") int isRecycled) {
         String userToken = request.getHeader("token");
-        return projectService.getProjectList(userToken,type);
+        return projectService.getProjectList(userToken,type,isRecycled);
     }
 
     //jeff get project list by module
@@ -102,9 +103,10 @@ public class ProjectController {
     @GetMapping(value = {"/project/filter"})
     public Object keyWordQuery(HttpServletRequest request,
                                @RequestParam("keyWord") String keyWord,
-                               @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
+                               @RequestParam(name = "type",required = false,defaultValue = "bug")String type,
+                               @RequestParam(name = "isRecycled",required = false,defaultValue = "0") int isRecycled) {
         String userToken = request.getHeader("token");
-        return projectService.getProjectListByKeyWord(userToken, keyWord,type);
+        return projectService.getProjectListByKeyWord(userToken, keyWord,type,isRecycled);
     }
 
     @DeleteMapping(value = {"/project/{projectId}"})
@@ -152,9 +154,24 @@ public class ProjectController {
 
     }
 
+    @GetMapping(value = {"/project/recycle"})
+    public Object projectRecycle(HttpServletRequest request,
+                                 @RequestParam(name = "projectId")String projectId,
+                                 @RequestParam(name = "isRecycled", required = false,defaultValue = "0") int isRecycled
+    ){
+        String userToken = request.getHeader("token");
+        try {
+            projectService.recycle(projectId,userToken,isRecycled);
+            return new ResponseBean(200, "success", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "failed", null);
+        }
+
+    }
+
 
     //下面是其它服务调用的内部接口
-
     @PutMapping(value = {"/inner/project"})
     public Object updateProject(@RequestBody Project project) {
         try {
@@ -164,6 +181,17 @@ public class ProjectController {
             e.printStackTrace();
             return new ResponseBean(401, "project update failed!", null);
         }
+    }
+
+    @GetMapping(value = {"/inner/project/all"})
+    public Object getAllProjects(@RequestParam(name = "isRecycled", required = false,defaultValue = "0") int isRecycled){
+        try {
+            return new ResponseBean(200, "success", projectService.getAllProject(isRecycled));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "failed", null);
+        }
+
     }
 
     @GetMapping(value = {"/inner/project"})
@@ -184,13 +212,15 @@ public class ProjectController {
 
     @GetMapping(value = "/inner/project/repo-ids")
     public Object getProjectIds(@RequestParam(name = "account_id", required = false) String account_id,
-                                @RequestParam("type")String type) {
-        return projectService.getRepoIdsByAccountIdAndType(account_id,type);
+                                @RequestParam("type")String type,
+                                @RequestParam(name = "isRecycled",required = false,defaultValue = "0") int isRecycled) {
+        return projectService.getRepoIdsByAccountIdAndType(account_id,type,isRecycled);
     }
 
     @GetMapping(value = "/inner/projects")
-    public Object getProjectByAccountId(@RequestParam(name = "account_id", required = false) String account_id){
-        return projectService.getProjectByAccountId(account_id);
+    public Object getProjectByAccountId(@RequestParam(name = "account_id", required = false) String account_id,
+                                        @RequestParam(name = "isRecycled",required = false,defaultValue = "0") int isRecycled){
+        return projectService.getProjectByAccountId(account_id,isRecycled);
     }
 
     @GetMapping(value = "/inner/project/exist")
@@ -209,6 +239,15 @@ public class ProjectController {
         }
     }
 
-
+    @GetMapping(value = "/inner/project/addRootProject")
+    public Object addRootProject(@RequestParam("projectId") String projectId){
+        try {
+            projectService.addRootProject(projectId);
+            return new ResponseBean(200, "project add success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "project add failed!", null);
+        }
+    }
 
 }

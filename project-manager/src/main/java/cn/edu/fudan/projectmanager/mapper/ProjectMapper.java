@@ -21,6 +21,8 @@ public interface ProjectMapper {
 
     List<Project> getProjectByKeyWordAndAccountId(@Param("account_id") String account_id, @Param("keyWord") String keyWord,@Param("type") String type);
 
+    List<Project> getAllProjectByKeyWord(@Param("keyWord") String keyWord,@Param("type") String type);
+
     List<Project> getProjectByRepoId(@Param("repo_id") String repo_id);
 
     Project getProjectByID(String uuid);
@@ -46,4 +48,6 @@ public interface ProjectMapper {
     Project getProjectByRepoIdAndCategory( @Param("account_id") String account_id, @Param("repo_id") String repo_id,@Param("category") String category);
 
     List<Project> getProjectsByCondition( @Param("account_id") String account_id, @Param("type") String category,@Param("name") String name,@Param("module") String module);
+
+    List<Project> getProjects();
 }

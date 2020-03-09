@@ -329,20 +329,6 @@ public class MeasureController {
         }
     }
 
-    //根据repo_id和commit_id 判断该commit是否是merge的情况
-    @GetMapping("/measure/commit/is-merge")
-    @CrossOrigin
-    public ResponseBean isMerge(
-            @RequestParam("repo_id")String repo_id,
-            @RequestParam("commit_id")String commit_id
-    ){
-        try{
-            return new ResponseBean(200,"success",measureService.isMerge(repo_id,commit_id));
-        }catch (Exception e){
-            e.printStackTrace();
-            return new ResponseBean(401,"failed",e.getMessage());
-        }
-    }
 
     //根据repo_id和commit_id 获取该commit的修改文件的数量
     //还没写
