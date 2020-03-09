@@ -25,8 +25,17 @@ public class Project {
     private int first_auto_scan;
     private String module;
     private int recycled;
+    private Date delete_time;
 
-    public static Project createOneProjectByRepoBasicInfo(RepoBasicInfo r,String type) throws ParseException {
+    public Date getDelete_time() {
+        return delete_time;
+    }
+
+    public void setDelete_time(Date delete_time) {
+        this.delete_time = delete_time;
+    }
+
+    public static Project createOneProjectByRepoBasicInfo(RepoBasicInfo r, String type) throws ParseException {
         return new Project(UUID.randomUUID().toString(), r.getName(), r.getLanguage(), r.getUrl(), r.getRepo_source(), type,"superAccount","Downloaded",
                 "Not Scan",(new SimpleDateFormat("yyyy-MM-dd")).parse(r.getAdd_time()) , (new SimpleDateFormat("yyyy-MM-dd")).parse(r.getTill_commit_time()), r.getDescription(), r.getRepo_id(), r.getBranch());
     }

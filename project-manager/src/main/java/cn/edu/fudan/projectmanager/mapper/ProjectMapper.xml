@@ -22,6 +22,7 @@
         <result property="first_auto_scan" column="first_auto_scan"/>
         <result property="recycled" column="recycled"/>
         <result property="module" column="module"/>
+        <result property="delete_time" column="delete_time"/>
     </resultMap>
 
     <insert id="addOneProject" parameterType="Project">
@@ -179,7 +180,10 @@
                 module = #{module},
             </if>
             <if test="recycled != null">
-                recycled = #{recycled}
+                recycled = #{recycled},
+            </if>
+            <if test="delete_time != null">
+                delete_time = #{delete_time}
             </if>
         </set>
         where uuid = #{uuid}

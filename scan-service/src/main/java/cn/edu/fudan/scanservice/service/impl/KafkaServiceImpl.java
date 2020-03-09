@@ -278,6 +278,8 @@ public class KafkaServiceImpl implements KafkaService {
 
                 checkOutCodeTrackerStatus(repoId);
 
+
+
                 sendMessageToMeasure(repoId,bugFilterCommits);
             }
 
