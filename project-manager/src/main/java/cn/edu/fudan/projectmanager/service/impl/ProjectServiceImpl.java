@@ -340,28 +340,13 @@ public class ProjectServiceImpl implements ProjectService {
             String account_id = restInterfaceManager.getAccountId(userToken);
             //如果当前repoId和type只有这一个projectId与其对应，那么删除project的同时会删除repo的相关内容
             //否则还有其他project与当前repoId和type对应，该repo的相关内容就不删
+            //先删project表，再删redis中的数据，再删其它表
             //if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
             if(account_id.equals("1")){
                 List<Project> projects = projectDao.getProjectByRepoId(repoId);
                 List<String> projectIds = projects.stream().map(Project::getUuid).collect(Collectors.toList());
                 for(String id : projectIds){
                     projectDao.remove(id);
-                }
-                restInterfaceManager.deleteIssuesOfRepo(repoId, type);
-                restInterfaceManager.deleteRawIssueOfRepo(repoId, type);
-                restInterfaceManager.deleteScanOfRepo(repoId, type);
-                restInterfaceManager.deleteEventOfRepo(repoId, type);
-                restInterfaceManager.deleteScanResultOfRepo(repoId, type);
-                restInterfaceManager.deleteIgnoreRecord(account_id, repoId);
-                if(type.equals("bug")){
-                    logger.info("start to request measure to delete measure info ...");
-                    restInterfaceManager.deleteRepoMeasure(repoId);
-                    logger.info("delete measure info success");
-                }
-
-                if(type.equals("clone")){
-                    //对于clone的CPU版本，删除时需要删除前一次commit扫描的结果文件
-                    deleteCloneResPreFile(repoId);
                 }
                 //delete info in redis
                 stringRedisTemplate.setEnableTransactionSupport(true);
@@ -382,6 +367,23 @@ public class ProjectServiceImpl implements ProjectService {
                 stringRedisTemplate.delete("trend:" + type + ":week:remaining:" + account_id + ":" + repoId);
                 stringRedisTemplate.delete("trend:" + type + ":week:eliminated:" + account_id + ":" + repoId);
                 stringRedisTemplate.exec();
+
+                restInterfaceManager.deleteIssuesOfRepo(repoId, type);
+                restInterfaceManager.deleteRawIssueOfRepo(repoId, type);
+                restInterfaceManager.deleteScanOfRepo(repoId, type);
+                restInterfaceManager.deleteEventOfRepo(repoId, type);
+                restInterfaceManager.deleteScanResultOfRepo(repoId, type);
+                restInterfaceManager.deleteIgnoreRecord(account_id, repoId);
+                if(type.equals("bug")){
+                    logger.info("start to request measure to delete measure info ...");
+                    restInterfaceManager.deleteRepoMeasure(repoId);
+                    logger.info("delete measure info success");
+                }
+
+                if(type.equals("clone")){
+                    //对于clone的CPU版本，删除时需要删除前一次commit扫描的结果文件
+                    deleteCloneResPreFile(repoId);
+                }
 
             }else if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
                 Project project = projectDao.getProjectByID(projectId);
@@ -525,6 +527,7 @@ public class ProjectServiceImpl implements ProjectService {
     public void recycle(String projectId, String userToken, int isRecycled) {
         Project project = getProjectByID(projectId);
         project.setRecycled(isRecycled);
+        project.setDelete_time(new Date());
         projectDao.updateProjectStatus(project);
     }
 }
