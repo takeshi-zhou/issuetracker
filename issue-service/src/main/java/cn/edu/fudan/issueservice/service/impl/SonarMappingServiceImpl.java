@@ -373,8 +373,8 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
             }
 
             //更新tag
-
-            modifyTag(needToModifiedSolvedTags,ignoreTypes);
+            //待修改，未考虑ignore类型
+            modifyToOpenTagByIssues(needToModifiedSolvedTags);
 
             modifyToSolvedTag(solvedIssues,true,true,EventType.ELIMINATE_BUG, committer,commitDate,repo_id,category);
 
@@ -609,33 +609,11 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                     priority = -1;
             }
         }else{
+            priority = 10;
             logger.error("severity --> is null ");
         }
         return priority;
     }
 
 
-    private void modifyTag(List<Issue> issues,JSONArray ignoreTypes) {
-        List<JSONObject> taggeds = new ArrayList<>();
-        for(Issue issue : issues){
-            JSONObject tagged = new JSONObject();
-            tagged.put("item_id", issue.getUuid());
-
-            String tagID = null;
-            if(ignoreTypes!=null&&!ignoreTypes.isEmpty()&&ignoreTypes.contains(issue.getType())){
-                //如果新增的issue的类型包含在ignore的类型之中，打ignore的tag
-                tagID=ignoreTagId;
-                issue.setPriority(5);
-            }else if(issue.getCategory().equals(Scanner.SONAR.getType())){
-                tagID = tagMapHelper.getTagIdByPriority(issue.getPriority());
-            }
-            if(tagID!=null){
-                tagged.put("tag_id", tagID);
-
-            }
-            taggeds.add(tagged);
-        }
-        restInterfaceManager.modifyTags(taggeds);
-
-    }
 }

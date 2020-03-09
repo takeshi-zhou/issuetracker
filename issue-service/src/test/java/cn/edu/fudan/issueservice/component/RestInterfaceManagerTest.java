@@ -129,4 +129,12 @@ public class RestInterfaceManagerTest extends IssueServiceApplicationTests {
         a= a+1;
         System.out.println(a);
     }
+
+    @Test
+    public void getScanByRepoIdAndStatus(){
+        JSONArray result = restInterfaceManager.getScanByRepoIdAndStatus("ae9e7ff0-6ff6-11e9-b723-0f92b2ad63bf","doing...");
+        int  a=1;
+        a= a+1;
+        System.out.println(a);
+    }
 }

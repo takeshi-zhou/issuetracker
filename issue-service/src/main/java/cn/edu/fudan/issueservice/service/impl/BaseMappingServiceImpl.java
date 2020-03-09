@@ -34,6 +34,10 @@ public class BaseMappingServiceImpl implements MappingService {
 
     @Value("${solved.tag_id}")
     private String solvedTagId;
+    @Value("${open.tag_id}")
+    private String openTagId;
+    @Value("${to_review.tag_id}")
+    private String toReviewTagId;
     @Value("${ignore.tag_id}")
     String ignoreTagId;
 
@@ -46,7 +50,7 @@ public class BaseMappingServiceImpl implements MappingService {
     RestInterfaceManager restInterfaceManager;
 
     private StringRedisTemplate stringRedisTemplate;
-    protected TagMapHelper tagMapHelper;
+    private TagMapHelper tagMapHelper;
     private KafkaTemplate kafkaTemplate;
 
     @Autowired
@@ -192,23 +196,40 @@ public class BaseMappingServiceImpl implements MappingService {
 
     int addTag(List<JSONObject> tags, JSONArray ignoreTypes, RawIssue rawIssue, Issue issue){
         int result=0;
-        String tagID = null;
+        String priorityTagID = null;
         if(ignoreTypes!=null&&!ignoreTypes.isEmpty()&&ignoreTypes.contains(rawIssue.getType())){
             //如果新增的issue的类型包含在ignore的类型之中，打ignore的tag
-            tagID=ignoreTagId;
+            priorityTagID=ignoreTagId;
             issue.setPriority(5);
             result=1;
         }else if (rawIssue.getCategory().equals(Scanner.FINDBUGS.getType())){
             RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
-            tagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
+            priorityTagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
         }else if(rawIssue.getCategory().equals(Scanner.SONAR.getType())){
-            tagID = tagMapHelper.getTagIdByPriority(issue.getPriority());
+            priorityTagID = tagMapHelper.getTagIdByPriority(issue.getPriority());
         }
-        if(tagID!=null){
-            JSONObject tagged = new JSONObject();
-            tagged.put("item_id", issue.getUuid());
-            tagged.put("tag_id", tagID);
-            tags.add(tagged);
+        if(priorityTagID!=null){
+            JSONObject priorityTagged = new JSONObject();
+            priorityTagged.put("item_id", issue.getUuid());
+            priorityTagged.put("tag_id", priorityTagID);
+            tags.add(priorityTagged);
+
+            JSONObject statusTagged = new JSONObject();
+            statusTagged.put("item_id", issue.getUuid());
+            String statusTagId = null;
+            switch (issue.getStatus()){
+                case "Open" :
+                    statusTagId = openTagId;
+                    break;
+                case "TO_REVIEW" :
+                    statusTagId = toReviewTagId;
+                    break;
+                default:
+                    statusTagId = openTagId;
+            }
+
+            statusTagged.put("tag_id", statusTagId);
+            tags.add(statusTagged);
         }
         return result;
     }
@@ -249,9 +270,25 @@ public class BaseMappingServiceImpl implements MappingService {
 
                 List<JSONObject> taggeds = new ArrayList<>();
                 for (Issue issue : issues) {
+                    String preTagId = null;
+                    switch (issue.getStatus()){
+                        case "Open" :
+                            preTagId = openTagId;
+                            break;
+                        case "Solved" :
+                            preTagId = solvedTagId;
+                            break;
+                        case "TO_REVIEW" :
+                            preTagId = toReviewTagId;
+                            break;
+                        default:
+                            preTagId = openTagId;
+                    }
+
                     JSONObject tagged = new JSONObject();
-                    tagged.put("item_id", issue.getUuid());
-                    tagged.put("tag_id", solvedTagId);
+                    tagged.put("itemId", issue.getUuid());
+                    tagged.put("preTagId", preTagId);
+                    tagged.put("newTagId", solvedTagId);
                     taggeds.add(tagged);
                 }
                 restInterfaceManager.modifyTags(taggeds);
@@ -260,32 +297,32 @@ public class BaseMappingServiceImpl implements MappingService {
     }
 
 
-    void modifyToOriginalPriorityTag(List<RawIssue> rawIssues,JSONArray ignoreTypes) {
+    void modifyToOpenTagByRawIssues(List<RawIssue> rawIssues) {
         List<JSONObject> taggeds = new ArrayList<>();
         for(RawIssue rawIssue : rawIssues){
             String issueId = rawIssue.getIssue_id();
             Issue issue = issueDao.getIssueByID(issueId);
-            int originalPriority =  Integer.parseInt(JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class).getRank())/5 + 1 ;
-            int priority = originalPriority == 5 ? 4 : originalPriority ;
-            issue.setPriority(priority);
+
             JSONObject tagged = new JSONObject();
-            tagged.put("item_id", issue.getUuid());
+            tagged.put("itemId", issue.getUuid());
+            tagged.put("preTagId", solvedTagId);
+            tagged.put("newTagId", openTagId);
 
-            String tagID = null;
-            if(ignoreTypes!=null&&!ignoreTypes.isEmpty()&&ignoreTypes.contains(rawIssue.getType())){
-                //如果新增的issue的类型包含在ignore的类型之中，打ignore的tag
-                tagID=ignoreTagId;
-                issue.setPriority(5);
-            }else if (rawIssue.getCategory().equals(Scanner.FINDBUGS.getType())){
-                RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
-                tagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
-            }else if(rawIssue.getCategory().equals(Scanner.SONAR.getType())){
-                tagID = tagMapHelper.getTagIdByPriority(issue.getPriority());
-            }
-            if(tagID!=null){
-                tagged.put("tag_id", tagID);
+            taggeds.add(tagged);
+        }
+        restInterfaceManager.modifyTags(taggeds);
 
-            }
+    }
+
+
+    void modifyToOpenTagByIssues(List<Issue> issues) {
+        List<JSONObject> taggeds = new ArrayList<>();
+        for(Issue issue : issues){
+            JSONObject tagged = new JSONObject();
+            tagged.put("itemId", issue.getUuid());
+            tagged.put("preTagId", solvedTagId);
+            tagged.put("newTagId", openTagId);
+
             taggeds.add(tagged);
         }
         restInterfaceManager.modifyTags(taggeds);

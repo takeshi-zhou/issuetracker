@@ -146,11 +146,10 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 equalsCount++;
                 currentRawIssue.setIssue_id(preIssueId);
                 Issue issue = issueDao.getIssueByID(preIssueId);
-                int priority = issue.getPriority();
-                if(priority == 6){
-                    issue.setPriority(getPriorityByRawIssue(currentRawIssue));
+                String status = issue.getStatus();
+                if("Solved".equals(status)){
+                    issue.setStatus("Open");
                     mappedPreSolvedRawIssues.add(preRawIssue);
-                    issue.setStatus("HAVE_SOLVED");
                     String resolution = issue.getResolution();
                     if(resolution == null){
                         issue.setResolution(String.valueOf(1));
@@ -171,7 +170,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             }
         }
 
-        modifyToOriginalPriorityTag(mappedPreSolvedRawIssues,ignoreTypes);
+        modifyToOpenTagByRawIssues(mappedPreSolvedRawIssues);
 
 
         for(RawIssue preRawIssue : preRawIssues){
@@ -190,9 +189,8 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         List<RawIssue> list = preRawIssues.stream().filter(rawIssue -> !rawIssue.isMapped()).collect(Collectors.toList());
         for(RawIssue solvedRawIssue : list){
             Issue issue = issueDao.getIssueByID(solvedRawIssue.getIssue_id());
-            if(issue.getPriority() == 6){
+            if("Solved".equals(issue.getStatus())){
                 notAdoptEliminateCount++;
-                issue.setStatus("HAVE_SOLVED");
                 String resolution = issue.getResolution();
                 if(resolution == null){
                     issue.setResolution(String.valueOf(1));
@@ -201,7 +199,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 }
 
             }else{
-                issue.setPriority(6);
+                issue.setStatus("Solved");
                 solvedIssues.add(issue);
             }
             issues.add(issue);
@@ -393,12 +391,11 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 currentRawIssue.setIssue_id(preIssueId);
                 Issue issue = issueDao.getIssueByID(preIssueId);
 
-                int priority = issue.getPriority();
-                if(priority == 6){
+                String status = issue.getStatus();
+                if("Solved".equals(status)){
+                    issue.setStatus("Open");
                     notAdoptEliminateCount++;
-                    issue.setPriority(getPriorityByRawIssue(currentRawIssue));
                     mappedPreSolvedRawIssues.add(preRawIssue);
-                    issue.setStatus("HAVE_SOLVED");
                     String resolution = issue.getResolution();
                     if(resolution == null){
                         issue.setResolution(String.valueOf(1));
@@ -418,7 +415,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             }
         }
 
-        modifyToOriginalPriorityTag(mappedPreSolvedRawIssues,ignoreTypes);
+        modifyToOpenTagByRawIssues(mappedPreSolvedRawIssues);
 
 
         for(Issue issue : allIssues){
@@ -442,7 +439,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             if(resolution == null){
                 resolution = String.valueOf(0);
             }
-            if(notMappedIssue.getPriority() == 6 ){
+            if("Solved".equals(notMappedIssue.getStatus())){
 
             }else{
 
@@ -454,11 +451,11 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 if(resolution.equals("0")){
                     //第一大类
                     //这种情况 后续补充,包括发送解决问题的信息，
-                    notMappedIssue.setPriority(6);
+                    notMappedIssue.setStatus("Solved");
                     actualEliminatedIssueCount++;
                 }else{
                     //第二大类
-                    notMappedIssue.setPriority(6);
+                    notMappedIssue.setStatus("Solved");
                     notMappedIssue.setUpdate_time(new Date());
                     notMappedIssue.setResolution(String.valueOf(Integer.parseInt(resolution) - 1));
 
@@ -697,6 +694,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 currentCommitDate, currentCommitId,currentCommitDate, rawIssue.getUuid(),
                 rawIssue.getUuid(), repoId, targetFiles,addTime,addTime,++currentDisplayId);
         issue.setPriority(priority);
+        issue.setStatus("Open");
         return issue;
     }
 
