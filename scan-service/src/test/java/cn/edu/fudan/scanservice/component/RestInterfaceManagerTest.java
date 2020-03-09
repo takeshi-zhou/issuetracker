@@ -18,7 +18,9 @@ public class RestInterfaceManagerTest extends ScanServiceApplicationTests {
 
     @Test
     public void getSonarIssueResults() {
-        restInterfaceManager.getSonarIssueResults("IssueTracker-Master-zhonghui20191012",null,100,false);
+        JSONObject object = restInterfaceManager.getSonarIssueResults("IssueTracker-Master-zhonghui20191012",null,100,false);
+
+        System.out.println(object);
     }
 
 

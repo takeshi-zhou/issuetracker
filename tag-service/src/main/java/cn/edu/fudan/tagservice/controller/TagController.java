@@ -1,5 +1,6 @@
 package cn.edu.fudan.tagservice.controller;
 
+import cn.edu.fudan.tagservice.domain.ModifyTaggedItem;
 import cn.edu.fudan.tagservice.domain.ResponseBean;
 import cn.edu.fudan.tagservice.domain.TaggedItem;
 import cn.edu.fudan.tagservice.service.TagService;
@@ -120,7 +121,7 @@ public class TagController {
     }
 
     @PostMapping("/inner/tags/tagged-modify")
-    public Object modifyMultiTaggedItem(@RequestBody List<TaggedItem> list) {
+    public Object modifyMultiTaggedItem(@RequestBody List<ModifyTaggedItem> list) {
         try {
             tagService.modifyMultiTaggedItem(list);
             return new ResponseBean(200, "update success", null);

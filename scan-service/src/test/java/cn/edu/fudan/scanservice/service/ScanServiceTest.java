@@ -226,4 +226,15 @@ public class ScanServiceTest extends ScanServiceApplicationTests {
         String result = scanService.getLatestScannedCommitId(repoId,category);
         Assert.assertEquals(commitId,result);
     }
+
+    @Test
+    public void getScanByRepoIdAndStatus() {
+        String repoId = "repo1";
+        String category = "category";
+        String commitId = "comm1";
+        Object result = scanService.getScanByCategoryAndRepoIdAndCommitId("092dbf14-e28c-11e9-9552-6953b034b671","bug","1f871b2731ea7aa60edeec024b3a49b076328afb");
+        System.out.println(1);
+        Assert.assertEquals(commitId,result);
+    }
+
 }

@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static cn.edu.fudan.scanservice.util.DateTimeUtil.timeTotimeStamp;
+import static org.eclipse.jgit.revwalk.RevSort.REVERSE;
 
 @SuppressWarnings("Duplicates")
 @Slf4j
@@ -66,10 +67,20 @@ public class JGitHelper {
             git.reset().setMode(ResetCommand.ResetType.HARD).call();
             CheckoutCommand checkoutCommand = git.checkout();
             checkoutCommand.setName(commit).call();
+
         } catch (Exception e) {
             log.error("JGitHelper checkout error:{} ", e.getMessage());
         }
     }
+
+    public void checkoutToLatestCommit(String branchName) {
+        try {
+            checkout(branchName);
+        } catch (Exception e) {
+            log.error("JGitHelper checkout error:{} ", e.getMessage());
+        }
+    }
+
 
     public String getAuthorName(String commit) {
         String authorName = null;
@@ -153,6 +164,13 @@ public class JGitHelper {
      *  getCommitTime return second not millisecond
      */
     public List<String> getCommitListByBranchAndDuration(String branchName, String duration) {
+        if(branchName == null){
+            try {
+                branchName = repository.getBranch();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         checkout(branchName);
         final int durationLength = 21;
         Map<String, Long> commitMap = new HashMap<>(512);
@@ -323,6 +341,19 @@ public class JGitHelper {
     }
 
 
+    public String getLatestCommitId(String branchName){
+        try {
+            checkout(branchName);
+            ObjectId obj = repository.resolve("HEAD");
+            if(obj != null){
+                return obj.getName();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
 
     public static void main(String[] args) throws ParseException {
@@ -332,7 +363,25 @@ public class JGitHelper {
 //        String commitId = "75c6507e2139e9bb663abf35037b31478e44c616";
         JGitHelper jGitHelper = new JGitHelper(repoPath);
         List<RevCommit> list = jGitHelper.getAggregationCommit("2019-8-12 00:00:00");
+        for(RevCommit rev : list){
+            System.out.println(rev.getCommitTime());
+        }
+
+
+        jGitHelper.checkout("5e8ee4f41fc02d8356875d0a8f252246ef814528");
+
+//        jGitHelper.revWalk.sort(REVERSE);
+        try {
+            ObjectId obj = jGitHelper.repository.resolve("HEAD");
+            System.out.println(obj.name());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         list.stream().forEach(System.out::println);
+
+
 
         //String s[] = jGitHelper.getCommitParents(commitId);
 //        int m = jGitHelper.mergeJudgment(commitId);

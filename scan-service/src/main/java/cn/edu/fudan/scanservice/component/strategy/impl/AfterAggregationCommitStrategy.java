@@ -123,16 +123,18 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
 
 
     private String getBaseCommitId(String  completeCommitTime, String  repoId, String checkCommitId){
+        int findCounts = 0;
         String baseCommitId = null;
         LocalDateTime latestCommitTime = null;
         LocalDateTime firstScanCommitTime = null;
 
 
         latestCommitTime = DateTimeUtil.stringToLocalDate(completeCommitTime);
-        firstScanCommitTime = latestCommitTime.minusMonths(3).minusDays(5);
+        firstScanCommitTime = latestCommitTime.minusMonths(6).minusDays(5);
 
         int allAggregationCommitCount = getAllAggregationCommitCount(repoId,checkCommitId);
         int lastListCommitsSize = 0;
+        String lastScannedCommit = null;
 
         while(baseCommitId == null){
             List<RevCommit> qualified = null;
@@ -183,9 +185,14 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
                     qualified) {
                 String repoPathRevCommit = null;
 
+                if(lastScannedCommit != null && revCommit.getName().equals(lastScannedCommit)){
+                    break;
+                }
+
                 try {
                     repoPathRevCommit = restInterfaceManager.getRepoPath(repoId, revCommit.getName());
                     boolean isCompiled = executeShellUtil.executeMvn(repoPathRevCommit);
+                    findCounts++;
                     if (isCompiled) {
                         baseCommit = revCommit;
                         break;
@@ -197,12 +204,19 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
                 }
             }
 
+            lastScannedCommit = qualified.get(0).getName();
+
+
             if(baseCommit != null){
                 baseCommitId = baseCommit.getName();
 
             }
             if(qualified.size() == allAggregationCommitCount){
                 break;
+            }
+
+            if(findCounts > 10 && baseCommit == null){
+               return null;
             }
 
             firstScanCommitTime = firstScanCommitTime.minusMonths(3);

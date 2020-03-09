@@ -95,5 +95,10 @@ public class DateTimeUtil {
 
     }
 
+    public static void main(String[] args){
+        Date date = timestampToDate(1579813742);
+        System.out.println(format(date));
+    }
+
 
 }

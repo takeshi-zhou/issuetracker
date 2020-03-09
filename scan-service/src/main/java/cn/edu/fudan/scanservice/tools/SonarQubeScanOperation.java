@@ -55,6 +55,11 @@ public class SonarQubeScanOperation extends ScanOperationAdapter  {
         logger.info("scan complete");
         logger.info("start to analyze result......");
         //如果sonar-scanner调用成功，开始通过api访问的方式获取缺陷数据
+        try {
+            TimeUnit.MINUTES.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if (!analyzeSonarResult(repoName)) {
             logger.error("analyze sonar result failed");
             return new ScanResult("Sonar","failed", "analyze failed");

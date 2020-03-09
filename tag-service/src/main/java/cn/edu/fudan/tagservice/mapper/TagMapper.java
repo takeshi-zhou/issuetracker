@@ -1,5 +1,6 @@
 package cn.edu.fudan.tagservice.mapper;
 
+import cn.edu.fudan.tagservice.domain.ModifyTaggedItem;
 import cn.edu.fudan.tagservice.domain.Tag;
 import cn.edu.fudan.tagservice.domain.TaggedItem;
 import org.apache.ibatis.annotations.Param;
@@ -16,7 +17,7 @@ public interface TagMapper {
 
     void addMultiTaggedItem(List<TaggedItem> list);
 
-    void modifyMultiTaggedItem(List<TaggedItem> list);
+    void modifyMultiTaggedItem(List<ModifyTaggedItem> list);
 
     String getUuidByNameAndScope(@Param("name") String name, @Param("scope") String scope);
 
