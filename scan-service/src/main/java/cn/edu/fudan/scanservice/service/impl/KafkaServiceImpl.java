@@ -167,32 +167,32 @@ public class KafkaServiceImpl implements KafkaService {
      *
      * @author WZY
      */
-//    @Override
-//    @KafkaListener(id = "projectScan", topics = {"Scan"}, groupId = "scan")
-//    public void scanByMQ(ConsumerRecord<String, String> consumerRecord) {
-//        String msg = consumerRecord.value();
-//        logger.info("received message from topic -> " + consumerRecord.topic() + " : " + msg);
-//        ScanMessage scanMessage = JSONObject.parseObject(msg, ScanMessage.class);
-//        String repoId = scanMessage.getRepoId();
-//        String commitId = scanMessage.getCommitId();
-//        List<ScanMessageWithTime> list=new ArrayList<>();
-//        ScanMessageWithTime scanMessageWithTime=new ScanMessageWithTime(repoId,commitId);
-//        scanMessageWithTime.setCommitTime(restInterfaceManager.getCommitTime(commitId).getJSONObject("data").getString("commit_time"));
-//        list.add(scanMessageWithTime);
-//        //串行扫
-//        if(existProject(repoId,"bug",false)){
-//            findBugScanTask.runSynchronously(repoId, commitId,"bug");
-//
-//            updateCodeTracker(repoId);
-//            checkOutCodeTrackerStatus(repoId);
-//
-//            sendMessageToMeasure(repoId,list);
-//        }
-//        if(existProject(repoId,"clone",false)){
-//            cloneScanTask.runSynchronously(repoId,commitId,"clone");
-//            sendMessageToClone(repoId,list);
-//        }
-//    }
+    @Override
+    @KafkaListener(id = "projectScan", topics = {"Scan"}, groupId = "scan")
+    public void scanByMQ(ConsumerRecord<String, String> consumerRecord) {
+        String msg = consumerRecord.value();
+        logger.info("received message from topic -> " + consumerRecord.topic() + " : " + msg);
+        ScanMessage scanMessage = JSONObject.parseObject(msg, ScanMessage.class);
+        String repoId = scanMessage.getRepoId();
+        String commitId = scanMessage.getCommitId();
+        List<ScanMessageWithTime> list=new ArrayList<>();
+        ScanMessageWithTime scanMessageWithTime=new ScanMessageWithTime(repoId,commitId);
+        scanMessageWithTime.setCommitTime(restInterfaceManager.getCommitTime(commitId).getJSONObject("data").getString("commit_time"));
+        list.add(scanMessageWithTime);
+        //串行扫
+        if(existProject(repoId,"bug",false)){
+            findBugScanTask.runSynchronously(repoId, commitId,"bug");
+
+            updateCodeTracker(repoId);
+            checkOutCodeTrackerStatus(repoId);
+
+            sendMessageToMeasure(repoId,list);
+        }
+        if(existProject(repoId,"clone",false)){
+            cloneScanTask.runSynchronously(repoId,commitId,"clone");
+            sendMessageToClone(repoId,list);
+        }
+    }
 
     @SuppressWarnings("unchecked")
     private void sendMessageToMeasure(String repoId,List<ScanMessageWithTime> list){
@@ -211,29 +211,29 @@ public class KafkaServiceImpl implements KafkaService {
         logger.info("message has been send to topic Clone -> {}",repoId);
     }
 
-//    @Override
-//    @KafkaListener(id = "updateCommit", topics = {"UpdateCommit"}, groupId = "updateCommit")
-//    public void firstScanByMQ(ConsumerRecord<String, String> consumerRecord) {
-//        String msg = consumerRecord.value();
-//        List<ScanMessageWithTime> commits=JSONArray.parseArray(msg,ScanMessageWithTime.class);
-//        commits = commits.stream().distinct().collect(Collectors.toList());
-//        int size=commits.size();
-//        logger.info("received message from topic -> " + consumerRecord.topic() + " : " + size+" commits need to scan!");
-//        if(!commits.isEmpty()){
-//            Map<LocalDate,List<ScanMessageWithTime>> map=commits.stream().collect(Collectors.groupingBy((ScanMessageWithTime scanMessageWithTime)->{
-//                String dateStr=scanMessageWithTime.getCommitTime().split(" ")[0];
-//                return LocalDate.parse(dateStr,DateTimeUtil.Y_M_D_formatter);
-//            }));
-//            List<LocalDate> dates=new ArrayList<>(map.keySet());
-//            dates.sort(((o1, o2) -> {
-//                if(o1.equals(o2)) {
-//                    return 0;
-//                }
-//                return o1.isBefore(o2)?-1:1;
-//            }));
-//            firstAutoScan(map,dates);
-//        }
-//    }
+    @Override
+    @KafkaListener(id = "updateCommit", topics = {"UpdateCommit"}, groupId = "updateCommit")
+    public void firstScanByMQ(ConsumerRecord<String, String> consumerRecord) {
+        String msg = consumerRecord.value();
+        List<ScanMessageWithTime> commits=JSONArray.parseArray(msg,ScanMessageWithTime.class);
+        commits = commits.stream().distinct().collect(Collectors.toList());
+        int size=commits.size();
+        logger.info("received message from topic -> " + consumerRecord.topic() + " : " + size+" commits need to scan!");
+        if(!commits.isEmpty()){
+            Map<LocalDate,List<ScanMessageWithTime>> map=commits.stream().collect(Collectors.groupingBy((ScanMessageWithTime scanMessageWithTime)->{
+                String dateStr=scanMessageWithTime.getCommitTime().split(" ")[0];
+                return LocalDate.parse(dateStr,DateTimeUtil.Y_M_D_formatter);
+            }));
+            List<LocalDate> dates=new ArrayList<>(map.keySet());
+            dates.sort(((o1, o2) -> {
+                if(o1.equals(o2)) {
+                    return 0;
+                }
+                return o1.isBefore(o2)?-1:1;
+            }));
+            firstAutoScan(map,dates);
+        }
+    }
 
 
     @Override
