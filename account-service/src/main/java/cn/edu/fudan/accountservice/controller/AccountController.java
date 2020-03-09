@@ -2,6 +2,7 @@ package cn.edu.fudan.accountservice.controller;
 
 import cn.edu.fudan.accountservice.domain.Account;
 import cn.edu.fudan.accountservice.domain.ResponseBean;
+import cn.edu.fudan.accountservice.domain.Tool;
 import cn.edu.fudan.accountservice.service.AccountService;
 import cn.edu.fudan.accountservice.util.CookieUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 
 @RestController
@@ -81,5 +83,29 @@ public class AccountController {
     @GetMapping(value = "/accountIds")
     public Object getAccountIds() {
         return accountService.getAllAccountId();
+    }
+
+    @GetMapping(value = "/accountGroups")
+    @CrossOrigin
+    public Object getGroupsByAccountName(@RequestParam("accountName") String accountName){
+        return accountService.getGroupsByAccountName(accountName);
+    }
+
+    @PostMapping(value = "/updateTools")
+    @CrossOrigin
+    public Object updateToolsEnable(@RequestBody List<Tool> tools){
+        try{
+            accountService.updateToolsEnable(tools);
+            return new ResponseBean(200, "Successful!", null);
+        }catch (Exception e){
+            return new ResponseBean(401, "update failed! " + e.getMessage(), null);
+        }
+
+    }
+
+    @GetMapping(value = "/tools")
+    @CrossOrigin
+    public Object getTools(){
+        return accountService.getTools();
     }
 }

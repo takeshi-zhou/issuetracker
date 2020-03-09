@@ -228,15 +228,50 @@ public class RestInterfaceManager {
         }
     }
 
+//    -------------------------------------------------- code tracker ------------------------------
 
-    public JSONObject startCodeTracker(String repoId, String branch, int beginCommit) {
+    public boolean startCodeTracker(String repoId, String branch, String beginCommit) {
+        boolean result = false;
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("repoId",repoId);
         jsonObject.put("branch",branch);
         jsonObject.put("beginCommit",beginCommit);
-        JSONObject result = restTemplate.postForObject(codeTrackerServicePath+"/project/auto", jsonObject, JSONObject.class);
-
-        return null;
+        JSONObject requestResult = restTemplate.postForObject(codeTrackerServicePath+"/project/auto", jsonObject, JSONObject.class);
+        if(requestResult != null){
+            int code = requestResult.getInteger("code");
+            if(code == 200){
+                result = true;
+            }
+        }
+        return result;
     }
+
+    public boolean updateCodeTracker(String repoId, String branch) {
+        boolean result = false;
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("repoId",repoId);
+        jsonObject.put("branch",branch);
+        JSONObject requestResult = restTemplate.postForObject(codeTrackerServicePath+"/project/auto/update", jsonObject, JSONObject.class);
+        if(requestResult != null){
+            int code = requestResult.getInteger("code");
+            if(code == 200){
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    public String getCodeTrackerStatus(String repoId, String branch) {
+        String result = "";
+        JSONObject requestResult = restTemplate.getForObject(codeTrackerServicePath + "/project/scan/status?repoId=" + repoId + "&branch=" + branch, JSONObject.class);
+        if(requestResult != null){
+            int code = requestResult.getInteger("code");
+            if(code == 200){
+                result = requestResult.getString("data");
+            }
+        }
+        return result;
+    }
+
 }
 

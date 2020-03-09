@@ -28,6 +28,8 @@ public interface RepoMeasureMapper {
 
     int getCommitCountsByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until,@Param("developer_name")String developerName);
 
+    int getChangedFilesByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until,@Param("developer_name")String developerName);
+
     String getStartDateOfRepo(@Param("repo_id")String repo_id);
 
     void insertOneRepoMeasure(RepoMeasure repoMeasure);

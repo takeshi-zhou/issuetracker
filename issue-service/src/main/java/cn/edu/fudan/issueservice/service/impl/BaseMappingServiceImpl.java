@@ -34,6 +34,10 @@ public class BaseMappingServiceImpl implements MappingService {
 
     @Value("${solved.tag_id}")
     private String solvedTagId;
+    @Value("${open.tag_id}")
+    private String openTagId;
+    @Value("${to_review.tag_id}")
+    private String toReviewTagId;
     @Value("${ignore.tag_id}")
     String ignoreTagId;
 
@@ -137,6 +141,38 @@ public class BaseMappingServiceImpl implements MappingService {
         stringRedisTemplate.exec();
     }
 
+    void dashboardUpdateForMergeVersion(String repo_id, int newIssueCount, int remainingIssueCountChanged, int eliminatedIssueCount, String category) {
+        //注意只有remaining是覆盖的，其余是累增的
+        String todayKey = "dashboard:"+category+":day:" + repo_id;
+        String weekKey = "dashboard:"+category+":week:" + repo_id;
+        String monthKey = "dashboard:"+category+":month:" + repo_id;
+        stringRedisTemplate.setEnableTransactionSupport(true);
+        stringRedisTemplate.multi();
+
+        stringRedisTemplate.opsForHash().increment(todayKey, "new", newIssueCount);
+        stringRedisTemplate.opsForHash().increment(todayKey, "remaining", remainingIssueCountChanged);
+//        Object todayRemainingObject=stringRedisTemplate.opsForHash().get(todayKey,"remaining");
+//        int todayRemaining = todayRemainingObject==null?0:Integer.parseInt((String)todayRemainingObject);
+//        stringRedisTemplate.opsForHash().put(todayKey, "remaining", String.valueOf(todayRemaining+remainingIssueCountChanged));
+        stringRedisTemplate.opsForHash().increment(todayKey, "eliminated", eliminatedIssueCount);
+
+
+        stringRedisTemplate.opsForHash().increment(weekKey, "new", newIssueCount);
+        stringRedisTemplate.opsForHash().increment(weekKey, "remaining", remainingIssueCountChanged);
+//        Object weekRemainingObject=stringRedisTemplate.opsForHash().get(todayKey,"remaining");
+//        int weekRemaining = weekRemainingObject==null?0:Integer.parseInt((String)weekRemainingObject);
+//        stringRedisTemplate.opsForHash().put(todayKey, "remaining", String.valueOf(weekRemaining+remainingIssueCountChanged));
+        stringRedisTemplate.opsForHash().increment(weekKey, "eliminated", eliminatedIssueCount);
+
+        stringRedisTemplate.opsForHash().increment(monthKey, "new", newIssueCount);
+        stringRedisTemplate.opsForHash().increment(monthKey, "remaining", remainingIssueCountChanged);
+//        Object monthRemainingObject=stringRedisTemplate.opsForHash().get(todayKey,"remaining");
+//        int monthRemaining = monthRemainingObject==null?0:Integer.parseInt((String)monthRemainingObject);
+//        stringRedisTemplate.opsForHash().put(monthKey, "remaining", String.valueOf(monthRemaining+remainingIssueCountChanged));
+        stringRedisTemplate.opsForHash().increment(monthKey, "eliminated", eliminatedIssueCount);
+        stringRedisTemplate.exec();
+    }
+
     Date getCommitDate(String commitId){
         JSONObject response=restInterfaceManager.getCommitTime(commitId);
         if(response!=null && response.getJSONObject("data") != null){
@@ -160,23 +196,40 @@ public class BaseMappingServiceImpl implements MappingService {
 
     int addTag(List<JSONObject> tags, JSONArray ignoreTypes, RawIssue rawIssue, Issue issue){
         int result=0;
-        String tagID = null;
+        String priorityTagID = null;
         if(ignoreTypes!=null&&!ignoreTypes.isEmpty()&&ignoreTypes.contains(rawIssue.getType())){
             //如果新增的issue的类型包含在ignore的类型之中，打ignore的tag
-            tagID=ignoreTagId;
+            priorityTagID=ignoreTagId;
             issue.setPriority(5);
             result=1;
         }else if (rawIssue.getCategory().equals(Scanner.FINDBUGS.getType())){
             RawIssueDetail rawIssueDetail= JSONObject.parseObject(rawIssue.getDetail(),RawIssueDetail.class);
-            tagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
+            priorityTagID=tagMapHelper.getTagIdByRank(Integer.parseInt(rawIssueDetail.getRank()));
         }else if(rawIssue.getCategory().equals(Scanner.SONAR.getType())){
-            tagID = tagMapHelper.getTagIdByPriority(issue.getPriority());
+            priorityTagID = tagMapHelper.getTagIdByPriority(issue.getPriority());
         }
-        if(tagID!=null){
-            JSONObject tagged = new JSONObject();
-            tagged.put("item_id", issue.getUuid());
-            tagged.put("tag_id", tagID);
-            tags.add(tagged);
+        if(priorityTagID!=null){
+            JSONObject priorityTagged = new JSONObject();
+            priorityTagged.put("item_id", issue.getUuid());
+            priorityTagged.put("tag_id", priorityTagID);
+            tags.add(priorityTagged);
+
+            JSONObject statusTagged = new JSONObject();
+            statusTagged.put("item_id", issue.getUuid());
+            String statusTagId = null;
+            switch (issue.getStatus()){
+                case "Open" :
+                    statusTagId = openTagId;
+                    break;
+                case "TO_REVIEW" :
+                    statusTagId = toReviewTagId;
+                    break;
+                default:
+                    statusTagId = openTagId;
+            }
+
+            statusTagged.put("tag_id", statusTagId);
+            tags.add(statusTagged);
         }
         return result;
     }
@@ -200,6 +253,84 @@ public class BaseMappingServiceImpl implements MappingService {
             }
         }
     }
+
+
+    void modifyToSolvedTag(List<Issue> issues,boolean isSendToEvent,boolean isUpdateIssueIdsToDashboard,
+                           EventType eventType,String committer,Date currentCommitTime,String repo_id,String category) {
+        if(issues != null) {
+            //暂不发送event消息
+            if(isSendToEvent){
+                issueEventManager.sendIssueEvent(eventType, issues, committer, repo_id, currentCommitTime);
+            }
+            if (!issues.isEmpty()) {
+                //暂不更新消除缺陷的id到dashboard
+                if(isUpdateIssueIdsToDashboard){
+                    eliminatedInfoUpdate(issues, category, repo_id);
+                }
+
+                List<JSONObject> taggeds = new ArrayList<>();
+                for (Issue issue : issues) {
+                    String preTagId = null;
+                    switch (issue.getStatus()){
+                        case "Open" :
+                            preTagId = openTagId;
+                            break;
+                        case "Solved" :
+                            preTagId = solvedTagId;
+                            break;
+                        case "TO_REVIEW" :
+                            preTagId = toReviewTagId;
+                            break;
+                        default:
+                            preTagId = openTagId;
+                    }
+
+                    JSONObject tagged = new JSONObject();
+                    tagged.put("itemId", issue.getUuid());
+                    tagged.put("preTagId", preTagId);
+                    tagged.put("newTagId", solvedTagId);
+                    taggeds.add(tagged);
+                }
+                restInterfaceManager.modifyTags(taggeds);
+            }
+        }
+    }
+
+
+    void modifyToOpenTagByRawIssues(List<RawIssue> rawIssues) {
+        List<JSONObject> taggeds = new ArrayList<>();
+        for(RawIssue rawIssue : rawIssues){
+            String issueId = rawIssue.getIssue_id();
+            Issue issue = issueDao.getIssueByID(issueId);
+
+            JSONObject tagged = new JSONObject();
+            tagged.put("itemId", issue.getUuid());
+            tagged.put("preTagId", solvedTagId);
+            tagged.put("newTagId", openTagId);
+
+            taggeds.add(tagged);
+        }
+        restInterfaceManager.modifyTags(taggeds);
+
+    }
+
+
+    void modifyToOpenTagByIssues(List<Issue> issues) {
+        List<JSONObject> taggeds = new ArrayList<>();
+        for(Issue issue : issues){
+            JSONObject tagged = new JSONObject();
+            tagged.put("itemId", issue.getUuid());
+            tagged.put("preTagId", solvedTagId);
+            tagged.put("newTagId", openTagId);
+
+            taggeds.add(tagged);
+        }
+        restInterfaceManager.modifyTags(taggeds);
+
+    }
+
+
+
 
     @SuppressWarnings("unchecked")
     void saveSolvedInfo(List<RawIssue> rawIssues,String repo_id,String pre_commit_id,String current_commit_id){

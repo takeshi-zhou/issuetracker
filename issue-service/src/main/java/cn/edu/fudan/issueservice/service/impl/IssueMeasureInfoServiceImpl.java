@@ -508,6 +508,4 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
         return cloneLinesWithOutTest;
     }
 
-
-
 }

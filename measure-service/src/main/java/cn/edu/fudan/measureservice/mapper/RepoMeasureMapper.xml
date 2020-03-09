@@ -4,6 +4,7 @@
 <mapper namespace="cn.edu.fudan.measureservice.mapper.RepoMeasureMapper">
 
     <resultMap id="repoMeasure" type="RepoMeasure">
+        <id property="uuid" column="uuid"/>
         <result property="files" column="files"/>
         <result property="ncss" column="ncss"/>
         <result property="classes" column="classes"/>
@@ -17,6 +18,10 @@
         <result property="developer_email" column="developer_email"/>
         <result property="add_lines" column="add_lines"/>
         <result property="del_lines" column="del_lines"/>
+        <result property="add_comment_lines" column="add_comment_lines"/>
+        <result property="del_comment_lines" column="del_comment_lines"/>
+        <result property="changed_files" column="changed_files"/>
+        <result property="is_merge" column="is_merge"/>
     </resultMap>
 
     <resultMap id="repoMeasureWithDate" type="RepoMeasure">
@@ -37,6 +42,10 @@
         <result property="developer_email" column="developer_email"/>
         <result property="add_lines" column="add_lines"/>
         <result property="del_lines" column="del_lines"/>
+        <result property="add_comment_lines" column="add_comment_lines"/>
+        <result property="del_comment_lines" column="del_comment_lines"/>
+        <result property="changed_files" column="changed_files"/>
+        <result property="is_merge" column="is_merge"/>
     </resultMap>
 
 <!--    getCommitBaseByCommit-->
@@ -56,6 +65,7 @@
         <result property="commit_counts" column="commit_counts"/>
         <result property="add" column="sumAdd"/>
         <result property="del" column="sumDel"/>
+        <result property="changed_files" column="sumChangedFiles"/>
     </resultMap>
 
 
@@ -89,7 +99,11 @@
                developer_name,
                developer_email,
                add_lines,
-               del_lines
+               del_lines,
+               add_comment_lines,
+               del_comment_lines,
+               changed_files,
+               is_merge
             )
         values
            (
@@ -109,7 +123,11 @@
               #{developer_name},
               #{developer_email},
               #{add_lines},
-              #{del_lines}
+              #{del_lines},
+              #{add_comment_lines},
+              #{del_comment_lines},
+              #{changed_files},
+              #{is_merge}
            )
     </insert>
 
@@ -119,7 +137,7 @@
 
     <select id="getRepoMeasureByCommit" resultMap="repoMeasure">
         select
-            files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines,developer_name,developer_email,add_lines,del_lines
+            *
         from repo_measure where repo_id = #{repo_id} and commit_id = #{commit_id}
     </select>
 
@@ -131,7 +149,7 @@
 
     <select id="getCommitInfoDeveloperListByDuration" resultMap="CommitInfoDeveloperListByDuration">
         select
-            developer_name,developer_email,SUM(add_lines) as sumAdd, SUM(del_lines) as sumDel, COUNT(*) as commit_counts
+            developer_name,developer_email,SUM(add_lines) as sumAdd, SUM(del_lines) as sumDel, COUNT(*) as commit_counts, SUM(changed_files) as sumChangedFiles
         from repo_measure
         where
          repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until}
@@ -163,9 +181,18 @@
         </if>
     </select>
 
+    <select id="getChangedFilesByDuration" resultType="int">
+        select
+        IFNULL(SUM(changed_files),0)
+        from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until}
+        <if test="developer_name != null and developer_name != ''" >
+            and developer_name = #{developer_name}
+        </if>
+    </select>
+
     <select id="getLatestMeasureData" resultMap="repoMeasure">
         select
-            files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines,developer_name,developer_email,add_lines,del_lines
+            *
         from
             repo_measure
         where
@@ -176,7 +203,7 @@
 
     <select id="getFirstMeasureDataAfterDuration" resultMap="repoMeasure">
          select
-            files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines,developer_name,developer_email,add_lines,del_lines
+            *
         from
             repo_measure
         where
@@ -203,7 +230,7 @@
 
     <select id="getRepoMeasureByDeveloperAndRepoId"  resultMap="repoMeasureWithDate">
         select
-            uuid,files,ncss,classes,functions,ccn,java_docs,java_doc_lines,single_comment_lines,multi_comment_lines,commit_id,commit_time,repo_id,developer_name,developer_email,add_lines,del_lines
+            *
         from
             repo_measure
         <where>

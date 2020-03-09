@@ -4,11 +4,23 @@ import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.domain.ResponseBean;
 import cn.edu.fudan.projectmanager.service.ProjectService;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -35,25 +47,47 @@ public class ProjectController {
     }
 
     // List ： url isPrivate username password name type branch
+//    @PostMapping(value = {"/project/addProjectList"})
+//    public Object addProjectList(HttpServletRequest request, @RequestBody List<JSONObject> projectListInfo) {
+//        String userToken = request.getHeader("token");
+//        JSONObject obj = projectService.addProjectList(userToken, projectListInfo);
+//        boolean flag = obj.getBoolean("isSuccessful");
+//        String lofInfo = obj.getString("logInfo");
+//        if (flag){
+//            return new ResponseBean(200, "All projects were added successfully!", null);
+//        }
+//        return new ResponseBean(401, "At least one project was not added successfully. Logging info is showed as follow:/n" + lofInfo, null);
+//
+//    }
+
+    // List ： url isPrivate username password name type branch
     @PostMapping(value = {"/project/addProjectList"})
-    public Object addProjectList(HttpServletRequest request, @RequestBody List<JSONObject> projectListInfo) {
+    @ResponseBody
+    public Object addProjectList(HttpServletRequest request, @RequestBody MultipartFile file) throws IOException {
         String userToken = request.getHeader("token");
+        if (file.isEmpty()) {
+            return "上传失败，请选择文件";
+        }
+        List<JSONObject> projectListInfo = projectService.getProjectListInfoFromExcelFile(file);
         JSONObject obj = projectService.addProjectList(userToken, projectListInfo);
         boolean flag = obj.getBoolean("isSuccessful");
         String lofInfo = obj.getString("logInfo");
         if (flag){
             return new ResponseBean(200, "All projects were added successfully!", null);
         }
-        return new ResponseBean(401, "At least one project was not added successfully. Logging info is showed as follow:/n" + lofInfo, null);
+        return new ResponseBean(401, "At least one project was not added successfully. Logging info is showed as follow:" + lofInfo, null);
 
     }
+
+
 
     //get project list
     @GetMapping(value = {"/project"})
     public Object query(HttpServletRequest request,
-                        @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
+                        @RequestParam(name = "type",required = false,defaultValue = "bug")String type,
+                        @RequestParam(name = "isRecycled",required = false,defaultValue = "0") int isRecycled) {
         String userToken = request.getHeader("token");
-        return projectService.getProjectList(userToken,type);
+        return projectService.getProjectList(userToken,type,isRecycled);
     }
 
     //jeff get project list by module
@@ -69,9 +103,10 @@ public class ProjectController {
     @GetMapping(value = {"/project/filter"})
     public Object keyWordQuery(HttpServletRequest request,
                                @RequestParam("keyWord") String keyWord,
-                               @RequestParam(name = "type",required = false,defaultValue = "bug")String type) {
+                               @RequestParam(name = "type",required = false,defaultValue = "bug")String type,
+                               @RequestParam(name = "isRecycled",required = false,defaultValue = "0") int isRecycled) {
         String userToken = request.getHeader("token");
-        return projectService.getProjectListByKeyWord(userToken, keyWord,type);
+        return projectService.getProjectListByKeyWord(userToken, keyWord,type,isRecycled);
     }
 
     @DeleteMapping(value = {"/project/{projectId}"})
@@ -119,9 +154,24 @@ public class ProjectController {
 
     }
 
+    @GetMapping(value = {"/project/recycle"})
+    public Object projectRecycle(HttpServletRequest request,
+                                 @RequestParam(name = "projectId")String projectId,
+                                 @RequestParam(name = "isRecycled", required = false,defaultValue = "0") int isRecycled
+    ){
+        String userToken = request.getHeader("token");
+        try {
+            projectService.recycle(projectId,userToken,isRecycled);
+            return new ResponseBean(200, "success", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "failed", null);
+        }
+
+    }
+
 
     //下面是其它服务调用的内部接口
-
     @PutMapping(value = {"/inner/project"})
     public Object updateProject(@RequestBody Project project) {
         try {
@@ -131,6 +181,17 @@ public class ProjectController {
             e.printStackTrace();
             return new ResponseBean(401, "project update failed!", null);
         }
+    }
+
+    @GetMapping(value = {"/inner/project/all"})
+    public Object getAllProjects(@RequestParam(name = "isRecycled", required = false,defaultValue = "0") int isRecycled){
+        try {
+            return new ResponseBean(200, "success", projectService.getAllProject(isRecycled));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "failed", null);
+        }
+
     }
 
     @GetMapping(value = {"/inner/project"})
@@ -151,13 +212,15 @@ public class ProjectController {
 
     @GetMapping(value = "/inner/project/repo-ids")
     public Object getProjectIds(@RequestParam(name = "account_id", required = false) String account_id,
-                                @RequestParam("type")String type) {
-        return projectService.getRepoIdsByAccountIdAndType(account_id,type);
+                                @RequestParam("type")String type,
+                                @RequestParam(name = "isRecycled",required = false,defaultValue = "0") int isRecycled) {
+        return projectService.getRepoIdsByAccountIdAndType(account_id,type,isRecycled);
     }
 
     @GetMapping(value = "/inner/projects")
-    public Object getProjectByAccountId(@RequestParam(name = "account_id", required = false) String account_id){
-        return projectService.getProjectByAccountId(account_id);
+    public Object getProjectByAccountId(@RequestParam(name = "account_id", required = false) String account_id,
+                                        @RequestParam(name = "isRecycled",required = false,defaultValue = "0") int isRecycled){
+        return projectService.getProjectByAccountId(account_id,isRecycled);
     }
 
     @GetMapping(value = "/inner/project/exist")
@@ -176,6 +239,15 @@ public class ProjectController {
         }
     }
 
-
+    @GetMapping(value = "/inner/project/addRootProject")
+    public Object addRootProject(@RequestParam("projectId") String projectId){
+        try {
+            projectService.addRootProject(projectId);
+            return new ResponseBean(200, "project add success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "project add failed!", null);
+        }
+    }
 
 }

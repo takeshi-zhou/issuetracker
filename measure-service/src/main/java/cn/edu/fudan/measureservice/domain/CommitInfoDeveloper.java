@@ -2,12 +2,13 @@ package cn.edu.fudan.measureservice.domain;
 
 public class CommitInfoDeveloper  {
 
-    //一段时间内开发者提交的commit次数和涉及到的代码变动的行数
+    //一段时间内开发者提交的commit次数和涉及到的代码变动的行数以及修改的文件数量
     private String author;
     private String email;
     private int commit_counts;
     private int add;
     private int del;
+    private int changed_files;
 
     public CommitInfoDeveloper() {
     }
@@ -60,5 +61,13 @@ public class CommitInfoDeveloper  {
 
     public void setDel(int del) {
         this.del = del;
+    }
+
+    public int getChanged_files() {
+        return changed_files;
+    }
+
+    public void setChanged_files(int changed_files) {
+        this.changed_files = changed_files;
     }
 }

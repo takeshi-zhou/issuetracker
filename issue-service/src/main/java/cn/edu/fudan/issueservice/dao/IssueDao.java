@@ -146,4 +146,10 @@ public class IssueDao {
     public List<String> getCommitId(String repoId, String since, String until) {
         return issueMapper.getCommitIds(repoId,since,until);
     }
+
+
+    public List<Issue> getHaveNotAdoptEliminateIssuesByCategoryAndRepoId(String repoId, String category) {
+        return issueMapper.getHaveNotAdoptEliminateIssuesByCategoryAndRepoId(repoId, category);
+    }
+
 }

@@ -4,6 +4,7 @@ public class NeedDownload {
 
 
     private String projectId;
+    private String repoSource;
     private String url;
     private boolean isPrivate;
     private String username;
@@ -13,13 +14,14 @@ public class NeedDownload {
     public NeedDownload() {
     }
 
-    public NeedDownload(String projectId, String url, boolean isPrivate, String username, String password ,String branch) {
+    public NeedDownload(String projectId, String url, boolean isPrivate, String username, String password ,String branch,String repoSource) {
         this.projectId = projectId;
         this.url = url;
         this.isPrivate = isPrivate;
         this.username = username;
         this.password = password;
         this.branch = branch;
+        this.repoSource = repoSource;
     }
 
     public String getProjectId() {
@@ -28,6 +30,14 @@ public class NeedDownload {
 
     public void setProjectId(String projectId) {
         this.projectId = projectId;
+    }
+
+    public String getRepoSource() {
+        return repoSource;
+    }
+
+    public void setRepoSource(String repoSource) {
+        this.repoSource = repoSource;
     }
 
     public String getUrl() {

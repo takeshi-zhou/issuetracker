@@ -44,7 +44,7 @@ public class RawIssueServiceTest extends IssueServiceApplicationTests {
     private String commitServicePath;
     @Value("${code.service.path}")
     private String codeServicePath;
-    @Value("${repoHome}")
+    @Value("${}")
     private String repoHome;
 
     @Mock

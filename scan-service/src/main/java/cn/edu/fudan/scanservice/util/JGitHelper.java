@@ -27,6 +27,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static cn.edu.fudan.scanservice.util.DateTimeUtil.timeTotimeStamp;
+import static org.eclipse.jgit.revwalk.RevSort.REVERSE;
+
+@SuppressWarnings("Duplicates")
 @Slf4j
 public class JGitHelper {
 
@@ -63,10 +67,20 @@ public class JGitHelper {
             git.reset().setMode(ResetCommand.ResetType.HARD).call();
             CheckoutCommand checkoutCommand = git.checkout();
             checkoutCommand.setName(commit).call();
+
         } catch (Exception e) {
             log.error("JGitHelper checkout error:{} ", e.getMessage());
         }
     }
+
+    public void checkoutToLatestCommit(String branchName) {
+        try {
+            checkout(branchName);
+        } catch (Exception e) {
+            log.error("JGitHelper checkout error:{} ", e.getMessage());
+        }
+    }
+
 
     public String getAuthorName(String commit) {
         String authorName = null;
@@ -150,6 +164,13 @@ public class JGitHelper {
      *  getCommitTime return second not millisecond
      */
     public List<String> getCommitListByBranchAndDuration(String branchName, String duration) {
+        if(branchName == null){
+            try {
+                branchName = repository.getBranch();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         checkout(branchName);
         final int durationLength = 21;
         Map<String, Long> commitMap = new HashMap<>(512);
@@ -260,15 +281,111 @@ public class JGitHelper {
         return MERGE_WITHOUT_CONFLICT;
     }
 
-    public static void main(String[] args) {
+    public List<RevCommit> getAllAggregationCommit(){
+        List<RevCommit> aggregationCommits = new ArrayList<>();
+        try {
+
+            int branch = 0;
+            Iterable<RevCommit> commits = git.log().call();
+            List<RevCommit> commitList = new ArrayList<>();
+            Map<String,Integer> sonCommitsMap = new HashMap<>();
+            for (RevCommit revCommit: commits) {
+                commitList.add(revCommit);
+                RevCommit[] parents = revCommit.getParents();
+                for (RevCommit parentCommit : parents) {
+                    int sonCount = Optional.ofNullable(sonCommitsMap.get(parentCommit.getName())).orElse(0);
+                    sonCommitsMap.put(parentCommit.getName(),++sonCount);
+                }
+            }
+            commitList.sort(Comparator.comparingInt(RevCommit::getCommitTime));
+
+            for (RevCommit revCommit : commitList) {
+                branch -= revCommit.getParentCount()-1;
+                if (branch==1) {aggregationCommits.add(revCommit);}
+                branch += Optional.ofNullable(sonCommitsMap.get(revCommit.getName())).orElse(0)-1;
+            }
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        }
+        return aggregationCommits;
+    }
+
+    public List<RevCommit> getAggregationCommit(String startTime){
+        List<RevCommit> aggregationCommits = new ArrayList<>();
+        try {
+            int startTimeStamp = Integer.valueOf(timeTotimeStamp(startTime));
+            int branch = 0;
+            Iterable<RevCommit> commits = git.log().call();
+            List<RevCommit> commitList = new ArrayList<>();
+            Map<String,Integer> sonCommitsMap = new HashMap<>();
+            for (RevCommit revCommit: commits) {
+                commitList.add(revCommit);
+                RevCommit[] parents = revCommit.getParents();
+                for (RevCommit parentCommit : parents) {
+                    int sonCount = Optional.ofNullable(sonCommitsMap.get(parentCommit.getName())).orElse(0);
+                    sonCommitsMap.put(parentCommit.getName(),++sonCount);
+                }
+            }
+            commitList.sort(Comparator.comparingInt(RevCommit::getCommitTime));
+
+            for (RevCommit revCommit : commitList) {
+                branch -= revCommit.getParentCount()-1;
+                if (startTimeStamp<revCommit.getCommitTime()&&branch==1) {aggregationCommits.add(revCommit);}
+                branch += Optional.ofNullable(sonCommitsMap.get(revCommit.getName())).orElse(0)-1;
+            }
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        }
+
+        return aggregationCommits;
+    }
+
+
+    public String getLatestCommitId(String branchName){
+        try {
+            checkout(branchName);
+            ObjectId obj = repository.resolve("HEAD");
+            if(obj != null){
+                return obj.getName();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+    public static void main(String[] args) throws ParseException {
         //gitCheckout("E:\\Lab\\project\\IssueTracker-Master", "f8263335ef380d93d6bb93b2876484e325116ac2");
         //String repoPath = "E:\\Lab\\iec-wepm-develop";
-        String repoPath = "E:\\school\\laboratory\\issueTrackerDev\\IssueTracker-Master";
-        String commitId = "75c6507e2139e9bb663abf35037b31478e44c616";
+        String repoPath = "E:\\school\\laboratory\\test-samples\\maven-surefire";
+//        String commitId = "75c6507e2139e9bb663abf35037b31478e44c616";
         JGitHelper jGitHelper = new JGitHelper(repoPath);
-        String s[] = jGitHelper.getCommitParents(commitId);
-        int m = jGitHelper.mergeJudgment(commitId);
-        System.out.println(m);
+        List<RevCommit> list = jGitHelper.getAggregationCommit("2019-8-12 00:00:00");
+        for(RevCommit rev : list){
+            System.out.println(rev.getCommitTime());
+        }
+
+
+        jGitHelper.checkout("5e8ee4f41fc02d8356875d0a8f252246ef814528");
+
+//        jGitHelper.revWalk.sort(REVERSE);
+        try {
+            ObjectId obj = jGitHelper.repository.resolve("HEAD");
+            System.out.println(obj.name());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        list.stream().forEach(System.out::println);
+
+
+
+        //String s[] = jGitHelper.getCommitParents(commitId);
+//        int m = jGitHelper.mergeJudgment(commitId);
+//        System.out.println(m);
 //        String t = jGitHelper.getCommitTime("f61e34233aa536cf5e698b502099e12d1caf77e4");
 //        for (String s : jGitHelper.getCommitListByBranchAndDuration("zhonghui20191012", "2019.10.12-2019.12.16")) {
 //            System.out.println(s);

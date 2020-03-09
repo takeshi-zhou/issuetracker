@@ -3,6 +3,7 @@ package cn.edu.fudan.accountservice.service;
 
 import cn.edu.fudan.accountservice.domain.Account;
 import cn.edu.fudan.accountservice.domain.ResponseBean;
+import cn.edu.fudan.accountservice.domain.Tool;
 
 import java.util.List;
 
@@ -79,4 +80,10 @@ public interface AccountService {
      * @return List<String>
      */
     List<String> getAllAccountId();
+
+    List<String> getGroupsByAccountName(String accountName);
+
+    void updateToolsEnable(List<Tool> tools);
+
+    List<Tool> getTools();
 }

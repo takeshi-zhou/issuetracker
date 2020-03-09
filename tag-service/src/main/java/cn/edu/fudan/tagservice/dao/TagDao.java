@@ -1,5 +1,6 @@
 package cn.edu.fudan.tagservice.dao;
 
+import cn.edu.fudan.tagservice.domain.ModifyTaggedItem;
 import cn.edu.fudan.tagservice.domain.Tag;
 import cn.edu.fudan.tagservice.domain.TaggedItem;
 import cn.edu.fudan.tagservice.mapper.TagMapper;
@@ -58,7 +59,7 @@ public class TagDao {
         tagMapper.modifyOneTagged(oldTagId, newTagId, iteamId);
     }
 
-    public void modifyMultiTaggedItem(List<TaggedItem> list){
+    public void modifyMultiTaggedItem(List<ModifyTaggedItem> list){
         tagMapper.modifyMultiTaggedItem(list);
     }
 

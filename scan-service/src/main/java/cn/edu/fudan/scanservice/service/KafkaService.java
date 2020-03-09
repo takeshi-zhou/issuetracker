@@ -12,4 +12,6 @@ public interface KafkaService {
     void firstScanByMQ(ConsumerRecord<String, String> consumerRecord);
 
     void updateCommitScanStatus(ConsumerRecord<String, String> consumerRecord);
+
+    String startAutoScan(String repoId,String commitId);
 }

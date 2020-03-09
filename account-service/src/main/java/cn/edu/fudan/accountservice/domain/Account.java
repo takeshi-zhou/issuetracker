@@ -9,6 +9,30 @@ public class Account implements Serializable {
     private String password;
     private String name;
     private String email;
+    /**
+     * 用户权限管理，0表示管理员，1表示团队负责人，默认为1
+     */
+    private int right;
+    /**
+     * 当前用户所属组，可为空,可属于多个组
+     */
+    private String groups;
+
+    public String getGroups() {
+        return groups;
+    }
+
+    public void setGroups(String groups) {
+        this.groups = groups;
+    }
+
+    public void setRight(int right) {
+        this.right = right;
+    }
+
+    public int getRight() {
+        return right;
+    }
 
     public String getAccountName() {
         return accountName;

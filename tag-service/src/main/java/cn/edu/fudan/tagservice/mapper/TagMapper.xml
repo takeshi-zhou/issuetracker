@@ -92,14 +92,14 @@
             <trim prefix="tag_id = case" suffix="end,">
                 <foreach collection="list" item="item">
                     <if test="item.tag_id != null">
-                        when item_id=#{item.item_id} then #{item.tag_id}
+                        when item_id=#{item.itemId} then #{item.newTagId}
                     </if>
                 </foreach>
             </trim>
         </trim>
         <where>
             <foreach collection="list" separator="or" item="item">
-                item_id = #{item.item_id}
+                item_id = #{item.itemId} and tag_id = #{item.preTagId}
             </foreach>
         </where>
     </update>

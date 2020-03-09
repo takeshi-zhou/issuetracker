@@ -8,7 +8,7 @@
         <result property="name" column="name"/>
         <result property="language" column="language"/>
         <result property="url" column="url"/>
-        <result property="vcs_type" column="vcs_type"/>
+        <result property="repo_source" column="repo_source"/>
         <result property="type" column="type"/>
         <result property="account_id" column="account_id"/>
         <result property="download_status" column="download_status"/>
@@ -20,8 +20,9 @@
         <result property="repo_id" column="repo_id"/>
         <result property="branch" column="branch"/>
         <result property="first_auto_scan" column="first_auto_scan"/>
-
+        <result property="recycled" column="recycled"/>
         <result property="module" column="module"/>
+        <result property="delete_time" column="delete_time"/>
     </resultMap>
 
     <insert id="addOneProject" parameterType="Project">
@@ -31,7 +32,7 @@
         name,
         language,
         url,
-        vcs_type,
+        repo_source,
         type,
         account_id,
         download_status,
@@ -50,7 +51,7 @@
         #{name},
         #{language},
         #{url},
-        #{vcs_type},
+        #{repo_source},
         #{type},
         #{account_id},
         #{download_status},
@@ -80,6 +81,21 @@
             account_id = #{account_id}
             <if test="keyWord != null and keyWord != '' ">
                 and name like "%"#{keyWord}"%"
+            </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
+        </where>
+        order by add_time desc
+    </select>
+
+    <select id="getAllProjectByKeyWord" parameterType="String" resultMap="project">
+        select *
+        from project
+        <where>
+
+            <if test="keyWord != null and keyWord != '' ">
+                name like "%"#{keyWord}"%"
             </if>
             <if test="type != null and type != ''">
                 and type = #{type}
@@ -136,11 +152,14 @@
             <if test="language != null">
                 language = #{language},
             </if>
-            <if test="vcs_type != null">
-                vcs_type = #{vcs_type},
+            <if test="repo_source != null">
+                repo_source = #{repo_source},
             </if>
             <if test="download_status != null">
                 download_status = #{download_status},
+            </if>
+            <if test="account_id != null">
+                account_id = #{account_id},
             </if>
             <if test="scan_status != null">
                 scan_status = #{scan_status},
@@ -155,7 +174,16 @@
                 description = #{description},
             </if>
             <if test="repo_id != null">
-                repo_id = #{repo_id}
+                repo_id = #{repo_id},
+            </if>
+            <if test="module != null">
+                module = #{module},
+            </if>
+            <if test="recycled != null">
+                recycled = #{recycled},
+            </if>
+            <if test="delete_time != null">
+                delete_time = #{delete_time}
             </if>
         </set>
         where uuid = #{uuid}
@@ -180,7 +208,7 @@
     </select>
 
     <select id="getProjectsByCondition" parameterType="String" resultMap="project">
-        select uuid,name,language,url,vcs_type,type,account_id,download_status,scan_status,add_time,till_commit_time,last_scan_time,description,repo_id,branch,first_auto_scan,module
+        select uuid,name,language,url,repo_source,type,account_id,download_status,scan_status,add_time,till_commit_time,last_scan_time,description,repo_id,branch,first_auto_scan,module
         from project
         <where>
             account_id = #{account_id}
@@ -196,5 +224,8 @@
         </where>
     </select>
 
-
+    <select id="getProjects" resultMap="project">
+        select *
+        from project
+    </select>
 </mapper>

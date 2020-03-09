@@ -72,4 +72,15 @@ public class ScanController {
     }
 
 
+    @GetMapping(value = {"/scan/test-auto-scan"})
+    public Object startAutoScan(@RequestParam("repo_id") String repo_id,
+                                      @RequestParam("category")String category,
+                                      @RequestParam("commit_id")String commit_id){
+        try{
+            return new ResponseBean(200,"success",kafkaService.startAutoScan(repo_id, commit_id));
+        }catch (Exception e){
+            return new ResponseBean(500,e.getMessage(),null);
+        }
+    }
+
 }

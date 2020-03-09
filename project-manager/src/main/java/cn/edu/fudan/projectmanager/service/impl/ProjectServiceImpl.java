@@ -7,6 +7,12 @@ import cn.edu.fudan.projectmanager.domain.NeedDownload;
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.service.ProjectService;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +20,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 @Service
 public class ProjectServiceImpl implements ProjectService {
 
@@ -63,8 +75,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @SuppressWarnings("unchecked")
-    private void send(String projectId, String url,boolean isPrivate,String username,String password, String branch) {
-        NeedDownload needDownload = new NeedDownload(projectId, url,isPrivate,username,password ,branch);
+    private void send(String projectId, String url,boolean isPrivate,String username,String password, String branch,String repoSource) {
+        NeedDownload needDownload = new NeedDownload(projectId, url,isPrivate,username,password ,branch,repoSource);
         kafkaTemplate.send("ProjectManager", JSONObject.toJSONString(needDownload));
         logger.info("send message to topic ProjectManage ---> " + JSONObject.toJSONString(needDownload));
     }
@@ -72,6 +84,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void addOneProject(String userToken, JSONObject projectInfo) {
         String url = projectInfo.getString("url");
+        String repo_source = projectInfo.getString("repo_source");
         if (url == null) {
             throw new RuntimeException("please input the project url!");
         }
@@ -115,7 +128,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setName(name);
         project.setUrl(url);
         project.setType(type);
-        project.setVcs_type("git");
+        project.setRepo_source(repo_source);
         project.setAccount_id(accountId);
         project.setDownload_status("Downloading");
         project.setAdd_time(new Date());
@@ -123,8 +136,10 @@ public class ProjectServiceImpl implements ProjectService {
         project.setModule(module);
         projectDao.addOneProject(project);
         //向RepoManager这个Topic发送消息，请求开始下载
-        send(projectId, url,isPrivate,username,password,branch);
+        send(projectId, url,isPrivate,username,password,branch,repo_source);
     }
+
+
 
     @Override
     public JSONObject addProjectList(String userToken, List<JSONObject> projectListInfo){
@@ -153,17 +168,104 @@ public class ProjectServiceImpl implements ProjectService {
         return result;
     }
 
+
     @Override
-    public Object getProjectList(String userToken,String type) {
+    public List<JSONObject> getProjectListInfoFromExcelFile(MultipartFile file) throws IOException {
+        List<JSONObject> result = new ArrayList<>();
+
+        String fileName = file.getOriginalFilename();
+        String dir=System.getProperty("user.dir");
+        System.out.println(dir);
+        String destFileName=dir+ File.separator + "project-manager" + File.separator + "uploadedfiles"+ File.separator + fileName;
+        System.out.println(destFileName);
+        File destFile = new File(destFileName);
+        file.transferTo(destFile);
+
+        System.out.println("文件上传成功");
+        logger.info("文件上传成功");
+        System.out.println("开始读取EXCEL内容");
+        logger.info("开始读取EXCEL内容");
+
+        Sheet sheet;
+        InputStream fis = null;
+
+        fis = new FileInputStream(destFileName);
+
+        Workbook workbook = null;
+        try {
+            workbook= new XSSFWorkbook(destFile);
+        } catch (Exception ex) {
+            workbook = new HSSFWorkbook(fis);
+        }
+        sheet = workbook.getSheetAt(0);
+
+        int totalRowNum = sheet.getLastRowNum();
+
+        System.out.println("当前表格共有："+totalRowNum+"行");
+        logger.info("当前表格共有："+totalRowNum+"行");
+
+
+        for(int i = 13;i <= totalRowNum; i++){
+            JSONObject projectInfo = new JSONObject();
+            Row row = sheet.getRow(i);
+            if(row!=null){
+                int columnNum=row.getPhysicalNumberOfCells();
+                System.out.println("该行共有列数："+columnNum);
+                logger.info("该行共有列数："+columnNum);
+                for(int j=1;j<columnNum;j++){
+                    System.out.println("当前处理第"+i+"行，第"+j+"列");
+                    logger.info("当前处理第"+i+"行，第"+j+"列");
+                    Cell cell = row.getCell(j);
+                    String cellValue="";
+                    if(cell!=null){
+                        switch (cell.getCellType()) {
+                            case STRING:
+                                cellValue = cell.getStringCellValue();
+                                break;
+                            case NUMERIC:
+                                cellValue = String.valueOf(cell.getNumericCellValue());
+                                break;
+                            case BOOLEAN:
+                                cellValue = String.valueOf(cell.getBooleanCellValue());
+                                break;
+                            default:
+                                cellValue = cell.getStringCellValue();
+                                break;
+                        }
+                    }
+                    System.out.println(cellValue);
+                    if (j == 1){projectInfo.put("url",cellValue);}
+                    if (j == 2){projectInfo.put("branch",cellValue);}
+                    if (j == 3){projectInfo.put("name",cellValue);}
+                    if (j == 4){projectInfo.put("isPrivate",cellValue);}
+                    if (j == 5){projectInfo.put("username",cellValue);}
+                    if (j == 6){projectInfo.put("password",cellValue);}
+                    if (j == 7){projectInfo.put("module",cellValue);}
+                }
+
+            }
+            //Jason对象中必须有"type"字段,默认是bug工具来检测
+            projectInfo.put("type","bug");
+            result.add(projectInfo);
+        }
+        return result;
+    }
+
+
+    @Override
+    public Object getProjectList(String userToken,String type,int isRecycled) {
+        if("1".equals(restInterfaceManager.getAccountId(userToken))){
+            return projectDao.getAllProjects().stream().filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
+        }
         String account_id = restInterfaceManager.getAccountId(userToken);
-        return projectDao.getProjectList(account_id,type);
+        return projectDao.getProjectList(account_id,type).stream().filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
     }
 
     //jeff
     @Override
     public Object getProjectListByModule(String userToken,String type, String module) {
         String account_id = restInterfaceManager.getAccountId(userToken);
-        return projectDao.getProjectListByModule(account_id,type,module);
+        return projectDao.getProjectListByModule(account_id,type,module).stream().filter(project -> project.getRecycled()==0).collect(Collectors.toList());
     }
 
     @Override
@@ -172,19 +274,37 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Object getProjectByAccountId(String account_id) {
-        return projectDao.getProjectByAccountId(account_id);
+    public Object getProjectByAccountId(String account_id,int isRecycled) {
+
+        return projectDao.getProjectByAccountId(account_id).stream().filter(project ->
+                project.getRecycled()==isRecycled).collect(Collectors.toList());
     }
 
     @Override
-    public Object getProjectListByKeyWord(String userToken, String keyWord,String type) {
+    public Object getProjectListByKeyWord(String userToken, String keyWord,String type,int isRecycled) {
         String account_id = restInterfaceManager.getAccountId(userToken);
-        return projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim(),type);
+        if("1".equals(account_id)){
+            return projectDao.getAllProjectByKeyWord(keyWord,type).stream()
+                    .filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
+        }else {
+            return projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim(),type).stream()
+                    .filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
+        }
     }
 
     @Override
-    public List<String> getRepoIdsByAccountIdAndType(String account_id,String type) {
-        return projectDao.getRepoIdsByAccountIdAndType(account_id,type);
+    public List<String> getRepoIdsByAccountIdAndType(String account_id, String type, int isRecycled) {
+        List<String> repoIds;
+        if("1".equals(account_id)){
+            repoIds = projectDao.getAllProjects().stream()
+                    .filter(project -> project.getRecycled()==isRecycled)
+                    .map(Project::getRepo_id).collect(Collectors.toList());
+        }else {
+            repoIds = projectDao.getRepoIdsByAccountIdAndType(account_id,type).stream().filter(repoId -> projectDao.getProjectByRepoIdAndCategory(account_id,repoId,type)
+                    .getRecycled()==isRecycled).collect(Collectors.toList());
+        }
+        return repoIds;
+
     }
 
     @Override
@@ -205,30 +325,28 @@ public class ProjectServiceImpl implements ProjectService {
         projectDao.updateProjectStatus(project);
     }
 
+    /**
+     * 若非管理员，先判断是非为唯一repo，若唯一，则将project的accountID改为adminID；若不唯一，则和之前处理相同，只删除project表对应数据
+     * 若是管理员，则不需要考虑是否还有其他人拥有此项目，直接删除所有repoId相同的项目
+     * @param projectId
+     * @param type
+     * @param userToken
+     */
     @Override
     public void remove(String projectId, String type,String userToken) {
-        updateProjectStatus(projectId,"deleting");
+        //updateProjectStatus(projectId,"deleting");
         String repoId = projectDao.getRepoId(projectId);
         if(repoId!=null){
             String account_id = restInterfaceManager.getAccountId(userToken);
             //如果当前repoId和type只有这一个projectId与其对应，那么删除project的同时会删除repo的相关内容
             //否则还有其他project与当前repoId和type对应，该repo的相关内容就不删
-            if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type)) {
-                restInterfaceManager.deleteIssuesOfRepo(repoId, type);
-                restInterfaceManager.deleteRawIssueOfRepo(repoId, type);
-                restInterfaceManager.deleteScanOfRepo(repoId, type);
-                restInterfaceManager.deleteEventOfRepo(repoId, type);
-                restInterfaceManager.deleteScanResultOfRepo(repoId, type);
-                restInterfaceManager.deleteIgnoreRecord(account_id, repoId);
-                if(type.equals("bug")){
-                    logger.info("start to request measure to delete measure info ...");
-                    restInterfaceManager.deleteRepoMeasure(repoId);
-                    logger.info("delete measure info success");
-                }
-
-                if(type.equals("clone")){
-                    //对于clone的CPU版本，删除时需要删除前一次commit扫描的结果文件
-                    deleteCloneResPreFile(repoId);
+            //先删project表，再删redis中的数据，再删其它表
+            //if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
+            if(account_id.equals("1")){
+                List<Project> projects = projectDao.getProjectByRepoId(repoId);
+                List<String> projectIds = projects.stream().map(Project::getUuid).collect(Collectors.toList());
+                for(String id : projectIds){
+                    projectDao.remove(id);
                 }
                 //delete info in redis
                 stringRedisTemplate.setEnableTransactionSupport(true);
@@ -249,9 +367,35 @@ public class ProjectServiceImpl implements ProjectService {
                 stringRedisTemplate.delete("trend:" + type + ":week:remaining:" + account_id + ":" + repoId);
                 stringRedisTemplate.delete("trend:" + type + ":week:eliminated:" + account_id + ":" + repoId);
                 stringRedisTemplate.exec();
+
+                restInterfaceManager.deleteIssuesOfRepo(repoId, type);
+                restInterfaceManager.deleteRawIssueOfRepo(repoId, type);
+                restInterfaceManager.deleteScanOfRepo(repoId, type);
+                restInterfaceManager.deleteEventOfRepo(repoId, type);
+                restInterfaceManager.deleteScanResultOfRepo(repoId, type);
+                restInterfaceManager.deleteIgnoreRecord(account_id, repoId);
+                if(type.equals("bug")){
+                    logger.info("start to request measure to delete measure info ...");
+                    restInterfaceManager.deleteRepoMeasure(repoId);
+                    logger.info("delete measure info success");
+                }
+
+                if(type.equals("clone")){
+                    //对于clone的CPU版本，删除时需要删除前一次commit扫描的结果文件
+                    deleteCloneResPreFile(repoId);
+                }
+
+            }else if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
+                Project project = projectDao.getProjectByID(projectId);
+                project.setAccount_id("1");
+                //project.setScan_status("Scanned");
+                projectDao.updateProjectStatus(project);
+            }else {
+                projectDao.remove(projectId);
             }
+        }else{
+            projectDao.remove(projectId);
         }
-        projectDao.remove(projectId);
         logger.info("project delete success!");
     }
 
@@ -340,5 +484,50 @@ public class ProjectServiceImpl implements ProjectService {
         String account_id = restInterfaceManager.getAccountId(userToken);
         List<Project> projects = projectDao.getProjectsByCondition(account_id,category,name,module);
         return projects;
+    }
+
+    @Override
+    public void addRootProject(String projectId) {
+        Project project = getProjectByID(projectId);
+
+        if(!projectDao.getProjectList("1","bug").stream().
+                map(Project::getRepo_id).collect(Collectors.toList()).contains(project.getRepo_id())){
+            String uuid = UUID.randomUUID().toString();
+            project.setUuid(uuid);
+            project.setAccount_id("1");
+            projectDao.addOneProject(project);
+        }
+
+    }
+
+    @Override
+    public void removeNonAdminProject(String projectId, String type, String userToken) {
+        projectDao.remove(projectId);
+    }
+
+
+    /**
+     * 功能已合并到getProjectList接口
+     * @param
+     * @return
+     */
+    @Override
+    public List<Project> getAllProject(int isRecycled) {
+        return projectDao.getAllProjects().stream().
+                filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
+
+    }
+
+    /**
+     * 功能不完善，没有考虑dashboard
+     * @param projectId
+     * @param userToken
+     */
+    @Override
+    public void recycle(String projectId, String userToken, int isRecycled) {
+        Project project = getProjectByID(projectId);
+        project.setRecycled(isRecycled);
+        project.setDelete_time(new Date());
+        projectDao.updateProjectStatus(project);
     }
 }

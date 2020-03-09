@@ -79,7 +79,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public void modifyMultiTaggedItem(List<TaggedItem> list) {
+    public void modifyMultiTaggedItem(List<ModifyTaggedItem> list) {
         tagDao.modifyMultiTaggedItem(list);
     }
 
@@ -157,6 +157,7 @@ public class TagServiceImpl implements TagService {
      * */
     @Override
     @Transactional
+    //待修改
     public void ignoreOneType(JSONObject requestBody,String token) {
         String userId = restInterfaceManager.getUserId(token);
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore-level").toUpperCase());
@@ -174,9 +175,9 @@ public class TagServiceImpl implements TagService {
         List<String> ignoreUuidList = restInterfaceManager.getIssueListByTypeAndRepoId(repoId,type);
         restInterfaceManager.batchUpdateIssueListPriority(ignoreUuidList, PriorityEnum.IGNORE.getLevel());
 
-        List<TaggedItem> ignoreList = new ArrayList<>();
+        List<ModifyTaggedItem> ignoreList = new ArrayList<>();
         for (String uuid : ignoreUuidList) {
-            ignoreList.add(new TaggedItem(uuid, ignoreTagId));
+            ignoreList.add(new ModifyTaggedItem(uuid, "",ignoreTagId));
         }
         tagDao.modifyMultiTaggedItem(ignoreList);
         //tagDao.addMultiTaggedItem(ignoreList);

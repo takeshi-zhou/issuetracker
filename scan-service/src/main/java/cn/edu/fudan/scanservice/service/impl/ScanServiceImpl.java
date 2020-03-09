@@ -164,8 +164,12 @@ public class ScanServiceImpl implements ScanService {
     public List<String> getPreScannedCommitByCurrentCommit(String repoId, String category, String commitId) {
         String repoPath = null;
         List<String> result = null;
+        JSONObject jsonObject = restInterfaceManager.getCommitsOfRepoByConditions(repoId, 1, 1, null);
+        JSONArray scanMessageWithTimeJsonArray = jsonObject.getJSONArray("data");
+        JSONObject latestScanMessageWithTime = scanMessageWithTimeJsonArray.getJSONObject(0);
+        String checkCommitId = latestScanMessageWithTime.getString("commit_id");
         try{
-            repoPath = restInterfaceManager.getRepoPath(repoId,commitId);
+            repoPath = restInterfaceManager.getRepoPath(repoId,checkCommitId);
             if(repoPath == null){
                 return null;
             }
@@ -187,7 +191,7 @@ public class ScanServiceImpl implements ScanService {
 
         String[] parents = jGitHelper.getCommitParents(commitId);
         for(String parent : parents){
-            Scan  scan = scanDao.getScanByCategoryAndRepoIdAndCommitId(repoId,category,commitId);
+            Scan  scan = scanDao.getScanByCategoryAndRepoIdAndCommitId(repoId,category,parent);
             if(scan == null ){
                 continue;
             }
@@ -196,7 +200,7 @@ public class ScanServiceImpl implements ScanService {
                     scannedParents.add(parent);
                 }
             }else{
-                getPreScannedCommitByJGit(jGitHelper,scannedParents,repoId,category,commitId);
+                getPreScannedCommitByJGit(jGitHelper,scannedParents,repoId,category,parent);
             }
         }
 
@@ -221,6 +225,11 @@ public class ScanServiceImpl implements ScanService {
         return result;
     }
 
+    @Override
+    public Object getScanByRepoIdAndStatus(String repoId, String status) {
+        return scanDao.getScanByRepoIdAndStatus(repoId,status);
+    }
+
     /**
      * 目前只是选取第一个未扫描或者编译未成功的commit作为返回值。 后面仍需改进。
      * @param jGitHelper
@@ -233,7 +242,7 @@ public class ScanServiceImpl implements ScanService {
 
         String[] parents = jGitHelper.getCommitParents(commitId);
         for(String parent : parents){
-            Scan  scan = scanDao.getScanByCategoryAndRepoIdAndCommitId(repoId,category,commitId);
+            Scan  scan = scanDao.getScanByCategoryAndRepoIdAndCommitId(repoId,category,parent);
             if(scan == null ){
                 return parent;
             }

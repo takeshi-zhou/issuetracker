@@ -328,4 +328,21 @@ public class MeasureController {
             return new ResponseBean(401,"failed",e.getMessage());
         }
     }
+
+
+    //根据repo_id和commit_id 获取该commit的修改文件的数量
+    //还没写
+    @GetMapping("/measure/commit/changed-files")
+    @CrossOrigin
+    public ResponseBean getChangedFilesCount(
+            @RequestParam("repo_id")String repo_id,
+            @RequestParam("commit_id")String commit_id
+    ){
+        try{
+            return new ResponseBean(200,"success","null");
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package cn.edu.fudan.tagservice.service;
 
+import cn.edu.fudan.tagservice.domain.ModifyTaggedItem;
 import cn.edu.fudan.tagservice.domain.Tag;
 import cn.edu.fudan.tagservice.domain.TaggedItem;
 import com.alibaba.fastjson.JSONObject;
@@ -12,7 +13,7 @@ public interface TagService {
 
     void addMultiTaggedItem(List<TaggedItem> list);
 
-    void modifyMultiTaggedItem(List<TaggedItem> list);
+    void modifyMultiTaggedItem(List<ModifyTaggedItem> list);
 
     void deleteTag(String tagId, String itemId);
 

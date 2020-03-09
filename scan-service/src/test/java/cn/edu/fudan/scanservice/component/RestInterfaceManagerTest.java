@@ -18,7 +18,9 @@ public class RestInterfaceManagerTest extends ScanServiceApplicationTests {
 
     @Test
     public void getSonarIssueResults() {
-        restInterfaceManager.getSonarIssueResults("IssueTracker-Master-zhonghui20191012",null,100,false);
+        JSONObject object = restInterfaceManager.getSonarIssueResults("IssueTracker-Master-zhonghui20191012",null,100,false);
+
+        System.out.println(object);
     }
 
 
@@ -39,6 +41,24 @@ public class RestInterfaceManagerTest extends ScanServiceApplicationTests {
     @Test
     public void getRepoPath() {
         String result = restInterfaceManager.getRepoPath("bc62ad1a-14d7-11ea-9635-3d7444b06c34","aad48b73e22f8fe4b8222a5686a2b39344f1db55");
+        System.out.println("result");
+    }
+
+    @Test
+    public void startCodeTracker() {
+        boolean result = restInterfaceManager.startCodeTracker("7e35f5ae-544e-11ea-9837-31458decacbe","master","33f48e3437f2c098a057ab617bc6c522a618eca7");
+        System.out.println("result");
+    }
+
+    @Test
+    public void getCodeTrackerStatus() {
+        String result = restInterfaceManager.getCodeTrackerStatus("7e35f5ae-544e-11ea-9837-31458decacbe","master");
+        System.out.println("result");
+    }
+
+    @Test
+    public void updateCodeTracker() {
+        boolean result = restInterfaceManager.updateCodeTracker("7e35f5ae-544e-11ea-9837-31458decacbe","master");
         System.out.println("result");
     }
 }

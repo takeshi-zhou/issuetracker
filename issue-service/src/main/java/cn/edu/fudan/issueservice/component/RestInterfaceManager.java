@@ -133,6 +133,7 @@ public class RestInterfaceManager {
     public JSONArray getProjectList(String account_id) {
         return restTemplate.getForObject(projectServicePath + "/inner/projects?account_id=" + account_id,JSONArray.class);
     }
+
     //-------------------------------------------------end-------------------------------------------------------------
 
     //---------------------------------------------commit service------------------------------------------------------
@@ -154,6 +155,29 @@ public class RestInterfaceManager {
     public JSONObject getCommitTime(String commitId){
         return restTemplate.getForObject(commitServicePath+"/commit-time?commit_id="+commitId,JSONObject.class);
     }
+
+
+    public JSONObject getCommitsOfRepoByConditions(String repoId, Integer page, Integer pageSize,Boolean isWhole) {
+
+        String url = commitServicePath + "?repo_id=" + repoId;
+        if(page != null ){
+            if(pageSize != null){
+                if(pageSize<=0 || page<=0){
+                    logger.error("page size or page is not correct . page size --> {},page --> {}",pageSize,page);
+                    return null;
+                }
+                url += "&per_page=" + pageSize;
+            }
+            url += "&page=" + page;
+        }
+
+        if(isWhole != null){
+            url += "&is_whole=" + isWhole ;
+        }
+        return restTemplate.getForObject(url, JSONObject.class);
+
+    }
+
     //----------------------------------------------end-----------------------------------------------------------------
 
     //---------------------------------------------code service---------------------------------------------------------
@@ -408,13 +432,25 @@ public class RestInterfaceManager {
     }
 
     public String getLatestScanFailedCommitId(String repoId,String commitId ,String category){
-        JSONObject failedCommitId = restTemplate.getForObject(scanServicePath + "/inner/scan/pre-scanned-commit?repo_id=" + repoId+"&commit_id="+commitId+"&category="+category, JSONObject.class);
+        String failedCommitId = restTemplate.getForObject(scanServicePath + "/inner/scan/pre-failed-commit?repo_id=" + repoId+"&commit_id="+commitId+"&category="+category, String.class);
         if(failedCommitId != null){
-            return failedCommitId.toString();
+            return failedCommitId;
         }
         return null;
 
     }
+
+
+    public JSONArray getScanByRepoIdAndStatus(String repoId,String status){
+        JSONArray scans = restTemplate.getForObject(scanServicePath + "/inner/scan/get-by-status?repo_id=" + repoId+"&status=" + status, JSONArray.class);
+        if(scans != null){
+            return scans;
+        }
+        return null;
+
+    }
+
+
 
     // --------------------------------------------------------measure api ---------------------------------------------------------
 
