@@ -224,7 +224,7 @@
     </select>
 
     <select id="getLatestScannedCommitId" parameterType="String" resultType="String">
-        select commit_id from scan where repo_id = #{repo_id} and category = #{category} and end_time = (select max(end_time) from scan where
+        select commit_id from scan where repo_id = #{repo_id} and category = #{category} and commit_time = (select max(commit_time) from scan where
         repo_id = #{repo_id} and category = #{category});
     </select>
 </mapper>
