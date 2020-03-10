@@ -85,16 +85,20 @@ public class ProjectServiceImpl implements ProjectService {
     public void addOneProject(String userToken, JSONObject projectInfo) {
         String url = projectInfo.getString("url");
         String repo_source = projectInfo.getString("repo_source");
+        repo_source = repo_source.toLowerCase();
         if (url == null) {
             throw new RuntimeException("please input the project url!");
         }
         url = url.trim();
+        if(url.endsWith(".git")){
+            url = url.substring(0, url.lastIndexOf("."));
+        }
         boolean isPrivate=projectInfo.getBooleanValue("isPrivate");
         checkProjectURL(url,isPrivate);
         String accountId = restInterfaceManager.getAccountId(userToken);
-        String branch  =  (projectInfo.getString("branch") == null || projectInfo.getString("branch").equals("")) ? "master" : projectInfo.getString("branch") ;
-        String username=projectInfo.getString("username");
-        String password=projectInfo.getString("password");
+        String branch = (projectInfo.getString("branch") == null || projectInfo.getString("branch").equals("")) ? "master" : projectInfo.getString("branch") ;
+        String username = projectInfo.getString("username");
+        String password = projectInfo.getString("password");
         if(isPrivate){
             if(username==null||password==null|| username.equals("") || password.equals("")){
                 throw new RuntimeException("this project is private,please provide your git username and password!");
@@ -104,6 +108,10 @@ public class ProjectServiceImpl implements ProjectService {
         //验证project name是否重复
         String name=projectInfo.getString("name");
         String type=projectInfo.getString("type");
+        //如果没有规定type的值，默认给bug（即用findbugs扫描）
+        if (type == null || type.equals("")){
+            type = "bug";
+        }
         List<Project> verifyProjectList= projectDao.getProjectsByCondition(accountId,type,name,null);
         if(verifyProjectList.size()>=1){
             throw new RuntimeException("The project name has already been used! ");
