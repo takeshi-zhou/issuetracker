@@ -262,4 +262,38 @@
     <select id="getCommits" parameterType="String" resultMap="Commit">
         select * from commit where repo_id= #{repo_id} order by commit_time desc limit 0,58;
     </select>
+
+    <select id="getDeveloperRankByCommitCount" parameterType="String" resultType="java.util.HashMap">
+        SELECT
+            developer_name,
+            COUNT(*) AS `counts`
+        FROM
+            repo_measure
+        WHERE
+            repo_id = #{repo_id}
+            and
+            DATE(commit_time) BETWEEN #{since} AND #{until}
+        GROUP BY
+            developer_name
+        ORDER BY
+            COUNT(*) DESC
+        LIMIT 3;
+    </select>
+
+    <select id="getDeveloperRankByLoc" parameterType="String" resultType="java.util.HashMap">
+        SELECT
+            developer_name,
+            SUM( add_lines ) + SUM( del_lines ) AS LOC
+        FROM
+            repo_measure
+        WHERE
+            repo_id = #{repo_id}
+            and
+            DATE(commit_time) BETWEEN #{since} AND #{until}
+        GROUP BY
+            developer_name
+        ORDER BY
+            COUNT(*) DESC
+        LIMIT 3;
+    </select>
 </mapper>

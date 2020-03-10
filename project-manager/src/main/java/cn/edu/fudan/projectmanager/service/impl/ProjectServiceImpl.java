@@ -217,7 +217,7 @@ public class ProjectServiceImpl implements ProjectService {
             JSONObject projectInfo = new JSONObject();
             Row row = sheet.getRow(i);
             if(row!=null){
-                int columnNum=row.getPhysicalNumberOfCells();
+                int columnNum = row.getPhysicalNumberOfCells();
                 System.out.println("该行共有列数："+columnNum);
                 logger.info("该行共有列数："+columnNum);
                 for(int j=1;j<columnNum;j++){
@@ -249,6 +249,7 @@ public class ProjectServiceImpl implements ProjectService {
                     if (j == 5){projectInfo.put("username",cellValue);}
                     if (j == 6){projectInfo.put("password",cellValue);}
                     if (j == 7){projectInfo.put("module",cellValue);}
+                    if (j == 8){projectInfo.put("repo_source",cellValue);}
                 }
 
             }
