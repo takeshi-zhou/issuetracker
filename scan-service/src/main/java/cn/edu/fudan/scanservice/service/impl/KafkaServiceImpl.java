@@ -99,6 +99,7 @@ public class KafkaServiceImpl implements KafkaService {
                 for (int i = 0; i < projects.size(); i++) {
                     JSONObject project=projects.getJSONObject(i);
                     String project_id = project.getString("uuid");
+
                     String type=project.getString("type");
                     if(type.equals(expected_type)){
                         projectParam.put("uuid", project_id);
@@ -187,11 +188,14 @@ public class KafkaServiceImpl implements KafkaService {
             checkOutCodeTrackerStatus(repoId);
 
             sendMessageToMeasure(repoId,list);
-        }
-        if(existProject(repoId,"clone",false)){
+
             cloneScanTask.runSynchronously(repoId,commitId,"clone");
             sendMessageToClone(repoId,list);
+
         }
+//        if(existProject(repoId,"clone",false)){
+//
+//        }
     }
 
     @SuppressWarnings("unchecked")
@@ -356,7 +360,11 @@ public class KafkaServiceImpl implements KafkaService {
 
                 checkOutCodeTrackerStatus(repoId);
 
-
+                for(ScanMessageWithTime message:bugFilterCommits){
+                    String commitId = message.getCommitId();
+                    cloneScanTask.runSynchronously(repoId,commitId,"clone");
+                }
+                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
 
                 sendMessageToMeasure(repoId,bugFilterCommits);
             }
