@@ -356,9 +356,9 @@ public class KafkaServiceImpl implements KafkaService {
                 }
                 restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
 
-                //sendMsgToCodeTracker(isSendMsgToCodeTracker,firstScanCommit,repoId);
+                sendMsgToCodeTracker(isSendMsgToCodeTracker,firstScanCommit,repoId);
 
-                //checkOutCodeTrackerStatus(repoId);
+                checkOutCodeTrackerStatus(repoId);
 
                 for(ScanMessageWithTime message:bugFilterCommits){
                     String commitId = message.getCommitId();
