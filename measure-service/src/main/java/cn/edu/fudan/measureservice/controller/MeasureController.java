@@ -330,16 +330,30 @@ public class MeasureController {
     }
 
 
-    //根据repo_id和commit_id 获取该commit的修改文件的数量
-    //还没写
-    @GetMapping("/measure/commit/changed-files")
+    //根据repo_id和since、until获取某个时间段内commit次数最多的三位开发者姓名以及对应的commit次数
+    @GetMapping("/measure/developer-rank/commit-count")
     @CrossOrigin
-    public ResponseBean getChangedFilesCount(
+    public ResponseBean getDeveloperRankByCommitCount(
             @RequestParam("repo_id")String repo_id,
-            @RequestParam("commit_id")String commit_id
-    ){
+            @RequestParam("since")String since,
+            @RequestParam("until")String until){
         try{
-            return new ResponseBean(200,"success","null");
+            return new ResponseBean(200,"success",measureService.getDeveloperRankByCommitCount(repo_id, since, until));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+    //根据repo_id和since、until获取某个时间段内,该项目中提交代码行数（LOC）最多的前三名开发者的姓名以及对应的LOC
+    @GetMapping("/measure/developer-rank/loc")
+    @CrossOrigin
+    public ResponseBean getDeveloperRankByLoc(
+            @RequestParam("repo_id")String repo_id,
+            @RequestParam("since")String since,
+            @RequestParam("until")String until){
+        try{
+            return new ResponseBean(200,"success",measureService.getDeveloperRankByLoc(repo_id, since, until));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());

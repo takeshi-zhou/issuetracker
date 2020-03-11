@@ -32,6 +32,8 @@ public class RestInterfaceManager {
     private String measureServicePath;
     @Value("${bug.recommendation.service.path}")
     private String bugRecommendationServicePath;
+    @Value("${codeTracker.service.path}")
+    private String codeTrackerServicePath;
 
     private RestTemplate restTemplate;
 
@@ -90,5 +92,10 @@ public class RestInterfaceManager {
 
     public void deleteIgnoreRecord(String account_id, String repoId) {
         restTemplate.delete(tagServicePath + "/inner/tags/ignore?repo-id=" + repoId + "&account-id=" + account_id);
+    }
+
+    //codeTracker
+    public void deleteCodeTeackerOfRepo(String branch, String repoId) {
+        restTemplate.delete(codeTrackerServicePath + "/delete?repoUuid=" + repoId + "&branch=" + branch);
     }
 }

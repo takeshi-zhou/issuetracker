@@ -85,16 +85,20 @@ public class ProjectServiceImpl implements ProjectService {
     public void addOneProject(String userToken, JSONObject projectInfo) {
         String url = projectInfo.getString("url");
         String repo_source = projectInfo.getString("repo_source");
+        repo_source = repo_source.toLowerCase();
         if (url == null) {
             throw new RuntimeException("please input the project url!");
         }
         url = url.trim();
+        if(url.endsWith(".git")){
+            url = url.substring(0, url.lastIndexOf("."));
+        }
         boolean isPrivate=projectInfo.getBooleanValue("isPrivate");
         checkProjectURL(url,isPrivate);
         String accountId = restInterfaceManager.getAccountId(userToken);
-        String branch  =  (projectInfo.getString("branch") == null || projectInfo.getString("branch").equals("")) ? "master" : projectInfo.getString("branch") ;
-        String username=projectInfo.getString("username");
-        String password=projectInfo.getString("password");
+        String branch = (projectInfo.getString("branch") == null || projectInfo.getString("branch").equals("")) ? "master" : projectInfo.getString("branch") ;
+        String username = projectInfo.getString("username");
+        String password = projectInfo.getString("password");
         if(isPrivate){
             if(username==null||password==null|| username.equals("") || password.equals("")){
                 throw new RuntimeException("this project is private,please provide your git username and password!");
@@ -104,6 +108,10 @@ public class ProjectServiceImpl implements ProjectService {
         //验证project name是否重复
         String name=projectInfo.getString("name");
         String type=projectInfo.getString("type");
+        //如果没有规定type的值，默认给bug（即用findbugs扫描）
+        if (type == null || type.equals("")){
+            type = "bug";
+        }
         List<Project> verifyProjectList= projectDao.getProjectsByCondition(accountId,type,name,null);
         if(verifyProjectList.size()>=1){
             throw new RuntimeException("The project name has already been used! ");
@@ -209,7 +217,7 @@ public class ProjectServiceImpl implements ProjectService {
             JSONObject projectInfo = new JSONObject();
             Row row = sheet.getRow(i);
             if(row!=null){
-                int columnNum=row.getPhysicalNumberOfCells();
+                int columnNum = row.getPhysicalNumberOfCells();
                 System.out.println("该行共有列数："+columnNum);
                 logger.info("该行共有列数："+columnNum);
                 for(int j=1;j<columnNum;j++){
@@ -241,6 +249,7 @@ public class ProjectServiceImpl implements ProjectService {
                     if (j == 5){projectInfo.put("username",cellValue);}
                     if (j == 6){projectInfo.put("password",cellValue);}
                     if (j == 7){projectInfo.put("module",cellValue);}
+                    if (j == 8){projectInfo.put("repo_source",cellValue);}
                 }
 
             }
@@ -344,6 +353,7 @@ public class ProjectServiceImpl implements ProjectService {
             //if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
             if(account_id.equals("1")){
                 List<Project> projects = projectDao.getProjectByRepoId(repoId);
+                String branch = projects.get(0).getBranch();
                 List<String> projectIds = projects.stream().map(Project::getUuid).collect(Collectors.toList());
                 for(String id : projectIds){
                     projectDao.remove(id);
@@ -374,16 +384,19 @@ public class ProjectServiceImpl implements ProjectService {
                 restInterfaceManager.deleteEventOfRepo(repoId, type);
                 restInterfaceManager.deleteScanResultOfRepo(repoId, type);
                 restInterfaceManager.deleteIgnoreRecord(account_id, repoId);
-                if(type.equals("bug")){
-                    logger.info("start to request measure to delete measure info ...");
-                    restInterfaceManager.deleteRepoMeasure(repoId);
-                    logger.info("delete measure info success");
-                }
-
-                if(type.equals("clone")){
-                    //对于clone的CPU版本，删除时需要删除前一次commit扫描的结果文件
-                    deleteCloneResPreFile(repoId);
-                }
+                restInterfaceManager.deleteRepoMeasure(repoId);
+                restInterfaceManager.deleteCodeTeackerOfRepo(branch,repoId);
+                deleteCloneResPreFile(repoId);
+//                if(type.equals("bug")){
+//                    logger.info("start to request measure to delete measure info ...");
+//
+//                    logger.info("delete measure info success");
+//                }
+//
+//                if(type.equals("clone")){
+//                    //对于clone的CPU版本，删除时需要删除前一次commit扫描的结果文件
+//
+//                }
 
             }else if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
                 Project project = projectDao.getProjectByID(projectId);

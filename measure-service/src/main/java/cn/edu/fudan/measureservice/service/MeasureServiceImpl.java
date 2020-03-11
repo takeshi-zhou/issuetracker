@@ -1113,6 +1113,23 @@ public class MeasureServiceImpl implements MeasureService {
         return result;
     }
 
+    @Override
+    public Object getDeveloperRankByCommitCount(String repo_id, String since, String until){
+        since = dateFormatChange(since);
+        until = dateFormatChange(until);
+        List<Map<String, Object>> result = repoMeasureMapper.getDeveloperRankByCommitCount(repo_id, since, until);
+        return result;
+    }
+
+    @Override
+    public Object getDeveloperRankByLoc(String repo_id, String since, String until){
+        since = dateFormatChange(since);
+        until = dateFormatChange(until);
+        List<Map<String, Object>> result = repoMeasureMapper.getDeveloperRankByLoc(repo_id, since, until);
+        return result;
+    }
+
+
 
 
 

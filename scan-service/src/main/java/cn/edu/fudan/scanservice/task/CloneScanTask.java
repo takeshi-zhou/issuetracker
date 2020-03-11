@@ -23,7 +23,7 @@ public class CloneScanTask extends BaseScanTask{
     private static final Logger logger= LoggerFactory.getLogger(CloneScanTask.class);
 
 
-    //这边注入的是PUClone的扫描的实现方式，如果是其它工具，可以换作其它实现
+    //这边注入的是CPUClone的扫描的实现方式，如果是其它工具，可以换作其它实现
     @Resource(name = "CPUClone")
     private ScanOperation scanOperation;
 

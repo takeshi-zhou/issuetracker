@@ -187,5 +187,23 @@ public interface MeasureService {
 
     Object InsertData(String repoId);
 
+    /**
+     *
+     * @param repo_id
+     * @param since
+     * @param until
+     * @return 某段时间内，该项目中提交次数最多的前三名开发者的姓名以及对应的commit次数
+     */
+    Object getDeveloperRankByCommitCount(String repo_id, String since, String until);
+
+    /**
+     *
+     * @param repo_id
+     * @param since
+     * @param until
+     * @return 某段时间内，该项目中提交代码行数（LOC）最多的前三名开发者的姓名以及对应的LOC
+     */
+    Object getDeveloperRankByLoc(String repo_id, String since, String until);
+
 
 }
