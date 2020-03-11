@@ -353,6 +353,7 @@ public class ProjectServiceImpl implements ProjectService {
             //if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
             if(account_id.equals("1")){
                 List<Project> projects = projectDao.getProjectByRepoId(repoId);
+                String branch = projects.get(0).getBranch();
                 List<String> projectIds = projects.stream().map(Project::getUuid).collect(Collectors.toList());
                 for(String id : projectIds){
                     projectDao.remove(id);
@@ -383,16 +384,19 @@ public class ProjectServiceImpl implements ProjectService {
                 restInterfaceManager.deleteEventOfRepo(repoId, type);
                 restInterfaceManager.deleteScanResultOfRepo(repoId, type);
                 restInterfaceManager.deleteIgnoreRecord(account_id, repoId);
-                if(type.equals("bug")){
-                    logger.info("start to request measure to delete measure info ...");
-                    restInterfaceManager.deleteRepoMeasure(repoId);
-                    logger.info("delete measure info success");
-                }
-
-                if(type.equals("clone")){
-                    //对于clone的CPU版本，删除时需要删除前一次commit扫描的结果文件
-                    deleteCloneResPreFile(repoId);
-                }
+                restInterfaceManager.deleteRepoMeasure(repoId);
+                restInterfaceManager.deleteCodeTeackerOfRepo(branch,repoId);
+                deleteCloneResPreFile(repoId);
+//                if(type.equals("bug")){
+//                    logger.info("start to request measure to delete measure info ...");
+//
+//                    logger.info("delete measure info success");
+//                }
+//
+//                if(type.equals("clone")){
+//                    //对于clone的CPU版本，删除时需要删除前一次commit扫描的结果文件
+//
+//                }
 
             }else if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
                 Project project = projectDao.getProjectByID(projectId);
