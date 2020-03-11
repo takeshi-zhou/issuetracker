@@ -23,6 +23,7 @@ public class Issue {
     private int priority;
     private int displayId ;
     private String status;
+    private String manual_status;
     private String resolution;
     private String sonar_issue_id;
 
@@ -218,6 +219,14 @@ public class Issue {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getManual_status() {
+        return manual_status;
+    }
+
+    public void setManual_status(String manual_status) {
+        this.manual_status = manual_status;
     }
 
     public String getResolution() {

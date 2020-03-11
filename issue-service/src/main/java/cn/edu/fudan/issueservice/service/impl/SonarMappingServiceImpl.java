@@ -144,32 +144,35 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                             Issue confirmIssue = issueDao.getIssueBySonarIssueKey(sonarIssueKey);
                             if(confirmIssue != null){
                                 //判断是否是缺陷重新打开了,但是目前没有标志位表示这个缺陷是否属于缺陷重新打开，或者在某个版本已经修复了，哪个版本又重新引入
-                                if("CLOSED".equals(confirmIssue.getStatus())){
-                                    Issue issueReopened = issueDao.getIssueBySonarIssueKey(sonarIssueKey);
-                                    if(issueReopened != null){
-                                        issueReopened.setEnd_commit(current_commit_id);
-                                        issueReopened.setEnd_commit_date(commitDate);
-                                        issueReopened.setUpdate_time(new Date());
-                                        issueReopened.setStatus(sonarIssue.getString("status"));
-                                        issueReopened.setResolution(null);
-                                        updateIssueList.add(issueReopened);
-                                        newIssueCount++;
+                                if(StatusEnum.SOLVED.getName().equals(confirmIssue.getStatus())){
 
-                                        needToModifiedSolvedTags.add(issueReopened);
-
-
-                                        String rawIssueUUID = UUID.randomUUID().toString();
-                                        //将改issue的所有location直接表中
-                                        insertLocations(rawIssueUUID,sonarIssue,repoPath);
-                                        //获取rawIssue
-                                        RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,confirmIssue.getUuid(),sonarIssue);
-                                        rawIssue.setStatus(RawIssueStatus.ADD.getType());
-                                        rawIssue.setScan_id(scanId);
-                                        insertRawIssues.add(rawIssue);
-
-
-                                        continue;
+                                    confirmIssue.setEnd_commit(current_commit_id);
+                                    confirmIssue.setEnd_commit_date(commitDate);
+                                    confirmIssue.setUpdate_time(new Date());
+                                    if(confirmIssue.getManual_status() != null){
+                                        confirmIssue.setStatus(confirmIssue.getManual_status());
+                                    }else{
+                                        confirmIssue.setStatus(getStatusBySonarIssue(sonarIssue));
                                     }
+
+                                    updateIssueList.add(confirmIssue);
+                                    newIssueCount++;
+
+                                    needToModifiedSolvedTags.add(confirmIssue);
+
+
+                                    String rawIssueUUID = UUID.randomUUID().toString();
+                                    //将改issue的所有location直接表中
+                                    insertLocations(rawIssueUUID,sonarIssue,repoPath);
+                                    //获取rawIssue
+                                    RawIssue rawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,confirmIssue.getUuid(),sonarIssue);
+                                    rawIssue.setStatus(RawIssueStatus.ADD.getType());
+                                    rawIssue.setScan_id(scanId);
+                                    insertRawIssues.add(rawIssue);
+
+
+                                    continue;
+
 
                                 }else{
                                     logger.error("sonarIssueKey  map failed --> {}  ",sonarIssueKey);
@@ -267,8 +270,6 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                             updateIssue.setEnd_commit(current_commit_id);
                             updateIssue.setEnd_commit_date(commitDate);
                             updateIssue.setUpdate_time(new Date());
-                            updateIssue.setStatus(sonarIssue.getString("status"));
-                            updateIssue.setResolution(null);
                             updateIssueList.add(updateIssue);
                         }
                     }
@@ -325,8 +326,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                             for (int k = 0; k < solvedSonarIssues.size(); k++) {
                                 JSONObject solvedSonarIssue = solvedSonarIssues.getJSONObject(k);
                                 if(solvedIssue.getSonar_issue_id().equals(solvedSonarIssue.getString("key"))){
-                                    solvedIssue.setStatus(solvedSonarIssue.getString("status"));
-                                    solvedIssue.setResolution(solvedSonarIssue.getString("resolution"));
+                                    solvedIssue.setStatus(getStatusBySonarIssue(solvedSonarIssue));
                                     String rawIssueUUID = UUID.randomUUID().toString();
                                     //获取rawIssue
                                     RawIssue newRawIssue = getRawIssue(repo_id,current_commit_id,category,rawIssueUUID,solvedIssue.getUuid(),solvedSonarIssue);
@@ -336,9 +336,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                                     break;
                                 }
                             }
-                            if(!"CLOSED".equals(solvedIssue.getStatus()) || solvedIssue.getResolution()==null || solvedIssue.getResolution().isEmpty()){
-                                solvedIssue.setStatus("NON-MATCHED");
-                            }
+
                             solvedIssue.setUpdate_time(new Date());
 
                             updateIssueList.add(solvedIssue);
@@ -615,5 +613,57 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
         return priority;
     }
 
+    private String getStatusBySonarIssue(JSONObject sonarIssue){
+        String result = null;
+        String resolution = null;
+        String status = sonarIssue.getString("status");
+        if(status == null){
+            logger.warn("can not get status");
+        }else if("OPEN".equals(status)){
+            result = StatusEnum.OPEN.getName();
+        }else if("TO_REVIEW".equals(status)){
+            result = StatusEnum.TO_REVIEW.getName();
+        }else if("RESOLVED".equals(status)){
+            resolution = sonarIssue.getString("resolution");
+            if(resolution != null){
+                switch(resolution){
+                    case "FALSE-POSITIVE":
+                        result = StatusEnum.MISINFORMATION.getName();
+                        break;
+                    case "FIXED":
+                        result = StatusEnum.SOLVED.getName();
+                        break;
+                    case "WONTFIX":
+                        result = StatusEnum.IGNORE.getName();
+                        break;
+                    default:
+                        logger.warn("resolved status --> {} has not been considered!",resolution);
+                        result = resolution;
+                }
+            }else{
+                logger.warn("resolved status --> can not get resolution");
+            }
+
+        }else if("CLOSED".equals(status)){
+            resolution = sonarIssue.getString("resolution");
+            if(resolution != null){
+                switch(resolution){
+                    case "FIXED" :
+                        result = StatusEnum.SOLVED.getName();
+                        break;
+                    default:
+                        logger.warn("closed status --> {} has not been considered!",resolution);
+                        result = resolution;
+                }
+            }else{
+                logger.warn("closed status --> can not get resolution");
+            }
+
+        }else{
+            logger.warn(" this status has not been considered!" ,status);
+            result = status;
+        }
+        return result;
+    }
 
 }
