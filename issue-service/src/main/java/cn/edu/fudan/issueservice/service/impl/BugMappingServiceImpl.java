@@ -82,6 +82,16 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         }
         //新的issue
         if (!insertIssueList.isEmpty()) {
+            int errorCount = 0;
+            for(Issue issue :insertIssueList){
+
+                if(issue.getStatus()==null){
+                    errorCount++;
+                }
+
+
+            }
+            logger.error(" the status of {}  issues  is null! " , errorCount);
             issueDao.insertIssueList(insertIssueList);
             issueEventManager.sendIssueEvent(EventType.NEW_BUG,insertIssueList,committer,repoId,commitDate);
             newIssueInfoUpdate(insertIssueList,category,repoId);
@@ -150,7 +160,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 String status = issue.getStatus();
                 if(StatusEnum.SOLVED.getName().equals(status)){
                     //此处先暂时置为Open，等后面结合ignore_record表再确定什么类型
-                    if(issue.getManual_status() == null){
+                    if(issue.getManual_status() != null){
                         issue.setStatus(issue.getManual_status());
                     }else{
                         issue.setStatus(StatusEnum.OPEN.getName());
@@ -406,7 +416,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 String status = issue.getStatus();
                 if(StatusEnum.SOLVED.getName().equals(status)){
                     //此处先暂时置为Open，等后面结合ignore_record表再确定什么类型
-                    if(issue.getManual_status() == null){
+                    if(issue.getManual_status() != null){
                         issue.setStatus(issue.getManual_status());
                     }else{
                         issue.setStatus(StatusEnum.OPEN.getName());
