@@ -96,7 +96,7 @@ public class RestInterfaceManager {
         if (response != null ){
             if(response.getString("status").equals("Successful")) {
                 repoPath=response.getString("content");
-                logger.info("repoHome -> {} , repoId -->{} , commit_id -->{}" ,repoPath,repoId,commit_id);
+//                logger.info("repoHome -> {} , repoId -->{} , commit_id -->{}" ,repoPath,repoId,commit_id);
             }else{
                 logger.error("get repoHome fail -> {}",response.getString("content"));
                 logger.error("repoId -> {} commitId -> {}",repoId,commit_id);

@@ -364,7 +364,7 @@ public class JGitHelper {
 
             ObjectId oldHead=previsouCommit.getTree().getId();
 
-            System.out.println("Printing diff between the Revisions: " + revCommit.getName() + " and " + previsouCommit.getName());
+//            System.out.println("Printing diff between the Revisions: " + revCommit.getName() + " and " + previsouCommit.getName());
 
             // prepare the two iterators to compute the diff between
             try (ObjectReader reader = repo.newObjectReader()) {
@@ -577,7 +577,7 @@ public class JGitHelper {
 //            jGitHelper.checkout(s);
 //        }
 //        String versionTag="v2.6.19";//定位到某一次Commit，既可以使用Tag，也可以使用其hash
-        String versionTag="4f7bb427bdbe6acebb5a30ac3cdb0a0ac75ed431";
+        String versionTag="1e3d53db2b63cb94ff71efe249b10cba0eb3b873";
         String path="E:\\Project\\FDSELab\\IssueTracker-Master";
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);

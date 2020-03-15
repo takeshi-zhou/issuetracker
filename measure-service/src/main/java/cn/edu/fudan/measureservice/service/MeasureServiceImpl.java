@@ -189,6 +189,7 @@ public class MeasureServiceImpl implements MeasureService {
                 measure=measureAnalyzer.analyze(repoPath,"",resultHandler);
             }
         }catch (Exception e){
+            logger.error("获取某commit的Measure时出错：");
             e.printStackTrace();
             if(repoPath!=null) {
                 restInterfaceManager.freeRepoPath(repoId,repoPath);
@@ -203,79 +204,104 @@ public class MeasureServiceImpl implements MeasureService {
 
     //保存某个项目某个commit包级别的度量
     private void savePackageMeasureData(Measure measure,String repoId,String commitId,String commitTime){
-        List<Package> packages =new ArrayList<>();
-        DecimalFormat df=new DecimalFormat("#.00");
-        for(Package p:measure.getPackages().getPackages()){
-            p.setUuid(UUID.randomUUID().toString());
-            p.setCommit_id(commitId);
-            p.setCommit_time(commitTime);
-            p.setRepo_id(repoId);
-            if(packageMeasureMapper.samePackageMeasureExist(repoId,commitId,p.getName())>0) {
-                continue;
-            }
-            String packageName=p.getName();
-            int count=0;
-            int ccn=0;
-            for(Function function:measure.getFunctions().getFunctions()){
-                if(function.getName().startsWith(packageName)){
-                    count++;
-                    ccn+=function.getCcn();
+        try{
+            List<Package> packages =new ArrayList<>();
+            DecimalFormat df=new DecimalFormat("#.00");
+            for(Package p:measure.getPackages().getPackages()){
+                p.setUuid(UUID.randomUUID().toString());
+                p.setCommit_id(commitId);
+                p.setCommit_time(commitTime);
+                p.setRepo_id(repoId);
+                if(packageMeasureMapper.samePackageMeasureExist(repoId,commitId,p.getName())>0) {
+                    continue;
                 }
+                String packageName=p.getName();
+                int count=0;
+                int ccn=0;
+                for(Function function:measure.getFunctions().getFunctions()){
+                    if(function.getName().startsWith(packageName)){
+                        count++;
+                        ccn+=function.getCcn();
+                    }
+                }
+                if(count==0) {
+                    p.setCcn(0.00);
+                } else{
+                    double result=(double)ccn/count;
+                    p.setCcn(Double.valueOf(df.format(result)));
+                }
+                packages.add(p);
             }
-            if(count==0) {
-                p.setCcn(0.00);
-            } else{
-                double result=(double)ccn/count;
-                p.setCcn(Double.valueOf(df.format(result)));
+            if(!packages.isEmpty()){
+                packageMeasureMapper.insertPackageMeasureDataList(packages);
             }
-            packages.add(p);
+        } catch (NumberFormatException e) {
+            logger.error("保存某个项目某个commit包级别的度量时出错：");
+            e.printStackTrace();
         }
-        if(!packages.isEmpty()){
-            packageMeasureMapper.insertPackageMeasureDataList(packages);
-        }
+
     }
 
     //保存某个项目某个commit项目级别的度量
     private void saveRepoLevelMeasureData(Measure measure,String repoId,String commitId,String commitTime,String developerName,String developerEmail){
-        RepoMeasure repoMeasure=new RepoMeasure();
-        repoMeasure.setUuid(UUID.randomUUID().toString());
-        repoMeasure.setFiles(measure.getTotal().getFiles());
-        repoMeasure.setNcss(measure.getTotal().getNcss());
-        repoMeasure.setClasses(measure.getTotal().getClasses());
-        repoMeasure.setFunctions(measure.getTotal().getFunctions());
-        repoMeasure.setCcn(measure.getFunctions().getFunctionAverage().getNcss());
-        repoMeasure.setJava_docs(measure.getTotal().getJavaDocs());
-        repoMeasure.setJava_doc_lines(measure.getTotal().getJavaDocsLines());
-        repoMeasure.setSingle_comment_lines(measure.getTotal().getSingleCommentLines());
-        repoMeasure.setMulti_comment_lines(measure.getTotal().getMultiCommentLines());
-        repoMeasure.setCommit_id(commitId);
-        repoMeasure.setCommit_time(commitTime);
-        repoMeasure.setRepo_id(repoId);
-        repoMeasure.setDeveloper_name(developerName);
-        repoMeasure.setDeveloper_email(developerEmail);
+        try{
+            RepoMeasure repoMeasure=new RepoMeasure();
+            repoMeasure.setUuid(UUID.randomUUID().toString());
+            repoMeasure.setFiles(measure.getTotal().getFiles());
+            repoMeasure.setNcss(measure.getTotal().getNcss());
+            repoMeasure.setClasses(measure.getTotal().getClasses());
+            repoMeasure.setFunctions(measure.getTotal().getFunctions());
+            repoMeasure.setCcn(measure.getFunctions().getFunctionAverage().getNcss());
+            repoMeasure.setJava_docs(measure.getTotal().getJavaDocs());
+            repoMeasure.setJava_doc_lines(measure.getTotal().getJavaDocsLines());
+            repoMeasure.setSingle_comment_lines(measure.getTotal().getSingleCommentLines());
+            repoMeasure.setMulti_comment_lines(measure.getTotal().getMultiCommentLines());
+            repoMeasure.setCommit_id(commitId);
+            repoMeasure.setCommit_time(commitTime);
+            repoMeasure.setRepo_id(repoId);
+            repoMeasure.setDeveloper_name(developerName);
+            repoMeasure.setDeveloper_email(developerEmail);
 
-        //如果是最初始的那个commit，那么工作量记为0，否则  则进行git diff 对比获取工作量
-        if (isInitCommitByIGit(repoId,commitId)){
-            repoMeasure.setAdd_lines(0);
-            repoMeasure.setDel_lines(0);
-            repoMeasure.setAdd_comment_lines(0);
-            repoMeasure.setDel_comment_lines(0);
-            repoMeasure.setChanged_files(0);
-        }else{
-            Map<String, Integer> map = getLinesDataByJGit(repoId,commitId);
-            repoMeasure.setAdd_lines(map.get("addLines"));
-            repoMeasure.setDel_lines(map.get("delLines"));
-            repoMeasure.setAdd_comment_lines(map.get("addCommentLines"));
-            repoMeasure.setDel_comment_lines(map.get("delCommentLines"));
-            repoMeasure.setChanged_files(getChangedFilesCount(repoId,commitId));
+            //调用JGit，先实例化JGit对象
+            String repo_path = restInterfaceManager.getRepoPath(repoId,commitId);
+            JGitHelper jGitHelper = new JGitHelper(repo_path);
+            RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commitId);
+
+            //如果是最初始的那个commit，那么工作量记为0，否则  则进行git diff 对比获取工作量
+            boolean isInitCommitByJGit = jGitHelper.isInitCommit(revCommit);
+            if (isInitCommitByJGit){
+                repoMeasure.setAdd_lines(0);
+                repoMeasure.setDel_lines(0);
+                repoMeasure.setAdd_comment_lines(0);
+                repoMeasure.setDel_comment_lines(0);
+                repoMeasure.setChanged_files(0);
+            }else{
+                Map<String, Integer> map = getLinesDataByJGit(jGitHelper, repo_path, commitId);
+                repoMeasure.setAdd_lines(map.get("addLines"));
+                repoMeasure.setDel_lines(map.get("delLines"));
+                repoMeasure.setAdd_comment_lines(map.get("addCommentLines"));
+                repoMeasure.setDel_comment_lines(map.get("delCommentLines"));
+                repoMeasure.setChanged_files(getChangedFilesCount(jGitHelper, repo_path, commitId));
+            }
+
+            //获取该commit是否是merge
+            repoMeasure.setIs_merge(jGitHelper.isMerge(revCommit));
+
+            try{
+                if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
+                    repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
+                    logger.info("repo_measure插入一条数据成功");
+                }
+            } catch (Exception e) {
+                logger.error("measure数据写入数据库时出错：");
+                e.printStackTrace();
+            }
+
+        } catch (Exception e) {
+            logger.error("保存某个commit项目级别的度量时出错：");
+            e.printStackTrace();
         }
 
-        //获取该commit是否是merge
-        repoMeasure.setIs_merge(isMergeByJGit(repoId,commitId));
-
-        if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
-            repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
-        }
     }
 
     @Override
@@ -1028,47 +1054,13 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     /**
-     *
-     * @param repo_id
-     * @param commit_id
-     * @return 利用JGit工具获取commit是否是最初始的那个commit
-     */
-    public boolean isInitCommitByIGit(String repo_id, String commit_id){
-        String repo_path = restInterfaceManager.getRepoPath(repo_id,commit_id);
-        System.out.println(repo_path);
-        JGitHelper jGitHelper = new JGitHelper(repo_path);
-        RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
-        return jGitHelper.isInitCommit(revCommit);
-    }
-
-
-    /**
-     *
-     * @param repo_id
-     * @param commit_id
-     * @return 利用JGit工具获取commit是否是merge
-     */
-    public boolean isMergeByJGit(String repo_id, String commit_id){
-        String repo_path = restInterfaceManager.getRepoPath(repo_id,commit_id);
-        System.out.println(repo_path);
-        JGitHelper jGitHelper = new JGitHelper(repo_path);
-        RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
-        return jGitHelper.isMerge(revCommit);
-    }
-
-
-    /**
-     *
-     * @param repo_id
+     * @param jGitHelper
+     * @param repo_path
      * @param commit_id
      * @return 通过JGit获取一次commit中开发者的新增行数，删除行数，新增注释行数，删除注释行数
      */
-    public Map<String, Integer> getLinesDataByJGit(String repo_id, String commit_id){
+    public Map<String, Integer> getLinesDataByJGit(JGitHelper jGitHelper, String repo_path, String commit_id){
         Map<String, Integer> map = new HashMap<>();
-        String repo_path = restInterfaceManager.getRepoPath(repo_id,commit_id);
-        System.out.println(repo_path);
-        JGitHelper jGitHelper = new JGitHelper(repo_path);
-
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
         builder.addCeilingDirectory(new File(repo_path));
@@ -1086,16 +1078,13 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     /**
-     *
-     * @param repo_id
+     * @param jGitHelper
+     * @param repo_path
      * @param commit_id
      * @return 通过JGit获取本次commit修改的文件数量
      */
-    public int getChangedFilesCount(String repo_id, String commit_id){
+    public int getChangedFilesCount(JGitHelper jGitHelper, String repo_path, String commit_id){
         int result = 0;
-        String repo_path = restInterfaceManager.getRepoPath(repo_id,commit_id);
-        System.out.println(repo_path);
-        JGitHelper jGitHelper = new JGitHelper(repo_path);
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
