@@ -9,10 +9,13 @@ public class Tool {
     private String toolType;
     private String toolName;
     private String description;
+
     /**
      * 0表示不使用工具，1表示使用工具
      */
     private int enabled;
+
+    private int installed;
 
     private String accountName;
 
@@ -58,5 +61,13 @@ public class Tool {
 
     public void setEnabled(int enabled) {
         this.enabled = enabled;
+    }
+
+    public int getInastalled() {
+        return installed;
+    }
+
+    public void setInastalled(int installed) {
+        this.installed = installed;
     }
 }

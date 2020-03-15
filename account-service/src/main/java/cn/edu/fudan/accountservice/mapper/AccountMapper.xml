@@ -19,6 +19,7 @@
         <result property="toolName" column="tool_name"/>
         <result property="description" column="description"/>
         <result property="enabled" column="enabled"/>
+        <result property="installed" column="installed"/>
     </resultMap>
 
     <insert id="addAccount" parameterType="Account">

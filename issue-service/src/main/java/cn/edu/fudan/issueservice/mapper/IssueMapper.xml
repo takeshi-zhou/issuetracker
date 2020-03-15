@@ -37,6 +37,8 @@
         <result property="update_time" column="update_time"/>
         <result property="priority" column="priority"/>
         <result property="displayId" column="display_id"/>
+        <result property="status" column="status"/>
+        <result property="resolution" column="resolution"/>
         <collection property="issueType" column="type"
                     select="cn.edu.fudan.issueservice.mapper.IssueTypeMapper.getIssueTypeByTypeName"/>
     </resultMap>

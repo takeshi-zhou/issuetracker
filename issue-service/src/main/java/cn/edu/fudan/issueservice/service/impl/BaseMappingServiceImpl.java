@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static cn.edu.fudan.issueservice.domain.StatusEnum.IGNORE;
+
 /**
  * @author WZY
  * @version 1.0
@@ -40,6 +42,8 @@ public class BaseMappingServiceImpl implements MappingService {
     private String toReviewTagId;
     @Value("${ignore.tag_id}")
     String ignoreTagId;
+    @Value("${misinformation.tag_id}")
+    String misinformationTagId;
 
     int currentDisplayId = 1;
     volatile boolean  isDefaultDisplayId = true;
@@ -217,17 +221,7 @@ public class BaseMappingServiceImpl implements MappingService {
             JSONObject statusTagged = new JSONObject();
             statusTagged.put("item_id", issue.getUuid());
             String statusTagId = null;
-            switch (issue.getStatus()){
-                case "Open" :
-                    statusTagId = openTagId;
-                    break;
-                case "TO_REVIEW" :
-                    statusTagId = toReviewTagId;
-                    break;
-                default:
-                    statusTagId = openTagId;
-            }
-
+            statusTagId = getTagIdByStatus(issue.getStatus());
             statusTagged.put("tag_id", statusTagId);
             tags.add(statusTagged);
         }
@@ -271,20 +265,7 @@ public class BaseMappingServiceImpl implements MappingService {
                 List<JSONObject> taggeds = new ArrayList<>();
                 for (Issue issue : issues) {
                     String preTagId = null;
-                    switch (issue.getStatus()){
-                        case "Open" :
-                            preTagId = openTagId;
-                            break;
-                        case "Solved" :
-                            preTagId = solvedTagId;
-                            break;
-                        case "TO_REVIEW" :
-                            preTagId = toReviewTagId;
-                            break;
-                        default:
-                            preTagId = openTagId;
-                    }
-
+                    preTagId = getTagIdByStatus(issue.getStatus());
                     JSONObject tagged = new JSONObject();
                     tagged.put("itemId", issue.getUuid());
                     tagged.put("preTagId", preTagId);
@@ -297,16 +278,22 @@ public class BaseMappingServiceImpl implements MappingService {
     }
 
 
+    /**
+     * 此更新tag必须在更新完issue状态后进行
+     * @param rawIssues
+     */
     void modifyToOpenTagByRawIssues(List<RawIssue> rawIssues) {
         List<JSONObject> taggeds = new ArrayList<>();
         for(RawIssue rawIssue : rawIssues){
+            String tagId = null;
             String issueId = rawIssue.getIssue_id();
             Issue issue = issueDao.getIssueByID(issueId);
 
             JSONObject tagged = new JSONObject();
             tagged.put("itemId", issue.getUuid());
             tagged.put("preTagId", solvedTagId);
-            tagged.put("newTagId", openTagId);
+            tagId = getTagIdByStatus(issue.getStatus());
+            tagged.put("newTagId", tagId);
 
             taggeds.add(tagged);
         }
@@ -318,11 +305,12 @@ public class BaseMappingServiceImpl implements MappingService {
     void modifyToOpenTagByIssues(List<Issue> issues) {
         List<JSONObject> taggeds = new ArrayList<>();
         for(Issue issue : issues){
+            String tagId = null;
             JSONObject tagged = new JSONObject();
             tagged.put("itemId", issue.getUuid());
             tagged.put("preTagId", solvedTagId);
-            tagged.put("newTagId", openTagId);
-
+            tagId = getTagIdByStatus(issue.getStatus());
+            tagged.put("newTagId", tagId);
             taggeds.add(tagged);
         }
         restInterfaceManager.modifyTags(taggeds);
@@ -353,6 +341,57 @@ public class BaseMappingServiceImpl implements MappingService {
         if(!solvedInfos.isEmpty()){
             kafkaTemplate.send("solvedBug",JSONArray.toJSONString(solvedInfos));
         }
+    }
+
+
+    boolean judgeStatusIsClosedButNotSolved(String status){
+        boolean result = false;
+        switch (StatusEnum.getStatusByName(status)){
+            case IGNORE:
+                result = true;
+                break;
+            case OPEN:
+                result = false;
+                break;
+            case SOLVED:
+                result = false;
+                break;
+            case TO_REVIEW:
+                result = false;
+                break;
+            case MISINFORMATION:
+                result = true;
+                break;
+            default:
+                logger.warn("status --> {} is not recorded", status);
+                result = false;
+
+        }
+        return result;
+    }
+
+    private String getTagIdByStatus(String status){
+        String tagId = null;
+        switch (StatusEnum.getStatusByName(status)){
+            case IGNORE :
+                tagId = ignoreTagId;
+                break;
+            case MISINFORMATION:
+                tagId = misinformationTagId;
+                break;
+            case TO_REVIEW:
+                tagId = toReviewTagId;
+                break;
+            case SOLVED:
+                tagId = solvedTagId;
+                break;
+            case OPEN:
+                tagId = openTagId;
+                break;
+            default:
+                tagId = null;
+        }
+        return tagId;
     }
 
 }

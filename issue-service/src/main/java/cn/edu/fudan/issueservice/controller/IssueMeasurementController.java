@@ -189,6 +189,7 @@ public class IssueMeasurementController {
     }
 
     @GetMapping("/latestCloneLines")
+    @CrossOrigin
     public Object getLatestScannedCommitCloneLines(@RequestParam("repo_id") String  repoId) {
 
         return issueMeasureInfoService.getLatestScannedCommitCloneLines(repoId);

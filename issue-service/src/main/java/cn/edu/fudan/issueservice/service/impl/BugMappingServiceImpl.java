@@ -82,6 +82,16 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         }
         //新的issue
         if (!insertIssueList.isEmpty()) {
+            int errorCount = 0;
+            for(Issue issue :insertIssueList){
+
+                if(issue.getStatus()==null){
+                    errorCount++;
+                }
+
+
+            }
+            logger.error(" the status of {}  issues  is null! " , errorCount);
             issueDao.insertIssueList(insertIssueList);
             issueEventManager.sendIssueEvent(EventType.NEW_BUG,insertIssueList,committer,repoId,commitDate);
             newIssueInfoUpdate(insertIssueList,category,repoId);
@@ -115,6 +125,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         List<String> mappedIssueIds = new ArrayList<>();
         int equalsCount = 0;
         int ignoreCountInNewIssues = 0;
+        int ignoreCountInEliminatedIssues = 0;
         int mappedCount = 0;
         int eliminatedIssueCount = 0;
         int remainingIssueChangedCount = 0;
@@ -147,8 +158,14 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 currentRawIssue.setIssue_id(preIssueId);
                 Issue issue = issueDao.getIssueByID(preIssueId);
                 String status = issue.getStatus();
-                if("Solved".equals(status)){
-                    issue.setStatus("Open");
+                if(StatusEnum.SOLVED.getName().equals(status)){
+                    //此处先暂时置为Open，等后面结合ignore_record表再确定什么类型
+                    if(issue.getManual_status() != null){
+                        issue.setStatus(issue.getManual_status());
+                    }else{
+                        issue.setStatus(StatusEnum.OPEN.getName());
+                    }
+
                     mappedPreSolvedRawIssues.add(preRawIssue);
                     String resolution = issue.getResolution();
                     if(resolution == null){
@@ -189,7 +206,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         List<RawIssue> list = preRawIssues.stream().filter(rawIssue -> !rawIssue.isMapped()).collect(Collectors.toList());
         for(RawIssue solvedRawIssue : list){
             Issue issue = issueDao.getIssueByID(solvedRawIssue.getIssue_id());
-            if("Solved".equals(issue.getStatus())){
+            if(StatusEnum.SOLVED.getName().equals(issue.getStatus())){
                 notAdoptEliminateCount++;
                 String resolution = issue.getResolution();
                 if(resolution == null){
@@ -198,8 +215,12 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                     issue.setResolution(String.valueOf(Integer.parseInt(resolution) + 1));
                 }
 
+            }else if(judgeStatusIsClosedButNotSolved(issue.getStatus())){
+                ignoreCountInEliminatedIssues++;
+                issue.setStatus(StatusEnum.SOLVED.getName());
+                solvedIssues.add(issue);
             }else{
-                issue.setStatus("Solved");
+                issue.setStatus(StatusEnum.SOLVED.getName());
                 solvedIssues.add(issue);
             }
             issues.add(issue);
@@ -226,14 +247,14 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         }
 
         int newIssueCount = insertIssueList.size();
-        remainingIssueChangedCount = mappedPreSolvedRawIssues.size() + newIssueCount - eliminatedIssueCount + notAdoptEliminateCount;
+        remainingIssueChangedCount = mappedPreSolvedRawIssues.size() + newIssueCount - eliminatedIssueCount + notAdoptEliminateCount + ignoreCountInEliminatedIssues;
         logger.info("finish mapping -> new:{},remainingChangedCount:{},eliminated:{}",newIssueCount, remainingIssueChangedCount, eliminatedIssueCount);
         dashboardUpdateForMergeVersion(repoId, newIssueCount, remainingIssueChangedCount, eliminatedIssueCount,category);
         logger.info("dashboard info updated!");
         rawIssueDao.batchUpdateIssueId(currentRawIssues);
         modifyToSolvedTag(solvedIssues,true,true,EventType.ELIMINATE_BUG, committer,commitDate,repoId,category);
 //        modifyToSolvedTag(repoId, category, preCommitId, EventType.ELIMINATE_BUG, committer, commitDate);
-        scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,currentCommitId,commitDate,developer,newIssueCount,eliminatedIssueCount,currentRawIssues.size()));
+        scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,currentCommitId,commitDate,developer,newIssueCount,eliminatedIssueCount-ignoreCountInEliminatedIssues,currentRawIssues.size()));
     }
 
 
@@ -242,6 +263,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
         int equalsCount = 0;
         int ignoreCountInNewIssues = 0;
+        int ignoreCountInEliminatedIssues = 0;
         int mappedCount = 0;
         int eliminatedIssueCount = 0;
         int actualEliminatedIssueCount = 0;
@@ -392,8 +414,13 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 Issue issue = issueDao.getIssueByID(preIssueId);
 
                 String status = issue.getStatus();
-                if("Solved".equals(status)){
-                    issue.setStatus("Open");
+                if(StatusEnum.SOLVED.getName().equals(status)){
+                    //此处先暂时置为Open，等后面结合ignore_record表再确定什么类型
+                    if(issue.getManual_status() != null){
+                        issue.setStatus(issue.getManual_status());
+                    }else{
+                        issue.setStatus(StatusEnum.OPEN.getName());
+                    }
                     notAdoptEliminateCount++;
                     mappedPreSolvedRawIssues.add(preRawIssue);
                     String resolution = issue.getResolution();
@@ -439,8 +466,14 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             if(resolution == null){
                 resolution = String.valueOf(0);
             }
-            if("Solved".equals(notMappedIssue.getStatus())){
-
+            if(StatusEnum.SOLVED.getName().equals(notMappedIssue.getStatus())){
+                //后面结合code tracker，判断该消除是采用了哪种消除
+            }else if(judgeStatusIsClosedButNotSolved(notMappedIssue.getStatus())){
+                ignoreCountInEliminatedIssues++;
+                notMappedIssue.setStatus(StatusEnum.SOLVED.getName());
+                notMappedIssue.setUpdate_time(new Date());
+                needToModifyTagToSolvedIssue.add(notMappedIssue);
+                issues.add(notMappedIssue);
             }else{
 
                 //有两大类：
@@ -455,7 +488,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                     actualEliminatedIssueCount++;
                 }else{
                     //第二大类
-                    notMappedIssue.setStatus("Solved");
+                    notMappedIssue.setStatus(StatusEnum.SOLVED.getName());
                     notMappedIssue.setUpdate_time(new Date());
                     notMappedIssue.setResolution(String.valueOf(Integer.parseInt(resolution) - 1));
 
@@ -694,7 +727,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 currentCommitDate, currentCommitId,currentCommitDate, rawIssue.getUuid(),
                 rawIssue.getUuid(), repoId, targetFiles,addTime,addTime,++currentDisplayId);
         issue.setPriority(priority);
-        issue.setStatus("Open");
+        issue.setStatus(StatusEnum.OPEN.getName());
         return issue;
     }
 

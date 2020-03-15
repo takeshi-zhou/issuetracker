@@ -100,11 +100,11 @@ public class KafkaServiceImpl implements KafkaService {
                     JSONObject project=projects.getJSONObject(i);
                     String project_id = project.getString("uuid");
 
-                    String type=project.getString("type");
-                    if(type.equals(expected_type)){
+//                    String type=project.getString("type");
+//                    if(type.equals(expected_type)){
                         projectParam.put("uuid", project_id);
                         restInterfaceManager.updateProject(projectParam);
-                    }
+                    //}
                 }
             }
         } catch (Exception e) {
@@ -354,7 +354,7 @@ public class KafkaServiceImpl implements KafkaService {
                     String commitId = message.getCommitId();
                     findBugScanTask.runSynchronously(repoId,commitId,"bug");
                 }
-                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
+
 
                 sendMsgToCodeTracker(isSendMsgToCodeTracker,firstScanCommit,repoId);
 
@@ -364,9 +364,11 @@ public class KafkaServiceImpl implements KafkaService {
                     String commitId = message.getCommitId();
                     cloneScanTask.runSynchronously(repoId,commitId,"clone");
                 }
-                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
+                //restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
 
                 sendMessageToMeasure(repoId,bugFilterCommits);
+
+                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
             }
 
         }else{
