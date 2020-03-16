@@ -163,12 +163,12 @@ public class RestInterfaceManager {
         if (response != null) {
             if (response.getString("status").equals("Successful")) {
                 repoPath = response.getString("content");
-                log.info("repoHome -> {}", repoPath);
+                logger.info("repoHome -> {}", repoPath);
             } else {
-                log.error("get repoHome fail -> {}", response.getString("content"));
+                logger.error("get repoHome fail -> {}", response.getString("content"));
             }
         } else {
-            log.error("code service response null!");
+            logger.error("code service response null!");
         }
         return repoPath;
     }
