@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -92,17 +93,22 @@ public class RestInterfaceManager {
     //---------------------------------------------code service---------------------------------------------------------
     public String getRepoPath(String repoId,String commit_id){
         String repoPath=null;
-        JSONObject response=restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId+"&commit_id="+commit_id, JSONObject.class).getJSONObject("data");
-        if (response != null ){
-            if(response.getString("status").equals("Successful")) {
-                repoPath=response.getString("content");
+        try{
+            JSONObject response=restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId+"&commit_id="+commit_id, JSONObject.class).getJSONObject("data");
+            if (response != null ){
+                if(response.getString("status").equals("Successful")) {
+                    repoPath = response.getString("content");
 //                logger.info("repoHome -> {} , repoId -->{} , commit_id -->{}" ,repoPath,repoId,commit_id);
-            }else{
-                logger.error("get repoHome fail -> {}",response.getString("content"));
-                logger.error("repoId -> {} commitId -> {}",repoId,commit_id);
+                }else{
+                    logger.error("get repoHome fail -> {}",response.getString("content"));
+                    logger.error("repoId -> {} commitId -> {}",repoId,commit_id);
+                }
+            } else {
+                logger.error("code service response null!");
             }
-        } else {
-            logger.error("code service response null!");
+        } catch (RestClientException e) {
+            logger.error("Get exception when getting repoPath");
+            e.printStackTrace();
         }
         return repoPath;
     }
