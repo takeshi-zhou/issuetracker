@@ -610,10 +610,10 @@ public class KafkaServiceImpl implements KafkaService {
         String commitId = scanResult.getCommitId();
         String type=scanResult.getType();
         JSONObject commitResponse = restInterfaceManager.getCommitTime(commitId);
-        if (commitResponse != null) {
-            String commit_time = commitResponse.getJSONObject("data").getString("commit_time");
-            projectParam.put("till_commit_time", commit_time);
-        }
+//        if (commitResponse != null) {
+//            String commit_time = commitResponse.getJSONObject("data").getString("commit_time");
+//            projectParam.put("till_commit_time", commit_time);
+//        }
         projectParam.put("last_scan_time", DateTimeUtil.format(new Date()));
         if (scanResult.getStatus().equals("success")) {
             projectParam.put("scan_status", "Scanned");
