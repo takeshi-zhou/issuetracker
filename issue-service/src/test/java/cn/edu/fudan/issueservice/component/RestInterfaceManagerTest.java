@@ -123,16 +123,22 @@ public class RestInterfaceManagerTest extends IssueServiceApplicationTests {
     }
 
     @Test
-    public void getOneCommitByCommitId(){
-        JSONObject result = restInterfaceManager.getOneCommitByCommitId("71b599686d8cc73ad71db9f4497823cbd7926705");
+    public void getScanByRepoIdAndStatus(){
+        JSONArray result = restInterfaceManager.getScanByRepoIdAndStatus("ae9e7ff0-6ff6-11e9-b723-0f92b2ad63bf","doing...");
         int  a=1;
         a= a+1;
         System.out.println(a);
     }
 
     @Test
-    public void getScanByRepoIdAndStatus(){
-        JSONArray result = restInterfaceManager.getScanByRepoIdAndStatus("ae9e7ff0-6ff6-11e9-b723-0f92b2ad63bf","doing...");
+    public void modifyTags(){
+        List<JSONObject> tags = new ArrayList<>();
+        JSONObject tagged = new JSONObject();
+        tagged.put("itemId", "2d5cefde-40df-428a-b4ad-8ed54bf42467");
+        tagged.put("preTagId", "f123a572-253a-41aa-bf63-732aa3c4e230");
+        tagged.put("newTagId", "a890f64d-c485-4259-b9a3-8cb702843145");
+        tags.add(tagged);
+        restInterfaceManager.modifyTags(tags);
         int  a=1;
         a= a+1;
         System.out.println(a);

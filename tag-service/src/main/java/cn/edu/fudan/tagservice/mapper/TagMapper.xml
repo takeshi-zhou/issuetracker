@@ -91,8 +91,8 @@
         <trim prefix="set" suffixOverrides=",">
             <trim prefix="tag_id = case" suffix="end,">
                 <foreach collection="list" item="item">
-                    <if test="item.tag_id != null">
-                        when item_id=#{item.itemId} then #{item.newTagId}
+                    <if test="item.newTagId != null">
+                        when item_id=#{item.itemId}  and tag_id = #{item.preTagId} then  #{item.newTagId}
                     </if>
                 </foreach>
             </trim>
@@ -131,4 +131,19 @@
         select count(*) from tagged where tag_id = #{tag_id} and item_id = #{item_id}
     </select>
 
+
+    <select id="getItemIdsAndCountByTagIdsAndRepoId"  resultType="java.util.WeakHashMap">
+        select uuid,count(*) as count from issue_tag
+        <trim prefix="where" prefixOverrides="and">
+            <if test="repo_id != null">
+                and repo_id = #{repo_id}
+            </if>
+            <if test="list != null">
+                <foreach collection="list" separator=" or " open="(" close=")" item="tag_id">
+                    tag_id=#{tag_id}
+                </foreach>
+            </if>
+        </trim>
+         group by uuid
+    </select>
 </mapper>

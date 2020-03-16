@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.WeakHashMap;
 
 /**
  * @author WZY
@@ -81,5 +82,9 @@ public class TagDao {
 
     public void deleteTagByProjectId(String projectId) {
         tagMapper.deleteTagByProjectId(projectId);
+    }
+
+    public List<WeakHashMap<String,String>> getItemIdsAndCountByTagIdsAndRepoId(List<String> tagIds, String repoId) {
+        return tagMapper.getItemIdsAndCountByTagIdsAndRepoId(tagIds,repoId);
     }
 }

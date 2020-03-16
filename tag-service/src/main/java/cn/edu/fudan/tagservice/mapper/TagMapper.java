@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.WeakHashMap;
 
 @Repository
 public interface TagMapper {
@@ -40,4 +41,11 @@ public interface TagMapper {
     List<String> getItemIdsByTagIds(List<String> list);
 
     void deleteTagByProjectId(@Param("project_id") String projectId);
+
+    /**
+     * 根据repoId与tag id集合，查询视图 issue_tag ，获取符合tag id集合中任意tag的 item及其数量
+     * @param list
+     * @param repoId
+     */
+    List<WeakHashMap<String,String>> getItemIdsAndCountByTagIdsAndRepoId(@Param("list") List<String> list, @Param("repo_id") String repoId);
 }

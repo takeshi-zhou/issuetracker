@@ -72,4 +72,15 @@ public class DateTimeUtil {
         LocalDate localDate = LocalDate.parse(date, fmt);
         return localDate;
     }
+
+    public static Date stringToDate(String date){
+        Date result = null;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            result = simpleDateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }

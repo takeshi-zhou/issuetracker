@@ -135,6 +135,11 @@ public class TagController {
         return tagService.getItemIdsByTagIds(tagIds);
     }
 
+    @PostMapping("/inner/tags/required-item-ids")
+    public Object getRequiredItemIds(@RequestBody JSONObject requestBody ) {
+        return tagService.getItemIdsByTagIds(requestBody);
+    }
+
     @PostMapping("/inner/tags/tagged-delete")
     public Object deleteTagged(@RequestBody List<String> itemIds) {
         try {

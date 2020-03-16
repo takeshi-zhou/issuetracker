@@ -131,6 +131,31 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    public List<String> getItemIdsByTagIds(JSONObject requestBody) {
+        List<String> result = new ArrayList<>();
+
+        String repoId = requestBody.getString("repo_id");
+        List<String> tagIds = requestBody.getJSONArray("tag_ids").toJavaList(String.class);
+        int size = tagIds.size();
+
+        List<WeakHashMap<String,String>> items = tagDao.getItemIdsAndCountByTagIdsAndRepoId(tagIds,repoId);
+        if(size != 0){
+            for(Map<String,String> map : items){
+                if(Integer.parseInt(map.get("count")) == size ){
+                    result.add(map.get("uuid"));
+                }
+            }
+        }else{
+            for(Map<String,String> map : items){
+
+                result.add(map.get("uuid"));
+
+            }
+        }
+        return result;
+    }
+
+    @Override
     public List<Tag> getAllDefaultTags() {
         List<Tag> tags= tagDao.getAllDefaultTags();
         tags.sort(Comparator.comparingInt((Tag tag)->PriorityEnum.getByValue(tag.getName()).getLevel()));
