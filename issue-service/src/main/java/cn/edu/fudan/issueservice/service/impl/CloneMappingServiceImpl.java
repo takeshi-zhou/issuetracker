@@ -96,8 +96,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
     @Override
     public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category, String committer) {
         Date date=new Date();
-        Date commitDate = getCommitDate(current_commit_id);
-        String developer=getDeveloper(current_commit_id);
+        Date commitDate = getCommitDate(current_commit_id,repo_id);
         if (pre_commit_id.equals(current_commit_id)) {
             List<RawIssue> rawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,current_commit_id);
             if (rawIssues == null || rawIssues.isEmpty()) {
@@ -106,7 +105,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             logger.info("first scan mapping!");
             Map<String,List<RawIssue>> map=rawIssues.stream().collect(Collectors.groupingBy(RawIssue::getType));
             //对于第一次而言所有的group都是新增的
-            newCloneInsert(true,map,map.keySet(),repo_id,developer,current_commit_id,commitDate,category,committer,date);
+            newCloneInsert(true,map,map.keySet(),repo_id,committer,current_commit_id,commitDate,category,committer,date);
             rawIssueDao.batchUpdateIssueId(rawIssues);
         }else{
             //不是第一次扫描，需要和前一次的commit进行mapping
@@ -160,7 +159,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
                 }
             }
             //group映射完成,新的group作为新的issue插进去
-           int ignoreCountInNewIssues=newCloneInsert(false,map2,newGroups,repo_id,developer,current_commit_id,commitDate,category,committer,date);
+           int ignoreCountInNewIssues=newCloneInsert(false,map2,newGroups,repo_id,committer,current_commit_id,commitDate,category,committer,date);
             if (!issues.isEmpty()) {
                 //更新issue
                 issueDao.batchUpdateIssue(issues);
@@ -175,7 +174,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             int newIssueCount = currentGroups.size() - equalsCount-ignoreCountInNewIssues;
             logger.info("finish mapping -> new:{},remaining:{},eliminated:{}",newIssueCount,remainingIssueCount,eliminatedIssueCount);
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
-            scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,current_commit_id,commitDate,developer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
+            scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,current_commit_id,commitDate,committer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
             logger.info("dashboard info updated!");
             rawIssueDao.batchUpdateIssueId(rawIssues2);
             modifyToSolvedTag(repo_id,category, pre_commit_id,EventType.REMOVE_CLONE_CLASS,committer,commitDate);

@@ -8,6 +8,8 @@ import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.dao.ScanResultDao;
 import cn.edu.fudan.issueservice.domain.*;
 import cn.edu.fudan.issueservice.service.MappingService;
+import cn.edu.fudan.issueservice.util.DateTimeUtil;
+import cn.edu.fudan.issueservice.util.JGitHelper;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static cn.edu.fudan.issueservice.domain.StatusEnum.IGNORE;
 
@@ -177,20 +180,53 @@ public class BaseMappingServiceImpl implements MappingService {
         stringRedisTemplate.exec();
     }
 
-    Date getCommitDate(String commitId){
-        JSONObject response=restInterfaceManager.getCommitTime(commitId);
-        if(response!=null && response.getJSONObject("data") != null){
-            return response.getJSONObject("data").getDate("commit_time");
+    Date getCommitDate(String commitId, String repoId){
+        Date commitDate = null;
+        String commitTime = null;
+        JSONObject repoPathJson = null;
+        String repoPath = null;
+        JGitHelper jGitHelper = null;
+        try{
+            repoPathJson = restInterfaceManager.getRepoPath(repoId,commitId);
+            if(repoPathJson == null){
+                throw new RuntimeException("can not get repo path");
+            }
+            repoPath = repoPathJson.getJSONObject("data").getString("content");
+            if(repoPath != null){
+                jGitHelper = new JGitHelper(repoPath);
+                commitTime = jGitHelper.getCommitTime(commitId);
+            }
+        }finally{
+            if(repoPath!= null){
+                restInterfaceManager.freeRepoPath(repoId,repoPath);
+            }
         }
-        return null;
+        commitDate = DateTimeUtil.stringToDate(commitTime);
+        return commitDate;
+
     }
 
-    String getDeveloper(String commitId){
-        JSONObject response=restInterfaceManager.getOneCommitByCommitId(commitId);
-        if(response!=null){
-            return response.getJSONObject("data").getString("developer");
+    String getDeveloper(String commitId , String repoId){
+        String developer = null;
+        JSONObject repoPathJson = null;
+        String repoPath = null;
+        JGitHelper jGitHelper = null;
+        try{
+            repoPathJson = restInterfaceManager.getRepoPath(repoId,commitId);
+            if(repoPathJson == null){
+                throw new RuntimeException("can not get repo path");
+            }
+            repoPath = repoPathJson.getJSONObject("data").getString("content");
+            if(repoPath != null){
+                jGitHelper = new JGitHelper(repoPath);
+                developer = jGitHelper.getAuthorName(commitId);
+            }
+        }finally{
+            if(repoPath!= null){
+                restInterfaceManager.freeRepoPath(repoId,repoPath);
+            }
         }
-        return null;
+        return developer;
     }
 
     @Override
@@ -249,8 +285,9 @@ public class BaseMappingServiceImpl implements MappingService {
     }
 
 
-    void modifyToSolvedTag(List<Issue> issues,boolean isSendToEvent,boolean isUpdateIssueIdsToDashboard,
-                           EventType eventType,String committer,Date currentCommitTime,String repo_id,String category) {
+    void modifyToSolvedTag(List<Issue> issues, boolean isSendToEvent, boolean isUpdateIssueIdsToDashboard,
+                           EventType eventType, String committer, Date currentCommitTime,
+                           String repo_id, String category, Map<String,String> allPreStatus) {
         if(issues != null) {
             //暂不发送event消息
             if(isSendToEvent){
@@ -265,7 +302,8 @@ public class BaseMappingServiceImpl implements MappingService {
                 List<JSONObject> taggeds = new ArrayList<>();
                 for (Issue issue : issues) {
                     String preTagId = null;
-                    preTagId = getTagIdByStatus(issue.getStatus());
+                    String preStatus = allPreStatus.get(issue.getUuid());
+                    preTagId = getTagIdByStatus(preStatus);
                     JSONObject tagged = new JSONObject();
                     tagged.put("itemId", issue.getUuid());
                     tagged.put("preTagId", preTagId);

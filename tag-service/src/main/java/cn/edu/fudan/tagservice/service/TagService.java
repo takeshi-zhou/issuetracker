@@ -25,6 +25,8 @@ public interface TagService {
 
     List<String> getItemIdsByTagIds(List<String> tagIds);
 
+    List<String> getItemIdsByTagIds(JSONObject jsonObject);
+
     List<Tag> getAllDefaultTags();
 
     void deleteTagByProjectId(String projectId);

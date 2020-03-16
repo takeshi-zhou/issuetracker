@@ -101,6 +101,10 @@ public class RestInterfaceManager {
     public JSONArray getSpecificTaggedIssueIds(List<String> tagIds){
         return restTemplate.postForObject(tagServicePath + "/item-ids", tagIds, JSONArray.class);
     }
+    public JSONArray getSpecificTaggedIssueIdsByTagIdsAndRepoId(JSONObject requestParms){
+        return restTemplate.postForObject(tagServicePath + "/required-item-ids", requestParms, JSONArray.class);
+    }
+
 
     public JSONArray getSolvedIssueIds(List<String> tag_ids){
         return restTemplate.postForObject(tagServicePath + "/item-ids", tag_ids, JSONArray.class);
@@ -138,6 +142,7 @@ public class RestInterfaceManager {
 
     //---------------------------------------------commit service------------------------------------------------------
 
+    @Deprecated
     public JSONObject getOneCommitByCommitId(String commitId){
         try{
             return restTemplate.getForObject(commitServicePath+"/"+commitId,JSONObject.class);
