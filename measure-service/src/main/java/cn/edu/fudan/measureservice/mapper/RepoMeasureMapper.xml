@@ -296,4 +296,15 @@
             COUNT(*) DESC
         LIMIT 3;
     </select>
+
+    <select id="getRepoLOCByDuration" resultType="int">
+        select
+        IFNULL(SUM( add_lines ) + SUM( del_lines ),0)
+        from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until}
+        <if test="developer_name != null and developer_name != ''" >
+            and developer_name = #{developer_name}
+        </if>
+    </select>
+
+
 </mapper>

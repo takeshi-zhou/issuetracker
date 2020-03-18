@@ -205,5 +205,35 @@ public interface MeasureService {
      */
     Object getDeveloperRankByLoc(String repo_id, String since, String until);
 
+    /**
+     *
+     * @param repo_id
+     * @param since
+     * @param until
+     * @return 某段时间内，该项目每天的所有开发者提交commit的次数
+     */
+    Object getCommitCountsDaily(String repo_id, String since, String until);
+
+    /**
+     *
+     * @param repo_id
+     * @param since
+     * @param until
+     * @return 获取一段时间内，该repo所有开发者产生的LOC
+     */
+    Object getRepoLOCByDuration(String repo_id, String since, String until);
+
+    /**
+     *
+     * @param repo_id
+     * @param since
+     * @param until
+     * @return 某段时间内，该项目每天的所有开发者产生的LOC
+     */
+    Object getLOCDaily(String repo_id, String since, String until);
+
+
+
+
 
 }
