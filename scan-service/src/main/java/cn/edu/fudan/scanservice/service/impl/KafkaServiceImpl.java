@@ -178,7 +178,7 @@ public class KafkaServiceImpl implements KafkaService {
         String commitId = scanMessage.getCommitId();
         List<ScanMessageWithTime> list=new ArrayList<>();
         ScanMessageWithTime scanMessageWithTime=new ScanMessageWithTime(repoId,commitId);
-        scanMessageWithTime.setCommitTime(restInterfaceManager.getCommitTime(commitId).getJSONObject("data").getString("commit_time"));
+        scanMessageWithTime.setCommitTime(restInterfaceManager.getCommitTime(commitId,repoId).getJSONObject("data").getString("commit_time"));
         list.add(scanMessageWithTime);
         //串行扫
         if(existProject(repoId,"bug",false)){
@@ -609,7 +609,7 @@ public class KafkaServiceImpl implements KafkaService {
         String repoId = scanResult.getRepoId();
         String commitId = scanResult.getCommitId();
         String type=scanResult.getType();
-        JSONObject commitResponse = restInterfaceManager.getCommitTime(commitId);
+        JSONObject commitResponse = restInterfaceManager.getCommitTime(commitId,repoId);
         if (commitResponse != null) {
             String commit_time = commitResponse.getJSONObject("data").getString("commit_time");
             projectParam.put("till_commit_time", commit_time);

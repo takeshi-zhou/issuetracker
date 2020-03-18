@@ -47,5 +47,8 @@ public interface TagMapper {
      * @param list
      * @param repoId
      */
-    List<WeakHashMap<String,String>> getItemIdsAndCountByTagIdsAndRepoId(@Param("list") List<String> list, @Param("repo_id") String repoId);
+    List<WeakHashMap<Object,Object>> getItemIdsAndCountByTagIdsAndRepoId(@Param("list") List<String> list, @Param("repo_id") String repoId);
+
+
+    List<Tag> getTagsByCondition(@Param("scope") String scope);
 }

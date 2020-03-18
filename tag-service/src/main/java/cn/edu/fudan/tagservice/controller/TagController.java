@@ -33,6 +33,11 @@ public class TagController {
         return tagService.getAllDefaultTags();
     }
 
+    @GetMapping("/tags/scope")
+    public Object getTagsByScope(@RequestParam("scope") String scope) {
+        return tagService.getTagsByScope(scope);
+    }
+
     //JSONObject(name、scope、itemId、isDefault)
     @PostMapping("/tags")
     public Object addTag(@RequestBody JSONObject requestBody) {

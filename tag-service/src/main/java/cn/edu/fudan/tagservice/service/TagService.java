@@ -46,4 +46,11 @@ public interface TagService {
     List<String> getIgnoreTypeListByRepoId(String repoId);
 
     void deleteIgnoreRecordWhenRepoRemove(String repoId, String accountId);
+
+    /**
+     * 通过scope获取相应的tag列表
+     * @param scope
+     * @return
+     */
+    List<Tag> getTagsByScope(String scope);
 }
