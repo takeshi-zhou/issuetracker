@@ -46,7 +46,7 @@ public class ScanOperationAdapter implements ScanOperation {
         if(lastScannedCommitTime==null) {
             return true;
         }
-        JSONObject jsonObject = restInterfaceManager.getCommitTime(commitId);
+        JSONObject jsonObject = restInterfaceManager.getCommitTime(commitId,repoId);
         Date commit_time = jsonObject.getJSONObject("data").getDate("commit_time");
         return !lastScannedCommitTime.after(commit_time) ;
     }
@@ -76,7 +76,7 @@ public class ScanOperationAdapter implements ScanOperation {
         String uuid = UUID.randomUUID().toString();
         scan.setUuid(uuid);
         //use api provided by commit-service
-        JSONObject jsonObject = restInterfaceManager.getCommitTime(commitId);
+        JSONObject jsonObject = restInterfaceManager.getCommitTime(commitId,repoId);
         Date commit_time = jsonObject.getJSONObject("data").getDate("commit_time");
         scan.setCommit_time(commit_time);
         scanDao.insertOneScan(scan);

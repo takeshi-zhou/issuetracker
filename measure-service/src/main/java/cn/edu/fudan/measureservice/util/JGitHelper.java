@@ -577,7 +577,7 @@ public class JGitHelper {
 //            jGitHelper.checkout(s);
 //        }
 //        String versionTag="v2.6.19";//定位到某一次Commit，既可以使用Tag，也可以使用其hash
-        String versionTag="1e3d53db2b63cb94ff71efe249b10cba0eb3b873";
+        String versionTag="05b24b36";
         String path="E:\\Project\\FDSELab\\IssueTracker-Master";
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
@@ -597,7 +597,8 @@ public class JGitHelper {
             int verCommitTime=verCommit.getCommitTime();
             printTime(verCommitTime);//打印出本次Commit的时间
 
-            System.out.println("The author is: "+verCommit.getAuthorIdent().getName());//获得本次Commit Author的邮箱
+            System.out.println("The author is: "+verCommit.getAuthorIdent().getName());//获得本次Commit Author的姓名
+            System.out.println("The author's email is: "+verCommit.getAuthorIdent().getEmailAddress());//获得本次Commit Author的邮箱
 
             List<DiffEntry> diffFix=getChangedFileList(verCommit,repository);//获取变更的文件列表
 

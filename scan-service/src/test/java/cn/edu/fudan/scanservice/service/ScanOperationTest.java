@@ -117,7 +117,7 @@ public class ScanOperationTest {
             mock数据
          */
         Mockito.when(restInterfaceManager.getRepoById(repoId)).thenReturn(repoResponse);
-        Mockito.when(restInterfaceManager.getCommitTime(commitId)).thenReturn(commitResponse);
+        Mockito.when(restInterfaceManager.getCommitTime(commitId,repoId)).thenReturn(commitResponse);
 
         /*
             验证

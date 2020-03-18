@@ -152,52 +152,42 @@ public class MeasureServiceImpl implements MeasureService {
         ack.acknowledge();
         for(CommitWithTime commit:commits){
             String commitId = commit.getCommitId();
-            String developer_name =commit.getDeveloperName();
-            String developer_email =commit.getDeveloperEmail();
-            if(developer_name==null || developer_email==null || developer_name.isEmpty() || developer_email.isEmpty() ){
-                try{
-                    JSONObject jsonCommit = restInterfaceManager.getCommitByCommitId(commitId);
-                    developer_name = jsonCommit.getJSONObject("data").getString("developer");
-                    developer_email = jsonCommit.getJSONObject("data").getString("developer_email");
-                }catch(Exception e){
-                    logger.error("commit is not available, commit's value is --> {}",commit);
-                    e.printStackTrace();
+            String repoId = commit.getRepoId();
+            String repoPath = null;
+            try {
+                repoPath = restInterfaceManager.getRepoPath(repoId,commitId);
+                if (repoPath!=null){
+                    saveMeasureData(commit.getRepoId(),commitId,commit.getCommitTime(),repoPath);
+                }
+            }finally {
+                if(repoPath!=null) {
+                    restInterfaceManager.freeRepoPath(repoId,repoPath);
                 }
             }
-            saveMeasureData(commit.getRepoId(),commitId,commit.getCommitTime(),developer_name,developer_email);
         }
         logger.info("all complete!!!");
     }
 
     //保存某个项目某个commit的度量信息
-    public void saveMeasureData(String repoId, String commitId,String commitTime,String developerName,String developerEmail) {
+    public void saveMeasureData(String repoId, String commitId,String commitTime,String repoPath) {
         try{
-            Measure measure=getMeasureDataOfOneCommit(repoId,commitId);
-            saveRepoLevelMeasureData(measure,repoId,commitId,commitTime,developerName,developerEmail);
+            Measure measure = getMeasureDataOfOneCommit(repoPath);
+            saveRepoLevelMeasureData(measure,repoId,commitId,commitTime,repoPath);
             savePackageMeasureData(measure,repoId,commitId,commitTime);
         }catch (Exception e){
             e.printStackTrace();
         }
     }
     //获取单个项目某个commit的度量值
-    private Measure getMeasureDataOfOneCommit(String repoId,String commitId){
-        String repoPath=null;
+    private Measure getMeasureDataOfOneCommit(String repoPath){
         Measure measure=null;
         try{
-            repoPath=restInterfaceManager.getRepoPath(repoId,commitId);
             if(repoPath!=null) {
                 measure=measureAnalyzer.analyze(repoPath,"",resultHandler);
             }
         }catch (Exception e){
             logger.error("获取某commit的Measure时出错：");
             e.printStackTrace();
-            if(repoPath!=null) {
-                restInterfaceManager.freeRepoPath(repoId,repoPath);
-            }
-        }finally {
-            if(repoPath!=null) {
-                restInterfaceManager.freeRepoPath(repoId,repoPath);
-            }
         }
         return measure;
     }
@@ -243,7 +233,7 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     //保存某个项目某个commit项目级别的度量
-    private void saveRepoLevelMeasureData(Measure measure,String repoId,String commitId,String commitTime,String developerName,String developerEmail){
+    private void saveRepoLevelMeasureData(Measure measure,String repoId,String commitId,String commitTime,String repoPath){
         try{
             RepoMeasure repoMeasure=new RepoMeasure();
             repoMeasure.setUuid(UUID.randomUUID().toString());
@@ -259,13 +249,15 @@ public class MeasureServiceImpl implements MeasureService {
             repoMeasure.setCommit_id(commitId);
             repoMeasure.setCommit_time(commitTime);
             repoMeasure.setRepo_id(repoId);
-            repoMeasure.setDeveloper_name(developerName);
-            repoMeasure.setDeveloper_email(developerEmail);
 
             //调用JGit，先实例化JGit对象
-            String repo_path = restInterfaceManager.getRepoPath(repoId,commitId);
-            JGitHelper jGitHelper = new JGitHelper(repo_path);
-            RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commitId);
+            JGitHelper jGitHelper = new JGitHelper(repoPath);
+            RevCommit revCommit = jGitHelper.getCurrentRevCommit(repoPath,commitId);
+
+            String developerName = revCommit.getAuthorIdent().getName();
+            String developerEmail = revCommit.getAuthorIdent().getEmailAddress();
+            repoMeasure.setDeveloper_name(developerName);
+            repoMeasure.setDeveloper_email(developerEmail);
 
             //如果是最初始的那个commit，那么工作量记为0，否则  则进行git diff 对比获取工作量
             boolean isInitCommitByJGit = jGitHelper.isInitCommit(revCommit);
@@ -276,12 +268,12 @@ public class MeasureServiceImpl implements MeasureService {
                 repoMeasure.setDel_comment_lines(0);
                 repoMeasure.setChanged_files(0);
             }else{
-                Map<String, Integer> map = getLinesDataByJGit(jGitHelper, repo_path, commitId);
+                Map<String, Integer> map = getLinesDataByJGit(jGitHelper, repoPath, commitId);
                 repoMeasure.setAdd_lines(map.get("addLines"));
                 repoMeasure.setDel_lines(map.get("delLines"));
                 repoMeasure.setAdd_comment_lines(map.get("addCommentLines"));
                 repoMeasure.setDel_comment_lines(map.get("delCommentLines"));
-                repoMeasure.setChanged_files(getChangedFilesCount(jGitHelper, repo_path, commitId));
+                repoMeasure.setChanged_files(getChangedFilesCount(jGitHelper, repoPath, commitId));
             }
 
             //获取该commit是否是merge
@@ -1048,7 +1040,17 @@ public class MeasureServiceImpl implements MeasureService {
         List<Commit> commits = repoMeasureMapper.getCommits(repoId);
 
         for(Commit commit: commits){
-           saveMeasureData(commit.getRepo_id(),commit.getCommit_id(),commit.getCommit_time(),commit.getDeveloper(),commit.getDeveloper_email());
+            String repoPath= null;
+            try {
+                repoPath = restInterfaceManager.getRepoPath(repoId,commit.getCommit_id());
+                if (repoPath!=null){
+                    saveMeasureData(commit.getRepo_id(),commit.getCommit_id(),commit.getCommit_time(),repoPath);
+                }
+            }finally {
+                if(repoPath!=null) {
+                    restInterfaceManager.freeRepoPath(repoId,repoPath);
+                }
+            }
         }
         return "success";
     }

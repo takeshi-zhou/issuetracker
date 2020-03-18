@@ -3,7 +3,10 @@ package cn.edu.fudan.issueservice.service.impl;
 import cn.edu.fudan.issueservice.dao.LocationDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.domain.*;
+import cn.edu.fudan.issueservice.domain.Scanner;
 import cn.edu.fudan.issueservice.util.ASTUtil;
+import cn.edu.fudan.issueservice.util.DateTimeUtil;
+import cn.edu.fudan.issueservice.util.JGitHelper;
 import cn.edu.fudan.issueservice.util.SearchUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -13,10 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 @Slf4j
@@ -45,8 +45,8 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
         List<JSONObject> tags = new ArrayList<>();
         //当前时间
         Date date = new Date();
-        Date commitDate = getCommitDate(current_commit_id);
-        String developer = getDeveloper(current_commit_id);
+        Date commitDate = getCommitDate(current_commit_id,repo_id);
+        String developer = committer;
         //当前扫描的问题数变化
         int newIssueCount = 0;
         int remainingIssueCount = 0;
@@ -56,6 +56,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
         List<Issue> insertIssueList = new ArrayList<>();
         List<Issue> updateIssueList = new ArrayList<>();
         List<Issue> solvedIssues = new ArrayList<>();
+        Map<String,String> solvedIssuesPreStatusTag = new HashMap<>();
         List<Issue> needToModifiedSolvedTags = new ArrayList<>();
 
         String scanId = null;
@@ -68,7 +69,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
         }else{
             logger.error("can not get scan id");
         }
-
+        JGitHelper jGitHelper = null;
         try{
             JSONObject repoPathJson = restInterfaceManager.getRepoPath(repo_id,current_commit_id);
             if(repoPathJson == null){
@@ -77,7 +78,9 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
             }
             repoPath = repoPathJson.getJSONObject("data").getString("content");
 
-
+            if(repoPath != null){
+                jGitHelper = new JGitHelper(repoPath);
+            }
             //获取与sonar-scanner 扫描时对应的repo name
             JSONObject currentRepo = restInterfaceManager.getRepoById(repo_id);
             String localAddress=currentRepo.getJSONObject("data").getString("local_addr");
@@ -106,7 +109,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                         rawIssue.setScan_id(scanId);
                         insertRawIssues.add(rawIssue);
                         //获取issue
-                        Issue issue = generateOneNewIssue(rawIssue,issueUUID,pre_commit_id,sonarIssue,date);
+                        Issue issue = generateOneNewIssue(rawIssue,issueUUID,pre_commit_id,sonarIssue,date,jGitHelper);
                         addTag(tags,ignoreTypes,rawIssue,issue);
                         insertIssueList.add(issue);
                     }
@@ -120,6 +123,8 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
             }else{
                 //先获取数据库所有的sonarIssueKey，并且已经排序，用作后面的二分法查找。
                 List<Issue> issueList = issueDao.getSonarIssueByRepoId(repo_id, Scanner.SONAR.getType());
+
+
 
                 String[] sonarIssueKeys = new String[issueList.size()];
                 for(int i=0;i<issueList.size();i++){
@@ -192,7 +197,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                             rawIssue.setScan_id(scanId);
                             insertRawIssues.add(rawIssue);
                             //获取issue
-                            Issue issue = generateOneNewIssue(rawIssue,issueUUID,pre_commit_id,sonarIssue,date);
+                            Issue issue = generateOneNewIssue(rawIssue,issueUUID,pre_commit_id,sonarIssue,date,jGitHelper);
                             addTag(tags,ignoreTypes,rawIssue,issue);
                             insertIssueList.add(issue);
                         }else{
@@ -281,6 +286,12 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                 }
                 //实际解决的缺陷总数
                 int realResolvedIssueCounts=0;
+
+
+
+                for(Issue solvedIssue : solvedIssues){
+                    solvedIssuesPreStatusTag.put(solvedIssue.getUuid(),solvedIssue.getStatus());
+                }
 
 
                 //solved issue 数量不为零
@@ -374,7 +385,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
             //待修改，未考虑ignore类型
             modifyToOpenTagByIssues(needToModifiedSolvedTags);
 
-            modifyToSolvedTag(solvedIssues,true,true,EventType.ELIMINATE_BUG, committer,commitDate,repo_id,category);
+            modifyToSolvedTag(solvedIssues,true,true,EventType.ELIMINATE_BUG, committer,commitDate,repo_id,category,solvedIssuesPreStatusTag);
 
 
             if (!insertIssueList.isEmpty()) {
@@ -538,22 +549,21 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
     }
 
 
-    public Issue generateOneNewIssue(RawIssue rawIssue,String issueUUID,String startCommit,JSONObject sonarIssue,Date date){
+    public Issue generateOneNewIssue(RawIssue rawIssue,String issueUUID,String startCommit,JSONObject sonarIssue,Date date,JGitHelper jGitHelper){
 
         Issue issue = new Issue();
         issue.setUuid(issueUUID);
         issue.setType(rawIssue.getType());
         issue.setCategory(rawIssue.getCategory());
         issue.setStart_commit(startCommit);
-        JSONObject startCommitTimeJson = restInterfaceManager.getCommitTime(startCommit);
-        if(startCommitTimeJson!=null && startCommitTimeJson.getJSONObject("data") != null){
-            issue.setStart_commit_date(startCommitTimeJson.getJSONObject("data").getDate("commit_time"));
-        }
+
+
+        issue.setStart_commit_date(DateTimeUtil.stringToDate(jGitHelper.getCommitTime(startCommit)));
+
         issue.setEnd_commit(rawIssue.getCommit_id());
-        JSONObject endCommitTimeJson = restInterfaceManager.getCommitTime(rawIssue.getCommit_id());
-        if(endCommitTimeJson!=null && endCommitTimeJson.getJSONObject("data") != null){
-            issue.setEnd_commit_date(endCommitTimeJson.getJSONObject("data").getDate("commit_time"));
-        }
+
+        issue.setEnd_commit_date(DateTimeUtil.stringToDate(jGitHelper.getCommitTime(rawIssue.getCommit_id())));
+
         issue.setRepo_id(rawIssue.getRepo_id());
         issue.setCreate_time(date);
         issue.setUpdate_time(date);

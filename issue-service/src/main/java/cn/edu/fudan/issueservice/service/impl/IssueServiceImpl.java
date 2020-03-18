@@ -7,6 +7,7 @@ import cn.edu.fudan.issueservice.domain.*;
 import cn.edu.fudan.issueservice.scheduler.QuartzScheduler;
 import cn.edu.fudan.issueservice.service.IssueService;
 import cn.edu.fudan.issueservice.util.DateTimeUtil;
+import cn.edu.fudan.issueservice.util.JGitHelper;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -142,14 +143,12 @@ public class IssueServiceImpl implements IssueService {
         param.put("repo_id", repoId);
         param.put("size", size);
         param.put("category",category);
-        //获取已经solve的和ignore的issue_ids
-        List<String> tag_ids = new ArrayList<>();
-        tag_ids.add(solvedTagId);
-        tag_ids.add(ignoreTagId);
-        JSONArray solved_issue_ids = restInterfaceManager.getSolvedIssueIds(tag_ids);
-        if (solved_issue_ids != null && solved_issue_ids.size() > 0) {
-            param.put("solved_issue_ids", solved_issue_ids.toJavaList(String.class));
-        }
+
+        List<String> status = new ArrayList<>();
+        status.add(StatusEnum.OPEN.getName());
+        status.add(StatusEnum.TO_REVIEW.getName());
+        param.put("issue_status", status);
+
         int count = issueDao.getIssueCount(param);
         param.put("start", (page - 1) * size);
         result.put("totalPage", count % size == 0 ? count / size : count / size + 1);
@@ -176,7 +175,10 @@ public class IssueServiceImpl implements IssueService {
         Map<String, Object> query = new HashMap<>();
         if(tag_ids!=null&&!tag_ids.isEmpty()){
             //只有在筛选条件都不为null的条件下才启用过滤
-            JSONArray issue_ids = restInterfaceManager.getSpecificTaggedIssueIds(tag_ids);
+            JSONObject requestTagPrams = new JSONObject();
+            requestTagPrams.put("repo_id",repoId);
+            requestTagPrams.put("tag_ids",tag_ids.toJavaList(String.class));
+            JSONArray issue_ids = restInterfaceManager.getSpecificTaggedIssueIdsByTagIdsAndRepoId(requestTagPrams);
             if (issue_ids == null || issue_ids.size() == 0) {//没找到打了这些tag的issue
                 result.put("totalPage", 0);
                 result.put("totalCount", 0);
@@ -440,10 +442,25 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public void startMapping(String repo_id, String pre_commit_id, String current_commit_id,String category) {
         String committer="";
-        JSONObject commitInfo=restInterfaceManager.getOneCommitByCommitId(current_commit_id);
-        if(commitInfo!=null){
-            committer=commitInfo.getJSONObject("data").getString("developer");
+        JSONObject repoPathJson = null;
+        String repoPath = null;
+        JGitHelper jGitHelper = null;
+        try{
+            repoPathJson = restInterfaceManager.getRepoPath(repo_id,current_commit_id);
+            if(repoPathJson == null){
+                throw new RuntimeException("can not get repo path");
+            }
+            repoPath = repoPathJson.getJSONObject("data").getString("content");
+            if(repoPath != null){
+                jGitHelper = new JGitHelper(repoPath);
+                committer = jGitHelper.getAuthorName(current_commit_id);
+            }
+        }finally{
+            if(repoPath!= null){
+                restInterfaceManager.freeRepoPath(repo_id,repoPath);
+            }
         }
+
         if(category.equals("bug")){
             logger.info("start bug mapping -> repo_id={},pre_commit_id={},current_commit_id={}",repo_id,pre_commit_id,current_commit_id);
             bugMappingService.mapping(repo_id,pre_commit_id,current_commit_id,category,committer);

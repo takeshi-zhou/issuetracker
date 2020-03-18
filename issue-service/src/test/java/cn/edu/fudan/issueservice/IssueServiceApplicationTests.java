@@ -15,7 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @PowerMockRunnerDelegate(SpringRunner.class)
 @SpringBootTest(classes = IssueServiceApplication.class)
 @TestPropertySource("classpath:application.properties")
-@PowerMockIgnore({"javax.crypto.*","javax.management.*"})
+@PowerMockIgnore({"javax.crypto.*","javax.management.*","javax.xml.*"})
 public class IssueServiceApplicationTests {
 
     @BeforeClass

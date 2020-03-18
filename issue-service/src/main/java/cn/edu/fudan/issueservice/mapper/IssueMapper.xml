@@ -121,9 +121,9 @@
 
     <select id="getIssueList" parameterType="Map" resultMap="issue2">
         select * from issue
-        <where>
+        <trim prefix="where" prefixOverrides="and |or">
             <if test="repo_id != null">
-                repo_id = #{repo_id}
+                 and repo_id = #{repo_id}
             </if>
             <if test="types != null">
                 and type in
@@ -137,16 +137,16 @@
                     #{issue_id}
                 </foreach>
             </if>
-            <if test="solved_issue_ids != null">
-                and uuid not in
-                <foreach collection="solved_issue_ids" separator="," open="(" close=")" item="issue_id">
-                    #{issue_id}
+            <if test="issue_status != null">
+                and status  in
+                <foreach collection="issue_status" separator="," open="(" close=")" item="status">
+                    #{status}
                 </foreach>
             </if>
             <if test="category != null">
                 and category = #{category}
             </if>
-        </where>
+        </trim>
         order by priority , end_commit_date desc , start_commit_date desc , display_id
         <if test="start != null  and size != null ">
             limit #{start},#{size}
@@ -181,6 +181,13 @@
                     #{issue_id}
                 </foreach>
             </if>
+            <if test="issue_status != null">
+                and status in
+                <foreach collection="issue_status" separator="," open="(" close=")" item="status">
+                    #{status}
+                </foreach>
+            </if>
+
             <if test="category != null">
                 and category = #{category}
             </if>

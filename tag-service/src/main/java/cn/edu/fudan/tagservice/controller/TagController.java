@@ -33,6 +33,11 @@ public class TagController {
         return tagService.getAllDefaultTags();
     }
 
+    @GetMapping("/tags/scope")
+    public Object getTagsByScope(@RequestParam("scope") String scope) {
+        return tagService.getTagsByScope(scope);
+    }
+
     //JSONObject(name、scope、itemId、isDefault)
     @PostMapping("/tags")
     public Object addTag(@RequestBody JSONObject requestBody) {
@@ -133,6 +138,11 @@ public class TagController {
     @PostMapping("/inner/tags/item-ids")
     public Object getItemIds(@RequestBody List<String> tagIds) {
         return tagService.getItemIdsByTagIds(tagIds);
+    }
+
+    @PostMapping("/inner/tags/required-item-ids")
+    public Object getRequiredItemIds(@RequestBody JSONObject requestBody ) {
+        return tagService.getItemIdsByTagIds(requestBody);
     }
 
     @PostMapping("/inner/tags/tagged-delete")

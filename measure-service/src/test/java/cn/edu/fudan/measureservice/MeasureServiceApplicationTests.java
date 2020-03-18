@@ -52,7 +52,17 @@ public class MeasureServiceApplicationTests {
         List<Commit> commits = repoMeasureMapper.getCommits(repoId);
 
         for(Commit commit: commits){
-            measureService.saveMeasureData(commit.getRepo_id(),commit.getCommit_id(),commit.getCommit_time(),commit.getDeveloper(),commit.getDeveloper_email());
+            String repoPath = null;
+            try {
+                repoPath = restInterfaceManager.getRepoPath(repoId,commit.getCommit_id());
+                if (repoPath!=null){
+                    measureService.saveMeasureData(commit.getRepo_id(),commit.getCommit_id(),commit.getCommit_time(),repoPath);
+                }
+            }finally {
+                if(repoPath!=null) {
+                    restInterfaceManager.freeRepoPath(repoId,repoPath);
+                }
+            }
         }
         System.out.println(111);
     }
