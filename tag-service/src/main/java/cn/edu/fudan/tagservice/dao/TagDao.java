@@ -76,6 +76,10 @@ public class TagDao {
         return tagMapper.getAllDefaultTags();
     }
 
+    public List<Tag> getTagsByCondition(String scope) {
+        return tagMapper.getTagsByCondition(scope);
+    }
+
     public Integer hasBeenTagged(String tag_id, String item_id) {
         return tagMapper.hasBeenTagged(tag_id, item_id);
     }
@@ -84,7 +88,7 @@ public class TagDao {
         tagMapper.deleteTagByProjectId(projectId);
     }
 
-    public List<WeakHashMap<String,String>> getItemIdsAndCountByTagIdsAndRepoId(List<String> tagIds, String repoId) {
+    public List<WeakHashMap<Object,Object>> getItemIdsAndCountByTagIdsAndRepoId(List<String> tagIds, String repoId) {
         return tagMapper.getItemIdsAndCountByTagIdsAndRepoId(tagIds,repoId);
     }
 }

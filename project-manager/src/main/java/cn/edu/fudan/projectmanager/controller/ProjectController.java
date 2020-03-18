@@ -2,6 +2,7 @@ package cn.edu.fudan.projectmanager.controller;
 
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.domain.ResponseBean;
+import cn.edu.fudan.projectmanager.service.KafkaConsumerService;
 import cn.edu.fudan.projectmanager.service.ProjectService;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
@@ -28,6 +29,8 @@ import java.util.List;
 public class ProjectController {
 
     private ProjectService projectService;
+    @Autowired
+    private KafkaConsumerService kafkaConsumerService;
 
     @Autowired
     public void setProjectService(ProjectService projectService) {
@@ -169,7 +172,16 @@ public class ProjectController {
         }
 
     }
-
+//
+//    @GetMapping(value = {"/commitTime"})
+//    public Object getLatestCommitTime(@RequestParam(name = "repoId",required = false)String repoId){
+//        return kafkaConsumerService.getLatestCommitTime(repoId);
+//    }
+//
+//        @GetMapping(value = {"/commitTime"})
+//        public void getLatestCommitTime(@RequestParam(name = "repoId",required = false)String repoId){
+//             projectService.send1();
+//        }
 
     //下面是其它服务调用的内部接口
     @PutMapping(value = {"/inner/project"})

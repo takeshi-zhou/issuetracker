@@ -63,8 +63,8 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class);
     }
 
-    public JSONObject getCommitTime(String commitId) {
-        return restTemplate.getForObject(commitServicePath + "/commit-time?commit_id=" + commitId, JSONObject.class);
+    public JSONObject getCommitTime(String commitId,String repoId) {
+        return restTemplate.getForObject(commitServicePath + "/commit-time?commit_id=" + commitId + "&repo_id=" +repoId, JSONObject.class);
     }
 
     public JSONObject getCommitByCommitId(String commitId) {

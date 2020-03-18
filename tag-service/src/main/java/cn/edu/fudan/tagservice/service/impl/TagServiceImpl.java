@@ -138,17 +138,19 @@ public class TagServiceImpl implements TagService {
         List<String> tagIds = requestBody.getJSONArray("tag_ids").toJavaList(String.class);
         int size = tagIds.size();
 
-        List<WeakHashMap<String,String>> items = tagDao.getItemIdsAndCountByTagIdsAndRepoId(tagIds,repoId);
+        List<WeakHashMap<Object,Object>> items = tagDao.getItemIdsAndCountByTagIdsAndRepoId(tagIds,repoId);
         if(size != 0){
-            for(Map<String,String> map : items){
-                if(Integer.parseInt(map.get("count")) == size ){
-                    result.add(map.get("uuid"));
+            for(Map<Object,Object> map : items){
+                String key = (String)map.get("key");
+                long value = (Long)map.get("value");
+                if(value == size){
+                    result.add(key);
                 }
             }
         }else{
-            for(Map<String,String> map : items){
-
-                result.add(map.get("uuid"));
+            for(Map<Object,Object> map : items){
+                String key = (String)map.get("key");
+                result.add(key);
 
             }
         }
@@ -175,6 +177,12 @@ public class TagServiceImpl implements TagService {
         }
         return tags.get(0).getName().equals("Solved");
     }
+
+    @Override
+    public List<Tag> getTagsByScope(String scope){
+        return tagDao.getTagsByCondition(scope);
+    }
+
 
 
     /**
@@ -235,6 +243,10 @@ public class TagServiceImpl implements TagService {
     public void deleteIgnoreRecordWhenRepoRemove(String repoId, String accountId) {
         ignoreRecordDao.deleteIgnoreRecordWhenRepoRemove(repoId, accountId);
     }
+
+
+
+
 
     /**
      *  根据ignore 的level 级别返回对应的结果

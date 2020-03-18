@@ -72,15 +72,16 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
                     String bugLines=null;
                     int fragStart=Integer.parseInt(cloneInstance.attributeValue("fragStartLine"));
                     int fragEnd=Integer.parseInt(cloneInstance.attributeValue("fragEndLine"));
-                    StringBuilder sb=new StringBuilder();
-                    while(fragStart<=fragEnd){
-                        sb.append(",");
-                        sb.append(fragStart);
-                        fragStart++;
-                    }
-                    if (sb.length() > 0) {
-                        bugLines = sb.deleteCharAt(0).toString();
-                    }
+//                    StringBuilder sb=new StringBuilder();
+//                    while(fragStart<=fragEnd){
+//                        sb.append(",");
+//                        sb.append(fragStart);
+//                        fragStart++;
+//                    }
+//                    if (sb.length() > 0) {
+//                        bugLines = sb.deleteCharAt(0).toString();
+//                    }
+                    bugLines = fragStart + "," + fragEnd;
                     cloneLocation.put("start_line",startLine);
                     cloneLocation.put("end_line",endLine);
                     cloneLocation.put("bug_lines",bugLines);

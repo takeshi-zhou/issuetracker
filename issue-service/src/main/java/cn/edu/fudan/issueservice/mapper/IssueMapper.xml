@@ -138,9 +138,9 @@
                 </foreach>
             </if>
             <if test="issue_status != null">
-                and uuid not in
-                <foreach collection="issue_status" separator="," open="(" close=")" item="issue_id">
-                    #{issue_id}
+                and status  in
+                <foreach collection="issue_status" separator="," open="(" close=")" item="status">
+                    #{status}
                 </foreach>
             </if>
             <if test="category != null">
@@ -181,6 +181,13 @@
                     #{issue_id}
                 </foreach>
             </if>
+            <if test="issue_status != null">
+                and status in
+                <foreach collection="issue_status" separator="," open="(" close=")" item="status">
+                    #{status}
+                </foreach>
+            </if>
+
             <if test="category != null">
                 and category = #{category}
             </if>

@@ -75,4 +75,6 @@ public interface ProjectService {
      * @param userToken
      */
     void recycle(String projectId, String userToken, int isRecycled);
+
+    //void send1();
 }
