@@ -4,6 +4,7 @@ import cn.edu.fudan.projectmanager.domain.Project;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -50,4 +51,6 @@ public interface ProjectMapper {
     List<Project> getProjectsByCondition( @Param("account_id") String account_id, @Param("type") String category,@Param("name") String name,@Param("module") String module);
 
     List<Project> getProjects();
+
+    Date getLatestCommitTime(@Param("repo_id") String repo_id);
 }

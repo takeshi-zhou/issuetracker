@@ -629,7 +629,6 @@ public class KafkaServiceImpl implements KafkaService {
 
 
 
-
     private String getBaseCommitId(String  repoId,String branchName){
 
         JSONObject jsonObject = restInterfaceManager.getCommitsOfRepoByConditions(repoId,1,1,false);

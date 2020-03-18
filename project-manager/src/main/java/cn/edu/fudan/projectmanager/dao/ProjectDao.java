@@ -6,6 +6,7 @@ import cn.edu.fudan.projectmanager.mapper.ProjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -103,5 +104,9 @@ public class ProjectDao {
 
     public List<Project> getAllProjects(){
         return projectMapper.getProjects();
+    }
+
+    public Date getLatestCommitTime(String repoId){
+        return projectMapper.getLatestCommitTime(repoId);
     }
 }

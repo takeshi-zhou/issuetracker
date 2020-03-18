@@ -228,4 +228,9 @@
         select *
         from project
     </select>
+
+    <select id="getLatestCommitTime" resultType="java.util.Date">
+        select commit_time from commit where repo_id = #{repo_id} and commit_time = (select max(commit_time) from commit where
+        repo_id = #{repo_id});
+    </select>
 </mapper>

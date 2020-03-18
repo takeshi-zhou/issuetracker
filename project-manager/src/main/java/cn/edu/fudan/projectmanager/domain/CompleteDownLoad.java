@@ -1,11 +1,15 @@
 package cn.edu.fudan.projectmanager.domain;
 
+import java.util.Date;
+
 public class CompleteDownLoad {
 
     private String projectId;
     private String language;
     private String status;
     private String description;
+    private Date till_commiit_time;
+
 
     public String getRepo_id() {
         return repo_id;
@@ -48,5 +52,13 @@ public class CompleteDownLoad {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Date getTill_commiit_time() {
+        return till_commiit_time;
+    }
+
+    public void setTill_commiit_time(Date till_commiit_time) {
+        this.till_commiit_time = till_commiit_time;
     }
 }
