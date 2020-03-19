@@ -81,21 +81,35 @@ public class KafkaConsumerService {
             }
             repoIds = repoIds.stream().distinct().collect(Collectors.toList());
             for(String repoId:repoIds){
-                JSONObject jsonObject = restInterfaceManager.getLatestCommitTime(repoId);
-                Date date = jsonObject.getJSONObject("data").getDate("commit_time");
-                try {
-                    List<Project> projects = projectDao.getProjectByRepoId(repoId);
-                    if (projects != null && !projects.isEmpty()) {
-                        for (int i = 0; i < projects.size(); i++) {
-                            Project project=projects.get(i);
-                            project.setTill_commit_time(date);
-                            projectDao.updateProjectStatus(project);
-                        }
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException("project update failed!");
+                updateLatestCommitTime(repoId);
+            }
+        }
+    }
+
+    @KafkaListener(id = "projectScan", topics = {"Scan"}, groupId = "scan1")
+    public void updateTime(ConsumerRecord<String, String> consumerRecord) {
+        String msg = consumerRecord.value();
+        logger.info("received message from topic -> " + consumerRecord.topic() + " : " + msg);
+        ScanMessage scanMessage = JSONObject.parseObject(msg, ScanMessage.class);
+        String repoId = scanMessage.getRepoId();
+        updateLatestCommitTime(repoId);
+
+    }
+
+    private void updateLatestCommitTime(String repoId){
+        JSONObject jsonObject = restInterfaceManager.getLatestCommitTime(repoId);
+        Date date = jsonObject.getJSONObject("data").getDate("commit_time");
+        try {
+            List<Project> projects = projectDao.getProjectByRepoId(repoId);
+            if (projects != null && !projects.isEmpty()) {
+                for (int i = 0; i < projects.size(); i++) {
+                    Project project=projects.get(i);
+                    project.setTill_commit_time(date);
+                    projectDao.updateProjectStatus(project);
                 }
             }
+        } catch (Exception e) {
+            throw new RuntimeException("project update failed!");
         }
     }
 
