@@ -59,4 +59,10 @@ public interface RepoMeasureMapper {
     List<Map<String, Object>> getDeveloperRankByCommitCount(@Param("repo_id")String repo_id, @Param("since")String since, @Param("until")String until);
 
     List<Map<String, Object>> getDeveloperRankByLoc(@Param("repo_id")String repo_id, @Param("since")String since, @Param("until")String until);
+
+    int getRepoLOCByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until,@Param("developer_name")String developerName);
+
+
+
+
 }

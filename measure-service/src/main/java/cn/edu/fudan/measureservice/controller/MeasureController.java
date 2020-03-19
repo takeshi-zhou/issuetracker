@@ -127,7 +127,6 @@ public class MeasureController {
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());
         }
-
     }
 
     //中汇需要
@@ -142,7 +141,6 @@ public class MeasureController {
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());
         }
-
     }
 
     //不在中汇、不在前端需求、但画图可用
@@ -359,4 +357,50 @@ public class MeasureController {
             return new ResponseBean(401,"failed",e.getMessage());
         }
     }
+
+    //获取某段时间内，每天的所有开发者commit的提交次数
+    @GetMapping("/measure/repository/commit-count-daily")
+    @CrossOrigin
+    public ResponseBean getCommitCountsDaily(
+            @RequestParam("repo_id")String repo_id,
+            @RequestParam("since")String since,
+            @RequestParam("until")String until){
+        try{
+            return new ResponseBean(200,"success",measureService.getCommitCountsDaily(repo_id, since, until));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+    //获取某段时间内的，该repo的所有开发者产生的LOC
+    @GetMapping("/measure/repository/LOC")
+    @CrossOrigin
+    public ResponseBean getRepoLOCByDuration(@RequestParam("repo_id")String repo_id,
+                                                    @RequestParam("since")String since,
+                                                    @RequestParam("until")String until){
+        try{
+            return new ResponseBean(200,"success",measureService.getRepoLOCByDuration(repo_id, since, until));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+    //获取某段时间内，每天的所有开发者产生的LOC
+    @GetMapping("/measure/repository/LOC-daily")
+    @CrossOrigin
+    public ResponseBean getLOCDaily(
+            @RequestParam("repo_id")String repo_id,
+            @RequestParam("since")String since,
+            @RequestParam("until")String until){
+        try{
+            return new ResponseBean(200,"success",measureService.getLOCDaily(repo_id, since, until));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+
 }
