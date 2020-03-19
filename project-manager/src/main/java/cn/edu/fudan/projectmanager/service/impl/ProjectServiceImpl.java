@@ -82,14 +82,7 @@ public class ProjectServiceImpl implements ProjectService {
         kafkaTemplate.send("ProjectManager", JSONObject.toJSONString(needDownload));
         logger.info("send message to topic ProjectManage ---> " + JSONObject.toJSONString(needDownload));
     }
-//
-//    @Override
-//    public void send1(){
-//        ScanMessageWithTime scanMessageWithTime = new ScanMessageWithTime();
-//        scanMessageWithTime.setRepoId("56303652-4d58-11ea-b0b4-7b249411d09a");
-//
-//        kafkaTemplate.send("updateCommitTime", JSONObject.toJSONString(scanMessageWithTime));
-//    }
+
 
     @Override
     public void addOneProject(String userToken, JSONObject projectInfo) {

@@ -67,28 +67,6 @@ public class KafkaConsumerService {
         projectDao.addOneProject(Project.createOneProjectByRepoBasicInfo(repoBasicInfo, "clone"));
     }
 
-//    @KafkaListener(id = "updateCommitTime", topics = {"updateCommitTime"}, groupId = "updateCommitTime")
-//    public void updateCommitTime(ConsumerRecord<String, String> consumerRecord) {
-//        String msg = consumerRecord.value();
-//        logger.info("receive message from topic ->" + consumerRecord.topic() + ";  msg :" + msg);
-//        CompleteUpdate completeUpdate = JSONObject.parseObject(msg,CompleteUpdate.class);
-//
-//        String repoId =  completeUpdate.getRepoId();
-//        try {
-//            List<Project> projects = projectDao.getProjectByRepoId(repoId);
-//            if (projects != null && !projects.isEmpty()) {
-//                for (int i = 0; i < projects.size(); i++) {
-//                    Project project=projects.get(i);
-//                    project.setTill_commit_time(completeUpdate.getTill_commit_time());
-//                    projectDao.updateProjectStatus(project);
-//                }
-//            }
-//        } catch (Exception e) {
-//            throw new RuntimeException("project update failed!");
-//        }
-//
-//    }
-
     @KafkaListener(id = "updateCommit", topics = {"UpdateCommitTime"}, groupId = "updateCommit1")
     public void updateCommitTime(ConsumerRecord<String, String> consumerRecord) {
         String msg = consumerRecord.value();

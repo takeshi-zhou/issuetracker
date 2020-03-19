@@ -172,16 +172,7 @@ public class ProjectController {
         }
 
     }
-//
-//    @GetMapping(value = {"/commitTime"})
-//    public Object getLatestCommitTime(@RequestParam(name = "repoId",required = false)String repoId){
-//        return kafkaConsumerService.getLatestCommitTime(repoId);
-//    }
-//
-//        @GetMapping(value = {"/commitTime"})
-//        public void getLatestCommitTime(@RequestParam(name = "repoId",required = false)String repoId){
-//             projectService.send1();
-//        }
+
 
     //下面是其它服务调用的内部接口
     @PutMapping(value = {"/inner/project"})
