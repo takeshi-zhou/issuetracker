@@ -6,6 +6,7 @@ import cn.edu.fudan.projectmanager.dao.ProjectDao;
 import cn.edu.fudan.projectmanager.domain.CompleteUpdate;
 import cn.edu.fudan.projectmanager.domain.NeedDownload;
 import cn.edu.fudan.projectmanager.domain.Project;
+import cn.edu.fudan.projectmanager.domain.ScanMessageWithTime;
 import cn.edu.fudan.projectmanager.service.ProjectService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -84,10 +85,10 @@ public class ProjectServiceImpl implements ProjectService {
 //
 //    @Override
 //    public void send1(){
-//        CompleteUpdate completeUpdate = new CompleteUpdate();
-//        completeUpdate.setRepoId("56303652-4d58-11ea-b0b4-7b249411d09a");
-//        completeUpdate.setTill_commit_time(new Date());
-//        kafkaTemplate.send("updateCommitTime", JSONObject.toJSONString(completeUpdate));
+//        ScanMessageWithTime scanMessageWithTime = new ScanMessageWithTime();
+//        scanMessageWithTime.setRepoId("56303652-4d58-11ea-b0b4-7b249411d09a");
+//
+//        kafkaTemplate.send("updateCommitTime", JSONObject.toJSONString(scanMessageWithTime));
 //    }
 
     @Override
