@@ -316,10 +316,13 @@ public class ProjectServiceImpl implements ProjectService {
         if("1".equals(account_id)){
             repoIds = projectDao.getAllProjects().stream()
                     .filter(project -> project.getRecycled()==isRecycled)
-                    .map(Project::getRepo_id).collect(Collectors.toList());
+                    .map(Project::getRepo_id).filter(repoId -> repoId != null).collect(Collectors.toList());
         }else {
-            repoIds = projectDao.getRepoIdsByAccountIdAndType(account_id,type).stream().filter(repoId -> projectDao.getProjectByRepoIdAndCategory(account_id,repoId,type)
-                    .getRecycled()==isRecycled).collect(Collectors.toList());
+            repoIds = projectDao.getRepoIdsByAccountIdAndType(account_id,type).stream()
+                    .filter(repoId -> repoId != null)
+                    .filter(repoId -> projectDao.getProjectByRepoIdAndCategory(account_id,repoId,type)
+                            .getRecycled()==isRecycled).collect(Collectors.toList());
+
         }
         return repoIds;
 
