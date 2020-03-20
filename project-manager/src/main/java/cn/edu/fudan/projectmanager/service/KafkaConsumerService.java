@@ -97,8 +97,9 @@ public class KafkaConsumerService {
     }
 
     private void updateLatestCommitTime(String repoId){
-        JSONObject jsonObject = restInterfaceManager.getLatestCommitTime(repoId);
-        Date date = jsonObject.getJSONObject("data").getDate("commit_time");
+//        JSONObject jsonObject = restInterfaceManager.getLatestCommitTime(repoId);
+//        Date date = jsonObject.getJSONObject("data").getDate("commit_time");
+        Date date = projectDao.getLatestCommitTime(repoId);
         try {
             List<Project> projects = projectDao.getProjectByRepoId(repoId);
             if (projects != null && !projects.isEmpty()) {
