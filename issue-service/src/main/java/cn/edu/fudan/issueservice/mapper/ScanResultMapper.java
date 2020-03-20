@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public interface ScanResultMapper {
@@ -28,4 +29,7 @@ public interface ScanResultMapper {
     int getEliminateIssueCountByCommit(@Param("repo_id") String repo_id,@Param("commit_id") String commit_id,@Param("category") String category);
 
     List<ScanResult> getScanResultByCondition(@Param("repo_id") String repoId,@Param("since") String since,@Param("until") String until,@Param("category") String category,@Param("developer") String developer);
+
+    Map<String, Object> getRepoIssueCounts(@Param("repo_id")String repo_id, @Param("since")String since, @Param("until")String until,@Param("category") String category,@Param("developer")String developer);
+
 }

@@ -777,7 +777,7 @@ public class MeasureServiceImpl implements MeasureService {
             if (addedIssues != -1){
                 if (addedIssues != 0 ){
                     //新增问题质量指数：每改变100行代码，新增的问题数量
-                    changes.put("addedQuantity", addedIssues*100/changeLines);
+                    changes.put("addedQuantity", addedIssues*100*1.0/changeLines);
                 }else{
                     changes.put("addedQuantity", -1);
                 }
@@ -791,7 +791,7 @@ public class MeasureServiceImpl implements MeasureService {
             if(eliminatedIssues != -1){
                 if(eliminatedIssues != 0){
                     //消除问题质量指数：每改变100行代码，消除的问题数量
-                    changes.put("eliminatedQuantity", eliminatedIssues*100/changeLines);
+                    changes.put("eliminatedQuantity", eliminatedIssues*100*1.0/changeLines);
                 }else{
                     changes.put("eliminatedQuantity", -1);
                 }

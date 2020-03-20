@@ -86,6 +86,19 @@ public class IssueController {
         }
     }
 
+    //项目详情页面的issueCount数据图的接口
+    @GetMapping(value = {"/issue/repository/issue-count-daily"})
+    public Object getNewTrend(@RequestParam("repo_id")String repo_id,
+                              @RequestParam("since")String since,
+                              @RequestParam("until")String until,
+                              @RequestParam(name="category",defaultValue = "bug")String category) {
+        try{
+            return new ResponseBean(200,"success",issueService.getRepoIssueCounts(repo_id, since, until, category));
+        }catch (Exception e){
+            return new ResponseBean(500,e.getMessage(),null);
+        }
+    }
+
     @PostMapping("/issue/specific-issues")
     public Object getSpecificIssues(@RequestBody IssueParam issueParam,HttpServletRequest request){
         String userToken = request.getHeader("token");
