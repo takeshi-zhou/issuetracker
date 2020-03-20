@@ -6,6 +6,7 @@ import cn.edu.fudan.projectmanager.dao.ProjectDao;
 import cn.edu.fudan.projectmanager.domain.CompleteUpdate;
 import cn.edu.fudan.projectmanager.domain.NeedDownload;
 import cn.edu.fudan.projectmanager.domain.Project;
+import cn.edu.fudan.projectmanager.domain.ScanMessageWithTime;
 import cn.edu.fudan.projectmanager.service.ProjectService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -81,14 +82,7 @@ public class ProjectServiceImpl implements ProjectService {
         kafkaTemplate.send("ProjectManager", JSONObject.toJSONString(needDownload));
         logger.info("send message to topic ProjectManage ---> " + JSONObject.toJSONString(needDownload));
     }
-//
-//    @Override
-//    public void send1(){
-//        CompleteUpdate completeUpdate = new CompleteUpdate();
-//        completeUpdate.setRepoId("56303652-4d58-11ea-b0b4-7b249411d09a");
-//        completeUpdate.setTill_commit_time(new Date());
-//        kafkaTemplate.send("updateCommitTime", JSONObject.toJSONString(completeUpdate));
-//    }
+
 
     @Override
     public void addOneProject(String userToken, JSONObject projectInfo) {
@@ -316,10 +310,13 @@ public class ProjectServiceImpl implements ProjectService {
         if("1".equals(account_id)){
             repoIds = projectDao.getAllProjects().stream()
                     .filter(project -> project.getRecycled()==isRecycled)
-                    .map(Project::getRepo_id).collect(Collectors.toList());
+                    .map(Project::getRepo_id).filter(repoId -> repoId != null).collect(Collectors.toList());
         }else {
-            repoIds = projectDao.getRepoIdsByAccountIdAndType(account_id,type).stream().filter(repoId -> projectDao.getProjectByRepoIdAndCategory(account_id,repoId,type)
-                    .getRecycled()==isRecycled).collect(Collectors.toList());
+            repoIds = projectDao.getRepoIdsByAccountIdAndType(account_id,type).stream()
+                    .filter(repoId -> repoId != null)
+                    .filter(repoId -> projectDao.getProjectByRepoIdAndCategory(account_id,repoId,type)
+                            .getRecycled()==isRecycled).collect(Collectors.toList());
+
         }
         return repoIds;
 
