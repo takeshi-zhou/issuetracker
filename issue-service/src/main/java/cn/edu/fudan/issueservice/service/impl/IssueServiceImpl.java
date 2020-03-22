@@ -536,20 +536,17 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public Object getRepoIssueCounts(String repo_id, String since, String until, String category) {
-        since = dateFormatChange(since);
-        until = dateFormatChange(until);
-        List<Map<String, Object>> result = new ArrayList<>();
-        LocalDate indexDay = LocalDate.parse(since,DateTimeUtil.Y_M_D_formatter);
-        LocalDate untilDay = LocalDate.parse(until,DateTimeUtil.Y_M_D_formatter);
-        while(untilDay.isAfter(indexDay) || untilDay.isEqual(indexDay)){
-            Map<String, Object> map = scanResultDao.getRepoIssueCounts(repo_id, indexDay.toString(), indexDay.toString(), category, null);
-            if (map.get("commit_date") == null){
-                map.put("commit_date", indexDay.toString());
-            }
-            result.add(map);
-            indexDay = indexDay.plusDays(1);
-        }
-        return result;
+//        LocalDate indexDay = LocalDate.parse(since,DateTimeUtil.Y_M_D_formatter);
+//        LocalDate untilDay = LocalDate.parse(until,DateTimeUtil.Y_M_D_formatter);
+//        while(untilDay.isAfter(indexDay) || untilDay.isEqual(indexDay)){
+//            Map<String, Object> map = scanResultDao.getRepoIssueCounts(repo_id, indexDay.toString(), indexDay.toString(), category, null);
+//            if (map.get("commit_date") == null){
+//                map.put("commit_date", indexDay.toString());
+//            }
+//            result.add(map);
+//            indexDay = indexDay.plusDays(1);
+//        }
+        return scanResultDao.getScanResultsGroupByDay(Collections.singletonList(repo_id),category, since, until);
     }
 
 

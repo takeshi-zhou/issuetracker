@@ -87,7 +87,7 @@ public class IssueController {
     }
 
     //项目详情页面的issueCount数据图的接口
-    @GetMapping(value = {"/issue/repository/issue-count-daily"})
+    @GetMapping(value = {"/issue/repository/issue-count"})
     public Object getNewTrend(@RequestParam("repo_id")String repo_id,
                               @RequestParam("since")String since,
                               @RequestParam("until")String until,

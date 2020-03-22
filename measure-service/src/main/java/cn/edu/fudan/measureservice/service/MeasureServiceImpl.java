@@ -1166,6 +1166,27 @@ public class MeasureServiceImpl implements MeasureService {
         return result;
     }
 
+    @Override
+    public Object getCommitCountLOCDaily(String repo_id, String since, String until){
+        since = dateFormatChange(since);
+        until = dateFormatChange(until);
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        LocalDate indexDay = LocalDate.parse(since,DateTimeUtil.Y_M_D_formatter);
+        LocalDate untilDay = LocalDate.parse(until,DateTimeUtil.Y_M_D_formatter);
+        while(untilDay.isAfter(indexDay) || untilDay.isEqual(indexDay)){
+            Map<String, Object> map = new HashMap<>();
+            int LOC = repoMeasureMapper.getRepoLOCByDuration(repo_id, indexDay.toString(), indexDay.toString(),null);
+            int CommitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, indexDay.toString(), indexDay.toString(),null);
+            map.put("commit_date", indexDay.toString());
+            map.put("LOC", LOC);
+            map.put("commit_count", CommitCounts);
+            result.add(map);
+            indexDay = indexDay.plusDays(1);
+        }
+        return result;
+    }
+
 
 
 
