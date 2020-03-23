@@ -34,6 +34,8 @@ public class RestInterfaceManager {
     private String bugRecommendationServicePath;
     @Value("${codeTracker.service.path}")
     private String codeTrackerServicePath;
+    @Value("${commit.service.path}")
+    private String commitServicePath;
 
     private RestTemplate restTemplate;
 
@@ -96,6 +98,10 @@ public class RestInterfaceManager {
 
     //codeTracker
     public void deleteCodeTeackerOfRepo(String branch, String repoId) {
-        restTemplate.delete(codeTrackerServicePath + "/delete?repoUuid=" + repoId + "&branch=" + branch);
+        restTemplate.getForObject(codeTrackerServicePath + "/delete?repoUuid=" + repoId + "&branch=" + branch,JSONObject.class);
+    }
+
+    public JSONObject getLatestCommitTime(String repoId) {
+        return restTemplate.getForObject(commitServicePath + "/latest–commit–time?repo_id=" + repoId,JSONObject.class);
     }
 }

@@ -402,5 +402,20 @@ public class MeasureController {
         }
     }
 
+    //获取某段时间内，每天的所有开发者产生的LOC
+    @GetMapping("/measure/repository/commit-count&LOC-daily")
+    @CrossOrigin
+    public ResponseBean getCommitCountLOCDaily(
+            @RequestParam("repo_id")String repo_id,
+            @RequestParam("since")String since,
+            @RequestParam("until")String until){
+        try{
+            return new ResponseBean(200,"success",measureService.getCommitCountLOCDaily(repo_id, since, until));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
 
 }

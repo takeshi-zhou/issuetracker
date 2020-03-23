@@ -558,9 +558,9 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public void updateStatus(String issueId, String status,String token) {
-        issueDao.updateOneIssueStatus(issueId,status,status);
+        issueDao.updateOneIssueStatus(issueId, status, status);
         String statusTag = issueUtil.getTagIdByStatus(status);
-        String preTagId = restInterfaceManager.getTagIdByItemIdAndScope(issueId,"status");
+        String preTagId = restInterfaceManager.getTagIdByItemIdAndScope(issueId, "status");
         List<JSONObject> taggeds = new ArrayList<>();
         JSONObject tagged = new JSONObject();
         tagged.put("itemId", issueId);
@@ -569,6 +569,23 @@ public class IssueServiceImpl implements IssueService {
         taggeds.add(tagged);
         restInterfaceManager.modifyTags(taggeds);
     }
+
+    @Override
+    public Object getRepoIssueCounts(String repo_id, String since, String until, String category) {
+//        LocalDate indexDay = LocalDate.parse(since,DateTimeUtil.Y_M_D_formatter);
+//        LocalDate untilDay = LocalDate.parse(until,DateTimeUtil.Y_M_D_formatter);
+//        while(untilDay.isAfter(indexDay) || untilDay.isEqual(indexDay)){
+//            Map<String, Object> map = scanResultDao.getRepoIssueCounts(repo_id, indexDay.toString(), indexDay.toString(), category, null);
+//            if (map.get("commit_date") == null){
+//                map.put("commit_date", indexDay.toString());
+//            }
+//            result.add(map);
+//            indexDay = indexDay.plusDays(1);
+//        }
+        return scanResultDao.getScanResultsGroupByDay(Collections.singletonList(repo_id),category, since, until);
+    }
+
+
 
     @Override
     public void batchUpdateIssueListPriority(List<String> issueUuid, Integer priority) {
@@ -580,20 +597,19 @@ public class IssueServiceImpl implements IssueService {
         return issueDao.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
     }
 
-
     private String getPriorityTagIdByIntValue(int priorityInt,String token){
         String priorityTagId = null;
-        JSONArray tagList = restInterfaceManager.getTagByScope("priority",token);
+        JSONArray tagList = restInterfaceManager.getTagByScope("priority", token);
         String lowTagId = null;
         String urgentTagId = null;
         String normalTagId = null;
         String highTagId = null;
         String immediateTagId = null;
-        for(int i = 0 ; i < tagList.size() ; i++){
+        for (int i = 0; i < tagList.size(); i++) {
             JSONObject tagJson = tagList.getJSONObject(i);
             String tagIdFromJson = tagJson.getString("uuid");
-            switch (PriorityEnum.getPriprityEnum(tagJson.getString("name"))){
-                case LOW :
+            switch (PriorityEnum.getPriprityEnum(tagJson.getString("name"))) {
+                case LOW:
                     lowTagId = tagIdFromJson;
                     break;
                 case URGENT:
@@ -605,15 +621,15 @@ public class IssueServiceImpl implements IssueService {
                 case HIGH:
                     highTagId = tagIdFromJson;
                     break;
-                case IMMEDIATE :
+                case IMMEDIATE:
                     immediateTagId = tagIdFromJson;
                     break;
                 default:
 
             }
         }
-        switch (priorityInt){
-            case 0 :
+        switch (priorityInt) {
+            case 0:
                 priorityTagId = immediateTagId;
                 break;
             case 1:
@@ -632,6 +648,12 @@ public class IssueServiceImpl implements IssueService {
                 priorityTagId = null;
         }
         return priorityTagId;
+    }
+
+    //把日期格式从“2010.10.10转化为2010-10-10”
+    private String dateFormatChange(String dateStr){
+        String newdateStr = dateStr.replace('.','-');
+        return newdateStr;
     }
 
 }

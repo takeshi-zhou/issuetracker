@@ -47,5 +47,15 @@ public interface IssueService {
 
     List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type);
 
+    /**
+     *
+     * @param repo_id
+     * @param since
+     * @param until
+     * @param category
+     * @return 项目详情页面的issueCount每日数据
+     */
+    Object getRepoIssueCounts(String repo_id, String since, String until, String category);
+
 
 }
