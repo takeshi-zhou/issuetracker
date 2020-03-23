@@ -129,6 +129,14 @@ public interface IssueMapper {
      */
     void updateOneIssuePriority(@Param("uuid")String issueId, @Param("priority") int priority);
 
+
+    /**
+     * update one issue status
+     * @param status
+     * @param manualStatus
+     */
+    void updateOneIssueStatus(@Param("uuid")String issueId,@Param("status")String status, @Param("manual_status") String manualStatus);
+
     /**
      * get issue id and priority
      *
@@ -275,4 +283,6 @@ public interface IssueMapper {
      * @return
      */
     List<Issue> getHaveNotAdoptEliminateIssuesByCategoryAndRepoId(@Param("repo_id") String repoId,@Param("category")String category);
+
+
 }

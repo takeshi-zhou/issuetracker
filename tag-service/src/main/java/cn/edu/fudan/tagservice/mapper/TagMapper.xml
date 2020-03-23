@@ -148,6 +148,18 @@
          group by uuid
     </select>
 
+    <select id="getTagIdByItemIdAndScope"  parameterType="String" resultType="String">
+        select tag_id from issue_tag
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="uuid != null">
+                and uuid = #{uuid}
+            </if>
+            <if test="scope != null">
+                and scope = #{scope}
+            </if>
+        </trim>
+    </select>
+
     <select id="getTagsByCondition" parameterType="String" resultMap="tag">
         select * from tag
         <trim prefix="where" prefixOverrides="and | or">

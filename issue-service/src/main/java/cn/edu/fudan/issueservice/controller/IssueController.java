@@ -94,9 +94,22 @@ public class IssueController {
 
     // 修改 Issue 的 优先级（priority）
     @PutMapping(value = "/issue/priority/{issue-id}")
-    public Object updatePriority(@PathVariable("issue-id")String issueId, @RequestParam ("priority")String priority) {
+    public Object updatePriority(@PathVariable("issue-id")String issueId, @RequestParam ("priority")String priority,HttpServletRequest request) {
         try {
-            issueService.updatePriority(issueId,priority);
+            String userToken = request.getHeader("token");
+            issueService.updatePriority(issueId,priority,userToken);
+            return new ResponseBean(200, "issues update priority success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "issues update priority failed!", null);
+        }
+    }
+
+    @PutMapping(value = "/issue/status/{issue-id}")
+    public Object updateStatus(@PathVariable("issue-id")String issueId, @RequestParam ("status")String priority,HttpServletRequest request) {
+        try {
+            String userToken = request.getHeader("token");
+            issueService.updateStatus(issueId,priority,userToken);
             return new ResponseBean(200, "issues update priority success!", null);
         } catch (Exception e) {
             e.printStackTrace();

@@ -6,6 +6,7 @@ import cn.edu.fudan.tagservice.dao.TagDao;
 
 import cn.edu.fudan.tagservice.domain.*;
 import cn.edu.fudan.tagservice.service.TagService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,12 +75,35 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public void addMultiTaggedItem(List<TaggedItem> list) {
+    public void addMultiTaggedItem(JSONArray request) {
+        List<TaggedItem> list = new ArrayList<>();
+        if(request != null && !request.isEmpty()){
+            for(int i=0; i < request.size() ; i++){
+                JSONObject jsonObject = request.getJSONObject(i);
+                TaggedItem  taggedItem = new TaggedItem();
+                taggedItem.setItem_id(jsonObject.getString("item_id"));
+                taggedItem.setTag_id(jsonObject.getString("tag_id"));
+                list.add(taggedItem);
+            }
+
+        }
         tagDao.addMultiTaggedItem(list);
     }
 
     @Override
-    public void modifyMultiTaggedItem(List<ModifyTaggedItem> list) {
+    public void modifyMultiTaggedItem(JSONArray request) {
+        List<ModifyTaggedItem> list = new ArrayList<>();
+        if(request != null && !request.isEmpty()){
+            for(int i=0; i < request.size() ; i++){
+                JSONObject jsonObject = request.getJSONObject(i);
+                ModifyTaggedItem  modifyTaggedItem = new ModifyTaggedItem();
+                modifyTaggedItem.setItemId(jsonObject.getString("itemId"));
+                modifyTaggedItem.setNewTagId(jsonObject.getString("newTagId"));
+                modifyTaggedItem.setPreTagId(jsonObject.getString("preTagId"));
+                list.add(modifyTaggedItem);
+            }
+
+        }
         tagDao.modifyMultiTaggedItem(list);
     }
 
@@ -183,6 +207,10 @@ public class TagServiceImpl implements TagService {
         return tagDao.getTagsByCondition(scope);
     }
 
+    @Override
+    public String getTagIdByItemIdAndScope(String itemId, String scope) {
+        return tagDao.getTagIdByItemIdAndScope(itemId,scope);
+    }
 
 
     /**

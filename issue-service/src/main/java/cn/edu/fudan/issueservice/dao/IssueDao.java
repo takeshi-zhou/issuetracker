@@ -86,6 +86,10 @@ public class IssueDao {
         issueMapper.updateOneIssuePriority(issueId,priority);
     }
 
+    public void updateOneIssueStatus(String issueId,String status, String manualStatus) {
+        issueMapper.updateOneIssueStatus(issueId,status,manualStatus);
+    }
+
     public Map<String, String> getIssueIdAndPriority() {
         List<Map<String,String>> list = issueMapper.getIssueIdAndPriority();
 

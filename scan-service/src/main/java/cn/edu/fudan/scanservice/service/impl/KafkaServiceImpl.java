@@ -536,7 +536,7 @@ public class KafkaServiceImpl implements KafkaService {
                 logger.info("repo id ---> {} ,  code tracker is  scanning! ",repoId);
                 while("scanning".equals(status)){
                     try {
-                        TimeUnit.MINUTES.sleep(10);
+                        TimeUnit.MINUTES.sleep(1);
                         status = restInterfaceManager.getCodeTrackerStatus(repoId,branch);
                     }catch (InterruptedException e) {
                         e.printStackTrace();

@@ -7,6 +7,7 @@ import cn.edu.fudan.issueservice.domain.*;
 import cn.edu.fudan.issueservice.scheduler.QuartzScheduler;
 import cn.edu.fudan.issueservice.service.IssueService;
 import cn.edu.fudan.issueservice.util.DateTimeUtil;
+import cn.edu.fudan.issueservice.util.IssueUtil;
 import cn.edu.fudan.issueservice.util.JGitHelper;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -37,6 +38,12 @@ public class IssueServiceImpl implements IssueService {
     private String ignoreTagId;
 
     private RestInterfaceManager restInterfaceManager;
+    private IssueUtil issueUtil;
+
+    @Autowired
+    public void setIssueUtil(IssueUtil issueUtil) {
+        this.issueUtil = issueUtil;
+    }
 
     @Autowired
     public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
@@ -535,8 +542,32 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public void updatePriority(String issueId, String priority) {
-        issueDao.updateOneIssuePriority(issueId,Integer.parseInt(priority));
+    public void updatePriority(String issueId, String priority,String token) {
+        int priorityInt = Integer.parseInt(priority);
+        issueDao.updateOneIssuePriority(issueId,priorityInt);
+        String priorityTag = getPriorityTagIdByIntValue(priorityInt,token);
+        String preTagId = restInterfaceManager.getTagIdByItemIdAndScope(issueId,"priority");
+        List<JSONObject> taggeds = new ArrayList<>();
+        JSONObject tagged = new JSONObject();
+        tagged.put("itemId", issueId);
+        tagged.put("preTagId", preTagId);
+        tagged.put("newTagId", priorityTag);
+        taggeds.add(tagged);
+        restInterfaceManager.modifyTags(taggeds);
+    }
+
+    @Override
+    public void updateStatus(String issueId, String status,String token) {
+        issueDao.updateOneIssueStatus(issueId,status,status);
+        String statusTag = issueUtil.getTagIdByStatus(status);
+        String preTagId = restInterfaceManager.getTagIdByItemIdAndScope(issueId,"status");
+        List<JSONObject> taggeds = new ArrayList<>();
+        JSONObject tagged = new JSONObject();
+        tagged.put("itemId", issueId);
+        tagged.put("preTagId", preTagId);
+        tagged.put("newTagId", statusTag);
+        taggeds.add(tagged);
+        restInterfaceManager.modifyTags(taggeds);
     }
 
     @Override
@@ -547,6 +578,60 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type) {
         return issueDao.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
+    }
+
+
+    private String getPriorityTagIdByIntValue(int priorityInt,String token){
+        String priorityTagId = null;
+        JSONArray tagList = restInterfaceManager.getTagByScope("priority",token);
+        String lowTagId = null;
+        String urgentTagId = null;
+        String normalTagId = null;
+        String highTagId = null;
+        String immediateTagId = null;
+        for(int i = 0 ; i < tagList.size() ; i++){
+            JSONObject tagJson = tagList.getJSONObject(i);
+            String tagIdFromJson = tagJson.getString("uuid");
+            switch (PriorityEnum.getPriprityEnum(tagJson.getString("name"))){
+                case LOW :
+                    lowTagId = tagIdFromJson;
+                    break;
+                case URGENT:
+                    urgentTagId = tagIdFromJson;
+                    break;
+                case NORMAL:
+                    normalTagId = tagIdFromJson;
+                    break;
+                case HIGH:
+                    highTagId = tagIdFromJson;
+                    break;
+                case IMMEDIATE :
+                    immediateTagId = tagIdFromJson;
+                    break;
+                default:
+
+            }
+        }
+        switch (priorityInt){
+            case 0 :
+                priorityTagId = immediateTagId;
+                break;
+            case 1:
+                priorityTagId = urgentTagId;
+                break;
+            case 2:
+                priorityTagId = highTagId;
+                break;
+            case 3:
+                priorityTagId = normalTagId;
+                break;
+            case 4:
+                priorityTagId = lowTagId;
+                break;
+            default:
+                priorityTagId = null;
+        }
+        return priorityTagId;
     }
 
 }
