@@ -232,6 +232,15 @@ public interface MeasureService {
      */
     Object getLOCDaily(String repo_id, String since, String until);
 
+    /**
+     *
+     * @param repo_id
+     * @param since
+     * @param until
+     * @return 某段时间内，该项目每天的所有开发者产生的LOC以及commit次数
+     */
+    Object getCommitCountLOCDaily(String repo_id, String since, String until);
+
 
 
 

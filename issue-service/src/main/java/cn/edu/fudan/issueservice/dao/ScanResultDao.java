@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author WZY
@@ -105,4 +106,14 @@ public class ScanResultDao {
             return null;
         }
     }
+
+    public Map<String, Object> getRepoIssueCounts(String repoId, String since, String until, String category, String developer){
+        try{
+            return scanResultMapper.getRepoIssueCounts(repoId, since, until, category, developer);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            return null;
+        }
+    }
+
 }
