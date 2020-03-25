@@ -4,6 +4,7 @@ import cn.edu.fudan.tagservice.domain.ModifyTaggedItem;
 import cn.edu.fudan.tagservice.domain.ResponseBean;
 import cn.edu.fudan.tagservice.domain.TaggedItem;
 import cn.edu.fudan.tagservice.service.TagService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -116,9 +117,10 @@ public class TagController {
      *  以下为内部服务调用
      * */
     @PostMapping("/inner/tags")
-    public Object addMultiTaggedItem(@RequestBody List<TaggedItem> list) {
+    public Object addMultiTaggedItem(@RequestBody JSONArray request) {
         try {
-            tagService.addMultiTaggedItem(list);
+
+            tagService.addMultiTaggedItem(request);
             return new ResponseBean(200, "add success", null);
         } catch (Exception e) {
             return new ResponseBean(401, "add failed :" + e.getMessage(), null);
@@ -126,9 +128,9 @@ public class TagController {
     }
 
     @PostMapping("/inner/tags/tagged-modify")
-    public Object modifyMultiTaggedItem(@RequestBody List<ModifyTaggedItem> list) {
+    public Object modifyMultiTaggedItem(@RequestBody JSONArray request) {
         try {
-            tagService.modifyMultiTaggedItem(list);
+            tagService.modifyMultiTaggedItem(request);
             return new ResponseBean(200, "update success", null);
         } catch (Exception e) {
             return new ResponseBean(401, "update failed :" + e.getMessage(), null);
@@ -159,6 +161,12 @@ public class TagController {
     public Object getTags(@RequestParam("item_id") String item_id) {
         return tagService.getTagsByItemId(item_id);
     }
+
+    @GetMapping("/inner/tags/scope")
+    public Object getTagIdByItemIdAndScope(@RequestParam("item_id") String itemId,@RequestParam("scope") String scope) {
+        return tagService.getTagIdByItemIdAndScope(itemId,scope);
+    }
+
 
     @DeleteMapping("/inner/tags")
     public Object deleteTagByProjectId(@RequestParam("project-id") String projectId) {

@@ -51,4 +51,12 @@ public interface TagMapper {
 
 
     List<Tag> getTagsByCondition(@Param("scope") String scope);
+
+    /**
+     * 根据item id 与 scope 获取相应的tag id
+     * @param itemId
+     * @param scope
+     * @return
+     */
+    String getTagIdByItemIdAndScope(@Param("uuid") String itemId,@Param("scope") String scope);
 }

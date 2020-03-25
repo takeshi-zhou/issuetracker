@@ -12,6 +12,10 @@ public class ModifyTaggedItem {
         this.newTagId = newTagId;
     }
 
+    public ModifyTaggedItem() {
+        super();
+    }
+
     public String getItemId() {
         return itemId;
     }

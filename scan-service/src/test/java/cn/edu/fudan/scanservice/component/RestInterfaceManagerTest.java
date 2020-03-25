@@ -61,4 +61,11 @@ public class RestInterfaceManagerTest extends ScanServiceApplicationTests {
         boolean result = restInterfaceManager.updateCodeTracker("7e35f5ae-544e-11ea-9837-31458decacbe","master");
         System.out.println("result");
     }
+
+
+    @Test
+    public void getCommitTime() {
+        JSONObject result = restInterfaceManager.getCommitTime("3bfcbcda-57f1-11ea-b10e-1f495a510de6","873da28080dc364b2ef5f70f3880b0bb6751316d");
+        System.out.println("result");
+    }
 }

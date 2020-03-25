@@ -3,6 +3,7 @@ package cn.edu.fudan.tagservice.service;
 import cn.edu.fudan.tagservice.domain.ModifyTaggedItem;
 import cn.edu.fudan.tagservice.domain.Tag;
 import cn.edu.fudan.tagservice.domain.TaggedItem;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
@@ -11,9 +12,9 @@ public interface TagService {
 
     void addTag(JSONObject requestBody);
 
-    void addMultiTaggedItem(List<TaggedItem> list);
+    void addMultiTaggedItem(JSONArray requestBody);
 
-    void modifyMultiTaggedItem(List<ModifyTaggedItem> list);
+    void modifyMultiTaggedItem(JSONArray requestBody);
 
     void deleteTag(String tagId, String itemId);
 
@@ -53,4 +54,6 @@ public interface TagService {
      * @return
      */
     List<Tag> getTagsByScope(String scope);
+
+    String getTagIdByItemIdAndScope(String itemId , String scope);
 }

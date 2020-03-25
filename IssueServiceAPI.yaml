@@ -23,7 +23,7 @@ tags:
 
 paths:
 
-#  以下是缺陷度量接口，对应IssueMeasurementController
+  #  以下是缺陷度量接口，对应IssueMeasurementController
   /measurement/code-quality:
     get:
       tags:
@@ -91,9 +91,6 @@ paths:
         '200':
           description: "successful operation"
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/CodeQualityResponse'
             application/json:
               schema:
                 $ref: '#/components/schemas/CodeQualityResponse'
@@ -364,9 +361,6 @@ paths:
         '200':
           description: "successful operation"
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/IssueCountResponse'
             application/json:
               schema:
                 $ref: '#/components/schemas/IssueCountResponse'
@@ -376,46 +370,43 @@ paths:
   /measurement/issue/repository:
     get:
       tags:
-        - "缺陷度量接口"
+      - "缺陷度量接口"
       summary: "获取repo某段时间内的问题数-指定时段"
       description: "根据repo唯一ID获取该repo一段时间内的新增与消除问题数-指定时段"
       operationId: "getIssueCountMeasureByRepo"
       parameters:
-        - in: "query"
-          name: "since"
-          description: "指定的时间段开始时间"
-          required: true
-          schema:
-            type: "string"
-            example: "2017.09.09"
-        - in: "query"
-          name: "until"
-          description: "指定的时间段截止时间"
-          required: true
-          schema:
-            type: "string"
-            example: "2019.09.09"
-        - in: "query"
-          name: "category"
-          description: "工具选择，findbugs则选择'bug' "
-          required: true
-          schema:
-            type: "string"
-            example: "bug"
-        - in: "query"
-          name: "repo_id"
-          description: "repo的唯一ID"
-          required: true
-          schema:
-            type: "string"
-            example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
+      - in: "query"
+        name: "since"
+        description: "指定的时间段开始时间"
+        required: true
+        schema:
+          type: "string"
+          example: "2017.09.09"
+      - in: "query"
+        name: "until"
+        description: "指定的时间段截止时间"
+        required: true
+        schema:
+          type: "string"
+          example: "2019.09.09"
+      - in: "query"
+        name: "category"
+        description: "工具选择，findbugs则选择'bug' "
+        required: true
+        schema:
+          type: "string"
+          example: "bug"
+      - in: "query"
+        name: "repo_id"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
       responses:
         '200':
           description: "successful operation"
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/IssueCountByRepoResponse'
             application/json:
               schema:
                 $ref: '#/components/schemas/IssueCountByRepoResponse'
@@ -425,46 +416,43 @@ paths:
   /measurement/issue/developer:
     get:
       tags:
-        - "缺陷度量接口"
+      - "缺陷度量接口"
       summary: "获取repo某段时间内所有开发者对应的问题数-指定时段"
       description: "获取repo某段时间内所有开发者对应的问题数-指定时段"
       operationId: "getIssueCountMeasureByDeveloper"
       parameters:
-        - in: "query"
-          name: "since"
-          description: "指定的时间段开始时间"
-          required: true
-          schema:
-            type: "string"
-            example: "2017.09.09"
-        - in: "query"
-          name: "until"
-          description: "指定的时间段截止时间"
-          required: true
-          schema:
-            type: "string"
-            example: "2019.09.09"
-        - in: "query"
-          name: "category"
-          description: "工具选择，findbugs则选择'bug' "
-          required: true
-          schema:
-            type: "string"
-            example: "bug"
-        - in: "query"
-          name: "repo_id"
-          description: "repo的唯一ID"
-          required: true
-          schema:
-            type: "string"
-            example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
+      - in: "query"
+        name: "since"
+        description: "指定的时间段开始时间"
+        required: true
+        schema:
+          type: "string"
+          example: "2017.09.09"
+      - in: "query"
+        name: "until"
+        description: "指定的时间段截止时间"
+        required: true
+        schema:
+          type: "string"
+          example: "2019.09.09"
+      - in: "query"
+        name: "category"
+        description: "工具选择，findbugs则选择'bug' "
+        required: true
+        schema:
+          type: "string"
+          example: "bug"
+      - in: "query"
+        name: "repo_id"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
       responses:
         '200':
           description: "successful operation"
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/IssueCountByDeveloperResponse'
             application/json:
               schema:
                 $ref: '#/components/schemas/IssueCountByDeveloperResponse'
@@ -474,25 +462,25 @@ paths:
   /measurement/rankOfFileBaseIssueQuantity/{repoId}:
     get:
       tags:
-        - "缺陷度量接口"
+      - "缺陷度量接口"
       summary: "问题最多的文件排名"
       description: "问题最多的文件排名"
       operationId: "getRankOfFileBaseIssueQuantity"
       parameters:
-        - in: "path"
-          name: "repoId"
-          description: "repo的唯一ID"
-          required: true
-          schema:
-            type: "string"
-            example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
-        - in: "query"
-          name: "commitId"
-          description: "commit的唯一ID"
-          required: true
-          schema:
-            type: "string"
-            example: "18c74e4ad86de23c41ea57abc1e88ebed3140fe3"
+      - in: "path"
+        name: "repoId"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
+      - in: "query"
+        name: "commitId"
+        description: "commit的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "18c74e4ad86de23c41ea57abc1e88ebed3140fe3"
       responses:
         '200':
           description: "successful operation"
@@ -511,25 +499,25 @@ paths:
   /measurement/rankOfFileBaseDensity/{repoId}:
     get:
       tags:
-        - "缺陷度量接口"
+      - "缺陷度量接口"
       summary: "问题密度最大的文件排名"
       description: "问题密度最大的文件排名"
       operationId: "getRankOfFileBaseDensity"
       parameters:
-        - in: "path"
-          name: "repoId"
-          description: "repo的唯一ID"
-          required: true
-          schema:
-            type: "string"
-            example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
-        - in: "query"
-          name: "commitId"
-          description: "commit的唯一ID"
-          required: true
-          schema:
-            type: "string"
-            example: "18c74e4ad86de23c41ea57abc1e88ebed3140fe3"
+      - in: "path"
+        name: "repoId"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
+      - in: "query"
+        name: "commitId"
+        description: "commit的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "18c74e4ad86de23c41ea57abc1e88ebed3140fe3"
       responses:
         '200':
           description: "successful operation"
@@ -548,32 +536,32 @@ paths:
   /measurement/rankOfDeveloper/{repoId}:
     get:
       tags:
-        - "缺陷度量接口"
+      - "缺陷度量接口"
       summary: "问题密度最大的开发者排名"
       description: "问题密度最大的开发者排名"
       operationId: "getRankOfDeveloper"
       parameters:
-        - in: "path"
-          name: "repoId"
-          description: "repo的唯一ID"
-          required: true
-          schema:
-            type: "string"
-            example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
-        - in: "query"
-          name: "since"
-          description: "从什么时候开始统计"
-          required: true
-          schema:
-            type: "string"
-            example: "2019-06-08"
-        - in: "query"
-          name: "until"
-          description: "统计到什么时候结束"
-          required: true
-          schema:
-            type: "string"
-            example: "2019-06-09"
+      - in: "path"
+        name: "repoId"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
+      - in: "query"
+        name: "since"
+        description: "从什么时候开始统计"
+        required: true
+        schema:
+          type: "string"
+          example: "2019-06-08"
+      - in: "query"
+        name: "until"
+        description: "统计到什么时候结束"
+        required: true
+        schema:
+          type: "string"
+          example: "2019-06-09"
       responses:
         '200':
           description: "successful operation"
@@ -592,17 +580,17 @@ paths:
   /measurement/rankOfRepoBaseDensity:
     get:
       tags:
-        - "缺陷度量接口"
+      - "缺陷度量接口"
       summary: "问题密度最大（小）的项目排名"
       description: "问题密度最大（小）的项目排名"
       operationId: "getRankOfRepoBaseDensity"
       parameters:
-        - in: "header"
-          name: "token"
-          description: "用户token，用于验证用户"
-          required: true
-          schema:
-            type: "string"
+      - in: "header"
+        name: "token"
+        description: "用户token，用于验证用户"
+        required: true
+        schema:
+          type: "string"
       responses:
         '200':
           description: "successful operation"
@@ -621,32 +609,32 @@ paths:
   /measurement/issueTypeCounts:
     get:
       tags:
-        - "缺陷度量接口"
+      - "缺陷度量接口"
       summary: "现有静态问题按类型统计数"
       description: "根据repo与commit的唯一ID获取静态问题类型统计数"
       operationId: "getIssueTypeCountsByCategoryAndRepoId"
       parameters:
-        - in: "query"
-          name: "repoId"
-          description: "repo的唯一ID"
-          required: true
-          schema:
-            type: "string"
-            example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
-        - in: "query"
-          name: "category"
-          description: "工具选择，findbugs则选择'bug' "
-          required: true
-          schema:
-            type: "string"
-            example: "bug"
-        - in: "query"
-          name: "commitId"
-          description: "commit的唯一ID"
-          required: false
-          schema:
-            type: "string"
-            example: "18c74e4ad86de23c41ea57abc1e88ebed3140fe3"
+      - in: "query"
+        name: "repoId"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
+      - in: "query"
+        name: "category"
+        description: "工具选择，findbugs则选择'bug' "
+        required: true
+        schema:
+          type: "string"
+          example: "bug"
+      - in: "query"
+        name: "commitId"
+        description: "commit的唯一ID"
+        required: false
+        schema:
+          type: "string"
+          example: "18c74e4ad86de23c41ea57abc1e88ebed3140fe3"
       responses:
         200:
           description: "successful operation"
@@ -678,39 +666,36 @@ paths:
   /cloneRateInfo:
     get:
       tags:
-        - "缺陷度量接口"
+      - "缺陷度量接口"
       summary: "获取代码重复行数"
       description: "根据repo获取一段时间内的每次commit版本下的代码重复行数"
       operationId: "getCloneRate"
       parameters:
-        - in: "query"
-          name: "repo_id"
-          description: "repo的唯一ID"
-          required: true
-          schema:
-            type: "string"
-            example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
-        - in: "query"
-          name: "since"
-          description: "从什么时候开始统计"
-          required: true
-          schema:
-            type: "string"
-            example: "2019-02-08"
-        - in: "query"
-          name: "until"
-          description: "统计到什么时候结束"
-          required: true
-          schema:
-            type: "string"
-            example: "2019-06-09"
+      - in: "query"
+        name: "repo_id"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
+      - in: "query"
+        name: "since"
+        description: "从什么时候开始统计"
+        required: true
+        schema:
+          type: "string"
+          example: "2019-02-08"
+      - in: "query"
+        name: "until"
+        description: "统计到什么时候结束"
+        required: true
+        schema:
+          type: "string"
+          example: "2019-06-09"
       responses:
         '200':
           description: "successful operation"
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/CloneLinesList'
             application/json:
               schema:
                 $ref: '#/components/schemas/CloneLinesList'
@@ -720,18 +705,18 @@ paths:
   /latestCloneLines:
     get:
       tags:
-        - "缺陷度量接口"
+      - "缺陷度量接口"
       summary: "获取repo最新commit版本的代码重复行数"
       description: "获取repo最新commit版本的代码重复行数"
       operationId: "getLatestScannedCommitCloneLines"
       parameters:
-        - in: "query"
-          name: "repo_id"
-          description: "repo的唯一ID"
-          required: true
-          schema:
-            type: "string"
-            example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
+      - in: "query"
+        name: "repo_id"
+        description: "repo的唯一ID"
+        required: true
+        schema:
+          type: "string"
+          example: "aa41c6ae-6fd0-11e9-b723-0f92b2ad63bf"
       responses:
         '200':
           description: "successful operation"
@@ -746,36 +731,36 @@ paths:
           description: "failed"
 
 
-#  以下是issue接口，对应IssueController
+  #  以下是issue接口，对应IssueController
   /issue:
     get:
       tags:
-        - "issue接口"
+      - "issue接口"
       summary: "获取issueList"
       description: "根据project的ID获取issueList"
       operationId: "getIssues"
       parameters:
-        - in: "query"
-          name: "project_id"
-          description: "project的ID"
-          required: true
-          schema:
-            type: "string"
-        - in: "query"
-          name: "page"
-          required: true
-          schema:
-            type: "integer"
-        - in: "query"
-          name: "size"
-          required: true
-          schema:
-            type: "integer"
-        - in: "query"
-          name: "category"
-          required: true
-          schema:
-            type: "string"
+      - in: "query"
+        name: "project_id"
+        description: "project的ID"
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "page"
+        required: true
+        schema:
+          type: "integer"
+      - in: "query"
+        name: "size"
+        required: true
+        schema:
+          type: "integer"
+      - in: "query"
+        name: "category"
+        required: true
+        schema:
+          type: "string"
       responses:
         '200':
           description: "successful operation"
@@ -794,24 +779,21 @@ paths:
   /issue/one-issue:
     get:
       tags:
-        - "issue接口"
+      - "issue接口"
       summary: "获取issue"
       description: "根据issue的ID获取issue"
       operationId: "getSpecificIssue"
       parameters:
-        - in: "query"
-          name: "issue_id"
-          description: "issue的ID"
-          required: true
-          schema:
-            type: "string"
+      - in: "query"
+        name: "issue_id"
+        description: "issue的ID"
+        required: true
+        schema:
+          type: "string"
       responses:
         '200':
           description: "successful operation"
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/Issue'
             application/json:
               schema:
                 $ref: '#/components/schemas/Issue'
@@ -821,24 +803,21 @@ paths:
   /issue/issue-types:
     get:
       tags:
-        - "issue接口"
+      - "issue接口"
       summary: "获取issue的types"
       description: "根据category获取issue-types"
       operationId: "getExistIssueTypes"
       parameters:
-        - in: "query"
-          name: "category"
-          description: "工具类型，默认是bug"
-          required: true
-          schema:
-            type: "string"
+      - in: "query"
+        name: "category"
+        description: "工具类型，默认是bug"
+        required: true
+        schema:
+          type: "string"
       responses:
         '200':
           description: "successful operation"
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/IssueTypes'
             application/json:
               schema:
                 $ref: '#/components/schemas/IssueTypes'
@@ -848,7 +827,7 @@ paths:
   /issue/filter:
     post:
       tags:
-        - "issue接口"
+      - "issue接口"
       summary: "filter of issues"
       operationId: "filterIssues"
       requestBody:
@@ -858,29 +837,10 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/IssueFilterRequestParam'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/IssueFilterRequestParam'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IssueFilterRequestParam'
       responses:
         '200':
           description: "successful operation"
           content:
-            text/plain:
-              schema:
-                type: "object"
-                properties:
-                  totalPage:
-                    type: "integer"
-                    format: "int32"
-                  totalCount:
-                    type: "integer"
-                    format: "int32"
-                  issueList:
-                    items:
-                      $ref: '#/components/schemas/IssueList'
             application/json:
               schema:
                 type: "object"
@@ -900,43 +860,30 @@ paths:
   /issue/dashboard:
     get:
       tags:
-        - "issue接口"
+      - "issue接口"
       summary: "get dashboard info "
       operationId: "getDashBoardInfo"
       parameters:
-        - in: "header"
-          name: "token"
-          description: "get userToken from Header"
-          required: true
-          schema:
-            type: "string"
-        - in: "query"
-          name: "duration"
-          required: true
-          schema:
-            type: "string"
-        - in: "query"
-          name: "project_id"
-          required: false
-          schema:
-            type: "string"
+      - in: "header"
+        name: "token"
+        description: "get userToken from Header"
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "duration"
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "project_id"
+        required: false
+        schema:
+          type: "string"
       responses:
         '200':
           description: "successful operation"
           content:
-            text/plain:
-              schema:
-                type: "object"
-                properties:
-                  newIssueCount:
-                    type: "integer"
-                    format: "int32"
-                  eliminatedIssueCount:
-                    type: "integer"
-                    format: "int32"
-                  remainingIssueCount:
-                    type: "integer"
-                    format: "int32"
             application/json:
               schema:
                 type: "object"
@@ -956,27 +903,24 @@ paths:
   /issue/project-statistical-info:
     get:
       tags:
-        - "issue接口"
+      - "issue接口"
       summary: "get Avg Eliminated Time And Max Alive Time"
       operationId: "getAvgEliminatedTimeAndMaxAliveTime"
       parameters:
-        - in: "query"
-          name: "project_id"
-          required: true
-          schema:
-            type: "string"
-        - in: "query"
-          name: "category"
-          required: false
-          schema:
-            type: "string"
+      - in: "query"
+        name: "project_id"
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "category"
+        required: false
+        schema:
+          type: "string"
       responses:
         '200':
           description: "successful operation"
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/IssueStatisticInfo'
             application/json:
               schema:
                 $ref: '#/components/schemas/IssueStatisticInfo'
@@ -987,31 +931,31 @@ paths:
   /issue/statistical-results:
     get:
       tags:
-        - "issue接口"
+      - "issue接口"
       summary: "get Statistical Results"
       operationId: "getStatisticalResults"
       parameters:
-        - in: "header"
-          name: "token"
-          description: "get userToken from Header"
-          required: true
-          schema:
-            type: "string"
-        - in: "query"
-          name: "month"
-          required: true
-          schema:
-            type: "integer"
-        - in: "query"
-          name: "project_id"
-          required: false
-          schema:
-            type: "string"
-        - in: "query"
-          name: "category"
-          required: false
-          schema:
-            type: "string"
+      - in: "header"
+        name: "token"
+        description: "get userToken from Header"
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "month"
+        required: true
+        schema:
+          type: "integer"
+      - in: "query"
+        name: "project_id"
+        required: false
+        schema:
+          type: "string"
+      - in: "query"
+        name: "category"
+        required: false
+        schema:
+          type: "string"
       responses:
         '200':
           description: "successful operation"
@@ -1030,40 +974,35 @@ paths:
   /issue/statistical-results-fix:
     get:
       tags:
-        - "issue接口"
+      - "issue接口"
       summary: "get New Trend"
       operationId: "getNewTrend"
       parameters:
-        - in: "header"
-          name: "token"
-          description: "get userToken from Header"
-          required: true
-          schema:
-            type: "string"
-        - in: "query"
-          name: "month"
-          required: true
-          schema:
-            type: "integer"
-        - in: "query"
-          name: "project_id"
-          required: false
-          schema:
-            type: "string"
-        - in: "query"
-          name: "category"
-          required: false
-          schema:
-            type: "string"
+      - in: "header"
+        name: "token"
+        description: "get userToken from Header"
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "month"
+        required: true
+        schema:
+          type: "integer"
+      - in: "query"
+        name: "project_id"
+        required: false
+        schema:
+          type: "string"
+      - in: "query"
+        name: "category"
+        required: false
+        schema:
+          type: "string"
       responses:
         '200':
           description: "successful operation"
           content:
-            text/plain:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/IssueCount"
             application/json:
               schema:
                 type: "array"
@@ -1075,7 +1014,7 @@ paths:
   /issue/specific-issues:
     post:
       tags:
-        - "issue接口"
+      - "issue接口"
       summary: "get Specific Issues"
       operationId: "getSpecificIssues"
       requestBody:
@@ -1085,19 +1024,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/IssueParam'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/IssueParam'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IssueParam'
       parameters:
-        - in: "header"
-          name: "token"
-          description: "用户token"
-          required: true
-          schema:
-            type: "string"
+      - in: "header"
+        name: "token"
+        description: "用户token"
+        required: true
+        schema:
+          type: "string"
       responses:
         '200':
           description: "successful operation"
@@ -1116,22 +1049,47 @@ paths:
   /issue/priority/{issue-id}:
     put:
       tags:
-        - "issue接口"
+      - "issue接口"
       summary: "update Priority"
       operationId: "updatePriority"
       parameters:
-        - in: "path"
-          name: "issue-id"
-          description: ""
-          required: true
-          schema:
-            type: "string"
-        - in: "query"
-          name: "priority"
-          description: ""
-          required: true
-          schema:
-            type: "string"
+      - in: "path"
+        name: "issue-id"
+        description: ""
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "priority"
+        description: " 0 对应 Immediate，1对应Urgent，2对应High，3对应Normal，4对应Low"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+        401:
+          description: "failed operation"
+
+  /issue/status/{issue-id}:
+    put:
+      tags:
+      - "issue接口"
+      summary: "update Status"
+      operationId: "updateStatus"
+      parameters:
+      - in: "path"
+        name: "issue-id"
+        description: ""
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "status"
+        description: "包括4种可手动更改状态，Open、Ignore、Misinformation、To_Review"
+        required: true
+        schema:
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -1139,29 +1097,24 @@ paths:
           description: "failed operation"
 
 
-#  以下是RawIssue接口，对应RawIssueController
+  #  以下是RawIssue接口，对应RawIssueController
 
   /raw-issue:
     get:
       tags:
-        - "RawIssue接口"
+      - "RawIssue接口"
       summary: "get Raw Issue List"
       operationId: "getRawIssueList"
       parameters:
-        - in: "query"
-          name: "issue_id"
-          required: true
-          schema:
-            type: "string"
+      - in: "query"
+        name: "issue_id"
+        required: true
+        schema:
+          type: "string"
       responses:
         '200':
           description: "successful operation"
           content:
-            text/plain:
-              schema:
-                type: "array"
-                items:
-                  $ref: '#/components/schemas/RawIssue'
             application/json:
               schema:
                 type: "array"
@@ -1173,25 +1126,25 @@ paths:
   /raw-issueList:
     get:
       tags:
-        - "RawIssue接口"
+      - "RawIssue接口"
       summary: "get One Page Raw Issue List"
       operationId: "getOnePageRawIssueList"
       parameters:
-        - in: "query"
-          name: "issue_id"
-          required: true
-          schema:
-            type: "string"
-        - in: "query"
-          name: "page"
-          required: true
-          schema:
-            type: "integer"
-        - in: "query"
-          name: "size"
-          required: true
-          schema:
-            type: "integer"
+      - in: "query"
+        name: "issue_id"
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "page"
+        required: true
+        schema:
+          type: "integer"
+      - in: "query"
+        name: "size"
+        required: true
+        schema:
+          type: "integer"
       responses:
         '200':
           description: "successful operation"
@@ -1210,25 +1163,25 @@ paths:
   /raw-issue/code:
     get:
       tags:
-        - "RawIssue接口"
+      - "RawIssue接口"
       summary: "get Code"
       operationId: "getCode"
       parameters:
-        - in: "query"
-          name: "project_id"
-          required: true
-          schema:
-            type: "string"
-        - in: "query"
-          name: "commit_id"
-          required: true
-          schema:
-            type: "string"
-        - in: "query"
-          name: "file_path"
-          required: true
-          schema:
-            type: "string"
+      - in: "query"
+        name: "project_id"
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "commit_id"
+        required: true
+        schema:
+          type: "string"
+      - in: "query"
+        name: "file_path"
+        required: true
+        schema:
+          type: "string"
       responses:
         '200':
           description: "successful operation"
@@ -1596,6 +1549,8 @@ components:
           type: "string"
         code:
           type: "string"
+
+
 
 
 

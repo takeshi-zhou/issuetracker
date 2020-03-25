@@ -81,7 +81,7 @@ public class RestInterfaceManager {
     //----------------------------------------------tag service---------------------------------------------------------------
     public void deleteTagsOfIssueInOneRepo(List<String> issueIds){
         if (issueIds != null && !issueIds.isEmpty()) {
-            JSONObject response = restTemplate.postForObject(tagServicePath + "/tagged-delete", issueIds, JSONObject.class);
+            JSONObject response = restTemplate.postForObject(tagServicePath +  "/inner/tags" + "/tagged-delete", issueIds, JSONObject.class);
             if (response == null || response.getIntValue("code") != 200) {
                 throw new RuntimeException("tag item delete failed!");
             }
@@ -89,37 +89,56 @@ public class RestInterfaceManager {
     }
 
     public JSONArray getTagsOfIssue(String issueId){
-        return  restTemplate.getForObject(tagServicePath + "?item_id=" + issueId, JSONArray.class);
+        return  restTemplate.getForObject(tagServicePath +  "/inner/tags" + "?item_id=" + issueId, JSONArray.class);
     }
 
     public JSONArray getSpecificTaggedIssueIds(String ...tagIds){
-        return restTemplate.postForObject(tagServicePath + "/item-ids", tagIds, JSONArray.class);
+        return restTemplate.postForObject(tagServicePath +  "/inner/tags" + "/item-ids", tagIds, JSONArray.class);
     }
     public JSONArray getSpecificTaggedIssueIds(JSONArray tagIds){
-        return restTemplate.postForObject(tagServicePath + "/item-ids", tagIds, JSONArray.class);
+        return restTemplate.postForObject(tagServicePath +  "/inner/tags" + "/item-ids", tagIds, JSONArray.class);
     }
     public JSONArray getSpecificTaggedIssueIds(List<String> tagIds){
-        return restTemplate.postForObject(tagServicePath + "/item-ids", tagIds, JSONArray.class);
+        return restTemplate.postForObject(tagServicePath +  "/inner/tags" + "/item-ids", tagIds, JSONArray.class);
     }
     public JSONArray getSpecificTaggedIssueIdsByTagIdsAndRepoId(JSONObject requestParms){
-        return restTemplate.postForObject(tagServicePath + "/required-item-ids", requestParms, JSONArray.class);
+        return restTemplate.postForObject(tagServicePath +  "/inner/tags" + "/required-item-ids", requestParms, JSONArray.class);
     }
 
 
     public JSONArray getSolvedIssueIds(List<String> tag_ids){
-        return restTemplate.postForObject(tagServicePath + "/item-ids", tag_ids, JSONArray.class);
+        return restTemplate.postForObject(tagServicePath +  "/inner/tags" + "/item-ids", tag_ids, JSONArray.class);
     }
 
     public void modifyTags(List<JSONObject> tags){
-        restTemplate.postForObject(tagServicePath+"/tagged-modify", tags, JSONObject.class);
+        restTemplate.postForObject(tagServicePath +  "/inner/tags"+"/tagged-modify", tags, JSONObject.class);
     }
 
     public void addTags(List<JSONObject> tags){
-        restTemplate.postForObject(tagServicePath,tags, JSONObject.class);
+        restTemplate.postForObject(tagServicePath +  "/inner/tags",tags, JSONObject.class);
     }
 
     public JSONArray  getIgnoreTypesOfRepo(String repoId){
-        return restTemplate.getForObject(tagServicePath + "/ignore/types?repo-id=" + repoId, JSONArray.class);
+        return restTemplate.getForObject(tagServicePath +  "/inner/tags" + "/ignore/types?repo-id=" + repoId, JSONArray.class);
+    }
+
+
+    public JSONArray  getTagByScope(String scope,String token){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("token",token);
+        HttpEntity request = new HttpEntity(headers);
+
+
+        String url = tagServicePath + "/tags/scope?scope=" + scope;
+        ResponseEntity responseEntity = restTemplate.exchange(url , HttpMethod.GET,request,JSONArray.class);
+        String body = responseEntity.getBody().toString();
+        JSONArray result = JSONArray.parseObject(body,JSONArray.class);
+
+        return result;
+    }
+
+    public String  getTagIdByItemIdAndScope(String issueId , String scope){
+        return restTemplate.getForObject(tagServicePath +  "/inner/tags" + "/scope?scope=" + scope + "&item_id=" + issueId, String.class);
     }
 
 
