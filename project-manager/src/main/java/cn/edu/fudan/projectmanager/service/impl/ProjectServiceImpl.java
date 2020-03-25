@@ -8,6 +8,7 @@ import cn.edu.fudan.projectmanager.domain.NeedDownload;
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.domain.ScanMessageWithTime;
 import cn.edu.fudan.projectmanager.service.ProjectService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -295,6 +296,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Object getProjectListByKeyWord(String userToken, String keyWord,String type,int isRecycled) {
         String account_id = restInterfaceManager.getAccountId(userToken);
+        //String username = stringRedisTemplate.opsForValue().get("login:" + userToken);
+        JSONArray list;
         if("1".equals(account_id)){
             return projectDao.getAllProjectByKeyWord(keyWord,type).stream()
                     .filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
@@ -547,6 +550,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = getProjectByID(projectId);
         project.setRecycled(isRecycled);
         project.setDelete_time(new Date());
+        project.setAccount_id("1");
         projectDao.updateProjectStatus(project);
     }
 
