@@ -297,11 +297,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Object getProjectListByKeyWord(String userToken, String module,String keyWord,String type,int isRecycled) {
         String account_id = restInterfaceManager.getAccountId(userToken);
-        //String username = stringRedisTemplate.opsForValue().get("login:" + userToken);
-        JSONArray list;
         if("1".equals(account_id)){
-            return projectDao.getAllProjectByKeyWord(keyWord,module,type).stream()
+            List<Project> projects = projectDao.getAllProjectByKeyWord(keyWord,module,type).stream()
                     .filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
+            projects.stream().forEach(project -> project.setAccount_name(restInterfaceManager.getAccountName(project.getAccount_id())));
+            return projects;
         }else {
             return projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim(), module.trim(), type).stream()
                     .filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());

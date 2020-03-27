@@ -69,6 +69,10 @@
         select uuid from account;
     </select>
 
+    <select id="getAccountNameById" parameterType="String" resultType="String">
+        select accountName from account where uuid=#{uuid};
+    </select>
+
     <update id="updateToolsEnable" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
             update tool

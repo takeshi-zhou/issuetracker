@@ -131,4 +131,10 @@ public class AccountServiceImpl implements AccountService {
     public List<Tool> getTools(){
         return accountDao.getTools();
     }
+
+    @Override
+    public String getAccountNameById(String accountId) {
+
+        return accountDao.getAccountNameById(accountId);
+    }
 }

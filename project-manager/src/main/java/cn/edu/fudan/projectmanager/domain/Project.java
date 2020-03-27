@@ -14,6 +14,7 @@ public class Project {
     private String repo_source;
     private String type;
     private String account_id;
+    private String account_name;
     private String download_status;
     private String scan_status;
     private Date add_time;
@@ -60,6 +61,14 @@ public class Project {
         this.description = description;
         this.repo_id = repo_id;
         this.branch = branch;
+    }
+
+    public String getAccount_name() {
+        return account_name;
+    }
+
+    public void setAccount_name(String account_name) {
+        this.account_name = account_name;
     }
 
     public Date getStart_scan_date() {

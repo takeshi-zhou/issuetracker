@@ -54,4 +54,8 @@ public class AccountDao {
     public List<Tool> getTools(){
         return accountMapper.getTools();
     }
+
+    public String getAccountNameById(String uuid){
+        return accountMapper.getAccountNameById(uuid);
+    }
 }
