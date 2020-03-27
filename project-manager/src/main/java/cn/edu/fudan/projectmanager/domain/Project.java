@@ -17,6 +17,7 @@ public class Project {
     private String download_status;
     private String scan_status;
     private Date add_time;
+    private Date start_scan_date;
     private Date till_commit_time;
     private Date last_scan_time;
     private String description;
@@ -59,6 +60,14 @@ public class Project {
         this.description = description;
         this.repo_id = repo_id;
         this.branch = branch;
+    }
+
+    public Date getStart_scan_date() {
+        return start_scan_date;
+    }
+
+    public void setStart_scan_date(Date start_scan_date) {
+        this.start_scan_date = start_scan_date;
     }
 
     public String getType() {

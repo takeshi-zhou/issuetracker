@@ -50,20 +50,6 @@ public class ProjectController {
     }
 
     // List ： url isPrivate username password name type branch
-//    @PostMapping(value = {"/project/addProjectList"})
-//    public Object addProjectList(HttpServletRequest request, @RequestBody List<JSONObject> projectListInfo) {
-//        String userToken = request.getHeader("token");
-//        JSONObject obj = projectService.addProjectList(userToken, projectListInfo);
-//        boolean flag = obj.getBoolean("isSuccessful");
-//        String lofInfo = obj.getString("logInfo");
-//        if (flag){
-//            return new ResponseBean(200, "All projects were added successfully!", null);
-//        }
-//        return new ResponseBean(401, "At least one project was not added successfully. Logging info is showed as follow:/n" + lofInfo, null);
-//
-//    }
-
-    // List ： url isPrivate username password name type branch
     @PostMapping(value = {"/project/addProjectList"})
     @ResponseBody
     public Object addProjectList(HttpServletRequest request, @RequestBody MultipartFile file) throws IOException {
@@ -106,10 +92,11 @@ public class ProjectController {
     @GetMapping(value = {"/project/filter"})
     public Object keyWordQuery(HttpServletRequest request,
                                @RequestParam("keyWord") String keyWord,
+                               @RequestParam(name = "repo",required = false) String module,
                                @RequestParam(name = "type",required = false,defaultValue = "bug")String type,
                                @RequestParam(name = "isRecycled",required = false,defaultValue = "0") int isRecycled) {
         String userToken = request.getHeader("token");
-        return projectService.getProjectListByKeyWord(userToken, keyWord,type,isRecycled);
+        return projectService.getProjectListByKeyWord(userToken, module,keyWord,type,isRecycled);
     }
 
     @DeleteMapping(value = {"/project/{projectId}"})
