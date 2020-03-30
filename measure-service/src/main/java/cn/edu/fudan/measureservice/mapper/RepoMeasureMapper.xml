@@ -293,7 +293,7 @@
         GROUP BY
             developer_name
         ORDER BY
-            COUNT(*) DESC
+            LOC DESC
         LIMIT 5;
     </select>
 
