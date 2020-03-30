@@ -86,4 +86,6 @@ public interface AccountService {
     void updateToolsEnable(List<Tool> tools);
 
     List<Tool> getTools();
+
+    String getAccountNameById(String accountId);
 }

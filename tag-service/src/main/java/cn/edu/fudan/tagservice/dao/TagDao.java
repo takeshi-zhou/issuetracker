@@ -91,4 +91,8 @@ public class TagDao {
     public List<WeakHashMap<Object,Object>> getItemIdsAndCountByTagIdsAndRepoId(List<String> tagIds, String repoId) {
         return tagMapper.getItemIdsAndCountByTagIdsAndRepoId(tagIds,repoId);
     }
+
+    public String getTagIdByItemIdAndScope(String itemId, String scope) {
+        return tagMapper.getTagIdByItemIdAndScope(itemId,scope);
+    }
 }

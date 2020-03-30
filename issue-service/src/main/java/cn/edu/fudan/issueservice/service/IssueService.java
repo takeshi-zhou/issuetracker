@@ -39,7 +39,9 @@ public interface IssueService {
 
     Object getNewTrend(Integer month, String project_id, String userToken, String category);
 
-    void updatePriority(String issueId, String priority);
+    void updatePriority(String issueId, String priority,String token);
+
+    void updateStatus(String issueId, String status,String token);
 
     void batchUpdateIssueListPriority(List<String> issueUuid, Integer priority);
 

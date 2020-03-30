@@ -396,6 +396,19 @@
         UPDATE issue SET priority = #{priority} WHERE uuid = #{uuid}
     </update>
 
+    <update id="updateOneIssueStatus"  >
+        UPDATE issue
+        <trim prefix="set" suffixOverrides=",">
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="manual_status != null">
+                manual_status = #{manual_status},
+            </if>
+        </trim>
+         WHERE uuid = #{uuid}
+    </update>
+
     <select id="getIssueIdAndPriority" resultMap="issue3">
         SELECT a.uuid ,b.detail FROM issue  as a , rawIssue as b  where a.raw_issue_end = b.uuid and detail is not null
     </select>

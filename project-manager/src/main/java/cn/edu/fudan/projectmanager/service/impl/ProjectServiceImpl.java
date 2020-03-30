@@ -8,6 +8,7 @@ import cn.edu.fudan.projectmanager.domain.NeedDownload;
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.domain.ScanMessageWithTime;
 import cn.edu.fudan.projectmanager.service.ProjectService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -120,7 +121,7 @@ public class ProjectServiceImpl implements ProjectService {
             throw new RuntimeException("The project name has already been used! ");
         }
         String module=projectInfo.getString("module");
-
+        Date startScanDate = projectInfo.getDate("startScanDate");
         if (projectDao.hasBeenAdded(accountId, url, type, branch)) {
             throw new RuntimeException("The project has been added!");
         }
@@ -143,6 +144,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setAccount_id(accountId);
         project.setDownload_status("Downloading");
         project.setAdd_time(new Date());
+        project.setStart_scan_date(startScanDate);
         project.setBranch(branch);
         project.setModule(module);
         projectDao.addOneProject(project);
@@ -293,13 +295,15 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Object getProjectListByKeyWord(String userToken, String keyWord,String type,int isRecycled) {
+    public Object getProjectListByKeyWord(String userToken, String module,String keyWord,String type,int isRecycled) {
         String account_id = restInterfaceManager.getAccountId(userToken);
         if("1".equals(account_id)){
-            return projectDao.getAllProjectByKeyWord(keyWord,type).stream()
+            List<Project> projects = projectDao.getAllProjectByKeyWord(keyWord,module,type).stream()
                     .filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
+            projects.stream().forEach(project -> project.setAccount_name(restInterfaceManager.getAccountName(project.getAccount_id())));
+            return projects;
         }else {
-            return projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim(),type).stream()
+            return projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim(), module.trim(), type).stream()
                     .filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
         }
     }
@@ -384,6 +388,7 @@ public class ProjectServiceImpl implements ProjectService {
                 stringRedisTemplate.delete("trend:" + type + ":week:eliminated:" + account_id + ":" + repoId);
                 stringRedisTemplate.exec();
 
+                restInterfaceManager.deleteCodeTeackerOfRepo(branch,repoId);
                 restInterfaceManager.deleteIssuesOfRepo(repoId, type);
                 restInterfaceManager.deleteRawIssueOfRepo(repoId, type);
                 restInterfaceManager.deleteScanOfRepo(repoId, type);
@@ -391,7 +396,6 @@ public class ProjectServiceImpl implements ProjectService {
                 restInterfaceManager.deleteScanResultOfRepo(repoId, type);
                 restInterfaceManager.deleteIgnoreRecord(account_id, repoId);
                 restInterfaceManager.deleteRepoMeasure(repoId);
-                restInterfaceManager.deleteCodeTeackerOfRepo(branch,repoId);
                 deleteCloneResPreFile(repoId);
 //                if(type.equals("bug")){
 //                    logger.info("start to request measure to delete measure info ...");
@@ -547,6 +551,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = getProjectByID(projectId);
         project.setRecycled(isRecycled);
         project.setDelete_time(new Date());
+        project.setAccount_id("1");
         projectDao.updateProjectStatus(project);
     }
 

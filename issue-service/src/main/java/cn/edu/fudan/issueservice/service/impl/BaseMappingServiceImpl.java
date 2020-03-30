@@ -9,6 +9,7 @@ import cn.edu.fudan.issueservice.dao.ScanResultDao;
 import cn.edu.fudan.issueservice.domain.*;
 import cn.edu.fudan.issueservice.service.MappingService;
 import cn.edu.fudan.issueservice.util.DateTimeUtil;
+import cn.edu.fudan.issueservice.util.IssueUtil;
 import cn.edu.fudan.issueservice.util.JGitHelper;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -59,6 +60,12 @@ public class BaseMappingServiceImpl implements MappingService {
     private StringRedisTemplate stringRedisTemplate;
     private TagMapHelper tagMapHelper;
     private KafkaTemplate kafkaTemplate;
+    private IssueUtil issueUtil;
+
+    @Autowired
+    public void setIssueUtil(IssueUtil issueUtil) {
+        this.issueUtil = issueUtil;
+    }
 
     @Autowired
     public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
@@ -257,7 +264,7 @@ public class BaseMappingServiceImpl implements MappingService {
             JSONObject statusTagged = new JSONObject();
             statusTagged.put("item_id", issue.getUuid());
             String statusTagId = null;
-            statusTagId = getTagIdByStatus(issue.getStatus());
+            statusTagId = issueUtil.getTagIdByStatus(issue.getStatus());
             statusTagged.put("tag_id", statusTagId);
             tags.add(statusTagged);
         }
@@ -303,7 +310,7 @@ public class BaseMappingServiceImpl implements MappingService {
                 for (Issue issue : issues) {
                     String preTagId = null;
                     String preStatus = allPreStatus.get(issue.getUuid());
-                    preTagId = getTagIdByStatus(preStatus);
+                    preTagId = issueUtil.getTagIdByStatus(preStatus);
                     JSONObject tagged = new JSONObject();
                     tagged.put("itemId", issue.getUuid());
                     tagged.put("preTagId", preTagId);
@@ -330,7 +337,7 @@ public class BaseMappingServiceImpl implements MappingService {
             JSONObject tagged = new JSONObject();
             tagged.put("itemId", issue.getUuid());
             tagged.put("preTagId", solvedTagId);
-            tagId = getTagIdByStatus(issue.getStatus());
+            tagId = issueUtil.getTagIdByStatus(issue.getStatus());
             tagged.put("newTagId", tagId);
 
             taggeds.add(tagged);
@@ -347,7 +354,7 @@ public class BaseMappingServiceImpl implements MappingService {
             JSONObject tagged = new JSONObject();
             tagged.put("itemId", issue.getUuid());
             tagged.put("preTagId", solvedTagId);
-            tagId = getTagIdByStatus(issue.getStatus());
+            tagId = issueUtil.getTagIdByStatus(issue.getStatus());
             tagged.put("newTagId", tagId);
             taggeds.add(tagged);
         }
@@ -406,30 +413,6 @@ public class BaseMappingServiceImpl implements MappingService {
 
         }
         return result;
-    }
-
-    private String getTagIdByStatus(String status){
-        String tagId = null;
-        switch (StatusEnum.getStatusByName(status)){
-            case IGNORE :
-                tagId = ignoreTagId;
-                break;
-            case MISINFORMATION:
-                tagId = misinformationTagId;
-                break;
-            case TO_REVIEW:
-                tagId = toReviewTagId;
-                break;
-            case SOLVED:
-                tagId = solvedTagId;
-                break;
-            case OPEN:
-                tagId = openTagId;
-                break;
-            default:
-                tagId = null;
-        }
-        return tagId;
     }
 
 }

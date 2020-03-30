@@ -108,4 +108,10 @@ public class AccountController {
     public Object getTools(){
         return accountService.getTools();
     }
+
+    @GetMapping(value = "/accountName")
+    @CrossOrigin
+    public Object getAccountNameById(@RequestParam("accountId") String accountId){
+        return accountService.getAccountNameById(accountId);
+    }
 }

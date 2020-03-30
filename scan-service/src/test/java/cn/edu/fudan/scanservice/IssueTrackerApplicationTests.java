@@ -1,6 +1,7 @@
 package cn.edu.fudan.scanservice;
 
 
+import cn.edu.fudan.scanservice.component.rest.RestInterfaceManager;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.mapper.ScanMapper;
 import cn.edu.fudan.scanservice.util.DateTimeUtil;
@@ -25,6 +26,9 @@ public class IssueTrackerApplicationTests {
 	@Autowired
 	private ScanMapper scanMapper;
 
+	@Autowired
+	RestInterfaceManager restInterfaceManager;
+
 	@Test
 	public void test(){
 		JSONArray array=new JSONArray();
@@ -38,5 +42,12 @@ public class IssueTrackerApplicationTests {
         kafkaTemplate.send("Measure",JSONArray.toJSONString(array));
 	}
 
+
+
+	@Test
+	public void testCommitTime(){
+		JSONObject result = restInterfaceManager.getCommitTime("dd6604895528cddbf80fd74877fff1ee5bfa014b","ee4c0f3c-678f-11ea-9f24-d31dd1a362ec");
+		System.out.println("result");
+	}
 
 }

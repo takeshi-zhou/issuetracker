@@ -28,12 +28,12 @@ public class ProjectDao {
         return projectMapper.getProjectByAccountId(accountId);
     }
 
-    public List<Project> getProjectByKeyWordAndAccountId(String account_id, String keyWord,String type) {
-        return projectMapper.getProjectByKeyWordAndAccountId(account_id, keyWord,type);
+    public List<Project> getProjectByKeyWordAndAccountId(String account_id, String keyWord, String module, String type) {
+        return projectMapper.getProjectByKeyWordAndAccountId(account_id, keyWord, module, type);
     }
 
-    public List<Project> getAllProjectByKeyWord(String keyWord,String type) {
-        return projectMapper.getAllProjectByKeyWord(keyWord,type);
+    public List<Project> getAllProjectByKeyWord(String keyWord, String module, String type) {
+        return projectMapper.getAllProjectByKeyWord(keyWord, module, type);
     }
 
     public List<Project> getProjectByRepoId(String repo_id){
