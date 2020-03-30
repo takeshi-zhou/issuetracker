@@ -277,7 +277,7 @@
             developer_name
         ORDER BY
             COUNT(*) DESC
-        LIMIT 3;
+        LIMIT 5;
     </select>
 
     <select id="getDeveloperRankByLoc" parameterType="String" resultType="java.util.HashMap">
@@ -294,7 +294,7 @@
             developer_name
         ORDER BY
             COUNT(*) DESC
-        LIMIT 3;
+        LIMIT 5;
     </select>
 
     <select id="getRepoLOCByDuration" resultType="int">

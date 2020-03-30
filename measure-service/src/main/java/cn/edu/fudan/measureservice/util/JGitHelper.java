@@ -493,8 +493,8 @@ public class JGitHelper {
         for (DiffEntry entry : diffEntryList) {
             df.format(entry);
             String diffText = out.toString("UTF-8");
-//            String fullName = entry.getNewPath();
-//            System.out.println("正在匹配文件：" + fullName);//变更文件的路径
+            String fullName = entry.getNewPath();
+            System.out.println("正在匹配文件：" + fullName);//变更文件的路径
 //            System.out.println(diffText);
             int addWhiteLines = 0;
             int delWhiteLines = 0;
@@ -577,8 +577,8 @@ public class JGitHelper {
 //            jGitHelper.checkout(s);
 //        }
 //        String versionTag="v2.6.19";//定位到某一次Commit，既可以使用Tag，也可以使用其hash
-        String versionTag="05b24b36";
-        String path="E:\\Project\\FDSELab\\IssueTracker-Master";
+        String versionTag="b2cce57a5e1dbd9a3a9e79c2eadd866e289e6f7f";
+        String path="E:\\Project\\FDSELab\\平台相关文档\\开源项目列表\\测试项目\\maven-surefire";
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
         builder.addCeilingDirectory(new File(path));
