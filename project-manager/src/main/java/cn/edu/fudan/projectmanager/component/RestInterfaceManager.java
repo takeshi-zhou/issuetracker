@@ -50,6 +50,10 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(accountServicePath+"/user/accountId?userToken={userToken}",String.class,urlParameters);
     }
 
+    public String getAccountName(String accountId){
+        return restTemplate.getForObject(accountServicePath+"/user/accountName?accountId="+accountId,String.class);
+    }
+
     public void userAuth(String userToken)throws AuthException {
         JSONObject result = restTemplate.getForObject(accountServicePath + "/user/auth/" + userToken, JSONObject.class);
         if (result == null || result.getIntValue("code") != 200) {
