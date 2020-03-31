@@ -28,7 +28,7 @@ public class CloneScanTask extends BaseScanTask{
     private ScanOperation scanOperation;
 
 
-    private void run(String repoId, String commitId, String category) {
+    private void run(String repoId, String commitId, String category) throws RuntimeException{
         String identifier= UUID.randomUUID().toString();
         Boolean lockResult = false;
         while(!lockResult){
@@ -52,7 +52,7 @@ public class CloneScanTask extends BaseScanTask{
         return new AsyncResult<>("complete");
     }
 
-    public void runSynchronously(String repoId,String commitId,String category){
+    public void runSynchronously(String repoId,String commitId,String category) throws RuntimeException{
         run(repoId, commitId, category);
     }
 

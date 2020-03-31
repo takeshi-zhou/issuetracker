@@ -48,7 +48,7 @@ public class BaseScanTask {
         kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
     }
 
-    void scan(ScanOperation scanOperation, String repoId, String commitId, String category){
+    void scan(ScanOperation scanOperation, String repoId, String commitId, String category) throws RuntimeException{
         if (scanOperation.isScanned(repoId,commitId,category)) {
             //如果当前commit已经扫描过，直接结束
             logger.info("this commit has been scanned");

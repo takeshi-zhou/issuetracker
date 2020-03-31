@@ -41,23 +41,26 @@ public class ScanOperationAdapter implements ScanOperation {
     }
 
     @Override
-    public boolean checkCommit(String repoId,String commitId,String category) {
+    public boolean checkCommit(String repoId,String commitId,String category) throws RuntimeException{
         Date lastScannedCommitTime = scanDao.getLastScannedCommitTime(repoId,category);
         if(lastScannedCommitTime==null) {
             return true;
         }
         JSONObject jsonObject = restInterfaceManager.getCommitTime(commitId,repoId);
+        if(jsonObject == null){
+            throw new RuntimeException("request base server failed");
+        }
         Date commit_time = jsonObject.getJSONObject("data").getDate("commit_time");
         return !lastScannedCommitTime.after(commit_time) ;
     }
 
     @Override
-    public ScanInitialInfo initialScan(String repoId, String commitId,String category) {
+    public ScanInitialInfo initialScan(String repoId, String commitId,String category) throws RuntimeException{
         //没有拿到repoPath
         String repoPath = restInterfaceManager.getRepoPath(repoId,commitId);
         if(repoPath==null) {
             logger.error("scan initial failed ,  repo id --> {}, commit id --> {} , can't get repo path. ",repoId,commitId);
-            return new ScanInitialInfo(false);
+            throw new RuntimeException("request base server failed");
         }
         Date startTime = new Date();
         JSONObject currentRepo = restInterfaceManager.getRepoById(repoId);
@@ -77,6 +80,9 @@ public class ScanOperationAdapter implements ScanOperation {
         scan.setUuid(uuid);
         //use api provided by commit-service
         JSONObject jsonObject = restInterfaceManager.getCommitTime(commitId,repoId);
+        if(jsonObject == null){
+            throw new RuntimeException("request base server failed");
+        }
         Date commit_time = jsonObject.getJSONObject("data").getDate("commit_time");
         scan.setCommit_time(commit_time);
         scanDao.insertOneScan(scan);

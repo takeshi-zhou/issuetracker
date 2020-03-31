@@ -11,6 +11,30 @@
         <result property="description" column="description"/>
     </resultMap>
 
+
+    <insert id="insertIssueTypeList" parameterType="List">
+        insert into issueType
+        (
+        uuid,
+        type,
+        tool,
+        category,
+        description,
+        language
+        )
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.uuid},
+            #{item.type},
+            #{item.tool},
+            #{item.category},
+            #{item.description},
+            #{item.language}
+            )
+        </foreach>
+    </insert>
+
     <select id="getIssueTypeByTypeName" parameterType="String" resultMap="issueType">
         select * from issueType where type =#{type}
     </select>

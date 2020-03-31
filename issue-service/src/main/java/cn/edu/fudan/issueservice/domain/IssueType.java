@@ -7,6 +7,7 @@ public class IssueType {
     private String tool;
     private String category;
     private String description;
+    private String language;
 
     public String getUuid() {
         return uuid;
@@ -46,5 +47,13 @@ public class IssueType {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 }

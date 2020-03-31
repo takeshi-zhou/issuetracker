@@ -178,21 +178,33 @@ public class KafkaServiceImpl implements KafkaService {
         String commitId = scanMessage.getCommitId();
         List<ScanMessageWithTime> list=new ArrayList<>();
         ScanMessageWithTime scanMessageWithTime=new ScanMessageWithTime(repoId,commitId);
-        scanMessageWithTime.setCommitTime(restInterfaceManager.getCommitTime(commitId,repoId).getJSONObject("data").getString("commit_time"));
+        JSONObject commitTimeJson = restInterfaceManager.getCommitTime(commitId,repoId);
+        if(commitTimeJson == null){
+            sendToScanResult(repoId,commitId,"bug","failed","request base server failed");
+            return;
+        }
+        scanMessageWithTime.setCommitTime(commitTimeJson.getJSONObject("data").getString("commit_time"));
         list.add(scanMessageWithTime);
         //串行扫
-        if(existProject(repoId,"bug",false)){
-            findBugScanTask.runSynchronously(repoId, commitId,"bug");
+        try{
+            if(existProject(repoId,"bug",false)){
+                findBugScanTask.runSynchronously(repoId, commitId,"bug");
 
-            updateCodeTracker(repoId);
-            checkOutCodeTrackerStatus(repoId);
+                updateCodeTracker(repoId);
+                checkOutCodeTrackerStatus(repoId);
 
-            sendMessageToMeasure(repoId,list);
+                sendMessageToMeasure(repoId,list);
 
-            cloneScanTask.runSynchronously(repoId,commitId,"clone");
-            sendMessageToClone(repoId,list);
+                cloneScanTask.runSynchronously(repoId,commitId,"clone");
+                sendMessageToClone(repoId,list);
 
+            }
+        }catch (RuntimeException e){
+            if("request base server failed".equals(e.getMessage())){
+                sendToScanResult(repoId,commitId,"bug","failed","request base server failed");
+            }
         }
+
 //        if(existProject(repoId,"clone",false)){
 //
 //        }
@@ -213,6 +225,11 @@ public class KafkaServiceImpl implements KafkaService {
         //发送消息给clone服务，将度量信息保存
         kafkaTemplate.send("CloneZNJ",JSONObject.toJSONString(cloneInfo));
         logger.info("message has been send to topic Clone -> {}",repoId);
+    }
+
+    private void sendToScanResult(String repoId, String commitId,String category,String status, String description) {
+        ScanResult scanResult = new ScanResult(repoId, commitId, category,status, description);
+        kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
     }
 
     @Override
@@ -270,7 +287,7 @@ public class KafkaServiceImpl implements KafkaService {
 
             repoPath = restInterfaceManager.getRepoPath(repoId, firstScanCommitId);
             if (repoPath == null) {
-                return "can't get repo path.";
+                throw new RuntimeException("request base server failed");
             }
             JGitHelper jGitHelper = new JGitHelper(repoPath);
             jGitHelper.checkoutToLatestCommit(branch);
@@ -320,125 +337,133 @@ public class KafkaServiceImpl implements KafkaService {
 
         String repoId=map.get(dates.get(0)).get(0).getRepoId();
 
+        try{
+            //bug扫描
+            boolean existedForBug =(existProject(repoId,"bug",false)||existProject(repoId,"bug",true));
+            if(existedForBug){
+                boolean isSendMsgToCodeTracker = false;
+                String firstScanCommit = null;
+                if(existProject(repoId,"bug",true)){
+                    filteredCommits=commitFilter.filter(map,dates);
+                    if(filteredCommits.isEmpty()){
+                        return ;
+                    }
+                    isSendMsgToCodeTracker = true;
+                    firstScanCommit = filteredCommits.get(0).getCommitId();
+
+                }else{
+                    filteredCommits = addAllCommits(map,dates);
+                }
+                logger.info("{} need to auto scan!",repoId);
+                logger.info(filteredCommits.size()+" commits need to scan after filtered!");
 
 
-        //bug扫描
-        boolean existedForBug =(existProject(repoId,"bug",false)||existProject(repoId,"bug",true));
-        if(existedForBug){
-            boolean isSendMsgToCodeTracker = false;
-            String firstScanCommit = null;
-            if(existProject(repoId,"bug",true)){
-                filteredCommits=commitFilter.filter(map,dates);
+                Map<String,String> bugResultMap = analyzeProjectIsScanned(repoId,"bug",filteredCommits);
+
+                if(Boolean.parseBoolean(bugResultMap.get("isFirst"))){
+                    List<ScanMessageWithTime> bugFilterCommits = filteredCommits;
+                    if(bugResultMap.get("location") != null){
+                        bugFilterCommits = updateFilterCommits(filteredCommits,Integer.parseInt(bugResultMap.get("location")));
+                    }
+                    logger.info("start auto scan bug -> {}",repoId);
+                    for(ScanMessageWithTime message:bugFilterCommits){
+                        String commitId = message.getCommitId();
+                        findBugScanTask.runSynchronously(repoId,commitId,"bug");
+                    }
+
+                    logger.info("findbugs scan finished... start code tracker...");
+                    sendMsgToCodeTracker(isSendMsgToCodeTracker,firstScanCommit,repoId);
+
+                    checkOutCodeTrackerStatus(repoId);
+
+                    for(ScanMessageWithTime message:bugFilterCommits){
+                        String commitId = message.getCommitId();
+                        cloneScanTask.runSynchronously(repoId,commitId,"clone");
+                    }
+                    //restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
+
+                    sendMessageToMeasure(repoId,bugFilterCommits);
+
+                    restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
+                }
+
+            }else{
+                logger.info("repo {} not exist or has been auto scanned!",repoId);
+            }
+            //clone扫描
+            boolean existedForClone = (existProject(repoId,"clone",false)||existProject(repoId,"clone",true));
+            if(existedForClone){
+                if(existProject(repoId,"clone",true)){
+                    filteredCommits=commitFilter.filter(map,dates);
+                }else{
+                    filteredCommits = addAllCommits(map,dates);
+                }
+                logger.info("{} need to auto scan!",repoId);
+                logger.info(filteredCommits.size()+" commits need to scan after filtered!");
+
                 if(filteredCommits.isEmpty()){
                     return ;
                 }
-                isSendMsgToCodeTracker = true;
-                firstScanCommit = filteredCommits.get(0).getCommitId();
+                Map<String,String> cloneResultMap = analyzeProjectIsScanned(repoId,"clone",filteredCommits);
+
+                if(Boolean.parseBoolean(cloneResultMap.get("isFirst"))){
+                    List<ScanMessageWithTime> cloneFilterCommits = filteredCommits;
+                    if(cloneResultMap.get("location") != null){
+                        cloneFilterCommits = updateFilterCommits(filteredCommits,Integer.parseInt(cloneResultMap.get("location")));
+                    }
+                    logger.info("start auto scan clone -> {}",repoId);
+                    for(ScanMessageWithTime message:cloneFilterCommits){
+                        String commitId = message.getCommitId();
+                        cloneScanTask.runSynchronously(repoId,commitId,"clone");
+                    }
+                    restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
+                    sendMessageToClone(repoId,cloneFilterCommits);
+                }
+
 
             }else{
-                filteredCommits = addAllCommits(map,dates);
+                logger.info("repo {} not exist or has been auto scanned!",repoId);
             }
-            logger.info("{} need to auto scan!",repoId);
-            logger.info(filteredCommits.size()+" commits need to scan after filtered!");
-
-
-            Map<String,String> bugResultMap = analyzeProjectIsScanned(repoId,"bug",filteredCommits);
-
-            if(Boolean.parseBoolean(bugResultMap.get("isFirst"))){
-                List<ScanMessageWithTime> bugFilterCommits = filteredCommits;
-                if(bugResultMap.get("location") != null){
-                    bugFilterCommits = updateFilterCommits(filteredCommits,Integer.parseInt(bugResultMap.get("location")));
+            //sonar扫描
+            boolean existedForSonar = (existProject(repoId,"sonar",false)||existProject(repoId,"sonar",true));
+            if(existedForSonar){
+                if(existProject(repoId,"sonar",true)){
+                    filteredCommits=commitFilter.filter(map,dates);
+                }else{
+                    filteredCommits = addAllCommits(map,dates);
                 }
-                logger.info("start auto scan bug -> {}",repoId);
-                for(ScanMessageWithTime message:bugFilterCommits){
-                    String commitId = message.getCommitId();
-                    findBugScanTask.runSynchronously(repoId,commitId,"bug");
+                logger.info("{} need to auto scan!",repoId);
+                logger.info(filteredCommits.size()+" commits need to scan after filtered!");
+
+                if(filteredCommits.isEmpty()){
+                    return ;
                 }
+                Map<String,String> sonarResultMap = analyzeProjectIsScanned(repoId,"sonar",filteredCommits);
 
-
-                sendMsgToCodeTracker(isSendMsgToCodeTracker,firstScanCommit,repoId);
-
-                checkOutCodeTrackerStatus(repoId);
-
-                for(ScanMessageWithTime message:bugFilterCommits){
-                    String commitId = message.getCommitId();
-                    cloneScanTask.runSynchronously(repoId,commitId,"clone");
+                if(Boolean.parseBoolean(sonarResultMap.get("isFirst"))){
+                    List<ScanMessageWithTime> sonarFilterCommits = filteredCommits;
+                    if(sonarResultMap.get("location") != null){
+                        sonarFilterCommits = updateFilterCommits(filteredCommits,Integer.parseInt(sonarResultMap.get("location")));
+                    }
+                    logger.info("start auto scan sonar -> {}",repoId);
+                    for(ScanMessageWithTime message:sonarFilterCommits){
+                        String commitId = message.getCommitId();
+                        sonarScanTask.runSynchronously(repoId,commitId,"sonar");
+                    }
+                    restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"sonar");
                 }
-                //restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
-
-                sendMessageToMeasure(repoId,bugFilterCommits);
-
-                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"bug");
-            }
-
-        }else{
-            logger.info("repo {} not exist or has been auto scanned!",repoId);
-        }
-        //clone扫描
-        boolean existedForClone = (existProject(repoId,"clone",false)||existProject(repoId,"clone",true));
-        if(existedForClone){
-            if(existProject(repoId,"clone",true)){
-                filteredCommits=commitFilter.filter(map,dates);
             }else{
-                filteredCommits = addAllCommits(map,dates);
+                logger.info("repo {} not exist or has been auto scanned!",repoId);
             }
-            logger.info("{} need to auto scan!",repoId);
-            logger.info(filteredCommits.size()+" commits need to scan after filtered!");
-
-            if(filteredCommits.isEmpty()){
-                return ;
+        }catch (RuntimeException e){
+            e.printStackTrace();
+            logger.error("something wrong...");
+            if("request base server failed".equals(e.getMessage())){
+                sendToScanResult(repoId,"","bug","failed","request base server failed");
             }
-            Map<String,String> cloneResultMap = analyzeProjectIsScanned(repoId,"clone",filteredCommits);
-
-            if(Boolean.parseBoolean(cloneResultMap.get("isFirst"))){
-                List<ScanMessageWithTime> cloneFilterCommits = filteredCommits;
-                if(cloneResultMap.get("location") != null){
-                    cloneFilterCommits = updateFilterCommits(filteredCommits,Integer.parseInt(cloneResultMap.get("location")));
-                }
-                logger.info("start auto scan clone -> {}",repoId);
-                for(ScanMessageWithTime message:cloneFilterCommits){
-                    String commitId = message.getCommitId();
-                    cloneScanTask.runSynchronously(repoId,commitId,"clone");
-                }
-                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
-                sendMessageToClone(repoId,cloneFilterCommits);
-            }
-
-
-        }else{
-            logger.info("repo {} not exist or has been auto scanned!",repoId);
         }
-        //sonar扫描
-        boolean existedForSonar = (existProject(repoId,"sonar",false)||existProject(repoId,"sonar",true));
-        if(existedForSonar){
-            if(existProject(repoId,"sonar",true)){
-                filteredCommits=commitFilter.filter(map,dates);
-            }else{
-                filteredCommits = addAllCommits(map,dates);
-            }
-            logger.info("{} need to auto scan!",repoId);
-            logger.info(filteredCommits.size()+" commits need to scan after filtered!");
 
-            if(filteredCommits.isEmpty()){
-                return ;
-            }
-            Map<String,String> sonarResultMap = analyzeProjectIsScanned(repoId,"sonar",filteredCommits);
 
-            if(Boolean.parseBoolean(sonarResultMap.get("isFirst"))){
-                List<ScanMessageWithTime> sonarFilterCommits = filteredCommits;
-                if(sonarResultMap.get("location") != null){
-                    sonarFilterCommits = updateFilterCommits(filteredCommits,Integer.parseInt(sonarResultMap.get("location")));
-                }
-                logger.info("start auto scan sonar -> {}",repoId);
-                for(ScanMessageWithTime message:sonarFilterCommits){
-                    String commitId = message.getCommitId();
-                    sonarScanTask.runSynchronously(repoId,commitId,"sonar");
-                }
-                restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"sonar");
-            }
-        }else{
-            logger.info("repo {} not exist or has been auto scanned!",repoId);
-        }
     }
 
     private Map<String,String> analyzeProjectIsScanned(String repoId,String category,List<ScanMessageWithTime> filteredCommits){
@@ -523,6 +548,7 @@ public class KafkaServiceImpl implements KafkaService {
     }
 
     private boolean checkOutCodeTrackerStatus(String repoId){
+        logger.info("start check code tracker status .....");
         boolean  result = true;
         String status = null;
         JSONArray projectList = restInterfaceManager.getProjectsOfRepo(repoId);
@@ -629,9 +655,10 @@ public class KafkaServiceImpl implements KafkaService {
 
 
 
-    private String getBaseCommitId(String  repoId,String branchName){
+    private String getBaseCommitId(String  repoId,String branchName) throws RuntimeException{
 
         JSONObject jsonObject = restInterfaceManager.getCommitsOfRepoByConditions(repoId,1,1,false);
+
         JSONArray scanJsonArray = jsonObject.getJSONArray("data");
         if(scanJsonArray.isEmpty()){
             logger.warn("repoId is not exist! -->  {}" , repoId);
@@ -647,7 +674,7 @@ public class KafkaServiceImpl implements KafkaService {
         try {
             firstRequestrepoPath = restInterfaceManager.getRepoPath(repoId, checkOutCommitId);
             if (firstRequestrepoPath == null) {
-                return null;
+                throw new RuntimeException("request base server failed");
             }
 
             JGitHelper jGitHelper = new JGitHelper(firstRequestrepoPath);
@@ -685,7 +712,7 @@ public class KafkaServiceImpl implements KafkaService {
 
                 repoPath = restInterfaceManager.getRepoPath(repoId, checkOutCommitId);
                 if (repoPath == null) {
-                    return null;
+                    throw new RuntimeException("request base server failed");
                 }
 
 
@@ -767,13 +794,13 @@ public class KafkaServiceImpl implements KafkaService {
 
     }
 
-    private int getAllAggregationCommitCount(String repoId, String checkCommitId){
+    private int getAllAggregationCommitCount(String repoId, String checkCommitId) throws RuntimeException{
         int result = 0;
         String repoPath = null;
         try {
             repoPath = restInterfaceManager.getRepoPath(repoId, checkCommitId);
             if (repoPath == null) {
-                return 0;
+                throw new RuntimeException("request base server failed");
             }
 
 

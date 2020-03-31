@@ -35,12 +35,15 @@ public class RecentAllStrategy implements CommitFilterStrategy<ScanMessageWithTi
     }
 
     @Override
-    public List<ScanMessageWithTime> filter(Map<LocalDate, List<ScanMessageWithTime>> map, List<LocalDate> dates) {
+    public List<ScanMessageWithTime> filter(Map<LocalDate, List<ScanMessageWithTime>> map, List<LocalDate> dates) throws RuntimeException{
         String repoId = StrategyUtil.getRepoIdByMsg(map);
         LinkedList<ScanMessageWithTime> result=new LinkedList<>();
         LocalDate latestCommitTime = null;
         if(repoId != null ){
             JSONObject jsonObject = restInterfaceManager.getCommitsOfRepoByConditions(repoId,1,1,null);
+            if(jsonObject == null){
+                throw new RuntimeException("request base server failed");
+            }
             JSONArray scanMessageWithTimeJsonArray = jsonObject.getJSONArray("data");
             JSONObject latestScanMessageWithTime = scanMessageWithTimeJsonArray.getJSONObject(0);
             String completeCommitTime = latestScanMessageWithTime.getString("commit_time");

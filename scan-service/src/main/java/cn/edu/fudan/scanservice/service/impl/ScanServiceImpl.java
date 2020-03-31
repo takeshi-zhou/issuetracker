@@ -161,17 +161,20 @@ public class ScanServiceImpl implements ScanService {
     }
 
     @Override
-    public List<String> getPreScannedCommitByCurrentCommit(String repoId, String category, String commitId) {
+    public List<String> getPreScannedCommitByCurrentCommit(String repoId, String category, String commitId) throws RuntimeException{
         String repoPath = null;
         List<String> result = null;
         JSONObject jsonObject = restInterfaceManager.getCommitsOfRepoByConditions(repoId, 1, 1, null);
+        if(jsonObject == null){
+            throw new RuntimeException("request base server failed");
+        }
         JSONArray scanMessageWithTimeJsonArray = jsonObject.getJSONArray("data");
         JSONObject latestScanMessageWithTime = scanMessageWithTimeJsonArray.getJSONObject(0);
         String checkCommitId = latestScanMessageWithTime.getString("commit_id");
         try{
             repoPath = restInterfaceManager.getRepoPath(repoId,checkCommitId);
             if(repoPath == null){
-                return null;
+                throw new RuntimeException("request base server failed");
             }
             JGitHelper jGitHelper = new JGitHelper(repoPath);
             result = getPreScannedCommitByJGit(jGitHelper,null,repoId,category,commitId);
@@ -209,13 +212,13 @@ public class ScanServiceImpl implements ScanService {
 
 
     @Override
-    public String getLatestScanFailedCommitIdAndDeveloper(String repoId, String category, String commitId) {
+    public String getLatestScanFailedCommitIdAndDeveloper(String repoId, String category, String commitId) throws RuntimeException {
         String repoPath = null;
         String result = null;
         try{
             repoPath = restInterfaceManager.getRepoPath(repoId,commitId);
             if(repoPath == null){
-                return null;
+                throw new RuntimeException("request base server failed");
             }
             JGitHelper jGitHelper = new JGitHelper(repoPath);
             result = getPreScannedFailedCommitByJGit(jGitHelper,repoId,category,commitId);

@@ -1,6 +1,7 @@
 package cn.edu.fudan.scanservice.component.rest;
 
 import cn.edu.fudan.scanservice.exception.AuthException;
+import cn.edu.fudan.scanservice.util.DateTimeUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -59,17 +61,29 @@ public class RestInterfaceManager {
     }
 
     //-----------------------------------commit service-------------------------------------------------------
-    public JSONObject checkOut(String repo_id, String commit_id) {
-        return restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class);
-    }
+
 
     public JSONObject getCommitTime(String commitId,String repoId) {
         JSONObject result = null;
-        try{
-            String url = commitServicePath + "/commit-time?repo_id=" + repoId + "&commit_id=" +commitId;
-            result = restTemplate.getForObject(url, JSONObject.class);
-        }catch(Exception e){
-            logger.error( "request repo_id --> {},commit_id --> {},failed ",repoId,commitId);
+
+        int tryCount = 0;
+        while (tryCount < 5) {
+
+            try{
+                String url = commitServicePath + "/commit-time?repo_id=" + repoId + "&commit_id=" +commitId;
+                result = restTemplate.getForObject(url, JSONObject.class);
+                break;
+            }catch (Exception e){
+                logger.error( "request repo_id --> {},commit_id --> {},failed ",repoId,commitId);
+                e.printStackTrace();
+                try{
+                    TimeUnit.SECONDS.sleep(20);
+                }catch(Exception sleepException){
+                    e.printStackTrace();
+                }
+
+                tryCount++;
+            }
         }
 
         return result;
@@ -81,46 +95,107 @@ public class RestInterfaceManager {
     }
 
     public JSONObject getCommitsOfRepo(String repoId, Integer page, Integer size) {
-        String url = commitServicePath + "?repo_id=" + repoId;
-        if(page != null ){
-            if(size != null){
-                if(size<=0 || page<=0){
-                    logger.error("page size or page is not correct . page size --> {},page --> {}",size,page);
-                    return null;
+
+        JSONObject result = null;
+        int tryCount = 0;
+        while (tryCount < 5) {
+
+            try{
+                String url = commitServicePath + "?repo_id=" + repoId;
+                if(page != null ){
+                    if(size != null){
+                        if(size<=0 || page<=0){
+                            logger.error("page size or page is not correct . page size --> {},page --> {}",size,page);
+                            return null;
+                        }
+                        url += "&per_page="+size;
+                    }
+                    url += "&page="+page;
                 }
-                url += "&per_page="+size;
+                result = restTemplate.getForObject(commitServicePath + "?repo_id=" + repoId + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class);
+                break;
+            }catch (Exception e){
+                logger.error( "request repo_id --> {},failed ",repoId);
+                e.printStackTrace();
+                try{
+                    TimeUnit.SECONDS.sleep(20);
+                }catch(Exception sleepException){
+                    e.printStackTrace();
+                }
+
+                tryCount++;
             }
-            url += "&page="+page;
         }
 
-        return restTemplate.getForObject(commitServicePath + "?repo_id=" + repoId + "&page=" + page + "&per_page=" + size + "&is_whole=true", JSONObject.class);
+
+
+        return result;
     }
 
     public JSONObject getCommitsOfRepoByConditions(String repoId, Integer page, Integer pageSize,Boolean isWhole) {
 
-        String url = commitServicePath + "?repo_id=" + repoId;
-        if(page != null ){
-            if(pageSize != null){
-                if(pageSize<=0 || page<=0){
-                    logger.error("page size or page is not correct . page size --> {},page --> {}",pageSize,page);
-                    return null;
+        JSONObject result = null;
+        int tryCount = 0;
+        while (tryCount < 5) {
+
+            try{
+                String url = commitServicePath + "?repo_id=" + repoId;
+                if(page != null ){
+                    if(pageSize != null){
+                        if(pageSize<=0 || page<=0){
+                            logger.error("page size or page is not correct . page size --> {},page --> {}",pageSize,page);
+                            return null;
+                        }
+                        url += "&per_page=" + pageSize;
+                    }
+                    url += "&page=" + page;
                 }
-                url += "&per_page=" + pageSize;
+
+                if(isWhole != null){
+                    url += "&is_whole=" + isWhole ;
+                }
+                result = restTemplate.getForObject(url, JSONObject.class);
+                break;
+            }catch (Exception e){
+                logger.error( "request repo_id --> {},failed ",repoId);
+                e.printStackTrace();
+                try{
+                    TimeUnit.SECONDS.sleep(20);
+                }catch(Exception sleepException){
+                    e.printStackTrace();
+                }
+
+                tryCount++;
             }
-            url += "&page=" + page;
         }
 
-        if(isWhole != null){
-            url += "&is_whole=" + isWhole ;
-        }
-        return restTemplate.getForObject(url, JSONObject.class);
+        return result;
 
     }
 
 
     //-----------------------------------repo service--------------------------------------------------------
     public JSONObject getRepoById(String repoId) {
-        return restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
+
+        JSONObject result = null;
+        int tryCount = 0;
+        while (tryCount < 5) {
+
+            try{
+                result = restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
+                break;
+            }catch (Exception e){
+                e.printStackTrace();
+                try{
+                    TimeUnit.SECONDS.sleep(20);
+                }catch(Exception sleepException){
+                    e.printStackTrace();
+                }
+
+                tryCount++;
+            }
+        }
+        return result;
     }
 
     //-----------------------------------issue service-------------------------------------------------------
@@ -167,25 +242,59 @@ public class RestInterfaceManager {
 
     //---------------------------------------------code service---------------------------------------------------------
     public String getRepoPath(String repoId, String commit_id) {
+
         String repoPath = null;
-        JSONObject response = restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId + "&commit_id=" + commit_id, JSONObject.class).getJSONObject("data");
-        if (response != null) {
-            if (response.getString("status").equals("Successful")) {
-                repoPath = response.getString("content");
-                logger.info("repoHome -> {}", repoPath);
-            } else {
-                logger.error("get repoHome fail -> {}", response.getString("content"));
+        int tryCount = 0;
+        while (tryCount < 5) {
+
+            try{
+                JSONObject response = restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId + "&commit_id=" + commit_id, JSONObject.class).getJSONObject("data");
+                if (response != null) {
+                    if (response.getString("status").equals("Successful")) {
+                        repoPath = response.getString("content");
+                        logger.info("repoHome -> {}", repoPath);
+                    } else {
+                        logger.error("get repoHome fail -> {}", response.getString("content"));
+                    }
+                } else {
+                    logger.error("code service response null!");
+                }
+                break;
+            }catch (Exception e){
+                e.printStackTrace();
+                try{
+                    TimeUnit.SECONDS.sleep(20);
+                }catch(Exception sleepException){
+                    e.printStackTrace();
+                }
+
+                tryCount++;
             }
-        } else {
-            logger.error("code service response null!");
         }
         return repoPath;
     }
 
     public JSONObject freeRepoPath(String repoId, String repoPath) {
-        if (repoPath != null) {
-            return restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId + "&path=" + repoPath, JSONObject.class);
+        int tryCount = 0;
+        while (tryCount < 5) {
+            try{
+                if (repoPath != null) {
+                    return restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId + "&path=" + repoPath, JSONObject.class);
+                }
+
+                break;
+            }catch (Exception e){
+                e.printStackTrace();
+                try{
+                    TimeUnit.SECONDS.sleep(20);
+                }catch(Exception sleepException){
+                    e.printStackTrace();
+                }
+
+                tryCount++;
+            }
         }
+
         return null;
     }
 

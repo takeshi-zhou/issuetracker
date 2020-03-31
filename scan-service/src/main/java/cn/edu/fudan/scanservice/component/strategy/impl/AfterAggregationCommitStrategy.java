@@ -46,7 +46,7 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
 
 
     @Override
-    public List<ScanMessageWithTime> filter(Map<LocalDate, List<ScanMessageWithTime>> map, List<LocalDate> dates) {
+    public List<ScanMessageWithTime> filter(Map<LocalDate, List<ScanMessageWithTime>> map, List<LocalDate> dates) throws RuntimeException{
         String repoId = StrategyUtil.getRepoIdByMsg(map);
         String repoPath = null;
         LinkedList<ScanMessageWithTime> result = new LinkedList<>();
@@ -58,6 +58,9 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
 
 
         JSONObject jsonObject = restInterfaceManager.getCommitsOfRepoByConditions(repoId, 1, 1, null);
+        if(jsonObject == null){
+            throw new RuntimeException("request base server failed");
+        }
         JSONArray scanMessageWithTimeJsonArray = jsonObject.getJSONArray("data");
         JSONObject latestScanMessageWithTime = scanMessageWithTimeJsonArray.getJSONObject(0);
         String completeCommitTime = latestScanMessageWithTime.getString("commit_time");
@@ -122,7 +125,7 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
 
 
 
-    private String getBaseCommitId(String  completeCommitTime, String  repoId, String checkCommitId){
+    private String getBaseCommitId(String  completeCommitTime, String  repoId, String checkCommitId) throws RuntimeException{
         int findCounts = 0;
         String baseCommitId = null;
         LocalDateTime latestCommitTime = null;
@@ -145,7 +148,7 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
 
                 repoPath = restInterfaceManager.getRepoPath(repoId, checkCommitId);
                 if (repoPath == null) {
-                    return null;
+                    throw new RuntimeException("request base server failed");
                 }
 
 
@@ -191,6 +194,10 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
 
                 try {
                     repoPathRevCommit = restInterfaceManager.getRepoPath(repoId, revCommit.getName());
+                    if (repoPathRevCommit == null) {
+                        throw new RuntimeException("request base server failed");
+                    }
+
                     boolean isCompiled = executeShellUtil.executeMvn(repoPathRevCommit);
                     findCounts++;
                     if (isCompiled) {
@@ -227,13 +234,13 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
 
     }
 
-    private int getAllAggregationCommitCount(String repoId, String checkCommitId){
+    private int getAllAggregationCommitCount(String repoId, String checkCommitId) throws RuntimeException{
         int result = 0;
         String repoPath = null;
         try {
             repoPath = restInterfaceManager.getRepoPath(repoId, checkCommitId);
             if (repoPath == null) {
-                return 0;
+                throw new RuntimeException("request base server failed");
             }
 
 

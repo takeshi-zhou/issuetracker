@@ -30,7 +30,7 @@ public class FindBugScanTask extends BaseScanTask{
 
 
 
-    private void run(String repoId, String commitId,String category) {
+    private void run(String repoId, String commitId,String category) throws RuntimeException{
         //获取分布式锁，一个repo同一时间只能有一个线程在扫
         //15min恰好是一个整个Scan操作的超时时间，如果某个线程获得锁之后Scan过程卡死导致锁没有释放
         //如果那个锁成功设置了过期时间，那么key过期后，其他线程自然可以获取到锁
@@ -58,7 +58,7 @@ public class FindBugScanTask extends BaseScanTask{
         return new AsyncResult<>("complete");
     }
 
-    public void runSynchronously(String repoId,String commitId,String category){
+    public void runSynchronously(String repoId,String commitId,String category) throws RuntimeException{
         run(repoId,commitId,category);
     }
 }
