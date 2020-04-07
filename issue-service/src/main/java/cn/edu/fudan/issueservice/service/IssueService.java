@@ -43,6 +43,8 @@ public interface IssueService {
 
     void updateStatus(String issueId, String status,String token);
 
+    void updateIssueType(String issueId, String type, String token,String tool);
+
     void batchUpdateIssueListPriority(List<String> issueUuid, Integer priority);
 
     List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type);

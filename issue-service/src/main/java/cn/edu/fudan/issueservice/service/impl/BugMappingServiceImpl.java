@@ -271,6 +271,8 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
     private void issueMapping(String repoId, String category, List<String> parentCommits, String currentCommitId, Date commitDate,
                               Date date, List<Issue> insertIssueList, List<JSONObject> tags, JSONArray ignoreTypes, String committer, String developer, boolean isAggregation) {
 
+        logger.info("not first mapping!");
+
         int equalsCount = 0;
         int ignoreCountInNewIssues = 0;
         int ignoreCountInEliminatedIssues = 0;
@@ -889,6 +891,21 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
 
     }
+
+
+    private void addIssueTypeTag(List<JSONObject> tags,RawIssue rawIssue,Issue issue){
+        String tagId = null;
+        IssueType issueType = issueTypeDao.getIssueTypeByTypeName(rawIssue.getType());
+        JSONArray tagsJson = restInterfaceManager.getTagByCondition(null,issueType.getCategory(),null);
+        if(tagsJson.size()==1){
+            tagId = tagsJson.getJSONObject(0).getString("uuid");
+        }
+        JSONObject issueTypeTagged = new JSONObject();
+        issueTypeTagged.put("item_id", issue.getUuid());
+        issueTypeTagged.put("tag_id", tagId);
+        tags.add(issueTypeTagged);
+    }
+
 
 
 

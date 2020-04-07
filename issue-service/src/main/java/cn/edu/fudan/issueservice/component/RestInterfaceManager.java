@@ -18,6 +18,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author WZY
@@ -142,6 +143,46 @@ public class RestInterfaceManager {
     }
 
 
+    public JSONArray  getTagByCondition(String tagId , String name , String scope){
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity request = new HttpEntity(headers);
+        StringBuilder urlBuilder = new StringBuilder();
+        boolean isFirstPram =true;
+        urlBuilder.append(tagServicePath + "/tags/condition?");
+        if(tagId != null){
+            if(!isFirstPram){
+                urlBuilder.append("&");
+            }else{
+                isFirstPram=false;
+            }
+            urlBuilder.append("uuid=" + tagId);
+        }
+        if(name != null){
+            if(!isFirstPram){
+                urlBuilder.append("&");
+            }else{
+                isFirstPram=false;
+            }
+            urlBuilder.append("name=" + name);
+        }
+        if(scope != null){
+            if(!isFirstPram){
+                urlBuilder.append("&");
+            }else{
+                isFirstPram=false;
+            }
+            urlBuilder.append("scope=" + scope);
+        }
+        String url = urlBuilder.toString();
+
+        ResponseEntity responseEntity = restTemplate.exchange(url , HttpMethod.GET,request,JSONObject.class);
+        String body = responseEntity.getBody().toString();
+        JSONObject result = JSONArray.parseObject(body,JSONObject.class);
+
+        return result.getJSONArray("data");
+
+    }
+
     //----------------------------------------------------end--------------------------------------------------------
 
     //-----------------------------------------------project service-------------------------------------------------
@@ -206,7 +247,31 @@ public class RestInterfaceManager {
 
     //---------------------------------------------code service---------------------------------------------------------
     public JSONObject getRepoPath(String repoId,String commit_id){
-        return restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId+"&commit_id="+commit_id, JSONObject.class);
+        JSONObject repoPath = null;
+        int tryCount = 0;
+        while (tryCount < 5) {
+
+            try{
+                JSONObject response = restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId + "&commit_id=" + commit_id, JSONObject.class);
+                if (response != null) {
+                    repoPath = response;
+                } else {
+                    logger.error("code service response null!");
+                }
+                break;
+            }catch (Exception e){
+                e.printStackTrace();
+                try{
+                    TimeUnit.SECONDS.sleep(20);
+                }catch(Exception sleepException){
+                    e.printStackTrace();
+                }
+
+                tryCount++;
+            }
+        }
+        return repoPath;
+
     }
 
     public JSONObject freeRepoPath(String repoId,String repoPath){
@@ -435,6 +500,30 @@ public class RestInterfaceManager {
             linesList.add(code);
         }
         return linesList;
+    }
+
+
+
+    public JSONObject getSonarIssueType(String repositories,String status,int page , int ps){
+
+        Map<String, String> map = new HashMap<>();
+
+        String baseRequestUrl = sonarServicePath + "/api/rules/search?repositories={repositories}&status={status}&p={p}&ps={ps}";
+        map.put("repositories",repositories);
+        map.put("status",status);
+        map.put("p",String.valueOf(page));
+        map.put("ps",String.valueOf(ps));
+        try{
+            ResponseEntity entity = restTemplate.getForEntity(baseRequestUrl,JSONObject.class,map);
+            return JSONObject.parseObject(entity.getBody().toString());
+        }catch (RuntimeException e){
+            e.printStackTrace();
+            logger.error("componentKey : {}  ----> request sonar  source rule  api failed , repositories --> {} , status --> {}", repositories,status);
+            return null;
+        }
+
+
+
     }
 
     //------------------------------------------------------scan api ---------------------------------------------

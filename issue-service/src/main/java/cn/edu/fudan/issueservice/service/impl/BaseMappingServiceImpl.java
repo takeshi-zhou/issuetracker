@@ -4,6 +4,7 @@ import cn.edu.fudan.issueservice.component.IssueEventManager;
 import cn.edu.fudan.issueservice.component.RestInterfaceManager;
 import cn.edu.fudan.issueservice.component.TagMapHelper;
 import cn.edu.fudan.issueservice.dao.IssueDao;
+import cn.edu.fudan.issueservice.dao.IssueTypeDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.dao.ScanResultDao;
 import cn.edu.fudan.issueservice.domain.*;
@@ -56,6 +57,7 @@ public class BaseMappingServiceImpl implements MappingService {
     RawIssueDao rawIssueDao;
     ScanResultDao scanResultDao;
     RestInterfaceManager restInterfaceManager;
+    IssueTypeDao issueTypeDao;
 
     private StringRedisTemplate stringRedisTemplate;
     private TagMapHelper tagMapHelper;
@@ -106,6 +108,12 @@ public class BaseMappingServiceImpl implements MappingService {
     public void setStringRedisTemplate(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
     }
+
+    @Autowired
+    public void setIssueTypeDao(IssueTypeDao issueTypeDao) {
+        this.issueTypeDao = issueTypeDao;
+    }
+
 
     void newIssueInfoUpdate(List<Issue> issueList,String category,String repo_id){
         String todayNewIssueKey="dashboard:"+category+":day:new:" + repo_id;
@@ -208,7 +216,7 @@ public class BaseMappingServiceImpl implements MappingService {
                 restInterfaceManager.freeRepoPath(repoId,repoPath);
             }
         }
-        commitDate = DateTimeUtil.stringToDate(commitTime);
+        commitDate = DateTimeUtil.localToUTC(commitTime);
         return commitDate;
 
     }
