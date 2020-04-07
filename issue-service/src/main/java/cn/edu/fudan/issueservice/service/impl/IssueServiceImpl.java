@@ -571,6 +571,30 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
+    public void updateIssueType(String issueId, String type, String token,String tool) {
+        String scope = null;
+
+        if("findbugs".equals(tool)){
+            scope = "findbugs_type";
+        }else if("sonar".equals(tool)){
+            scope = "sonar_type";
+        }
+        String preTagId = restInterfaceManager.getTagIdByItemIdAndScope(issueId, scope);
+        List<JSONObject> taggeds = new ArrayList<>();
+        JSONObject tagged = new JSONObject();
+        tagged.put("itemId", issueId);
+        tagged.put("preTagId", preTagId);
+        JSONArray issueTypes = restInterfaceManager.getTagByCondition(null, type,scope);
+        String issueTypeTagId = null;
+        if(issueTypes.size() == 1){
+            issueTypeTagId = issueTypes.getJSONObject(0).getString("uuid");
+        }
+        tagged.put("newTagId", issueTypeTagId);
+        taggeds.add(tagged);
+        restInterfaceManager.modifyTags(taggeds);
+    }
+
+    @Override
     public Object getRepoIssueCounts(String repo_id, String since, String until, String category) {
 //        LocalDate indexDay = LocalDate.parse(since,DateTimeUtil.Y_M_D_formatter);
 //        LocalDate untilDay = LocalDate.parse(until,DateTimeUtil.Y_M_D_formatter);
@@ -608,7 +632,7 @@ public class IssueServiceImpl implements IssueService {
         for (int i = 0; i < tagList.size(); i++) {
             JSONObject tagJson = tagList.getJSONObject(i);
             String tagIdFromJson = tagJson.getString("uuid");
-            switch (PriorityEnum.getPriprityEnum(tagJson.getString("name"))) {
+            switch (PriorityEnum.getPriorityEnum(tagJson.getString("name"))) {
                 case LOW:
                     lowTagId = tagIdFromJson;
                     break;

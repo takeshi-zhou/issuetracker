@@ -163,6 +163,12 @@
     <select id="getTagsByCondition" parameterType="String" resultMap="tag">
         select * from tag
         <trim prefix="where" prefixOverrides="and | or">
+            <if test="uuid != null">
+                and uuid = #{uuid}
+            </if>
+            <if test="name != null">
+                and name = #{name}
+            </if>
             <if test="scope != null">
                 and scope = #{scope}
             </if>

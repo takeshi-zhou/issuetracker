@@ -24,7 +24,7 @@ public enum PriorityEnum {
         return name;
     }
 
-    public static PriorityEnum getPriprityEnum(String name){
+    public static PriorityEnum getPriorityEnum(String name){
         for(PriorityEnum priority : PriorityEnum.values()){
             if(priority.getName().equals(name)){
                 return priority;

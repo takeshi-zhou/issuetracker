@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 
@@ -111,6 +112,8 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                         //获取issue
                         Issue issue = generateOneNewIssue(rawIssue,issueUUID,pre_commit_id,sonarIssue,date,jGitHelper);
                         addTag(tags,ignoreTypes,rawIssue,issue);
+                        addIssueTypeTag(sonarIssue,tags,issue);
+
                         insertIssueList.add(issue);
                     }
                 }
@@ -199,6 +202,7 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
                             //获取issue
                             Issue issue = generateOneNewIssue(rawIssue,issueUUID,pre_commit_id,sonarIssue,date,jGitHelper);
                             addTag(tags,ignoreTypes,rawIssue,issue);
+                            addIssueTypeTag(sonarIssue,tags,issue);
                             insertIssueList.add(issue);
                         }else{
                             issueUUID = issueList.get(index).getUuid();
@@ -672,6 +676,41 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
         }else{
             logger.warn(" this status has not been considered!" ,status);
             result = status;
+        }
+        return result;
+    }
+
+
+    private void addIssueTypeTag(JSONObject sonarIssue,List<JSONObject> tags,Issue issue){
+        String tagId = null;
+        String issueType = getIssueTypeBySonarIssue(sonarIssue);
+        JSONArray tagsJson = restInterfaceManager.getTagByCondition(null,issueType,null);
+        if(tagsJson.size()==1){
+            tagId = tagsJson.getJSONObject(0).getString("uuid");
+        }
+        JSONObject issueTypeTagged = new JSONObject();
+        issueTypeTagged.put("item_id", issue.getUuid());
+        issueTypeTagged.put("tag_id", tagId);
+        tags.add(issueTypeTagged);
+    }
+
+    private String getIssueTypeBySonarIssue(JSONObject sonarIssue){
+        String result = null;
+        String issueType = sonarIssue.getString("type");
+        if(issueType == null){
+            logger.warn("can not get status");
+        }else if("CODE_SMELL".equals(issueType)){
+            result = IssueTypeEnum.CODE_SMELL.getName();
+        }else if("BUG".equals(issueType)){
+            result = IssueTypeEnum.BUG.getName();
+        }else if("SECURITY_HOTSPOT".equals(issueType)){
+            result = IssueTypeEnum.SECURITY_HOTSPOT.getName();
+        }else if("VULNERABILITY".equals(issueType)){
+            result = IssueTypeEnum.VULNERABILITY.getName();
+
+        }else{
+            logger.warn(" this issue type has not been considered!" ,issueType);
+            result = issueType;
         }
         return result;
     }
