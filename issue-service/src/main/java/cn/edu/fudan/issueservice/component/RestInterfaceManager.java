@@ -204,12 +204,27 @@ public class RestInterfaceManager {
 
     @Deprecated
     public JSONObject getOneCommitByCommitId(String commitId){
-        try{
-            return restTemplate.getForObject(commitServicePath+"/"+commitId,JSONObject.class);
-        }catch (Exception e){
-            logger.error(" through the API , commit id ---> {} may return  several commits info ",commitId);
-            throw  e;
+
+        JSONObject result = null;
+        int tryCount = 0;
+        while (tryCount < 5) {
+
+            try{
+                result = restTemplate.getForObject(commitServicePath+"/"+commitId,JSONObject.class);
+                break;
+            }catch (Exception e){
+                e.printStackTrace();
+                try{
+                    TimeUnit.SECONDS.sleep(20);
+                }catch(Exception sleepException){
+                    e.printStackTrace();
+                }
+
+                tryCount++;
+            }
         }
+        return result;
+
 
     }
 
@@ -236,10 +251,34 @@ public class RestInterfaceManager {
             url += "&page=" + page;
         }
 
+
         if(isWhole != null){
             url += "&is_whole=" + isWhole ;
         }
-        return restTemplate.getForObject(url, JSONObject.class);
+
+        JSONObject result = null;
+        int tryCount = 0;
+        while (tryCount < 5) {
+
+            try{
+
+
+                result = restTemplate.getForObject(url, JSONObject.class);
+                break;
+            }catch (Exception e){
+                e.printStackTrace();
+                try{
+                    TimeUnit.SECONDS.sleep(20);
+                }catch(Exception sleepException){
+                    e.printStackTrace();
+                }
+
+                tryCount++;
+            }
+        }
+        return result;
+
+
 
     }
 
