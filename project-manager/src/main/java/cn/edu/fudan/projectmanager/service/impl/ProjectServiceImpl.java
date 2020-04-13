@@ -303,7 +303,7 @@ public class ProjectServiceImpl implements ProjectService {
             projects.stream().forEach(project -> project.setAccount_name(restInterfaceManager.getAccountName(project.getAccount_id())));
             return projects;
         }else {
-            return projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim(), module.trim(), type).stream()
+            return projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim(), module, type).stream()
                     .filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
         }
     }
