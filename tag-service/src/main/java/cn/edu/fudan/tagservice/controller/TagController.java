@@ -113,6 +113,17 @@ public class TagController {
             return new ResponseBean(500,e.getMessage(),null);
         }
     }
+
+    @GetMapping("/tags/condition")
+    public Object getTagsByCondition(@RequestParam(value = "name" ,required = false)String name,
+                                     @RequestParam(value ="scope" ,required = false)String scope,
+                                     @RequestParam(value = "uuid", required = false)String uuid){
+        try{
+            return new ResponseBean(200,"success",tagService.getTagsByCondition(uuid,name,scope));
+        }catch (Exception e){
+            return new ResponseBean(500,e.getMessage(),null);
+        }
+    }
     /**
      *  以下为内部服务调用
      * */

@@ -27,7 +27,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
     private Logger logger = LoggerFactory.getLogger(BaseMappingServiceImpl.class);
 
     @Override
-    public void mapping(String repoId, String preCommitId, String currentCommitId, String category, String committer) {
+    public void mapping(String repoId, String preCommitId, String currentCommitId, String category, String committer) throws RuntimeException{
 
         // 每个merge点应该也需要判断是否是聚合点，如果是聚合点，同时需要对issue的resolution清0，此时可以得出每个issue有多少次被抛弃的修复。
         // 避免对下一次merge的影响。
@@ -270,6 +270,8 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
     private void issueMapping(String repoId, String category, List<String> parentCommits, String currentCommitId, Date commitDate,
                               Date date, List<Issue> insertIssueList, List<JSONObject> tags, JSONArray ignoreTypes, String committer, String developer, boolean isAggregation) {
+
+        logger.info("not first mapping!");
 
         int equalsCount = 0;
         int ignoreCountInNewIssues = 0;
@@ -835,10 +837,13 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         return null;
     }
 
-    private boolean verifyWhetherAggregation(String repoId,String commitId){
+    private boolean verifyWhetherAggregation(String repoId,String commitId) throws RuntimeException{
         boolean result = false;
 
         JSONObject jsonObject = restInterfaceManager.getCommitsOfRepoByConditions(repoId, 1, 1, null);
+        if(jsonObject == null){
+            throw  new RuntimeException("can't  get commit");
+        }
         JSONArray scanMessageWithTimeJsonArray = jsonObject.getJSONArray("data");
         JSONObject latestScanMessageWithTime = scanMessageWithTimeJsonArray.getJSONObject(0);
         String completeCommitTime = latestScanMessageWithTime.getString("commit_time");
@@ -889,6 +894,21 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
 
 
     }
+
+
+    private void addIssueTypeTag(List<JSONObject> tags,RawIssue rawIssue,Issue issue){
+        String tagId = null;
+        IssueType issueType = issueTypeDao.getIssueTypeByTypeName(rawIssue.getType());
+        JSONArray tagsJson = restInterfaceManager.getTagByCondition(null,issueType.getCategory(),null);
+        if(tagsJson.size()==1){
+            tagId = tagsJson.getJSONObject(0).getString("uuid");
+        }
+        JSONObject issueTypeTagged = new JSONObject();
+        issueTypeTagged.put("item_id", issue.getUuid());
+        issueTypeTagged.put("tag_id", tagId);
+        tags.add(issueTypeTagged);
+    }
+
 
 
 

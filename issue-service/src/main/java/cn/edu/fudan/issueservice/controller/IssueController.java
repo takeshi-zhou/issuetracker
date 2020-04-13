@@ -123,10 +123,22 @@ public class IssueController {
         try {
             String userToken = request.getHeader("token");
             issueService.updateStatus(issueId,priority,userToken);
-            return new ResponseBean(200, "issues update priority success!", null);
+            return new ResponseBean(200, "issues update status success!", null);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseBean(401, "issues update priority failed!", null);
+            return new ResponseBean(401, "issues update status failed!", null);
+        }
+    }
+
+    @PutMapping(value = "/issue/type/{issue-id}")
+    public Object updateIssueType(@PathVariable("issue-id")String issueId, @RequestParam ("type")String type,@RequestParam ("tool")String tool,HttpServletRequest request) {
+        try {
+            String userToken = request.getHeader("token");
+            issueService.updateIssueType(issueId,type,userToken,tool);
+            return new ResponseBean(200, "issues update issue type success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "issues update issue type failed!", null);
         }
     }
 

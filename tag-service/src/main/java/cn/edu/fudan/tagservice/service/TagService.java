@@ -56,4 +56,14 @@ public interface TagService {
     List<Tag> getTagsByScope(String scope);
 
     String getTagIdByItemIdAndScope(String itemId , String scope);
+
+    /**
+     * 通过条件获取tag列表
+     * @param scope
+     * @param name
+     * @param uuid
+     * @return
+     */
+    List<Tag> getTagsByCondition(String uuid,String name,String scope);
+
 }

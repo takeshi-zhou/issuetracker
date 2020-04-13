@@ -76,8 +76,8 @@ public class TagDao {
         return tagMapper.getAllDefaultTags();
     }
 
-    public List<Tag> getTagsByCondition(String scope) {
-        return tagMapper.getTagsByCondition(scope);
+    public List<Tag> getTagsByCondition(String uuid,String name,String scope) {
+        return tagMapper.getTagsByCondition(uuid,name,scope);
     }
 
     public Integer hasBeenTagged(String tag_id, String item_id) {

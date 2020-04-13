@@ -204,12 +204,18 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<Tag> getTagsByScope(String scope){
-        return tagDao.getTagsByCondition(scope);
+        return tagDao.getTagsByCondition(null,null,scope);
     }
 
     @Override
     public String getTagIdByItemIdAndScope(String itemId, String scope) {
         return tagDao.getTagIdByItemIdAndScope(itemId,scope);
+    }
+
+    @Override
+    public List<Tag> getTagsByCondition(String uuid,String name, String scope) {
+
+        return tagDao.getTagsByCondition(uuid,name,scope);
     }
 
 

@@ -300,6 +300,8 @@ public class MeasureServiceImpl implements MeasureService {
     public List<RepoMeasure> getRepoMeasureByRepoId(String repoId,String since,String until,Granularity granularity) {
         List<RepoMeasure> result=new ArrayList<>();
         LocalDate preTimeLimit= DateTimeUtil.parse(until).plusDays(1);
+        //until查询往后推一天，例如输入的是2020-03-31，不往后推一天，接口只能返回03-30这一天及以前的数据。推一天后，就能返回03-31这一天的数据
+        until = preTimeLimit.toString();
         //先统一把这个时间段的所有度量值对象都取出来，然后按照时间单位要求来过滤
         int count = 0;
         if(since == null || since.isEmpty()){

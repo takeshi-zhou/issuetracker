@@ -50,7 +50,7 @@ public interface TagMapper {
     List<WeakHashMap<Object,Object>> getItemIdsAndCountByTagIdsAndRepoId(@Param("list") List<String> list, @Param("repo_id") String repoId);
 
 
-    List<Tag> getTagsByCondition(@Param("scope") String scope);
+    List<Tag> getTagsByCondition(@Param("uuid") String uuid,@Param("name") String name,@Param("scope") String scope);
 
     /**
      * 根据item id 与 scope 获取相应的tag id
