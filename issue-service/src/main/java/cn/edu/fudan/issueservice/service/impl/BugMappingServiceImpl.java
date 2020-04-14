@@ -57,6 +57,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                     Issue issue=generateOneNewIssue(repoId, rawIssue, category, currentCommitId, commitDate, date);
                     insertIssueList.add(issue);
                     addTag(tags, ignoreTypes, rawIssue,issue);
+                    addIssueTypeTag(tags,rawIssue,issue);
                 }
                 int newIssueCount = insertIssueList.size();
                 int remainingIssueCount = insertIssueList.size();
@@ -64,6 +65,10 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 logger.info("first mapping -> new:{},remaining:{},eliminated:{}", newIssueCount, remainingIssueCount, eliminatedIssueCount);
                 dashboardUpdate(repoId, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
                 logger.info("dashboard info updated!");
+                //更新rawIssue的状态
+                for(RawIssue rawIssue : rawIssues){
+                    rawIssue.setStatus(RawIssueStatus.ADD.getType());
+                }
                 rawIssueDao.batchUpdateIssueId(rawIssues);
                 scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,currentCommitId,commitDate,committer,0,eliminatedIssueCount,remainingIssueCount));
             } else {
@@ -153,6 +158,8 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 Issue issue = generateOneNewIssue(repoId,currentRawIssue,category,currentCommitId,commitDate,date);
                 insertIssueList.add(issue);
                 addTag(tags, ignoreTypes, currentRawIssue,issue);
+                addIssueTypeTag(tags,currentRawIssue,issue);
+                currentRawIssue.setStatus(RawIssueStatus.ADD.getType());
             }else{
                 RawIssue preRawIssue = currentRawIssueMappedRawIssueList.get(currentRawIssue.getUuid()).get(mappedPreRawIssueIndex).getRawIssue();
                 String preIssueId = preRawIssue.getIssue_id();
@@ -186,6 +193,18 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 issue.setUpdate_time(new Date());
                 issues.add(issue);
                 mappedIssueIds.add(preIssueId);
+
+                //判断rawIssue 是否发生变化
+                List<Location> preRawIssueLocations = locationDao.getLocations(preRawIssue.getUuid());
+                List<Location> currentRawIssueLocations = locationDao.getLocations(currentRawIssue.getUuid());
+                if(preRawIssueLocations.size() == currentRawIssueLocations.size()){
+                    Location preRawIssueLocation = preRawIssueLocations.get(0);
+                    Location currentRawIssueLocation = currentRawIssueLocations.get(0);
+                    if(!preRawIssueLocation.judgeWhetherLocationIsEqual(currentRawIssueLocation)){
+                        currentRawIssue.setStatus(RawIssueStatus.CHANGED.getType());
+                    }
+                }
+
                 continue;
 
             }
@@ -412,6 +431,8 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 issue.setRaw_issue_start(null);
                 insertIssueList.add(issue);
                 addTag(tags, ignoreTypes, currentRawIssue,issue);
+                addIssueTypeTag(tags,currentRawIssue,issue);
+                currentRawIssue.setStatus(RawIssueStatus.ADD.getType());
 
             }else{
                 Map<String,List<RawIssueMappingSort>> currentRawIssueMappedRawIssueList = currentRawIssueMappedRawIssueLists.get(mostLikelyIndex);
@@ -451,6 +472,17 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 issues.add(issue);
                 mappedIssueIds.add(preIssueId);
                 allMappedIssues.add(issue);
+
+                //判断rawIssue 是否发生变化
+                List<Location> preRawIssueLocations = locationDao.getLocations(preRawIssue.getUuid());
+                List<Location> currentRawIssueLocations = locationDao.getLocations(currentRawIssue.getUuid());
+                if(preRawIssueLocations.size() == currentRawIssueLocations.size()){
+                    Location preRawIssueLocation = preRawIssueLocations.get(0);
+                    Location currentRawIssueLocation = currentRawIssueLocations.get(0);
+                    if(!preRawIssueLocation.judgeWhetherLocationIsEqual(currentRawIssueLocation)){
+                        currentRawIssue.setStatus(RawIssueStatus.CHANGED.getType());
+                    }
+                }
             }
         }
 

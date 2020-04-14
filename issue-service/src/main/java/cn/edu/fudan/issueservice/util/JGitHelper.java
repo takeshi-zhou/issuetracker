@@ -63,6 +63,9 @@ public class JGitHelper {
 
     public void checkout(String commit) {
         try {
+            if(commit == null){
+                commit = repository.getBranch();
+            }
             git.reset().setMode(ResetCommand.ResetType.HARD).call();
             CheckoutCommand checkoutCommand = git.checkout();
             checkoutCommand.setName(commit).call();
@@ -70,6 +73,7 @@ public class JGitHelper {
             log.error("JGitHelper checkout error:{} ", e.getMessage());
         }
     }
+
 
     public String getAuthorName(String commit) {
         String authorName = null;
@@ -353,6 +357,8 @@ public class JGitHelper {
         String repoPath = "E:\\school\\laboratory\\test-samples\\maven-surefire";
 //        String commitId = "75c6507e2139e9bb663abf35037b31478e44c616";
         JGitHelper jGitHelper = new JGitHelper(repoPath);
+        jGitHelper.checkout(null);
+        String authorName = jGitHelper.getAuthorName("733d92f6141a91c54ffa92f5d2f1c87528972f36");
         List<RevCommit> list = jGitHelper.getAggregationCommit("2019-1-1 00:00:00");
         list.stream().forEach(System.out::println);
 
