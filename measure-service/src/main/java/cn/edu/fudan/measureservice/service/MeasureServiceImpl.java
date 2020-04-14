@@ -112,10 +112,10 @@ public class MeasureServiceImpl implements MeasureService {
                 time_line=now.minusWeeks(1);
         }
         //当前时间该项目的度量值
-        logger.info("开始获取第一个度量........");
+//        logger.info("开始获取第一个度量........");
         RepoMeasure measure1=repoMeasureMapper.getLatestMeasureData(repoId);
         //某个时间跨度之前项目的度量值
-        logger.info("开始获取第二个度量........");
+//        logger.info("开始获取第二个度量........");
         RepoMeasure measure2=repoMeasureMapper.getFirstMeasureDataAfterDuration(repoId,DateTimeUtil.transfer(time_line));
         if(measure1!=null&&measure2!=null){
             Map<String,Object> measureChanges=new HashMap<>();
@@ -282,7 +282,7 @@ public class MeasureServiceImpl implements MeasureService {
             try{
                 if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
                     repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
-                    logger.info("repo_measure插入一条数据成功");
+//                    logger.info("repo_measure插入一条数据成功");
                 }
             } catch (Exception e) {
                 logger.error("measure数据写入数据库时出错：");

@@ -494,8 +494,8 @@ public class JGitHelper {
             df.format(entry);
             String diffText = out.toString("UTF-8");
             String fullName = entry.getNewPath();
-            System.out.println("正在匹配文件：" + fullName);//变更文件的路径
-            System.out.println(diffText);
+//            System.out.println("正在匹配文件：" + fullName);//变更文件的路径
+//            System.out.println(diffText);
             int addWhiteLines = 0;
             int delWhiteLines = 0;
             int addCommentLines = 0;

@@ -328,7 +328,7 @@ public class MeasureController {
     }
 
 
-    //根据repo_id和since、until获取某个时间段内commit次数最多的三位开发者姓名以及对应的commit次数
+    //根据repo_id和since、until获取某个时间段内commit次数最多的5位开发者姓名以及对应的commit次数
     @GetMapping("/measure/developer-rank/commit-count")
     @CrossOrigin
     public ResponseBean getDeveloperRankByCommitCount(
@@ -343,7 +343,7 @@ public class MeasureController {
         }
     }
 
-    //根据repo_id和since、until获取某个时间段内,该项目中提交代码行数（LOC）最多的前三名开发者的姓名以及对应的LOC
+    //根据repo_id和since、until获取某个时间段内,该项目中提交代码行数（LOC）最多的前5名开发者的姓名以及对应的LOC
     @GetMapping("/measure/developer-rank/loc")
     @CrossOrigin
     public ResponseBean getDeveloperRankByLoc(
