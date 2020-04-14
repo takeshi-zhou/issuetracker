@@ -6,6 +6,7 @@ import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.domain.Location;
 import cn.edu.fudan.issueservice.domain.RawIssue;
 import cn.edu.fudan.issueservice.service.RawIssueService;
+import cn.edu.fudan.issueservice.util.JGitHelper;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -167,6 +168,35 @@ public class RawIssueServiceImpl implements RawIssueService {
         result.put("totalPage", count % size == 0 ? count / size : count / size + 1);
         result.put("totalCount", count);
         List<RawIssue> rawIssues = rawIssueDao.getRawIssueListByIssueId(param);
+        if(rawIssues.size() != 0){
+            JSONObject repoPathJson = null;
+            String repoPath = null;
+            JGitHelper jGitHelper = null;
+            String repoId = rawIssues.get(0).getRepo_id();
+            String commitId = rawIssues.get(rawIssues.size()-1).getCommit_id();
+            try{
+                repoPathJson = restInterfaceManager.getRepoPath(repoId,commitId);
+                if(repoPathJson == null){
+                    throw new RuntimeException("can not get repo path");
+                }
+                repoPath = repoPathJson.getJSONObject("data").getString("content");
+                if(repoPath == null){
+                    throw new RuntimeException("can not get repo path");
+                }
+                jGitHelper = new JGitHelper(repoPath);
+                jGitHelper.checkout(rawIssues.get(0).getCommit_id());
+
+                for(RawIssue rawIssue : rawIssues){
+                    rawIssue.setDeveloperName(jGitHelper.getAuthorName(rawIssue.getCommit_id()));
+                }
+            }finally{
+                if(repoPath!= null){
+                    restInterfaceManager.freeRepoPath(repoId,repoPath);
+                }
+            }
+        }
+
+
         result.put("rawIssueList",rawIssues);
         return result;
     }

@@ -170,4 +170,18 @@ public class Location {
         }
         return false;
     }
+
+    public boolean judgeWhetherLocationIsEqual(Location anotherLocation){
+        boolean result = false;
+        if(anotherLocation == null ){
+            return false;
+        }
+        if(equals(anotherLocation)
+                && this.start_line == anotherLocation.getStart_line()
+                && this.end_line == anotherLocation.getEnd_line()
+                && this.code.equals(anotherLocation.getCode())){
+            result = true;
+        }
+        return result;
+    }
 }
