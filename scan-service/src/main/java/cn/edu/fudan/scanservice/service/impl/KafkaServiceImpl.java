@@ -345,7 +345,7 @@ public class KafkaServiceImpl implements KafkaService {
                 String firstScanCommit = null;
                 if(existProject(repoId,"bug",true)){
                     filteredCommits=commitFilter.filter(map,dates);
-                    if(filteredCommits.isEmpty()){
+                    if(filteredCommits == null || filteredCommits.isEmpty()){
                         return ;
                     }
                     isSendMsgToCodeTracker = true;

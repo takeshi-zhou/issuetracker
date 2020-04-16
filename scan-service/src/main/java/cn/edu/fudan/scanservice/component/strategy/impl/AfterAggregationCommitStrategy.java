@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -22,6 +23,9 @@ import java.time.LocalDateTime;
 
 @Component("AACS")
 public class AfterAggregationCommitStrategy implements CommitFilterStrategy<ScanMessageWithTime> {
+
+    @Value("${scan.start.time}")
+    private int scanStartTime;
 
     private RestInterfaceManager restInterfaceManager;
 
@@ -47,6 +51,7 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
 
     @Override
     public List<ScanMessageWithTime> filter(Map<LocalDate, List<ScanMessageWithTime>> map, List<LocalDate> dates) throws RuntimeException{
+        System.out.println("start from " + scanStartTime + "month ago.");
         String repoId = StrategyUtil.getRepoIdByMsg(map);
         String repoPath = null;
         LinkedList<ScanMessageWithTime> result = new LinkedList<>();
@@ -133,7 +138,7 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
 
 
         latestCommitTime = DateTimeUtil.stringToLocalDate(completeCommitTime);
-        firstScanCommitTime = latestCommitTime.minusMonths(6).minusDays(5);
+        firstScanCommitTime = latestCommitTime.minusMonths(scanStartTime);
 
         int allAggregationCommitCount = getAllAggregationCommitCount(repoId,checkCommitId);
         int lastListCommitsSize = 0;
