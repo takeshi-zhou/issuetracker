@@ -458,6 +458,7 @@ public class KafkaServiceImpl implements KafkaService {
         }catch (RuntimeException e){
             e.printStackTrace();
             logger.error("something wrong...");
+            scanDao.deleteScanByRepoIdAndCategory(repoId,"test");
             if("request base server failed".equals(e.getMessage())){
                 sendToScanResult(repoId,"","bug","failed","request base server failed");
             }
