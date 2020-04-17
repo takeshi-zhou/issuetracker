@@ -317,17 +317,19 @@ public class JGitHelper {
         int result = 0;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         for (DiffEntry entry : diffEntryList) {
-            String diffText = out.toString("UTF-8");
+//            String diffText = out.toString("UTF-8");
 //                System.out.println(diffText);
-            String fullName = entry.getNewPath();
+            String fullName = entry.getNewPath().toLowerCase();
+            String shortName = fullName.substring(fullName.lastIndexOf('/') + 1);
 //            System.out.println(fullName);//变更文件的路径
+//            System.out.println(shortName);
             //只统计java文件
             if (fullName.endsWith(".java")){
                 //并且去除其中的test文件
                 if (fullName.contains("/test/") ||
-                        fullName.endsWith("test.java") ||
-                        fullName.endsWith("tests.java") ||
-                        fullName.startsWith("test")){
+                        shortName.endsWith("test.java") ||
+                        shortName.endsWith("tests.java") ||
+                        shortName.startsWith("test")){
                     continue;
                 }else {
                     result += 1;
@@ -380,14 +382,15 @@ public class JGitHelper {
                             .setOldTree(oldTreeIter)
                             .call();
                     for(int i = diffs.size() - 1; i >= 0; i--){
-                        String fullName = diffs.get(i).getNewPath();
+                        String fullName = diffs.get(i).getNewPath().toLowerCase();
+                        String shortName = fullName.substring(fullName.lastIndexOf('/') + 1);
                         //只统计java文件
                         if (fullName.endsWith(".java")){
                             //并且去除其中的test文件
                             if (fullName.contains("/test/") ||
-                                    fullName.endsWith("test.java") ||
-                                    fullName.endsWith("tests.java") ||
-                                    fullName.startsWith("test")){
+                                    shortName.endsWith("test.java") ||
+                                    shortName.endsWith("tests.java") ||
+                                    shortName.startsWith("test")){
                                 diffs.remove(i);//去除其中的test文件
                             }else {
 //                                System.out.println("Entry: " + diffs.get(i));
@@ -493,7 +496,7 @@ public class JGitHelper {
         for (DiffEntry entry : diffEntryList) {
             df.format(entry);
             String diffText = out.toString("UTF-8");
-            String fullName = entry.getNewPath();
+//            String fullName = entry.getNewPath();
 //            System.out.println("正在匹配文件：" + fullName);//变更文件的路径
 //            System.out.println(diffText);
             int addWhiteLines = 0;
@@ -577,8 +580,8 @@ public class JGitHelper {
 //            jGitHelper.checkout(s);
 //        }
 //        String versionTag="v2.6.19";//定位到某一次Commit，既可以使用Tag，也可以使用其hash
-        String versionTag="52476119143dfef2cfd0b1f939b31e47acfb6189";
-        String path="E:\\Project\\FDSELab\\GitLabProjects\\IssueTracker-Master";
+        String versionTag="8868523b3e4bc97188a018e7e2e54251631c948e";
+        String path="E:\\Project\\FDSELab\\平台相关文档\\开源项目列表\\测试项目\\maven-surefire";
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
         builder.addCeilingDirectory(new File(path));
