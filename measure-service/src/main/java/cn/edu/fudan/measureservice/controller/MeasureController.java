@@ -417,5 +417,21 @@ public class MeasureController {
         }
     }
 
+    //获取程序员活跃度画像
+    @GetMapping("/measure/repository/developer-activeness")
+    @CrossOrigin
+    public ResponseBean getDeveloperActiveness(@RequestParam("repo_id")String repo_id,
+                                                     @RequestParam(name = "since")String since,
+                                                     @RequestParam(name = "until")String until,
+                                                     @RequestParam(name = "developer_name")String developer_name){
+
+        try{
+            return new ResponseBean(200,"success",measureService.getDeveloperActiveness(repo_id, since, until, developer_name));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
 
 }

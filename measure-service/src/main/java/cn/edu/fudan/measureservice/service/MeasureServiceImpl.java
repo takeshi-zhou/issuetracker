@@ -701,7 +701,7 @@ public class MeasureServiceImpl implements MeasureService {
         //最早一次commit日期
         LocalDate startDay=LocalDate.parse(startDateStr,DateTimeUtil.Y_M_D_formatter);
         LocalDate indexDay = LocalDate.now();
-        System.out.println(indexDay);
+//        System.out.println(indexDay);
         int counts = 0;
         while(indexDay.isAfter(startDay)){
             //当月第一天
@@ -842,8 +842,8 @@ public class MeasureServiceImpl implements MeasureService {
 
         String start = startYear+"."+startMonthStr+"."+startDayStr;
         String now = nowYear+"."+nowMonthStr+"."+nowDayStr;
-        System.out.println(start);
-        System.out.println(now);
+//        System.out.println(start);
+//        System.out.println(now);
         int commitCount = getCommitCountsByDuration(repo_id,start,now);
         if(commitCount != -1){
             if(commitCount <= inactive){
@@ -1189,8 +1189,38 @@ public class MeasureServiceImpl implements MeasureService {
         return result;
     }
 
+    @Override
+    public Object getDeveloperActiveness(String repo_id, String since, String until, String developer_name) {
+        since = dateFormatChange(since);
+        until = dateFormatChange(until);
+        List<Map<String, Object>> result = new ArrayList<>();
 
+        LocalDate indexDay = LocalDate.parse(since,DateTimeUtil.Y_M_D_formatter);
+        LocalDate untilDay = LocalDate.parse(until,DateTimeUtil.Y_M_D_formatter);
+        while(untilDay.isAfter(indexDay) || untilDay.isEqual(indexDay)){
+            Map<String, Object> map = new HashMap<>();
 
+            List<CommitInfoDeveloper> CommitInfoDeveloper = repoMeasureMapper.getCommitInfoDeveloperListByDuration(repo_id, indexDay.toString(), indexDay.toString(), developer_name);
+            if (CommitInfoDeveloper.size()==1){
+                int add = CommitInfoDeveloper.get(0).getAdd();
+                int del = CommitInfoDeveloper.get(0).getDel();
+                //还差缺陷数量，计算E/L N/L
+//                int newIssues = 0;
+//                int elliminateIssues = 0;
 
+//                double newIssuesQuality = newIssues*100.0 / (add+del);
+//                double elliminateIssuesQuality = elliminateIssues*100.0 / (add+del);
 
+                map.put("commit_date", indexDay.toString());
+                map.put("add", add);
+                map.put("del", del);
+//                map.put("E/L", newIssuesQuality);
+                result.add(map);
+            }
+
+            indexDay = indexDay.plusDays(1);
+        }
+        return result;
+
+    }
 }

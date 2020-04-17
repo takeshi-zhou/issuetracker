@@ -241,8 +241,13 @@ public interface MeasureService {
      */
     Object getCommitCountLOCDaily(String repo_id, String since, String until);
 
-
-
-
-
+    /**
+     *
+     * @param repo_id
+     * @param since
+     * @param until
+     * @param developer_name
+     * @return 某段时间内，该项目、该开发者的addlines dellines 以及平均E/L
+     */
+    Object getDeveloperActiveness(String repo_id, String since, String until, String developer_name);
 }
