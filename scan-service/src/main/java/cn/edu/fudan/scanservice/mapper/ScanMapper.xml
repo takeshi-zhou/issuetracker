@@ -64,12 +64,11 @@
 
     <select id="getLatestScannedCommitId" parameterType="String" resultType="String">
         select commit_id from scan where repo_id = #{repo_id} and category = #{category} and end_time = (select max(end_time) from scan where
-        repo_id = #{repo_id} and category = #{category});
+        repo_id = #{repo_id} and category = #{category}) limit 1;
     </select>
 
     <select id="getLastScannedCommitTime" parameterType="String" resultType="date">
-        select commit_time from scan where repo_id = #{repo_id} and category = #{category} and end_time = (select max(end_time) from scan where
-        repo_id = #{repo_id} and category = #{category});
+        select commit_time from scan where repo_id = #{repo_id} and category = #{category} order by end_time desc limit 1;
     </select>
 
     <select id="getScanCountByCommitIdAndCategory" parameterType="String" resultType="Integer">
