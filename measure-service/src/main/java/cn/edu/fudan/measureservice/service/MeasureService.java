@@ -244,10 +244,9 @@ public interface MeasureService {
     /**
      *
      * @param repo_id
-     * @param since
-     * @param until
+     * @param granularity
      * @param developer_name
-     * @return 某段时间内，该项目、该开发者的addlines dellines 以及平均E/L
+     * @return 根据时间粒度获取某段时间内，该项目、该开发者的addlines dellines 以及平均E/L
      */
-    Object getDeveloperActiveness(String repo_id, String since, String until, String developer_name);
+    Object getDeveloperActiveness(String repo_id, String granularity, String developer_name);
 }

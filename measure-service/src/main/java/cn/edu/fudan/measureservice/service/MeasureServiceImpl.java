@@ -1189,8 +1189,8 @@ public class MeasureServiceImpl implements MeasureService {
         return result;
     }
 
-    @Override
-    public Object getDeveloperActiveness(String repo_id, String since, String until, String developer_name) {
+
+    public Object getDeveloperActivenessDuration(String repo_id, String since, String until, String developer_name) {
         since = dateFormatChange(since);
         until = dateFormatChange(until);
         List<Map<String, Object>> result = new ArrayList<>();
@@ -1223,4 +1223,52 @@ public class MeasureServiceImpl implements MeasureService {
         return result;
 
     }
+
+    @Override
+    public Object getDeveloperActiveness(String repo_id, String granularity, String developer_name) {
+        //获取查询时的日期 也就是今天的日期,也作为查询时间段中的截止日期
+        LocalDate today = LocalDate.now();
+        List<Map<String, Object>> result = new ArrayList<>();
+
+
+        //此为“week”的情况
+        LocalDate sinceDay = today.minusWeeks(1);
+        String since = sinceDay.toString();
+        String until = today.toString();
+
+        switch (granularity){
+            case "week":
+                return getDeveloperActivenessDuration(repo_id, since, until, developer_name);
+            case "month":
+                sinceDay = today.minusMonths(1);
+                since = sinceDay.toString();
+                return getDeveloperActivenessDuration(repo_id, since, until, developer_name);
+            case "year":
+                sinceDay = today.minusYears(1);
+                LocalDate indexDay = sinceDay;
+                while(today.isAfter(indexDay)){
+                    Map<String, Object> map = new HashMap<>();
+                    List<CommitInfoDeveloper> list = repoMeasureMapper.getCommitInfoDeveloperListByDuration(repo_id, indexDay.toString(), indexDay.plusMonths(1).toString(), developer_name);
+
+                    if (list.size()>0){
+                        int add = list.get(0).getAdd();
+                        int del = list.get(0).getDel();
+                        map.put("commit_date", indexDay.toString().substring(0,7));
+                        map.put("add", add);
+                        map.put("del", del);
+                        result.add(map);
+                    }
+
+                    //indexDay 变成indexDay这天的下个月的这一天
+                    indexDay = indexDay.plusMonths(1);
+                }
+                break;
+            default:
+                throw new RuntimeException("please input correct granularity type: week or month or year");
+        }
+        return result;
+
+    }
+
+
 }

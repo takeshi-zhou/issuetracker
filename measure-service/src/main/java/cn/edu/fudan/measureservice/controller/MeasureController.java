@@ -421,12 +421,11 @@ public class MeasureController {
     @GetMapping("/measure/repository/developer-activeness")
     @CrossOrigin
     public ResponseBean getDeveloperActiveness(@RequestParam("repo_id")String repo_id,
-                                                     @RequestParam(name = "since")String since,
-                                                     @RequestParam(name = "until")String until,
-                                                     @RequestParam(name = "developer_name")String developer_name){
+                                               @RequestParam(name = "granularity")String granularity,
+                                               @RequestParam(name = "developer_name")String developer_name){
 
         try{
-            return new ResponseBean(200,"success",measureService.getDeveloperActiveness(repo_id, since, until, developer_name));
+            return new ResponseBean(200,"success",measureService.getDeveloperActiveness(repo_id, granularity, developer_name));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());
