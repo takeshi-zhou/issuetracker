@@ -20,6 +20,7 @@ public class RawIssue {
     private Date commit_time;
     private String developer_email;
     private Issue issue;
+    private String developerName;
 
     private boolean mapped=false;
 
@@ -161,6 +162,14 @@ public class RawIssue {
 
     public void setIssue(Issue issue) {
         this.issue = issue;
+    }
+
+    public String getDeveloperName() {
+        return developerName;
+    }
+
+    public void setDeveloperName(String developerName) {
+        this.developerName = developerName;
     }
 
     /**

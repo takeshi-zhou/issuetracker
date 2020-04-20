@@ -112,10 +112,10 @@ public class MeasureServiceImpl implements MeasureService {
                 time_line=now.minusWeeks(1);
         }
         //当前时间该项目的度量值
-        logger.info("开始获取第一个度量........");
+//        logger.info("开始获取第一个度量........");
         RepoMeasure measure1=repoMeasureMapper.getLatestMeasureData(repoId);
         //某个时间跨度之前项目的度量值
-        logger.info("开始获取第二个度量........");
+//        logger.info("开始获取第二个度量........");
         RepoMeasure measure2=repoMeasureMapper.getFirstMeasureDataAfterDuration(repoId,DateTimeUtil.transfer(time_line));
         if(measure1!=null&&measure2!=null){
             Map<String,Object> measureChanges=new HashMap<>();
@@ -282,7 +282,7 @@ public class MeasureServiceImpl implements MeasureService {
             try{
                 if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
                     repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
-                    logger.info("repo_measure插入一条数据成功");
+//                    logger.info("repo_measure插入一条数据成功");
                 }
             } catch (Exception e) {
                 logger.error("measure数据写入数据库时出错：");
@@ -701,7 +701,7 @@ public class MeasureServiceImpl implements MeasureService {
         //最早一次commit日期
         LocalDate startDay=LocalDate.parse(startDateStr,DateTimeUtil.Y_M_D_formatter);
         LocalDate indexDay = LocalDate.now();
-        System.out.println(indexDay);
+//        System.out.println(indexDay);
         int counts = 0;
         while(indexDay.isAfter(startDay)){
             //当月第一天
@@ -842,8 +842,8 @@ public class MeasureServiceImpl implements MeasureService {
 
         String start = startYear+"."+startMonthStr+"."+startDayStr;
         String now = nowYear+"."+nowMonthStr+"."+nowDayStr;
-        System.out.println(start);
-        System.out.println(now);
+//        System.out.println(start);
+//        System.out.println(now);
         int commitCount = getCommitCountsByDuration(repo_id,start,now);
         if(commitCount != -1){
             if(commitCount <= inactive){
@@ -1189,8 +1189,86 @@ public class MeasureServiceImpl implements MeasureService {
         return result;
     }
 
+    @Override
+    public Object getDeveloperActivenessByDuration(String repo_id, String since, String until, String developer_name) {
+        since = dateFormatChange(since);
+        until = dateFormatChange(until);
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        LocalDate indexDay = LocalDate.parse(since,DateTimeUtil.Y_M_D_formatter);
+        LocalDate untilDay = LocalDate.parse(until,DateTimeUtil.Y_M_D_formatter);
+        while(untilDay.isAfter(indexDay) || untilDay.isEqual(indexDay)){
+            Map<String, Object> map = new HashMap<>();
+
+            List<CommitInfoDeveloper> CommitInfoDeveloper = repoMeasureMapper.getCommitInfoDeveloperListByDuration(repo_id, indexDay.toString(), indexDay.toString(), developer_name);
+            if (CommitInfoDeveloper.size()==1){
+                int add = CommitInfoDeveloper.get(0).getAdd();
+                int del = CommitInfoDeveloper.get(0).getDel();
+                //还差缺陷数量，计算E/L N/L
+//                int newIssues = 0;
+//                int elliminateIssues = 0;
+
+//                double newIssuesQuality = newIssues*100.0 / (add+del);
+//                double elliminateIssuesQuality = elliminateIssues*100.0 / (add+del);
+
+                map.put("commit_date", indexDay.toString());
+                map.put("add", add);
+                map.put("del", del);
+//                map.put("E/L", newIssuesQuality);
+                result.add(map);
+            }
+
+            indexDay = indexDay.plusDays(1);
+        }
+        return result;
+
+    }
+
+    @Override
+    public Object getDeveloperActivenessByGranularity(String repo_id, String granularity, String developer_name) {
+        //获取查询时的日期 也就是今天的日期,也作为查询时间段中的截止日期
+        LocalDate today = LocalDate.now();
+        List<Map<String, Object>> result = new ArrayList<>();
 
 
+        //此为“week”的情况
+        LocalDate sinceDay = today.minusWeeks(1);
+        String since = sinceDay.toString();
+        String until = today.toString();
+
+        switch (granularity){
+            case "week":
+                return getDeveloperActivenessByDuration(repo_id, since, until, developer_name);
+            case "month":
+                sinceDay = today.minusMonths(1);
+                since = sinceDay.toString();
+                return getDeveloperActivenessByDuration(repo_id, since, until, developer_name);
+            case "year":
+                sinceDay = today.minusYears(1);
+                LocalDate indexDay = sinceDay;
+                while(today.isAfter(indexDay)){
+                    Map<String, Object> map = new HashMap<>();
+                    List<CommitInfoDeveloper> list = repoMeasureMapper.getCommitInfoDeveloperListByDuration(repo_id, indexDay.toString(), indexDay.plusMonths(1).toString(), developer_name);
+
+                    if (list.size()>0){
+                        int add = list.get(0).getAdd();
+                        int del = list.get(0).getDel();
+                        map.put("commit_date", indexDay.toString().substring(0,7));
+                        map.put("add", add);
+                        map.put("del", del);
+                        result.add(map);
+                    }
+
+                    //indexDay 变成indexDay这天的下个月的这一天
+                    indexDay = indexDay.plusMonths(1);
+                }
+                break;
+            default:
+                throw new RuntimeException("please input correct granularity type: week or month or year");
+        }
+        return result;
+
+    }
 
 
 }

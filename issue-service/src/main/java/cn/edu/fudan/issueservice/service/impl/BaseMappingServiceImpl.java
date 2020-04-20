@@ -3,10 +3,7 @@ package cn.edu.fudan.issueservice.service.impl;
 import cn.edu.fudan.issueservice.component.IssueEventManager;
 import cn.edu.fudan.issueservice.component.RestInterfaceManager;
 import cn.edu.fudan.issueservice.component.TagMapHelper;
-import cn.edu.fudan.issueservice.dao.IssueDao;
-import cn.edu.fudan.issueservice.dao.IssueTypeDao;
-import cn.edu.fudan.issueservice.dao.RawIssueDao;
-import cn.edu.fudan.issueservice.dao.ScanResultDao;
+import cn.edu.fudan.issueservice.dao.*;
 import cn.edu.fudan.issueservice.domain.*;
 import cn.edu.fudan.issueservice.service.MappingService;
 import cn.edu.fudan.issueservice.util.DateTimeUtil;
@@ -58,6 +55,7 @@ public class BaseMappingServiceImpl implements MappingService {
     ScanResultDao scanResultDao;
     RestInterfaceManager restInterfaceManager;
     IssueTypeDao issueTypeDao;
+    LocationDao locationDao;
 
     private StringRedisTemplate stringRedisTemplate;
     private TagMapHelper tagMapHelper;
@@ -112,6 +110,11 @@ public class BaseMappingServiceImpl implements MappingService {
     @Autowired
     public void setIssueTypeDao(IssueTypeDao issueTypeDao) {
         this.issueTypeDao = issueTypeDao;
+    }
+
+    @Autowired
+    public void setLocationDao(LocationDao locationDao) {
+        this.locationDao = locationDao;
     }
 
 
@@ -422,5 +425,7 @@ public class BaseMappingServiceImpl implements MappingService {
         }
         return result;
     }
+
+
 
 }

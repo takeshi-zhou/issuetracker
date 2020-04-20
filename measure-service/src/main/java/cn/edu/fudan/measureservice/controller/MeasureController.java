@@ -1,7 +1,6 @@
 package cn.edu.fudan.measureservice.controller;
 
 import cn.edu.fudan.measureservice.domain.Granularity;
-import cn.edu.fudan.measureservice.domain.Category;
 import cn.edu.fudan.measureservice.domain.ResponseBean;
 import cn.edu.fudan.measureservice.service.MeasureService;
 import org.springframework.web.bind.annotation.*;
@@ -328,7 +327,7 @@ public class MeasureController {
     }
 
 
-    //根据repo_id和since、until获取某个时间段内commit次数最多的三位开发者姓名以及对应的commit次数
+    //根据repo_id和since、until获取某个时间段内commit次数最多的5位开发者姓名以及对应的commit次数
     @GetMapping("/measure/developer-rank/commit-count")
     @CrossOrigin
     public ResponseBean getDeveloperRankByCommitCount(
@@ -343,7 +342,7 @@ public class MeasureController {
         }
     }
 
-    //根据repo_id和since、until获取某个时间段内,该项目中提交代码行数（LOC）最多的前三名开发者的姓名以及对应的LOC
+    //根据repo_id和since、until获取某个时间段内,该项目中提交代码行数（LOC）最多的前5名开发者的姓名以及对应的LOC
     @GetMapping("/measure/developer-rank/loc")
     @CrossOrigin
     public ResponseBean getDeveloperRankByLoc(
@@ -411,6 +410,37 @@ public class MeasureController {
             @RequestParam("until")String until){
         try{
             return new ResponseBean(200,"success",measureService.getCommitCountLOCDaily(repo_id, since, until));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+    //根据时间粒度获取程序员活跃度画像
+    @GetMapping("/measure/repository/developer-activeness-granularity")
+    @CrossOrigin
+    public ResponseBean getDeveloperActivenessByGranularity(@RequestParam("repo_id")String repo_id,
+                                               @RequestParam(name = "granularity")String granularity,
+                                               @RequestParam(name = "developer_name")String developer_name){
+
+        try{
+            return new ResponseBean(200,"success",measureService.getDeveloperActivenessByGranularity(repo_id, granularity, developer_name));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+    //根绝时间段获取程序员活跃度画像
+    @GetMapping("/measure/repository/developer-activeness-duration")
+    @CrossOrigin
+    public ResponseBean getDeveloperActivenessByDuration(@RequestParam("repo_id")String repo_id,
+                                                         @RequestParam(name = "since")String since,
+                                                         @RequestParam(name = "until")String until,
+                                               @RequestParam(name = "developer_name")String developer_name){
+
+        try{
+            return new ResponseBean(200,"success",measureService.getDeveloperActivenessByDuration(repo_id, since, until, developer_name));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());
