@@ -1189,8 +1189,8 @@ public class MeasureServiceImpl implements MeasureService {
         return result;
     }
 
-
-    public Object getDeveloperActivenessDuration(String repo_id, String since, String until, String developer_name) {
+    @Override
+    public Object getDeveloperActivenessByDuration(String repo_id, String since, String until, String developer_name) {
         since = dateFormatChange(since);
         until = dateFormatChange(until);
         List<Map<String, Object>> result = new ArrayList<>();
@@ -1225,7 +1225,7 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     @Override
-    public Object getDeveloperActiveness(String repo_id, String granularity, String developer_name) {
+    public Object getDeveloperActivenessByGranularity(String repo_id, String granularity, String developer_name) {
         //获取查询时的日期 也就是今天的日期,也作为查询时间段中的截止日期
         LocalDate today = LocalDate.now();
         List<Map<String, Object>> result = new ArrayList<>();
@@ -1238,11 +1238,11 @@ public class MeasureServiceImpl implements MeasureService {
 
         switch (granularity){
             case "week":
-                return getDeveloperActivenessDuration(repo_id, since, until, developer_name);
+                return getDeveloperActivenessByDuration(repo_id, since, until, developer_name);
             case "month":
                 sinceDay = today.minusMonths(1);
                 since = sinceDay.toString();
-                return getDeveloperActivenessDuration(repo_id, since, until, developer_name);
+                return getDeveloperActivenessByDuration(repo_id, since, until, developer_name);
             case "year":
                 sinceDay = today.minusYears(1);
                 LocalDate indexDay = sinceDay;
