@@ -1,9 +1,9 @@
-package cn.edu.fudan.scanservice.tools;
+package cn.edu.fudan.cloneservice.tools;
 
-import cn.edu.fudan.scanservice.domain.Scan;
-import cn.edu.fudan.scanservice.domain.ScanInitialInfo;
-import cn.edu.fudan.scanservice.domain.ScanResult;
-import cn.edu.fudan.scanservice.util.ASTUtil;
+import cn.edu.fudan.cloneservice.domain.Scan;
+import cn.edu.fudan.cloneservice.domain.ScanInitialInfo;
+import cn.edu.fudan.cloneservice.domain.ScanResult;
+import cn.edu.fudan.cloneservice.util.ASTUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * @author WZY
- * @version 1.0
- **/
+ * @author zyh
+ * @date 2020/4/15
+ */
 @Component("CPUClone")
-public class CPUCloneScanOperation extends ScanOperationAdapter {
+public class CPUCloneScanOperation extends ScanOperationAdapter{
 
     private static final Logger logger= LoggerFactory.getLogger(CPUCloneScanOperation.class);
 
@@ -103,6 +103,8 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
 
 
     private boolean invokeCloneTool(String repoPath,String repoName){
+        //repoPath = repoPath.substring(repoPath.indexOf("/") + 1);//去除github前缀
+        //String cmd = "java -jar CodeLexer.jar  " + repoHome+repoPath + " " + repoName;
         String cmd = "java -jar SAGA-CPUv423.jar " + repoPath + " " + repoName;
         logger.info("command -> {}",cmd);
         try {
