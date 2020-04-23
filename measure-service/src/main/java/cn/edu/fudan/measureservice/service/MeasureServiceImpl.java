@@ -282,7 +282,7 @@ public class MeasureServiceImpl implements MeasureService {
             try{
                 if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
                     repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
-//                    logger.info("repo_measure插入一条数据成功");
+                    logger.info("Successfully insert one record to repo_measure table ：commit_id is " + commitId);
                 }
             } catch (Exception e) {
                 logger.error("measure数据写入数据库时出错：");
@@ -1180,6 +1180,7 @@ public class MeasureServiceImpl implements MeasureService {
             Map<String, Object> map = new HashMap<>();
             int LOC = repoMeasureMapper.getRepoLOCByDuration(repo_id, indexDay.toString(), indexDay.toString(),null);
             int CommitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, indexDay.toString(), indexDay.toString(),null);
+            //这里只返回有commit的数据，并不是每天都返回
             if (CommitCounts > 0){
                 map.put("commit_date", indexDay.toString());
                 map.put("LOC", LOC);
