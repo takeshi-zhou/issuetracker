@@ -95,7 +95,7 @@
                 and commit_date &lt;= #{end}
             </if>
             <if test="start != null">
-                and commit_date &gt; #{start}
+                and commit_date &gt;= #{start}
             </if>
         </where>
         GROUP BY `commit_date`

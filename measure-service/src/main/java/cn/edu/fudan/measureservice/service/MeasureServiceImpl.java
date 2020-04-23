@@ -1180,10 +1180,12 @@ public class MeasureServiceImpl implements MeasureService {
             Map<String, Object> map = new HashMap<>();
             int LOC = repoMeasureMapper.getRepoLOCByDuration(repo_id, indexDay.toString(), indexDay.toString(),null);
             int CommitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, indexDay.toString(), indexDay.toString(),null);
-            map.put("commit_date", indexDay.toString());
-            map.put("LOC", LOC);
-            map.put("commit_count", CommitCounts);
-            result.add(map);
+            if (CommitCounts > 0){
+                map.put("commit_date", indexDay.toString());
+                map.put("LOC", LOC);
+                map.put("commit_count", CommitCounts);
+                result.add(map);
+            }
             indexDay = indexDay.plusDays(1);
         }
         return result;
