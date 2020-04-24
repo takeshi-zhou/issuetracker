@@ -74,13 +74,13 @@ public class ProjectDao {
         return projectMapper.getProjectIdsByRepoIdAndType(repoId,type).size() >= 2;
     }
 
-    public boolean existProjectWithThisRepoIdAndTypeAndNotAutoScanned(String repoId,String type){
-        return projectMapper.getProjectCountWithThisRepoIdAndType(repoId, type)>0;
+    public boolean existProjectWithThisRepoIdAndTypeAndScannedSign(String repoId,String type,int scannedSign){
+        return projectMapper.existProjectWithThisRepoIdAndTypeAndScannedSign(repoId, type,scannedSign)>0;
     }
 
-    public boolean existProjectWithThisRepoIdAndType(String repoId,String type){
-        return !projectMapper.getProjectIdsByRepoIdAndType(repoId, type).isEmpty();
-    }
+//    public boolean existProjectWithThisRepoIdAndType(String repoId,String type){
+//        return !projectMapper.getProjectIdsByRepoIdAndType(repoId, type).isEmpty();
+//    }
 
     public List<Project> getProjectsByURLAndTypeBranch(String url,String type, String branch){
         return projectMapper.getProjectsByURLAndTypeBranch(url, type , branch);
