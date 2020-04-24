@@ -356,12 +356,12 @@ public class ProjectServiceImpl implements ProjectService {
         //updateProjectStatus(projectId,"deleting");
         String repoId = projectDao.getRepoId(projectId);
         if(repoId!=null){
-            String account_id = restInterfaceManager.getAccountId(userToken);
+            String accountId = restInterfaceManager.getAccountId(userToken);
             //如果当前repoId和type只有这一个projectId与其对应，那么删除project的同时会删除repo的相关内容
             //否则还有其他project与当前repoId和type对应，该repo的相关内容就不删
             //先删project表，再删redis中的数据，再删其它表
             //if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
-            if(account_id.equals("1")){
+            if(accountId.equals("1")){
                 List<Project> projects = projectDao.getProjectByRepoId(repoId);
                 String branch = projects.get(0).getBranch();
                 List<String> projectIds = projects.stream().map(Project::getUuid).collect(Collectors.toList());
@@ -369,32 +369,10 @@ public class ProjectServiceImpl implements ProjectService {
                     projectDao.remove(id);
                 }
                 //delete info in redis
-                stringRedisTemplate.setEnableTransactionSupport(true);
-                stringRedisTemplate.multi();
-                stringRedisTemplate.delete("dashboard:" + type + ":day:" + repoId);
-                stringRedisTemplate.delete("dashboard:" + type + ":week:" + repoId);
-                stringRedisTemplate.delete("dashboard:" + type + ":month:" + repoId);
-                stringRedisTemplate.delete("dashboard:" + type + ":day:new:" + repoId);
-                stringRedisTemplate.delete("dashboard:" + type + ":week:new:" + repoId);
-                stringRedisTemplate.delete("dashboard:" + type + ":month:new:" + repoId);
-                stringRedisTemplate.delete("dashboard:" + type + ":day:eliminated:" + repoId);
-                stringRedisTemplate.delete("dashboard:" + type + ":week:eliminated:" + repoId);
-                stringRedisTemplate.delete("dashboard:" + type + ":month:eliminated:" + repoId);
-                stringRedisTemplate.delete("trend:" + type + ":day:new:" + account_id + ":" + repoId);
-                stringRedisTemplate.delete("trend:" + type + ":day:remaining:" + account_id + ":" + repoId);
-                stringRedisTemplate.delete("trend:" + type + ":day:eliminated:" + account_id + ":" + repoId);
-                stringRedisTemplate.delete("trend:" + type + ":week:new:" + account_id + ":" + repoId);
-                stringRedisTemplate.delete("trend:" + type + ":week:remaining:" + account_id + ":" + repoId);
-                stringRedisTemplate.delete("trend:" + type + ":week:eliminated:" + account_id + ":" + repoId);
-                stringRedisTemplate.exec();
-
+                deleteProjectInfo(repoId, accountId, "bug");
+                deleteProjectInfo(repoId, accountId, "clone");
                 restInterfaceManager.deleteCodeTeackerOfRepo(branch,repoId);
-                restInterfaceManager.deleteIssuesOfRepo(repoId, type);
-                restInterfaceManager.deleteRawIssueOfRepo(repoId, type);
-                restInterfaceManager.deleteScanOfRepo(repoId, type);
-                restInterfaceManager.deleteEventOfRepo(repoId, type);
-                restInterfaceManager.deleteScanResultOfRepo(repoId, type);
-                restInterfaceManager.deleteIgnoreRecord(account_id, repoId);
+                restInterfaceManager.deleteIgnoreRecord(accountId, repoId);
                 restInterfaceManager.deleteRepoMeasure(repoId);
                 deleteCloneResPreFile(repoId);
 //                if(type.equals("bug")){
@@ -420,6 +398,35 @@ public class ProjectServiceImpl implements ProjectService {
             projectDao.remove(projectId);
         }
         logger.info("project delete success!");
+    }
+
+    private void deleteProjectInfo(String repoId, String accountId, String type){
+        stringRedisTemplate.setEnableTransactionSupport(true);
+        stringRedisTemplate.multi();
+        stringRedisTemplate.delete("dashboard:" + type + ":day:" + repoId);
+        stringRedisTemplate.delete("dashboard:" + type + ":week:" + repoId);
+        stringRedisTemplate.delete("dashboard:" + type + ":month:" + repoId);
+        stringRedisTemplate.delete("dashboard:" + type + ":day:new:" + repoId);
+        stringRedisTemplate.delete("dashboard:" + type + ":week:new:" + repoId);
+        stringRedisTemplate.delete("dashboard:" + type + ":month:new:" + repoId);
+        stringRedisTemplate.delete("dashboard:" + type + ":day:eliminated:" + repoId);
+        stringRedisTemplate.delete("dashboard:" + type + ":week:eliminated:" + repoId);
+        stringRedisTemplate.delete("dashboard:" + type + ":month:eliminated:" + repoId);
+        stringRedisTemplate.delete("trend:" + type + ":day:new:" + accountId + ":" + repoId);
+        stringRedisTemplate.delete("trend:" + type + ":day:remaining:" + accountId + ":" + repoId);
+        stringRedisTemplate.delete("trend:" + type + ":day:eliminated:" + accountId + ":" + repoId);
+        stringRedisTemplate.delete("trend:" + type + ":week:new:" + accountId + ":" + repoId);
+        stringRedisTemplate.delete("trend:" + type + ":week:remaining:" + accountId + ":" + repoId);
+        stringRedisTemplate.delete("trend:" + type + ":week:eliminated:" + accountId + ":" + repoId);
+        stringRedisTemplate.exec();
+
+        restInterfaceManager.deleteIssuesOfRepo(repoId, type);
+        restInterfaceManager.deleteRawIssueOfRepo(repoId, type);
+        restInterfaceManager.deleteScanOfRepo(repoId, type);
+        restInterfaceManager.deleteEventOfRepo(repoId, type);
+        restInterfaceManager.deleteScanResultOfRepo(repoId, type);
+
+
     }
 
     private void deleteCloneResPreFile(String repoId) {

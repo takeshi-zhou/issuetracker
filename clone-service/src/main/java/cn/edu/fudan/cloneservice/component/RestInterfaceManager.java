@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import lombok.extern.slf4j.Slf4j;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author WZY
@@ -26,6 +27,8 @@ public class RestInterfaceManager {
     private String commitServicePath;
     @Value("${project.service.path}")
     private String projectServicePath;
+    @Value("${issue.service.path}")
+    private String issueServicePath;
 
     private RestTemplate restTemplate;
 
@@ -33,6 +36,19 @@ public class RestInterfaceManager {
         this.restTemplate = restTemplate;
     }
 
+
+    //-----------------------------------issue service-------------------------------------------------------
+    public JSONObject mapping(JSONObject requestParam) {
+        return restTemplate.postForObject(issueServicePath + "/inner/issue/mapping", requestParam, JSONObject.class);
+    }
+
+    public void insertRawIssuesWithLocations(List<JSONObject> rawIssues) {
+        restTemplate.postForObject(issueServicePath + "/inner/raw-issue", rawIssues, JSONObject.class);
+    }
+
+    public void deleteRawIssueOfRepo(String repoId, String category) {
+        restTemplate.delete(issueServicePath + "/inner/raw-issue/" + category + "/" + repoId);
+    }
 
 
     //-----------------------------------commit service-------------------------------------------------------
@@ -55,6 +71,31 @@ public class RestInterfaceManager {
 
     public JSONArray getProjectList(String account_id) {
         return restTemplate.getForObject(projectServicePath + "/inner/projects?account_id=" + account_id,JSONArray.class);
+    }
+
+    public JSONObject getCommitTime(String commitId,String repoId) {
+        JSONObject result = null;
+
+        int tryCount = 0;
+        while (tryCount < 5) {
+
+            try{
+                String url = commitServicePath + "/commit-time?repo_id=" + repoId + "&commit_id=" +commitId;
+                result = restTemplate.getForObject(url, JSONObject.class);
+                break;
+            }catch (Exception e){
+                e.printStackTrace();
+                try{
+                    TimeUnit.SECONDS.sleep(20);
+                }catch(Exception sleepException){
+                    e.printStackTrace();
+                }
+                tryCount++;
+            }
+        }
+
+        return result;
+
     }
 
     //---------------------------------------------code service---------------------------------------------------------

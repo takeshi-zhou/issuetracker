@@ -154,7 +154,6 @@ public class PackageScanTask {
         List<Map> list_distr = getCloneDistriMap(lci);
         logger.info("updateScan-->start to get URL " + repoId + commitId);
 
-
     }
 
     public void run(String repoId, List<String> commit_list){        //对外启动接口

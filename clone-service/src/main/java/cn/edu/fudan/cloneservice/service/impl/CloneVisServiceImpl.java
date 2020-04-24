@@ -19,6 +19,5 @@ public class CloneVisServiceImpl implements CloneVisService {
     @Override
     public List<PackageInfo> getCommitInfoByRepoId(String repo_id, String commit_id){
         return packageNameDao.getPackageInfoByRepoIdAndCommitId(repo_id, commit_id);
-
     }
 }

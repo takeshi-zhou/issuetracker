@@ -29,11 +29,10 @@ import java.util.concurrent.*;
  * @author WZY
  * @version 1.0
  **/
-//@Component("cloneScanTask")
-//public class CloneScanTask {
+@Component("cloneScanTask")
+public class CloneScanTask {
 
 //    private static final Logger logger= LoggerFactory.getLogger(CloneScanTask.class);
-//
 //
 //    @Value("${workHome}")
 //    private String workHome;
@@ -44,25 +43,15 @@ import java.util.concurrent.*;
 //    @Value("${shareDir}")
 //    private String shareDir;
 //
+//    @Autowired
 //    private KafkaTemplate kafkaTemplate;
+//    @Autowired
 //    private RedisLuaLock redisLock;
+//    @Autowired
 //    private RestInterfaceManager restInterfaceManager;
 //
-//    @Autowired
-//    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
-//        this.restInterfaceManager = restInterfaceManager;
-//    }
-
-//    @Autowired
-//    public void setKafkaTemplate(KafkaTemplate kafkaTemplate) {
-//        this.kafkaTemplate = kafkaTemplate;
-//    }
-//    @Autowired
-//    public void setRedisLock(RedisLuaLock redisLock) {
-//        this.redisLock = redisLock;
-//    }
-
-
+//
+//
 //    private boolean analyzeResultFile(String repoId,String scanId,String commitId,String resultFilePath){
 //        SAXReader reader = new SAXReader();
 //        try{
@@ -72,8 +61,8 @@ import java.util.concurrent.*;
 //            List<JSONObject> cloneRawIssues=new ArrayList<>();
 //            while (iterator.hasNext()){
 //                Element group=iterator.next();
-//                String group_id=group.attributeValue("id");
-//                Iterator<Element> cloneInstances=group.elementIterator("cloneInstance");
+//                String groupId=group.attributeValue("id");
+//                Iterator<Element> cloneInstances = group.elementIterator("cloneInstance");
 //                while(cloneInstances.hasNext()){
 //                    //一个clone instance是一个rawIssue
 //                    List<JSONObject> cloneLocations=new ArrayList<>();
@@ -82,14 +71,13 @@ import java.util.concurrent.*;
 //                    String cloneRawIssueId= UUID.randomUUID().toString();
 //                    JSONObject cloneRawIssue=new JSONObject();
 //                    cloneRawIssue.put("uuid",cloneRawIssueId);
-//                    cloneRawIssue.put("type",group_id);
+//                    cloneRawIssue.put("type",groupId);
 //                    cloneRawIssue.put("category","clone");
 //                    cloneRawIssue.put("detail",null);
 //                    cloneRawIssue.put("file_name",filePath);
 //                    cloneRawIssue.put("scan_id",scanId);
 //                    cloneRawIssue.put("commit_id",commitId);
 //                    cloneRawIssue.put("repo_id",repoId);
-//
 //                    JSONObject cloneLocation=new JSONObject();
 //                    cloneLocation.put("uuid",UUID.randomUUID().toString());
 //                    int startLine=Integer.parseInt(cloneInstance.attributeValue("startLine"));
@@ -109,7 +97,7 @@ import java.util.concurrent.*;
 //            }
 //            if(!cloneRawIssues.isEmpty()){
 //                //插入所有的rawIssue
-////                restInterfaceManager.insertRawIssuesWithLocations(cloneRawIssues);
+//                restInterfaceManager.insertRawIssuesWithLocations(cloneRawIssues);
 //            }
 //            return true;
 //        }catch (Exception e){
@@ -117,7 +105,7 @@ import java.util.concurrent.*;
 //            return false;
 //        }
 //    }
-
+//
 //    private boolean invokeCloneTool(String repoPath,String repoName){
 //        String cmd = "java -jar SAGA.jar  " + repoPath + " " + repoName;
 //        BufferedInputStream br = null;
@@ -146,28 +134,30 @@ import java.util.concurrent.*;
 //            }
 //        }
 //    }
-
-//    private boolean mapping(String repo_id,String current_commit_id,String category){
-//        String pre_commit_id = restInterfaceManager.getLastScannedCommitId(repo_id,category);
-//        JSONObject requestParam = new JSONObject();
-//        requestParam.put("repo_id", repo_id);
-//        if (pre_commit_id != null)
-//            requestParam.put("pre_commit_id", pre_commit_id);
-//        else
-//            requestParam.put("pre_commit_id", current_commit_id);
-//        requestParam.put("current_commit_id", current_commit_id);
-//        requestParam.put("category",category);
-//        logger.info("mapping between " + requestParam.toJSONString());
+//
+////    private boolean mapping(String repo_id,String current_commit_id,String category){
+////        String pre_commit_id = restInterfaceManager.getLastScannedCommitId(repo_id,category);
+////        JSONObject requestParam = new JSONObject();
+////        requestParam.put("repo_id", repo_id);
+////        if (pre_commit_id != null)
+////            requestParam.put("pre_commit_id", pre_commit_id);
+////        else
+////            requestParam.put("pre_commit_id", current_commit_id);
+////        requestParam.put("current_commit_id", current_commit_id);
+////        requestParam.put("category",category);
+////        logger.info("mapping between " + requestParam.toJSONString());
 ////        JSONObject result = restInterfaceManager.mapping(requestParam);
-//        return result != null && result.getIntValue("code") == 200;
-//    }
-
+////        return result != null && result.getIntValue("code") == 200;
+////    }
+//
 //    private boolean checkOut(String repoId, String commitId) {
 //        JSONObject response = restInterfaceManager.checkOut(repoId, commitId);
 //        return response != null && response.getJSONObject("data").getString("status").equals("Successful");
 //    }
-
-//    private void startScan(String repoId,String repoName,String repoPath,Scan scan){
+//
+//    public void startScan(String repoId,String repoName,String repoPath,Scan scan){
+//
+//
 //        logger.info(repoPath+"  : "+repoName);
 //        String scanId=scan.getUuid();
 //        String commitId=scan.getCommit_id();
@@ -196,49 +186,48 @@ import java.util.concurrent.*;
 //        }
 //        logger.info("file analyze success!");
 //        logger.info("start to mapping......");
-//        if(!mapping(repoId,commitId,scan.getCategory())){
-//            send(repoId,commitId,"failed","mapping failed!");
-//            logger.error("mapping failed!");
-//            return;
-//        }
-//        logger.info("mapping success!");
-//        logger.info("start to insert scan.....");
+////        if(!mapping(repoId,commitId,scan.getCategory())){
+////            send(repoId,commitId,"failed","mapping failed!");
+////            logger.error("mapping failed!");
+////            return;
+////        }
+////        logger.info("mapping success!");
+////        logger.info("start to insert scan.....");
 //        scan.setStatus("done");//设为结束状态
 //        scan.setEnd_time(DateTimeUtil.formatedDate(new Date()));
-//        JSONObject response =restInterfaceManager.insertScan(scan);
-//        if(response==null||response.getIntValue("code")!=200){
-//            send(repoId,commitId,"failed","scan add failed!");
-//            logger.error("scan add failed!");
-//            return;
-//        }
+////        JSONObject response =restInterfaceManager.insertScan(scan);
+////        if(response==null||response.getIntValue("code")!=200){
+////            send(repoId,commitId,"failed","scan add failed!");
+////            logger.error("scan add failed!");
+////            return;
+////        }
 //        send(repoId,commitId,"success","scan success");
 //        logger.info("scan complete!");
 //    }
-
-//    @Async
-//    public Future<String> run(String repoId, String repoName, String repoPath, Scan scan) {
-//        //获取分布式锁，一个repo同一时间只能有一个线程在扫
-//        //15min恰好是一个整个Scan操作的超时时间，如果某个线程获得锁之后Scan过程卡死导致锁没有释放
-//        //如果那个锁成功设置了过期时间，那么key过期后，其他线程自然可以获取到锁
-//        //如果那个锁并没有成功地设置过期时间
-//        //那么等待获取同一个锁的线程会因为10min的超时而强行获取到锁，并设置自己的identifier和key的过期时间
-//        String identifier = redisLock.acquireLockWithTimeOut(repoId, 10, 10, TimeUnit.MINUTES);
-//        logger.info("repo->" + repoId + "get the lock :"+identifier);
-//        try {
-//            startScan(repoId, repoName, shareDir+repoPath, scan);
-//        } finally {
-//            if (redisLock.releaseLock(repoId, identifier)) {
-//                logger.error("repo->" + repoId + " release lock success!");
-//            }
-//        }
-//        return new AsyncResult<>("complete");
 //
-//    }
-
-
+////    @Async
+////    public Future<String> run(String repoId, String repoName, String repoPath, Scan scan) {
+////        //获取分布式锁，一个repo同一时间只能有一个线程在扫
+////        //15min恰好是一个整个Scan操作的超时时间，如果某个线程获得锁之后Scan过程卡死导致锁没有释放
+////        //如果那个锁成功设置了过期时间，那么key过期后，其他线程自然可以获取到锁
+////        //如果那个锁并没有成功地设置过期时间
+////        //那么等待获取同一个锁的线程会因为10min的超时而强行获取到锁，并设置自己的identifier和key的过期时间
+////        String identifier = redisLock.acquireLockWithTimeOut(repoId, 10, 10, TimeUnit.MINUTES);
+////        logger.info("repo->" + repoId + "get the lock :"+identifier);
+////        try {
+////            startScan(repoId, repoName, shareDir+repoPath, scan);
+////        } finally {
+////            if (redisLock.releaseLock(repoId, identifier)) {
+////                logger.error("repo->" + repoId + " release lock success!");
+////            }
+////        }
+////        return new AsyncResult<>("complete");
+////
+////    }
+//
 //    private void send(String repoId, String commitId ,String status, String description) {
 //        ScanResult scanResult = new ScanResult(repoId, commitId,"clone" ,status, description);
 //        kafkaTemplate.send("ScanResult", JSONObject.toJSONString(scanResult));
 //    }
 
-//}
+}

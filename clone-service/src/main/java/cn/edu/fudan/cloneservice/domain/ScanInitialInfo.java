@@ -8,12 +8,38 @@ import java.util.List;
  **/
 public class ScanInitialInfo {
 
+    private Scan scan;
+    private String repoName;
     private String repoId;
-    private List<String> commitList;
+    private String repoPath;
+    private boolean isSuccess;
 
-    public ScanInitialInfo(String repoId, List<String> commitList) {
+    public ScanInitialInfo(boolean isSuccess) {
+        this.isSuccess = isSuccess;
+    }
+
+    public ScanInitialInfo(Scan scan, String repoName, String repoId, String repoPath, boolean isSuccess) {
+        this.scan = scan;
+        this.repoName = repoName;
         this.repoId = repoId;
-        this.commitList = commitList;
+        this.repoPath = repoPath;
+        this.isSuccess = isSuccess;
+    }
+
+    public Scan getScan() {
+        return scan;
+    }
+
+    public void setScan(Scan scan) {
+        this.scan = scan;
+    }
+
+    public String getRepoName() {
+        return repoName;
+    }
+
+    public void setRepoName(String repoName) {
+        this.repoName = repoName;
     }
 
     public String getRepoId() {
@@ -24,11 +50,19 @@ public class ScanInitialInfo {
         this.repoId = repoId;
     }
 
-    public List<String> getCommitList() {
-        return commitList;
+    public String getRepoPath() {
+        return repoPath;
     }
 
-    public void setCommitList(List<String> commitList) {
-        this.commitList = commitList;
+    public void setRepoPath(String repoPath) {
+        this.repoPath = repoPath;
+    }
+
+    public boolean isSuccess() {
+        return isSuccess;
+    }
+
+    public void setSuccess(boolean success) {
+        isSuccess = success;
     }
 }
