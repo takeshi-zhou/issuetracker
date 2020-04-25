@@ -23,21 +23,21 @@ import java.util.List;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class CloneInstanceInfoDaoTests {
-    @Autowired
-    CloneMeasureService cloneMeasureService;
-    @Test
-    public void testCloneLine(){
-        String repo_id = "14209e64-9197-11e9-be7f-7f225df07fc5";
-        String commit_id = "b927741b28aa9eb4f919df2e0b6a8dafb99f67ea";
-        RepoCloneMeasureData repoCloneMeasureData =  cloneMeasureService.getRepoMeasureCloneDataByRepoIdCommitId(repo_id, commit_id);
-        System.out.println(repoCloneMeasureData);
-    }
-
-    public void testCloneLinebyDeveloper(){
-        String repo_id = "14209e64-9197-11e9-be7f-7f225df07fc5";
-        String commit_id = "b927741b28aa9eb4f919df2e0b6a8dafb99f67ea";
-        String developer_name = "";
-    }
+//    @Autowired
+//    CloneMeasureService cloneMeasureService;
+//    @Test
+//    public void testCloneLine(){
+//        String repo_id = "14209e64-9197-11e9-be7f-7f225df07fc5";
+//        String commit_id = "b927741b28aa9eb4f919df2e0b6a8dafb99f67ea";
+//        RepoCloneMeasureData repoCloneMeasureData =  cloneMeasureService.getRepoMeasureCloneDataByRepoIdCommitId(repo_id, commit_id);
+//        System.out.println(repoCloneMeasureData);
+//    }
+//
+//    public void testCloneLinebyDeveloper(){
+//        String repo_id = "14209e64-9197-11e9-be7f-7f225df07fc5";
+//        String commit_id = "b927741b28aa9eb4f919df2e0b6a8dafb99f67ea";
+//        String developer_name = "";
+//    }
 
 
 
