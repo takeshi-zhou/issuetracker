@@ -70,7 +70,14 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                     rawIssue.setStatus(RawIssueStatus.ADD.getType());
                 }
                 rawIssueDao.batchUpdateIssueId(rawIssues);
-                scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,currentCommitId,commitDate,committer,0,eliminatedIssueCount,remainingIssueCount));
+                String[] currentCommitParentCommits = getParentCommits(repoId,currentCommitId);
+                int devAddIssues = 0;
+                if(currentCommitParentCommits != null && currentCommitParentCommits.length == 0){
+                    devAddIssues = newIssueCount;
+                }else{
+                    logger.error("can't get commit parent commits!");
+                }
+                scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,currentCommitId,commitDate,committer,devAddIssues,eliminatedIssueCount,remainingIssueCount));
             } else {
 
                 if(parentCommits.size() == 1){
