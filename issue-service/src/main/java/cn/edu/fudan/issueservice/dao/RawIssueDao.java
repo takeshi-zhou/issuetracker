@@ -27,6 +27,10 @@ public class RawIssueDao {
         rawIssueMapper.insertRawIssueList(list);
     }
 
+    public RawIssue getRawIssueById(String rawIssueId) {
+        return rawIssueMapper.getRawIssueById(rawIssueId);
+    }
+
     public void deleteRawIssueByRepoIdAndCategory(String repoId,String category) {
         rawIssueMapper.deleteRawIssueByRepoIdAndCategory(repoId,category);
     }
@@ -79,8 +83,8 @@ public class RawIssueDao {
         return rawIssueMapper.getNumberOfRemainingIssueBasePackage(repoId, commit, packageName);
     }
 
-    public int getNumberOfRawIssuesByIssueId(String issueId) {
-        return rawIssueMapper.getNumberOfRawIssuesByIssueId(issueId);
+    public int getNumberOfRawIssuesByIssueIdAndStatus(String issueId,List status) {
+        return rawIssueMapper.getNumberOfRawIssuesByIssueIdAndStatus(issueId,status);
     }
 
     public List<RawIssue> getRawIssueListByIssueId(Map<String, Object> map) {

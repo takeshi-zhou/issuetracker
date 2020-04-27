@@ -6,6 +6,7 @@ import cn.edu.fudan.issueservice.util.JGitHelper;
 import cn.edu.fudan.issueservice.util.LocationCompare;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
@@ -233,6 +234,9 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         List<Issue> solvedIssues = new ArrayList<>();
         Map<String,String> solvedIssuesPreStatusTag = new HashMap<>();
 
+        // 标记为solved 的raw issue 集合
+        List<RawIssue> solvedStatusRawIssues = new ArrayList<>();
+
         //存储上个commit没匹配上的，也就是被solved的rawIssue的信息
         List<RawIssue> list = preRawIssues.stream().filter(rawIssue -> !rawIssue.isMapped()).collect(Collectors.toList());
         for(RawIssue solvedRawIssue : list){
@@ -258,6 +262,10 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 solvedIssues.add(issue);
             }
             issues.add(issue);
+
+            // 插入一条raw issue 标记为解决
+            RawIssue solvedStatusRawIssue = generateSolvedStatusRawIssue(solvedRawIssue,currentCommitId,commitDate);
+            solvedStatusRawIssues.add(solvedStatusRawIssue);
 
         }
         saveSolvedInfo(list,repoId,preCommitId,currentCommitId);
@@ -288,6 +296,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         dashboardUpdateForMergeVersion(repoId, newIssueCount, remainingIssueChangedCount, eliminatedIssueCount,category);
         logger.info("dashboard info updated!");
         rawIssueDao.batchUpdateIssueId(currentRawIssues);
+        rawIssueDao.insertRawIssueList(solvedStatusRawIssues);
         modifyToSolvedTag(solvedIssues,true,true,EventType.ELIMINATE_BUG, committer,commitDate,repoId,category,solvedIssuesPreStatusTag);
 //        modifyToSolvedTag(repoId, category, preCommitId, EventType.ELIMINATE_BUG, committer, commitDate);
         scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,currentCommitId,commitDate,developer,newIssueCount,eliminatedIssueCount-ignoreCountInEliminatedIssues,currentRawIssues.size()));
@@ -435,7 +444,6 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 Issue issue = generateOneNewIssue(repoId,currentRawIssue,category,causeIssueChangedCommit,causeIssueChangedCommitDate,date);
                 issue.setEnd_commit(currentCommitId);
                 issue.setEnd_commit_date(commitDate);
-                issue.setRaw_issue_start(null);
                 insertIssueList.add(issue);
                 addTag(tags, ignoreTypes, currentRawIssue,issue);
                 addIssueTypeTag(tags,currentRawIssue,issue);
@@ -513,6 +521,9 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         List<Issue> needToModifyTagToSolvedIssue = new ArrayList<>();
         Map<String,String> solvedIssuesPreStatusTag = new HashMap<>();
 
+        // 标记为solved 的raw issue 集合
+        List<RawIssue> solvedStatusRawIssues = new ArrayList<>();
+
         for(Issue notMappedIssue : allNotMappedIssues){
             String resolution = notMappedIssue.getResolution();
             if(resolution == null){
@@ -550,6 +561,11 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 issues.add(notMappedIssue);
                 eliminatedIssueCount++;
             }
+
+            // 插入一条raw issue 标记为解决
+            RawIssue rawIssue = rawIssueDao.getRawIssueById(notMappedIssue.getRaw_issue_end());
+            RawIssue solvedStatusRawIssue = generateSolvedStatusRawIssue(rawIssue,currentCommitId,commitDate);
+            solvedStatusRawIssues.add(solvedStatusRawIssue);
         }
 
         modifyToSolvedTag(needToModifyTagToSolvedIssue,false,false,null,null,null,null,null,solvedIssuesPreStatusTag);
@@ -591,6 +607,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         dashboardUpdateForMergeVersion(repoId, newIssueCount, remainingIssueChangedCount, actualEliminatedIssueCount-realNotAdoptEliminateCount,category);
         logger.info("dashboard info updated!");
         rawIssueDao.batchUpdateIssueId(currentRawIssues);
+        rawIssueDao.insertRawIssueList(solvedStatusRawIssues);
 
 
         scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,causeIssueChangedCommit,causeIssueChangedCommitDate,causeIssueChangedCommitDeveloper,newIssueCount,actualEliminatedIssueCount,currentRawIssues.size()));
@@ -843,6 +860,8 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 }
                 if(!isMapped){
                     rawIssueList.add(rawIssue);
+                    Issue issue = issueDao.getIssueByID(rawIssue.getIssue_id());
+                    issues.add(issue);
                 }
             }
         }
@@ -946,6 +965,36 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         issueTypeTagged.put("item_id", issue.getUuid());
         issueTypeTagged.put("tag_id", tagId);
         tags.add(issueTypeTagged);
+    }
+
+    private RawIssue generateSolvedStatusRawIssue(RawIssue preRawIssue,String currentCommitId,
+                                                  Date currentCommitDate){
+        RawIssue solvedStatusRawIssue = new RawIssue();
+        String newRawIssueId = UUID.randomUUID().toString();
+        solvedStatusRawIssue.setUuid(newRawIssueId);
+        solvedStatusRawIssue.setType(preRawIssue.getType());
+        solvedStatusRawIssue.setCategory(preRawIssue.getCategory());
+        solvedStatusRawIssue.setDetail(preRawIssue.getDetail());
+        solvedStatusRawIssue.setFile_name(preRawIssue.getFile_name());
+
+        JSONObject scan = restInterfaceManager.getScanByCategoryAndRepoIdAndCommitId(preRawIssue.getRepo_id(),currentCommitId,preRawIssue.getCategory());
+        if(scan == null){
+            logger.error("can't get scan throw inner interface, repo id --> {} ,commit id -->" ,preRawIssue.getRepo_id(),currentCommitId);
+        }
+        String scanId = scan.getString("uuid");
+        solvedStatusRawIssue.setScan_id(scanId);
+        //此处可能会有影响issue对raw issue 的筛选！！
+        solvedStatusRawIssue.setIssue_id(preRawIssue.getIssue_id());
+        solvedStatusRawIssue.setCommit_id(currentCommitId);
+        solvedStatusRawIssue.setRepo_id(preRawIssue.getRepo_id());
+        solvedStatusRawIssue.setCode_lines(preRawIssue.getCode_lines());
+        solvedStatusRawIssue.setStatus(RawIssueStatus.SOLVED.getType());
+        //此处应该在raw issue 类中修改，针对存储location ，存储的是list的clone
+        solvedStatusRawIssue.setLocations(preRawIssue.getLocations());
+        solvedStatusRawIssue.setCommit_time(currentCommitDate);
+        solvedStatusRawIssue.setIssue(preRawIssue.getIssue());
+
+        return solvedStatusRawIssue;
     }
 
 
