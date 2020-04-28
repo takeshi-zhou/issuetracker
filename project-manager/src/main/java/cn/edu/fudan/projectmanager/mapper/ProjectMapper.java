@@ -44,7 +44,7 @@ public interface ProjectMapper {
 
     List<String> getProjectIdsByRepoIdAndType(@Param("repo_id") String repo_id,@Param("type") String type);
 
-    int getProjectCountWithThisRepoIdAndType(@Param("repo_id") String repo_id,@Param("type") String type);
+    int existProjectWithThisRepoIdAndTypeAndScannedSign(@Param("repo_id") String repo_id,@Param("type") String type,@Param("first_auto_scan") int scannedSign);
 
     Project getProjectByRepoIdAndCategory( @Param("account_id") String account_id, @Param("repo_id") String repo_id,@Param("category") String category);
 

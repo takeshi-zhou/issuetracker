@@ -13,4 +13,13 @@ public enum RawIssueStatus {
     //这个issue 在这个commit 被消除
     SOLVED("solved");
     private String type;
+
+    public static RawIssueStatus getStatusByName(String name){
+        for(RawIssueStatus status : RawIssueStatus.values()){
+            if(status.getType().equals(name)){
+                return status;
+            }
+        }
+        return null;
+    }
 }

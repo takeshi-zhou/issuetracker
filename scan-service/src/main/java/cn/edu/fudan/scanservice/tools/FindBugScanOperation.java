@@ -125,7 +125,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
         } else {
             code = ASTUtil.getCode(start, end, repoPath+ "/" + filePath);
         }
-        code = code.replace(" ","");
+//        code = code.replace(" ","");
         code = code.replaceAll("\r|\n","");
         fileInfo.setCode_lines(ASTUtil.getCodeLines(repoPath+ "/" + filePath));
         fileInfo.setFileName(fileName);

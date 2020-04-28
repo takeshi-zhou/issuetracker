@@ -355,13 +355,38 @@ public class JGitHelper {
     }
 
 
+    public String getFirstCommitId(){
+        List<RevCommit> commitList = new ArrayList<>();
+        try {
+            Iterable<RevCommit> commits = git.log().call();
+
+            Map<String,Integer> sonCommitsMap = new HashMap<>();
+            for (RevCommit revCommit: commits) {
+                commitList.add(revCommit);
+                RevCommit[] parents = revCommit.getParents();
+                for (RevCommit parentCommit : parents) {
+                    int sonCount = Optional.ofNullable(sonCommitsMap.get(parentCommit.getName())).orElse(0);
+                    sonCommitsMap.put(parentCommit.getName(),++sonCount);
+                }
+            }
+            commitList.sort(Comparator.comparingInt(RevCommit::getCommitTime));
+
+
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        }
+        return commitList.get(0).getName();
+
+    }
+
 
     public static void main(String[] args) throws ParseException {
         //gitCheckout("E:\\Lab\\project\\IssueTracker-Master", "f8263335ef380d93d6bb93b2876484e325116ac2");
         //String repoPath = "E:\\Lab\\iec-wepm-develop";
-        String repoPath = "E:\\school\\laboratory\\test-samples\\maven-surefire";
+        String repoPath = "E:\\school\\laboratory\\scan-service-rebuild\\IssueTracker-Master";
 //        String commitId = "75c6507e2139e9bb663abf35037b31478e44c616";
         JGitHelper jGitHelper = new JGitHelper(repoPath);
+        String commitId = jGitHelper.getFirstCommitId();
         List<RevCommit> list = jGitHelper.getAggregationCommit("2019-8-12 00:00:00");
         for(RevCommit rev : list){
             System.out.println(rev.getCommitTime());

@@ -14,6 +14,8 @@ import cn.edu.fudan.scanservice.util.JGitHelper;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,6 +25,8 @@ import java.time.LocalDateTime;
 
 @Component("AACS")
 public class AfterAggregationCommitStrategy implements CommitFilterStrategy<ScanMessageWithTime> {
+
+    private Logger logger = LoggerFactory.getLogger(AfterAggregationCommitStrategy.class);
 
     @Value("${scan.start.time}")
     private int scanStartTime;
@@ -109,8 +113,11 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
             }
         }
 
+        logger.info("{} -> commits are gotten after filter!",result.size());
+
         if(result.isEmpty()){
             if(isHaveFindAggregation){
+                logger.info(" do not get any commits!",result.size());
                 Scan insertScan = new Scan();
                 insertScan.setCategory("test");
                 insertScan.setName("test--" + repoId);
@@ -123,6 +130,7 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
                 scanDao.insertOneScan(insertScan);
             }
         }else{
+            logger.info("{} -> delete test scan!",repoId);
             scanDao.deleteScanByRepoIdAndCategory(repoId,"test");
         }
         return result;
@@ -160,6 +168,16 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
                 JGitHelper jGitHelper = new JGitHelper(repoPath);
                 String formatTime = DateTimeUtil.format(firstScanCommitTime);
                 List<RevCommit> listCommits = jGitHelper.getAggregationCommit(formatTime);
+                System.out.println(listCommits.size() + "counts of aggregation commits are gotten from JGit!");
+                if(listCommits.isEmpty()){
+                    return jGitHelper.getFirstCommitId();
+                }else{
+                    LocalDate firstAggregationCommitDate = DateTimeUtil.dateToLocalDate(DateTimeUtil.localToUTC(DateTimeUtil.timestampToDate(listCommits.get(0).getCommitTime())));
+                    LocalDate latestCommitDate = DateTimeUtil.dateToLocalDate(DateTimeUtil.stringToDate(completeCommitTime));
+                    if(firstAggregationCommitDate.isAfter(latestCommitDate.minusMonths(1))){
+                        return jGitHelper.getFirstCommitId();
+                    }
+                }
                 while (listCommits.isEmpty()) {
                     firstScanCommitTime = firstScanCommitTime.minusMonths(6);
                     formatTime = DateTimeUtil.format(firstScanCommitTime);
@@ -206,6 +224,12 @@ public class AfterAggregationCommitStrategy implements CommitFilterStrategy<Scan
                     boolean isCompiled = executeShellUtil.executeMvn(repoPathRevCommit);
                     findCounts++;
                     if (isCompiled) {
+                        JGitHelper jGitHelper = new JGitHelper(repoPath);
+                        LocalDate firstAggregationCommitDate = DateTimeUtil.dateToLocalDate(DateTimeUtil.localToUTC(DateTimeUtil.timestampToDate(revCommit.getCommitTime())));
+                        LocalDate latestCommitDate = DateTimeUtil.dateToLocalDate(DateTimeUtil.stringToDate(completeCommitTime));
+                        if(firstAggregationCommitDate.isAfter(latestCommitDate.minusMonths(1))){
+                            return jGitHelper.getFirstCommitId();
+                        }
                         baseCommit = revCommit;
                         break;
                     }

@@ -455,11 +455,11 @@ public class ProjectServiceImpl implements ProjectService {
         if(isFirst)
             //如果项目是第一次添加时判断是否自动扫
         {
-            result.put("exist",projectDao.existProjectWithThisRepoIdAndTypeAndNotAutoScanned(repoId, type));
+            result.put("exist",projectDao.existProjectWithThisRepoIdAndTypeAndScannedSign(repoId, type,0));
         } else
             //后续收到新的commit时判断是否扫
         {
-            result.put("exist",projectDao.existProjectWithThisRepoIdAndType(repoId, type));
+            result.put("exist",projectDao.existProjectWithThisRepoIdAndTypeAndScannedSign(repoId, type,1));
         }
         return result;
     }

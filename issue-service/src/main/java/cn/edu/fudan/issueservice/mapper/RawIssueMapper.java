@@ -43,7 +43,7 @@ public interface RawIssueMapper {
 
     Integer getNumberOfRemainingIssueBasePackage(@Param("repo_id")String repoId, @Param("commit_id")String commitId,@Param("package_name") String packageName);
 
-    Integer getNumberOfRawIssuesByIssueId(@Param("issueId") String issueId);
+    Integer getNumberOfRawIssuesByIssueIdAndStatus(@Param("issueId") String issueId,@Param("list") List status);
 
     List<RawIssue> getRawIssueListByIssueId(Map<String, Object> map);
 
@@ -62,4 +62,6 @@ public interface RawIssueMapper {
     List<String> getRawIssueIdByCommitId(@Param("repo_id") String repoId,@Param("commit_id") String commit, @Param("category")String category);
 
     String getLatestScannedCommitId(@Param("repo_id") String repo_id,@Param("category")String category);
+
+    RawIssue getRawIssueById(@Param("uuid") String rawIssueId);
 }

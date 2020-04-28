@@ -5,6 +5,7 @@ import cn.edu.fudan.issueservice.dao.LocationDao;
 import cn.edu.fudan.issueservice.dao.RawIssueDao;
 import cn.edu.fudan.issueservice.domain.Location;
 import cn.edu.fudan.issueservice.domain.RawIssue;
+import cn.edu.fudan.issueservice.domain.RawIssueStatus;
 import cn.edu.fudan.issueservice.service.RawIssueService;
 import cn.edu.fudan.issueservice.util.JGitHelper;
 import com.alibaba.fastjson.JSONObject;
@@ -156,14 +157,26 @@ public class RawIssueServiceImpl implements RawIssueService {
     }
 
     @Override
-    public Object getRawIssueList(String issue_id,Integer page,Integer size){
+    public Object getRawIssueList(String issue_id,Integer page,Integer size,String status){
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> param = new HashMap<>();
+        List<String> statusList = new ArrayList<>();
+        if(status != null){
+            String[] statusArray =  status.split(",");
+            for(String statusJudge : statusArray){
+                RawIssueStatus rawIssueStatus = RawIssueStatus.getStatusByName(statusJudge);
+                if(rawIssueStatus == null ){
+                    return statusJudge + " is wrong, please input add ,changed or solved.";
+                }
+                statusList.add(statusJudge);
+            }
+            param.put("list",statusList);
+        }
         param.put("issue_id",issue_id);
         param.put("page",page);
         param.put("size",size);
         /*获取总页数*/
-        int count = rawIssueDao.getNumberOfRawIssuesByIssueId(issue_id);
+        int count = rawIssueDao.getNumberOfRawIssuesByIssueIdAndStatus(issue_id,statusList);
         param.put("start", (page - 1) * size);
         result.put("totalPage", count % size == 0 ? count / size : count / size + 1);
         result.put("totalCount", count);
