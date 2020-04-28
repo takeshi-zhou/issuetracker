@@ -13,16 +13,26 @@
         <result property="commit_id" column="commit_id"/>
         <result property="repo_id" column="repo_id"/>
         <result property="code_lines" column="code_lines"/>
-        <result property="commit_time" column="commit_time"/>
-        <result property="developer_email" column="developer_email"/>
-
     </resultMap>
     <select id="getRawIssueByUUID" resultMap="rawIssue">
         select * from rawIssue where uuid=#{uuid}
     </select>
+
     <select id="getRawIssueByRepoIdCommitIdIssueId" resultMap="rawIssue">
         select * from rawIssue where repo_id = #{repo_id}
                                 and commit_id = #{commit_id}
                                 and issue_id = #{issue_id} limit 1
+    </select>
+
+    <select id="getRawIssueByTypeAndCommit" resultMap="rawIssue">
+        select * from rawIssue where repo_id = #{repo_id}
+                                and commit_id = #{commit_id}
+                                and type = #{type}
+    </select>
+
+    <select id="getRawIssueByCommitId" resultMap="rawIssue">
+        select * from rawIssue where repo_id = #{repo_id}
+                                and commit_id = #{commit_id}
+                                and category = 'clone'
     </select>
 </mapper>

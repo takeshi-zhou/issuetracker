@@ -158,6 +158,9 @@
     <update id="updateProjectStatus" parameterType="Project">
         update project
         <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
             <if test="language != null">
                 language = #{language},
             </if>

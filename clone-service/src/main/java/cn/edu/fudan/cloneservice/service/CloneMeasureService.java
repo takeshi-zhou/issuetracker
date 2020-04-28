@@ -18,10 +18,14 @@ import java.util.Set;
 public interface CloneMeasureService {
 
 
-//    DeveloperCloneMeasureData getDeveloperMeasureCloneDataByRepoIdCommitId(String repo_id, String commit_id, String developer_name);
-//
-//
-//    Set<PersonIdent> getDeveloperListByRepoId(String repo_id, String commit_id);
-//
-//    RepoCloneMeasureActiveData getCloneActive(String repo_id, String since, String until);
+    DeveloperCloneMeasureData getDeveloperMeasureCloneDataByRepoIdCommitId(String repo_id, String commit_id, String developer_name);
+
+
+    Set<PersonIdent> getDeveloperListByRepoId(String repoId, String commitId);
+
+    RepoCloneMeasureActiveData getCloneActive(String repoId, String since, String until);
+
+    CloneMeasure getCloneMeasure(String repoId, String commitId);
+
+
 }

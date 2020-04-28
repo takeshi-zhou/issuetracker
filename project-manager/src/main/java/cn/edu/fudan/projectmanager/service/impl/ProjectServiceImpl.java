@@ -43,8 +43,6 @@ public class ProjectServiceImpl implements ProjectService {
     private String githubAPIPath;
     @Value("${repo.url.pattern}")
     private String repoUrlPattern;
-//    @Value("${repo.url.patternGitlab}")
-//    private String repoUrlPatternGitlab;
     @Value("${clone.result.pre.home}")
     private String cloneResPreHome;
 
@@ -549,7 +547,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     /**
-     * 功能不完善，没有考虑dashboard
+     *
      * @param projectId
      * @param userToken
      */
@@ -560,6 +558,19 @@ public class ProjectServiceImpl implements ProjectService {
         project.setDelete_time(new Date());
         project.setAccount_id("1");
         projectDao.updateProjectStatus(project);
+    }
+
+    @Override
+    public void updateProject(JSONObject project) {
+
+        String projectId = project.getString("uuid");
+        String name = project.getString("name");
+        String module = project.getString("module");
+        Project project1 = new Project();
+        project1.setUuid(projectId);
+        project1.setModule(module);
+        project1.setName(name);
+        projectDao.updateProjectStatus(project1);
     }
 
 

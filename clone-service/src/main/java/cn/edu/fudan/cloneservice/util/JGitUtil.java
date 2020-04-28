@@ -1,6 +1,7 @@
 package cn.edu.fudan.cloneservice.util;
 
 import cn.edu.fudan.cloneservice.bean.CloneInstanceInfo;
+import cn.edu.fudan.cloneservice.domain.CommitChange;
 import org.eclipse.jgit.api.BlameCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -100,6 +101,51 @@ public class JGitUtil {
         return cloneLine;
     }
 
+    public static boolean isSameDeveloperClone(String repoPath, String commitId, String filePath, String nums){
+
+        boolean isSameDeveloperClone = false;
+
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        builder.setMustExist(true);
+        builder.addCeilingDirectory(new File(repoPath));
+        builder.findGitDir(new File(repoPath));
+        String[] num = nums.split(",");
+        int start = Integer.parseInt(num[0]);
+        int end = Integer.parseInt(num[1]);
+        int sameDeveloperCloneLines = 0;
+        try {
+            Repository repository = builder.build();
+            RevCommit revCommit = getCurrentRevCommit(repoPath,commitId);
+            String developerName = revCommit.getAuthorIdent().getName();
+            ObjectId curCommitId = repository.resolve(commitId);
+            BlameCommand blamer = new BlameCommand(repository);
+            blamer.setStartCommit(curCommitId);
+            blamer.setFilePath(filePath);
+            try {
+                BlameResult blame = blamer.call();
+                for(int i = start; i <= end; i++){
+                    PersonIdent personIdent =  blame.getSourceAuthor(i);
+                    if(personIdent.getName().equals(developerName)){
+                        sameDeveloperCloneLines++;
+                    }
+                }
+
+                if(sameDeveloperCloneLines >= (end - start)/2){
+                    isSameDeveloperClone = true;
+                }
+
+            } catch (GitAPIException e) {
+                e.printStackTrace();
+            }
+
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return isSameDeveloperClone;
+
+    }
+
     public static Set<String> getDeveloperList(String repoPath){
         Set<String> spi = new HashSet<>();
         try {
@@ -126,10 +172,12 @@ public class JGitUtil {
         return spi;
     }
 
-    public static Map<Integer, String> getNewlyIncreasedLinesNum(List<DiffEntry> diffEntryList) throws IOException{
+    public static CommitChange getNewlyIncreasedLinesNum(List<DiffEntry> diffEntryList) throws IOException{
 
-        Map<Integer, String> map = new HashMap<>();
+        CommitChange commitChange = new CommitChange();
 
+        Map<String, String> map = new HashMap<>();
+        int addLines = 0;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         DiffFormatter df = new DiffFormatter(out);
 
@@ -140,71 +188,33 @@ public class JGitUtil {
         //以下循环是针对每一个有变动的文件
         for (DiffEntry entry : diffEntryList) {
             df.format(entry);
-            String diffText = out.toString("UTF-8");
-            int startLine = 0;
-
             String fileName = entry.toString().split(" ")[1];
             fileName = fileName.substring(0, fileName.length() - 1);
-            int addWhiteLines = 0;
-            int delWhiteLines = 0;
-            int addCommentLines = 0;
-            int delCommentLines = 0;
-
-
-            String[] diffLines = diffText.split("\n");
-            for (String line : diffLines) {
-                //若是增加的行，则执行以下筛选语句
-                if (line.startsWith("+") && !line.startsWith("+++")) {
-                    //去掉开头的"+"
-                    line = line.substring(1);
-                    //去掉头尾的空白符
-                    line = line.trim();
-                    if (line.matches("^[\\s]*$")) {
-                        //匹配空白行
-                        addWhiteLines++;
-                    } else if (line.startsWith("//") || line.startsWith("/*") || line.startsWith("*") || line.endsWith("*/")) {
-                        //匹配注释行
-                        addCommentLines++;
-                    }else {
-//                        newlyIncreasedLineNum = ASTUtil.getIncreasedLineNum(fileName, line, startLine);
-//                        if(newlyIncreasedLineNum != 0){
-//                            map.put(newlyIncreasedLineNum, fileName);
-//                            startLine = newlyIncreasedLineNum;
-//                        }
-                    }
-                }
-                //若是删除的行，则执行以下筛选语句
-//                if (line.startsWith("-") && !line.startsWith("---")) {
-//                    //去掉开头的"-"
-//                    line = line.substring(1);
-//                    //去掉头尾的空白符
-//                    line = line.trim();
-//                    if (line.matches("^[\\s]*$")) {//匹配空白行
-//                        delWhiteLines++;
-//                    } else if (line.startsWith("//") || line.startsWith("/*") || line.startsWith("*") || line.endsWith("*/")) {//匹配注释行
-//                        delCommentLines++;
-//                    }
-//                }
-            }
             FileHeader fileHeader = df.toFileHeader(entry);
             List<HunkHeader> hunks = (List<HunkHeader>) fileHeader.getHunks();
-
             for(HunkHeader hunkHeader:hunks){
                 EditList editList = hunkHeader.toEditList();
                 for(Edit edit : editList){
+                    addLines += edit.getEndB() - edit.getBeginB();
                     for(int i = edit.getBeginB()+1; i <= edit.getEndB(); i++){
-                        map.put(i, fileName);
+                        if(map.containsKey(fileName)){
+                            String lines = map.get(fileName) + "," + i;
+                            map.put(fileName, lines);
+                        }else {
+                            map.put(fileName, i+"");
+                        }
                     }
 
                 }
             }
-
-
         }
+        commitChange.setAddLines(addLines);
+        commitChange.setAddMap(map);
 
-
-        return map;
+        return commitChange;
     }
+
+
 
     /**
      * 获取某次commit的修改文件列表(只统计java文件，并且去除test文件)
@@ -306,7 +316,7 @@ public class JGitUtil {
         return null;
     }
 
-    private RevCommit getCurrentRevCommit(String repoPath, String commitId) throws IOException{
+    private static RevCommit getCurrentRevCommit(String repoPath, String commitId) throws IOException{
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
         builder.addCeilingDirectory(new File(repoPath));
@@ -314,41 +324,38 @@ public class JGitUtil {
         repository=builder.build();
         RevWalk walk = new RevWalk(repository);
         ObjectId versionId=repository.resolve(commitId);
-        RevCommit verCommit=walk.parseCommit(versionId);
-
-        return verCommit;
+        return walk.parseCommit(versionId);
 
     }
 
-    private static void test(JGitUtil jGitHeUtil, String repo_path, String commit_id){
+    public static CommitChange getNewlyIncreasedLines(String repoPath, String commitId){
 
-        Map<Integer, String> map = new HashMap<>();
+        CommitChange commitChange = new CommitChange();
+
+        Map<String, String> map = new HashMap<>();
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
-        builder.addCeilingDirectory(new File(repo_path));
-        builder.findGitDir(new File(repo_path));
+        builder.addCeilingDirectory(new File(repoPath));
+        builder.findGitDir(new File(repoPath));
         try {
             Repository repository = builder.build();
-            RevCommit revCommit = jGitHeUtil.getCurrentRevCommit(repo_path,commit_id);
+            RevCommit revCommit = getCurrentRevCommit(repoPath,commitId);
             //获取变更的文件列表
             List<DiffEntry> diffFix = getChangedFileList(revCommit,repository);
             if(diffFix != null){
-                map = getNewlyIncreasedLinesNum(diffFix);
-            }
-
-            for(int s : map.keySet()){
-                System.out.println(s+":"+map.get(s));
+                commitChange = getNewlyIncreasedLinesNum(diffFix);
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        return commitChange;
+
     }
 
     public static void main(String[] args) {
-        test(new JGitUtil("C:\\Users\\Thinkpad\\Desktop\\config\\IssueTracker-Master"),
-                "C:\\Users\\Thinkpad\\Desktop\\config\\IssueTracker-Master",
+        getNewlyIncreasedLines("C:\\Users\\Thinkpad\\Desktop\\config\\IssueTracker-Master",
                 "673c8264a7c972c7bba47e14b446baeca4846c6e");
 
 
