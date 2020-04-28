@@ -153,10 +153,19 @@ public class MeasureServiceImpl implements MeasureService {
         for(CommitWithTime commit:commits){
             String commitId = commit.getCommitId();
             String repoId = commit.getRepoId();
+            if (commitId == null || commitId.length() == 0){
+                logger.error("Save measure info failed : commitId is null!");
+                continue;
+            }
+            if (repoId == null || repoId.length() == 0){
+                logger.error("Save measure info failed : repoId is null!");
+                continue;
+            }
             String repoPath = null;
             try {
                 repoPath = restInterfaceManager.getRepoPath(repoId,commitId);
                 if (repoPath!=null){
+                    logger.info("Start to save measure info: repoId is " + repoId + " commitId is " + commitId);
                     saveMeasureData(commit.getRepoId(),commitId,commit.getCommitTime(),repoPath);
                 }
             }finally {
@@ -226,7 +235,7 @@ public class MeasureServiceImpl implements MeasureService {
                 packageMeasureMapper.insertPackageMeasureDataList(packages);
             }
         } catch (NumberFormatException e) {
-            logger.error("保存某个项目某个commit包级别的度量时出错：");
+            logger.error("Saving package measure data failed：");
             e.printStackTrace();
         }
 
@@ -282,15 +291,15 @@ public class MeasureServiceImpl implements MeasureService {
             try{
                 if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
                     repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
-                    logger.info("Successfully insert one record to repo_measure table ：commit_id is " + commitId);
+                    logger.info("Successfully insert one record to repo_measure table ：repoId is " + repoId + " commitId is " + commitId);
                 }
             } catch (Exception e) {
-                logger.error("measure数据写入数据库时出错：");
+                logger.error("Inserting data to DB table failed：");
                 e.printStackTrace();
             }
 
         } catch (Exception e) {
-            logger.error("保存某个commit项目级别的度量时出错：");
+            logger.error("Saving commit measure data failed：repoId is " + repoId + " commitId is " + commitId);
             e.printStackTrace();
         }
 
