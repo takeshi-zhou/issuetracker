@@ -31,9 +31,10 @@ public class RawIssueController {
     public Object getOnePageRawIssueList(
                         @RequestParam("issue_id") String issue_id ,
                         @RequestParam("page") Integer page,
-                        @RequestParam("size") Integer size
+                        @RequestParam("size") Integer size,
+                        @RequestParam(value = "status",required = false) String status
                         ) {
-        return rawIssueService.getRawIssueList(issue_id,page,size);
+        return rawIssueService.getRawIssueList(issue_id,page,size,status);
     }
 
     @GetMapping(value = {"/raw-issue/code"})

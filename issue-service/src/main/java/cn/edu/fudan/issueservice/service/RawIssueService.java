@@ -27,5 +27,5 @@ public interface RawIssueService {
 
     List<RawIssue> getRawIssueByCommitAndFile(String repo_id,String commit_id,String category,String filePath);
 
-    Object getRawIssueList(String issue_id,Integer page,Integer size);
+    Object getRawIssueList(String issue_id,Integer page,Integer size,String status);
 }
