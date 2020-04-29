@@ -1,5 +1,7 @@
 package cn.edu.fudan.cloneservice.controller;
 
+import cn.edu.fudan.cloneservice.dao.LocationDao;
+import cn.edu.fudan.cloneservice.domain.Location;
 import cn.edu.fudan.cloneservice.domain.ResponseBean;
 import cn.edu.fudan.cloneservice.service.CloneMeasureService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +22,31 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @EnableAutoConfiguration
 public class CloneMeasureController {
-//    @Autowired
-//    CloneMeasureService cloneMeasureService;
+    @Autowired
+    CloneMeasureService cloneMeasureService;
+
+    @Autowired
+    LocationDao location;
+
+    @GetMapping(value = {"/cloneMeasure/newCloneLines"})
+    public ResponseBean getMeasureClone(
+            @RequestParam("repo_id") String repoId,
+            @RequestParam("commit_id") String commitId
+    ){
+        try{
+            return new ResponseBean(200,"success",cloneMeasureService.getCloneMeasure(repoId, commitId));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
+    @GetMapping(value = {"/cloneMeasure/newCloneLines1"})
+    public Object test(@RequestParam("repo_id") String repoId,
+                       @RequestParam("commit_id") String commitId){
+        return location.getLocationsByCommitIdAndRepoId(commitId, repoId);
+    }
+
 //
 //    @GetMapping(value = {"/clonemeasure/repository"})
 //    public ResponseBean getMeasureCloneData(@RequestParam("repo_id") String repo_id,
@@ -58,5 +83,7 @@ public class CloneMeasureController {
 //            return new ResponseBean(401,"failed",null);
 //        }
 //    }
+
+
 
 }

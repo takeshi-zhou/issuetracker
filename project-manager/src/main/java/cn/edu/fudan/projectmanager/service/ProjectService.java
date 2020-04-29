@@ -76,5 +76,5 @@ public interface ProjectService {
      */
     void recycle(String projectId, String userToken, int isRecycled);
 
-
+    void updateProject(JSONObject project);
 }

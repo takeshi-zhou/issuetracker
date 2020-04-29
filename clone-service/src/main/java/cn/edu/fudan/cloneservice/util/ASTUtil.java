@@ -27,4 +27,22 @@ public class ASTUtil {
         return code.toString();
     }
 
+    public static int getIncreasedLineNum(String fileName, String line, int startLine){
+        String s = "";
+        int num = 1;
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName))) {
+            while ((s = bufferedReader.readLine()) != null) {
+                s = s.trim();
+                if(line.equals(s) && num > startLine){
+                    return num;
+                }
+                num++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
 }
