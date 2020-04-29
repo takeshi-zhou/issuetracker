@@ -96,13 +96,20 @@
         select * from rawIssue where uuid = #{uuid}
     </select>
 
-    <update id="batchUpdateIssueId" parameterType="java.util.List">
+    <update id="batchUpdateIssueIdAndStatus" parameterType="java.util.List">
         update rawIssue
         <trim prefix="set" suffixOverrides=",">
             <trim prefix="issue_id =case" suffix="end,">
                 <foreach collection="list" item="item">
                     <if test="item.issue_id != null">
                         when uuid=#{item.uuid} then #{item.issue_id}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="status =case" suffix="end,">
+                <foreach collection="list" item="item">
+                    <if test="item.status != null">
+                        when uuid=#{item.uuid} then #{item.status}
                     </if>
                 </foreach>
             </trim>
@@ -181,9 +188,13 @@
     <select id="getNumberOfRawIssuesByIssueIdAndStatus" resultType="Integer">
         select count(*) from rawIssue where issue_id = #{issueId}
         <if test="list != null || list.size != 0">
-            <foreach collection="list"  item="status">
-                and status = #{status}
-            </foreach>
+            <trim prefix="and (" prefixOverrides="or" suffix=")">
+
+                <foreach collection="list"  item="status">
+                      or status = #{status}
+                </foreach>
+
+            </trim>
         </if>
         ;
     </select>
@@ -194,10 +205,14 @@
         inner join commit as b
         on a.commit_id = b.commit_id
         where a.issue_id = #{issue_id}
-        <if test="list != null ">
-            <foreach collection="list"  item="status">
-                and status = #{status}
-            </foreach>
+        <if test="list != null and list.size != 0">
+            <trim prefix="and (" prefixOverrides="or" suffix=")">
+
+                <foreach collection="list"  item="status">
+                    or status = #{status}
+                </foreach>
+
+            </trim>
         </if>
 
         order by commit_time desc

@@ -16,7 +16,7 @@ public interface RawIssueMapper {
 
     void deleteRawIssueByRepoIdAndCategory(@Param("repo_id") String repo_id,@Param("category")String category);
 
-    void batchUpdateIssueId(List<RawIssue> list);
+    void batchUpdateIssueIdAndStatus(List<RawIssue> list);
 
     Integer getIssueCountBeforeSpecificTime(@Param("account_id") String account_id, @Param("specificTime") String specificTime);
 
