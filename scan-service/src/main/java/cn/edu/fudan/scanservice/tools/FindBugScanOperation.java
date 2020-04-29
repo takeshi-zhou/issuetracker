@@ -174,6 +174,7 @@ public class FindBugScanOperation extends ScanOperationAdapter {
                     rawIssue.put("code_lines",fileInfo.getCode_lines());
                     rawIssue.put("uuid", rawIssueUUID);
                     rawIssue.put("locations", locations);
+                    rawIssue.put("status", "default");
                     rawIssues.add(rawIssue);
                 }
             }

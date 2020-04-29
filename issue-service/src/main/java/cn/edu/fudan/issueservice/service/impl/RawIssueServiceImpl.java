@@ -67,8 +67,50 @@ public class RawIssueServiceImpl implements RawIssueService {
         for (RawIssue rawIssue : list) {
             locations.addAll(rawIssue.getLocations());
         }
-        rawIssueDao.insertRawIssueList(list);
-        locationDao.insertLocationList(locations);
+        int rawIssueSize = list.size();
+        RawIssue[] rawIssueArray = list.toArray(new RawIssue[rawIssueSize]);
+
+        for(int i = 0 ; i < rawIssueSize; ){
+            List<RawIssue> cutOfRawIssue = new ArrayList<>();
+            if(rawIssueSize > i + 10){
+
+                for(int j = i ; j < i+10 ; j++){
+                    cutOfRawIssue.add(rawIssueArray[j]);
+                }
+                rawIssueDao.insertRawIssueList(cutOfRawIssue);
+            }else{
+
+                for(int j = i ; j < rawIssueSize ; j++){
+                    cutOfRawIssue.add(rawIssueArray[j]);
+                }
+                rawIssueDao.insertRawIssueList(cutOfRawIssue);
+            }
+            i += 10;
+        }
+
+        int locationsSize = locations.size();
+        Location[] locationsArray = locations.toArray(new Location[locationsSize]);
+
+        for(int i = 0 ; i < locationsSize; ){
+            List<Location> cutOfLocation = new ArrayList<>();
+            if(locationsSize > i + 10){
+
+                for(int j = i ; j < i+10 ; j++){
+                    cutOfLocation.add(locationsArray[j]);
+                }
+                locationDao.insertLocationList(cutOfLocation);
+            }else{
+
+                for(int j = i ; j < rawIssueSize ; j++){
+                    cutOfLocation.add(locationsArray[j]);
+                }
+                locationDao.insertLocationList(cutOfLocation);
+            }
+            i += 10;
+        }
+
+//        rawIssueDao.insertRawIssueList(list);
+//        locationDao.insertLocationList(locations);
     }
 
     /**
@@ -86,7 +128,7 @@ public class RawIssueServiceImpl implements RawIssueService {
 
     @Override
     public void batchUpdateIssueId(List<RawIssue> list) {
-        rawIssueDao.batchUpdateIssueId(list);
+        rawIssueDao.batchUpdateIssueIdAndStatus(list);
     }
 
     @Override

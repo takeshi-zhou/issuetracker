@@ -64,6 +64,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
                     cloneRawIssue.put("scan_id",scanId);
                     cloneRawIssue.put("commit_id",commitId);
                     cloneRawIssue.put("repo_id",repo_id);
+                    cloneRawIssue.put("status","default");
 
                     JSONObject cloneLocation=new JSONObject();
                     cloneLocation.put("uuid",UUID.randomUUID().toString());
