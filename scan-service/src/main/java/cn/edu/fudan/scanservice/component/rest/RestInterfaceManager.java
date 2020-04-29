@@ -43,6 +43,8 @@ public class RestInterfaceManager {
     private String sonarServicePath;
     @Value("${code-tracker.service.path}")
     private String codeTrackerServicePath;
+    @Value("${cloneMeasure.service.path}")
+    private String cloneMeasurePath;
 
     private RestTemplate restTemplate;
 
@@ -51,6 +53,11 @@ public class RestInterfaceManager {
     }
 
     private Logger logger = LoggerFactory.getLogger(RestInterfaceManager.class);
+
+    public JSONObject cloneMeasure(String repoId, String commitId) {
+        return restTemplate.getForObject(cloneMeasurePath + "/cloneMeasure/insertMeasureClone?repo_id="+repoId+"&commit_id="+commitId, JSONObject.class);
+    }
+
 
     //----------------------------------account service----------------------------------------------------
     public void userAuth(String userToken) throws AuthException {

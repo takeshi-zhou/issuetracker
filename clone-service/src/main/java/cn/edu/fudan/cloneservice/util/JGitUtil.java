@@ -5,6 +5,7 @@ import cn.edu.fudan.cloneservice.domain.CommitChange;
 import org.eclipse.jgit.api.BlameCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.blame.BlameResult;
 import org.eclipse.jgit.diff.*;
 import org.eclipse.jgit.lib.ObjectId;
@@ -23,6 +24,9 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -61,6 +65,46 @@ public class JGitUtil {
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
+    }
+
+
+    static public List<String> getCommitList(String repoPath, String startDate, String endDate, String developer) {
+
+        List<String> commitIds = new ArrayList<>();
+
+        FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
+        Repository repository = null;
+        try {
+            repository = repositoryBuilder.setGitDir(new File(repoPath + "/.git"))
+                    .readEnvironment() // scan environment GIT_* variables
+                    .findGitDir() // scan up the file system tree
+                    .setMustExist(true)
+                    .build();
+            Git git = new Git(repository);
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                long start = dateFormat.parse(startDate).getTime();
+                long end = dateFormat.parse(endDate).getTime();
+                Iterable<RevCommit> commits = git.log().call();
+                for (RevCommit commit : commits) {
+                    long commitTime = commit.getCommitTime() * 1000L;
+                    if (commitTime <= end && commitTime >= start && commit.getAuthorIdent().getName().equals(developer)) {
+                        commitIds.add(commit.getName());
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            } catch (NoHeadException e) {
+                e.printStackTrace();
+            } catch (GitAPIException e) {
+                e.printStackTrace();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // find the current commit id
+        return commitIds;
     }
 
     public static Integer getCloneLineByDeveloper(String repoPath, String commitId, List<CloneInstanceInfo> lci, String developerName){
@@ -355,9 +399,9 @@ public class JGitUtil {
     }
 
     public static void main(String[] args) {
-        getNewlyIncreasedLines("C:\\Users\\Thinkpad\\Desktop\\config\\IssueTracker-Master",
-                "673c8264a7c972c7bba47e14b446baeca4846c6e");
-
+//        getNewlyIncreasedLines("C:\\Users\\Thinkpad\\Desktop\\config\\IssueTracker-Master",
+//                "673c8264a7c972c7bba47e14b446baeca4846c6e");
+        //System.out.println(getCommitList("C:\\Users\\Thinkpad\\Desktop\\config\\IssueTracker-Master", "2018-12-11", "2020-4-29", "bfkh"));
 
     }
 }

@@ -6,31 +6,59 @@ package cn.edu.fudan.cloneservice.domain;
  */
 public class CloneMeasure {
 
-    private int increasedCloneLines;
-    private int selfIncreasedCloneLines;
-    private double increasedCloneLinesRate;
+    private String uuid;
+    private String repoId;
+    private String commitId;
 
-    public int getIncreasedCloneLines() {
+    private String increasedCloneLines;
+    private String selfIncreasedCloneLines;
+    private String increasedCloneLinesRate;
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getRepoId() {
+        return repoId;
+    }
+
+    public void setRepoId(String repoId) {
+        this.repoId = repoId;
+    }
+
+    public String getCommitId() {
+        return commitId;
+    }
+
+    public void setCommitId(String commitId) {
+        this.commitId = commitId;
+    }
+
+    public String getIncreasedCloneLines() {
         return increasedCloneLines;
     }
 
-    public void setIncreasedCloneLines(int increasedCloneLines) {
+    public void setIncreasedCloneLines(String increasedCloneLines) {
         this.increasedCloneLines = increasedCloneLines;
     }
 
-    public int getSelfIncreasedCloneLines() {
+    public String getSelfIncreasedCloneLines() {
         return selfIncreasedCloneLines;
     }
 
-    public void setSelfIncreasedCloneLines(int selfIncreasedCloneLines) {
+    public void setSelfIncreasedCloneLines(String selfIncreasedCloneLines) {
         this.selfIncreasedCloneLines = selfIncreasedCloneLines;
     }
 
-    public double getIncreasedCloneLinesRate() {
+    public String getIncreasedCloneLinesRate() {
         return increasedCloneLinesRate;
     }
 
-    public void setIncreasedCloneLinesRate(double increasedCloneLinesRate) {
+    public void setIncreasedCloneLinesRate(String increasedCloneLinesRate) {
         this.increasedCloneLinesRate = increasedCloneLinesRate;
     }
 }

@@ -1,5 +1,6 @@
 package cn.edu.fudan.scanservice.controller;
 
+import cn.edu.fudan.scanservice.component.rest.RestInterfaceManager;
 import cn.edu.fudan.scanservice.domain.ResponseBean;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.service.KafkaService;
@@ -19,10 +20,12 @@ public class InnerController {
 
     private ScanService scanService;
 
+
     @Autowired
     public void setScanService(ScanService scanService) {
         this.scanService = scanService;
     }
+
 
 
     //下面都是供其它服务调用的内部接口

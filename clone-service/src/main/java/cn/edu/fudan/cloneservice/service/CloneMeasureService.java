@@ -25,7 +25,7 @@ public interface CloneMeasureService {
 
     RepoCloneMeasureActiveData getCloneActive(String repoId, String since, String until);
 
-    CloneMeasure getCloneMeasure(String repoId, String commitId);
+    CloneMeasure insertCloneMeasure(String repoId, String commitId);
 
-
+    CloneMeasure getCloneMeasure(String repoId, String developer, String start, String end);
 }

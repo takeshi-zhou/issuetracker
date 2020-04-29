@@ -21,6 +21,8 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,8 @@ import java.util.*;
 
 @Service
 public class CloneMeasureServiceImpl implements CloneMeasureService {
+
+    private static Logger logger = LoggerFactory.getLogger(CloneMeasureServiceImpl.class);
     @Autowired
     CloneInstanceInfoDao cloneInstanceInfoDao;
 
@@ -58,6 +62,10 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
 
     @Autowired
     private RestInterfaceManager restInterfaceManager;
+
+    @Autowired
+    private CloneMeasureDao cloneMeasureDao;
+
     @Value("${repoHome}")
     private String repoHome;
 
@@ -176,7 +184,36 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
     }
 
     @Override
-    public CloneMeasure getCloneMeasure(String repoId, String commitId){
+    public CloneMeasure getCloneMeasure(String repoId, String developer, String start, String end){
+
+        List<String> commitIds = commitDao.getCommitIs(repoId, developer, start, end);
+
+        int newCloneLines = 0;
+        int selfCloneLines = 0;
+        int increasedLines = 0;
+
+        List<CloneMeasure> cloneMeasures = cloneMeasureDao.getCloneMeasures(repoId);
+
+        for(CloneMeasure cloneMeasure1 : cloneMeasures){
+            for(String commitId : commitIds){
+                if(cloneMeasure1.getCommitId().equals(commitId)){
+                    newCloneLines += Integer.parseInt(cloneMeasure1.getIncreasedCloneLines());
+                    selfCloneLines += Integer.parseInt(cloneMeasure1.getSelfIncreasedCloneLines());
+                    String[] tmp = cloneMeasure1.getIncreasedCloneLinesRate().split("/");
+                    increasedLines += Integer.parseInt(tmp[1]);
+                }
+            }
+        }
+
+        CloneMeasure cloneMeasure = new CloneMeasure();
+        cloneMeasure.setIncreasedCloneLines(newCloneLines+"");
+        cloneMeasure.setSelfIncreasedCloneLines(selfCloneLines+"");
+        cloneMeasure.setIncreasedCloneLinesRate(newCloneLines+"/"+increasedLines);
+        return cloneMeasure;
+    }
+
+    @Override
+    public CloneMeasure insertCloneMeasure(String repoId, String commitId){
 
         CloneMeasure cloneMeasure = new CloneMeasure();
 
@@ -196,6 +233,8 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
 
             Map<String, List<CloneLocation>> cloneLocationMap = new HashMap<>();
 
+            logger.info("cloneLocation init start!");
+
             //初始化
             for(CloneLocation cloneLocation : cloneLocations){
                 String type = cloneLocation.getType();
@@ -208,6 +247,8 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
                 }
             }
 
+            logger.info("cloneLocation init success!");
+
             for(CloneLocation cloneLocation : cloneLocations){
                 String cloneLines = cloneLocation.getBugLines();
                 int startLine = Integer.parseInt(cloneLines.split(",")[0]);
@@ -219,6 +260,7 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
 
                         for(int i = 0; i < lines.length; i++){
                             if(Integer.parseInt(lines[i]) >= startLine && Integer.parseInt(lines[i]) <= endLine){
+                                logger.info("find increasedCloneLines:"+Integer.parseInt(lines[i])+"-"+filePath);
                                 List<CloneLocation> list = cloneLocationMap.get(cloneLocation.getType());
                                 list.remove(cloneLocation);
                                 for(CloneLocation cloneLocation1 : list){
@@ -241,9 +283,15 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
                     }
                 }
             }
-            cloneMeasure.setIncreasedCloneLines(increasedCloneLines);
-            cloneMeasure.setIncreasedCloneLinesRate((double) increasedCloneLines/(double) increasedLines);
-            cloneMeasure.setSelfIncreasedCloneLines(increasedSameCloneLines);
+
+            String uuid = UUID.randomUUID().toString();
+            cloneMeasure.setUuid(uuid);
+            cloneMeasure.setCommitId(commitId);
+            cloneMeasure.setRepoId(repoId);
+            cloneMeasure.setIncreasedCloneLines(increasedCloneLines+"");
+            cloneMeasure.setIncreasedCloneLinesRate(increasedCloneLines+"/"+increasedLines);
+            cloneMeasure.setSelfIncreasedCloneLines(increasedSameCloneLines+"");
+            cloneMeasureDao.insertCloneMeasure(cloneMeasure);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -253,6 +301,7 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
         }
 
         return cloneMeasure;
+
     }
 
 

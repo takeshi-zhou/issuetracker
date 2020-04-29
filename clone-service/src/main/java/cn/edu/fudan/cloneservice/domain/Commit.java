@@ -5,12 +5,22 @@ public class Commit {
     String repo_id;
     String commit_id;
     String commit_time;
+    String developer;
 
-    public Commit(String uuid, String repo_id, String commit_id, String commit_time) {
+    public Commit(String uuid, String repo_id, String commit_id, String commit_time, String developer) {
         this.uuid = uuid;
         this.repo_id = repo_id;
         this.commit_id = commit_id;
         this.commit_time = commit_time;
+        this.developer = developer;
+    }
+
+    public String getDeveloper() {
+        return developer;
+    }
+
+    public void setDeveloper(String developer) {
+        this.developer = developer;
     }
 
     public String getCommit_time() {

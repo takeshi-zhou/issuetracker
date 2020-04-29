@@ -28,13 +28,24 @@ public class CloneMeasureController {
     @Autowired
     LocationDao location;
 
-    @GetMapping(value = {"/cloneMeasure/newCloneLines"})
-    public ResponseBean getMeasureClone(
-            @RequestParam("repo_id") String repoId,
-            @RequestParam("commit_id") String commitId
-    ){
+    @GetMapping(value = {"/cloneMeasure/insertMeasureClone"})
+    public ResponseBean insertMeasureClone(@RequestParam("repo_id") String repoId, @RequestParam("commit_id") String commitId){
+
         try{
-            return new ResponseBean(200,"success",cloneMeasureService.getCloneMeasure(repoId, commitId));
+            return new ResponseBean(200,"success",cloneMeasureService.insertCloneMeasure(repoId, commitId));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
+    @GetMapping(value = {"/cloneMeasure/getMeasureClone"})
+    public ResponseBean getMeasureCloneData(@RequestParam("repo_id") String repoId,
+                                            @RequestParam("developer") String developer,
+                                            @RequestParam("start") String start,
+                                            @RequestParam("end") String end){
+        try{
+            return new ResponseBean(200,"success",cloneMeasureService.getCloneMeasure(repoId,developer,start,end));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",null);
