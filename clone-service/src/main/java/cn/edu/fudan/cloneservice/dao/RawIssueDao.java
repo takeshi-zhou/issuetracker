@@ -36,4 +36,12 @@ public class RawIssueDao {
         return result_list;
     }
 
+    public List<RawIssue> getRawIssueByTypeAndCommit(String repoId, String commitId, String type){
+        return rawIssueMapper.getRawIssueByTypeAndCommit(repoId, commitId, type);
+    }
+
+    public List<RawIssue> getRawIssuesByCommitId(String repoId, String commitId){
+        return rawIssueMapper.getRawIssueByCommitId(repoId, commitId);
+    }
+
 }

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.edu.fudan.cloneservice.mapper.ScanMapper">
-    <resultMap id="scan" type="Scan">
+    <resultMap id="scan" type="cn.edu.fudan.cloneservice.domain.Scan">
         <id property="uuid" column="uuid"/>
         <result property="category" column="category"/>
         <result property="name" column="name"/>
@@ -16,7 +16,7 @@
     </resultMap>
 
     <!-- never used -->
-    <insert id="insertOneScan" parameterType="Scan">
+    <insert id="insertOneScan" parameterType="cn.edu.fudan.cloneservice.domain.Scan">
         insert into scan
         (
         uuid,
@@ -50,7 +50,7 @@
         delete from scan where repo_id=#{repo_id} and category = #{category}
     </delete>
 
-    <update id="updateOneScan" parameterType="Scan">
+    <update id="updateOneScan" parameterType="cn.edu.fudan.cloneservice.domain.Scan">
         UPDATE scan
         <set>
             <if test="end_time != null">end_time = #{end_time},</if>

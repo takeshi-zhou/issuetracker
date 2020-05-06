@@ -68,6 +68,15 @@ public class ProjectController {
 
     }
 
+    @PostMapping(value = {"/project/updateProject"})
+    public Object updateProject(@RequestBody JSONObject projectInfo){
+        try {
+            projectService.updateProject(projectInfo);
+            return new ResponseBean(200, "add success", null);
+        } catch (Exception e) {
+            return new ResponseBean(401, "add failed :" + e.getMessage(), null);
+        }
+    }
 
 
     //get project list

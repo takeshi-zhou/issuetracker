@@ -106,7 +106,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             Map<String,List<RawIssue>> map=rawIssues.stream().collect(Collectors.groupingBy(RawIssue::getType));
             //对于第一次而言所有的group都是新增的
             newCloneInsert(true,map,map.keySet(),repo_id,committer,current_commit_id,commitDate,category,committer,date);
-            rawIssueDao.batchUpdateIssueId(rawIssues);
+            rawIssueDao.batchUpdateIssueIdAndStatus(rawIssues);
         }else{
             //不是第一次扫描，需要和前一次的commit进行mapping
             List<RawIssue> rawIssues1 = rawIssueDao.getRawIssueByCommitIDAndCategory(repo_id,category,pre_commit_id);
@@ -176,7 +176,7 @@ public class CloneMappingServiceImpl extends BaseMappingServiceImpl {
             dashboardUpdate(repo_id, newIssueCount, remainingIssueCount, eliminatedIssueCount,category);
             scanResultDao.addOneScanResult(new ScanResult(category,repo_id,date,current_commit_id,commitDate,committer,newIssueCount,eliminatedIssueCount,remainingIssueCount));
             logger.info("dashboard info updated!");
-            rawIssueDao.batchUpdateIssueId(rawIssues2);
+            rawIssueDao.batchUpdateIssueIdAndStatus(rawIssues2);
             modifyToSolvedTag(repo_id,category, pre_commit_id,EventType.REMOVE_CLONE_CLASS,committer,commitDate);
         }
         logger.info("mapping finished!");

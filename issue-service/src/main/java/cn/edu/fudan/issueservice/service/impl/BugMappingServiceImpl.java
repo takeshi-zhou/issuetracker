@@ -70,7 +70,10 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
                 for(RawIssue rawIssue : rawIssues){
                     rawIssue.setStatus(RawIssueStatus.ADD.getType());
                 }
-                rawIssueDao.batchUpdateIssueId(rawIssues);
+                if(!rawIssues.isEmpty()){
+                    rawIssueDao.batchUpdateIssueIdAndStatus(rawIssues);
+                }
+
                 String[] currentCommitParentCommits = getParentCommits(repoId,currentCommitId);
                 int devAddIssues = 0;
                 if(currentCommitParentCommits != null && currentCommitParentCommits.length == 0){
@@ -295,8 +298,13 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         logger.info("finish mapping -> new:{},remainingChangedCount:{},eliminated:{}",newIssueCount, remainingIssueChangedCount, eliminatedIssueCount);
         dashboardUpdateForMergeVersion(repoId, newIssueCount, remainingIssueChangedCount, eliminatedIssueCount,category);
         logger.info("dashboard info updated!");
-        rawIssueDao.batchUpdateIssueId(currentRawIssues);
-        rawIssueDao.insertRawIssueList(solvedStatusRawIssues);
+        if(!currentRawIssues.isEmpty()){
+            rawIssueDao.batchUpdateIssueIdAndStatus(currentRawIssues);
+        }
+        if(!solvedStatusRawIssues.isEmpty()){
+            rawIssueDao.insertRawIssueList(solvedStatusRawIssues);
+        }
+
         modifyToSolvedTag(solvedIssues,true,true,EventType.ELIMINATE_BUG, committer,commitDate,repoId,category,solvedIssuesPreStatusTag);
 //        modifyToSolvedTag(repoId, category, preCommitId, EventType.ELIMINATE_BUG, committer, commitDate);
         scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,currentCommitId,commitDate,developer,newIssueCount,eliminatedIssueCount-ignoreCountInEliminatedIssues,currentRawIssues.size()));
@@ -606,8 +614,12 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         logger.info("finish mapping -> new:{},remainingChangedCount:{},eliminated:{}",newIssueCount, remainingIssueChangedCount, actualEliminatedIssueCount-realNotAdoptEliminateCount);
         dashboardUpdateForMergeVersion(repoId, newIssueCount, remainingIssueChangedCount, actualEliminatedIssueCount-realNotAdoptEliminateCount,category);
         logger.info("dashboard info updated!");
-        rawIssueDao.batchUpdateIssueId(currentRawIssues);
-        rawIssueDao.insertRawIssueList(solvedStatusRawIssues);
+        if(!currentRawIssues.isEmpty()){
+            rawIssueDao.batchUpdateIssueIdAndStatus(currentRawIssues);
+        }
+        if(!solvedStatusRawIssues.isEmpty()){
+            rawIssueDao.insertRawIssueList(solvedStatusRawIssues);
+        }
 
 
         scanResultDao.addOneScanResult(new ScanResult(category,repoId,date,causeIssueChangedCommit,causeIssueChangedCommitDate,causeIssueChangedCommitDeveloper,newIssueCount,actualEliminatedIssueCount,currentRawIssues.size()));

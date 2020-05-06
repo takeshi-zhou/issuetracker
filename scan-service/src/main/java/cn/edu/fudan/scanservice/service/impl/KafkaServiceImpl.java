@@ -76,6 +76,7 @@ public class KafkaServiceImpl implements KafkaService {
 
     private CommitFilterStrategy<ScanMessageWithTime> commitFilter;
 
+
     @Autowired
     @Qualifier("AACS")
     public void setCommitFilter(CommitFilterStrategy<ScanMessageWithTime> commitFilter) {
@@ -196,6 +197,11 @@ public class KafkaServiceImpl implements KafkaService {
                 sendMessageToMeasure(repoId,list);
 
                 cloneScanTask.runSynchronously(repoId,commitId,"clone");
+                try {
+                    JSONObject result = restInterfaceManager.cloneMeasure(repoId, commitId);
+                }catch (RuntimeException e){
+                    e.printStackTrace();
+                }
                 sendMessageToClone(repoId,list);
 
             }
@@ -379,6 +385,12 @@ public class KafkaServiceImpl implements KafkaService {
                     for(ScanMessageWithTime message:bugFilterCommits){
                         String commitId = message.getCommitId();
                         cloneScanTask.runSynchronously(repoId,commitId,"clone");
+                        try {
+                            JSONObject result = restInterfaceManager.cloneMeasure(repoId, commitId);
+                        }catch (RuntimeException e){
+                            e.printStackTrace();
+                        }
+
                     }
                     //restInterfaceManager.updateFirstAutoScannedToTrue(repoId,"clone");
 

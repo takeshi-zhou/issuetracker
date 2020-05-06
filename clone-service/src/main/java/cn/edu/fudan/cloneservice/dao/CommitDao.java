@@ -1,6 +1,7 @@
 package cn.edu.fudan.cloneservice.dao;
 
 import cn.edu.fudan.cloneservice.domain.Commit;
+import cn.edu.fudan.cloneservice.mapper.CommitMapper;
 import cn.edu.fudan.cloneservice.mapper.RepoCommitMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,9 @@ import java.util.List;
 public class CommitDao {
 
     RepoCommitMapper repoCommitMapper;
+
+    @Autowired
+    CommitMapper commitMapper;
 
     public CommitDao(RepoCommitMapper repoCommitMapper) {
         this.repoCommitMapper = repoCommitMapper;
@@ -38,6 +42,10 @@ public class CommitDao {
             reslist.add(lc.get(lc.size() - 1));
         }
         return reslist;
+    }
+
+    public List<String> getCommitIs(String repoId, String developer, String start, String end){
+        return commitMapper.getCommitIdList(repoId,developer,start,end);
     }
 
 }

@@ -46,7 +46,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter{
             List<JSONObject> cloneRawIssues=new ArrayList<>();
             while (iterator.hasNext()){
                 Element group=iterator.next();
-                String group_id=group.attributeValue("id");
+                String groupId=group.attributeValue("id");
                 Iterator<Element> cloneInstances=group.elementIterator("cloneInstance");
                 while(cloneInstances.hasNext()){
                     //一个clone instance是一个rawIssue
@@ -57,7 +57,7 @@ public class CPUCloneScanOperation extends ScanOperationAdapter{
                     String cloneRawIssueId= UUID.randomUUID().toString();
                     JSONObject cloneRawIssue=new JSONObject();
                     cloneRawIssue.put("uuid",cloneRawIssueId);
-                    cloneRawIssue.put("type",group_id);
+                    cloneRawIssue.put("type",groupId);
                     cloneRawIssue.put("category","clone");
                     cloneRawIssue.put("detail","{\"rank\":"+rank+"}");
                     cloneRawIssue.put("file_name",filePath);

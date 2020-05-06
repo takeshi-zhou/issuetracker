@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.fudan.cloneservice.mapper.CloneMeasureMapper">
+    <resultMap id="cloneMeasure" type="cn.edu.fudan.cloneservice.domain.CloneMeasure">
+        <id property="uuid" column="uuid"/>
+        <result property="repoId" column="repo_id"/>
+        <result property="commitId" column="commit_id"/>
+        <result property="increasedCloneLines" column="new_clone_lines"/>
+        <result property="selfIncreasedCloneLines" column="self_clone_lines"/>
+        <result property="increasedCloneLinesRate" column="clone_lines_rate"/>
+    </resultMap>
+
+    <select id="getCloneMeasure" resultMap="cloneMeasure">
+    select * from clone_measure where repo_id=#{repo_id} and commit_id=#{commit_id} limit 1
+    </select>
+
+    <select id="getCloneMeasures" resultMap="cloneMeasure">
+    select * from clone_measure where repo_id=#{repo_id}
+    </select>
+
+    <insert id="insertCloneMeasure" parameterType="cn.edu.fudan.cloneservice.domain.CloneMeasure">
+        insert into clone_measure
+        (
+        uuid,
+        repo_id,
+        commit_id,
+        new_clone_lines,
+        self_clone_lines,
+        clone_lines_rate
+        )
+        VALUES
+        (
+        #{uuid},
+        #{repoId},
+        #{commitId},
+        #{increasedCloneLines},
+        #{selfIncreasedCloneLines},
+        #{increasedCloneLinesRate}
+        )
+    </insert>
+
+</mapper>
+

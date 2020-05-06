@@ -35,8 +35,8 @@ public class RawIssueDao {
         rawIssueMapper.deleteRawIssueByRepoIdAndCategory(repoId,category);
     }
 
-    public void batchUpdateIssueId(List<RawIssue> list) {
-        rawIssueMapper.batchUpdateIssueId(list);
+    public void batchUpdateIssueIdAndStatus(List<RawIssue> list) {
+        rawIssueMapper.batchUpdateIssueIdAndStatus(list);
     }
 
     public Integer getIssueCountBeforeSpecificTime(String account_id, String specificTime) {
