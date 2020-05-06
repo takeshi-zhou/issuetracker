@@ -283,7 +283,7 @@
     <select id="getDeveloperRankByLoc" parameterType="String" resultType="java.util.HashMap">
         SELECT
             developer_name,
-            SUM( add_lines ) + SUM( del_lines ) AS LOC
+            SUM( add_lines ) + SUM( del_lines ) AS counts
         FROM
             repo_measure
         WHERE
@@ -293,7 +293,7 @@
         GROUP BY
             developer_name
         ORDER BY
-            LOC DESC
+            counts DESC
         LIMIT 5;
     </select>
 
