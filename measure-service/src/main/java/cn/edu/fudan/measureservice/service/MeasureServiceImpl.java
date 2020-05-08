@@ -1302,7 +1302,6 @@ public class MeasureServiceImpl implements MeasureService {
 
     @Override
     public Object getDeveloperListByRepoId(String repo_id) {
-
-        return null;
+        return repoMeasureMapper.getDeveloperListByRepoId(repo_id);
     }
 }
