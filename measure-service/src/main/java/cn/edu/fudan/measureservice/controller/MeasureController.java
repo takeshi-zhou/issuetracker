@@ -447,5 +447,18 @@ public class MeasureController {
         }
     }
 
+    //根绝时间段获取程序员活跃度画像
+    @GetMapping("/measure/repository/developer-list")
+    @CrossOrigin
+    public ResponseBean getDeveloperListByRepoId(@RequestParam("repo_id")String repo_id){
+
+        try{
+            return new ResponseBean(200,"success",measureService.getDeveloperListByRepoId(repo_id));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
 
 }

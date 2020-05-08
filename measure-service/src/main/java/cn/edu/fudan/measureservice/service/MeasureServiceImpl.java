@@ -1128,6 +1128,24 @@ public class MeasureServiceImpl implements MeasureService {
         since = dateFormatChange(since);
         until = dateFormatChange(until);
         List<Map<String, Object>> result = repoMeasureMapper.getDeveloperRankByLoc(repo_id, since, until);
+        //如果LOC数据为0，则删除这条数据
+        if (null != result && result.size() > 0) {
+            for (int i = result.size() - 1; i >= 0; i--) {
+                Map<String, Object> map = result.get(i);
+                Object obj;
+                //取出map中第一个元素
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    obj = entry.getValue();
+                    if (obj != null) {
+                        //将Object类型转换为int类型
+                        if (Integer.parseInt(String.valueOf(obj)) == 0) {
+                            result.remove(i);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
         return result;
     }
 
@@ -1282,5 +1300,9 @@ public class MeasureServiceImpl implements MeasureService {
 
     }
 
+    @Override
+    public Object getDeveloperListByRepoId(String repo_id) {
 
+        return null;
+    }
 }
