@@ -178,6 +178,7 @@ public class IssueServiceImpl implements IssueService {
         String repoId = restInterfaceManager.getRepoIdOfProject(project_id);
         JSONArray tag_ids = requestParam.getJSONArray("tags");
         JSONArray types = requestParam.getJSONArray("types");
+        String developerName = requestParam.getString("developer");
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> query = new HashMap<>();
         if(tag_ids!=null&&!tag_ids.isEmpty()){
@@ -199,6 +200,7 @@ public class IssueServiceImpl implements IssueService {
         }
         query.put("repo_id", repoId);
         query.put("category",category);
+        query.put("developer",developerName);
         int count = issueDao.getIssueCount(query);
         query.put("size", size);
         query.put("start", (page - 1) * size);

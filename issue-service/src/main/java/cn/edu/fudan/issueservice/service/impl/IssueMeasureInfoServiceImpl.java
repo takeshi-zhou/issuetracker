@@ -349,7 +349,7 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
 
         codeQualityResponse.setTotalQuality(totalQuality);
 
-        System.out.println((System.currentTimeMillis()-start)*1.0/1000/60);
+        //System.out.println((System.currentTimeMillis()-start)*1.0/1000/60);
 
         return codeQualityResponse;
     }
