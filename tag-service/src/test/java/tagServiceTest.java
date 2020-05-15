@@ -8,6 +8,7 @@ public class tagServiceTest {
 
     @Test
     public void test() {
+
         PriorityEnum priority = PriorityEnum.getByValue("HIGH");
 
         System.out.println(priority.toString());

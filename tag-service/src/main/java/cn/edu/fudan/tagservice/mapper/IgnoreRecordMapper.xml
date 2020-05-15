@@ -10,6 +10,8 @@
         <result property="type" column="type"/>
         <result property="repoId" column="repo_id"/>
         <result property="repoName" column="repo_name"/>
+        <result property="branch" column="branch"/>
+        <result property="updateTime" column="update_time"/>
     </resultMap>
 
     <insert id="insertOneRecord" parameterType="ignoreRecord">
@@ -20,7 +22,9 @@
         level,
         type,
         repo_id,
-        repo_name
+        repo_name,
+        branch,
+        update_time
         )
         values
         (
@@ -29,7 +33,9 @@
         #{level},
         #{type},
         #{repoId},
-        #{repoName}
+        #{repoName},
+        #{branch},
+        #{updateTime}
         )
     </insert>
 
