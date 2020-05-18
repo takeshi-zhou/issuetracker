@@ -306,5 +306,19 @@
         </if>
     </select>
 
+    <select id="getDeveloperListByRepoId" parameterType="String" resultType="java.util.HashMap">
+        SELECT
+            developer_name
+        FROM
+            repo_measure
+        WHERE
+            repo_id = #{repo_id}
+        GROUP BY
+            developer_name
+        ORDER BY
+            developer_name
+    </select>
+
+
 
 </mapper>

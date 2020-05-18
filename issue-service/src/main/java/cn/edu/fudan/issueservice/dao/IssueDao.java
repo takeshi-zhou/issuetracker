@@ -2,6 +2,7 @@ package cn.edu.fudan.issueservice.dao;
 
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.mapper.IssueMapper;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -110,12 +111,20 @@ public class IssueDao {
         return issueMapper.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
     }
 
+    public Issue getIssueByIssueId(String issueId) {
+        return issueMapper.getIssueByIssueId(issueId);
+    }
+
     public List<Issue> getNotSolvedIssueAllListByCategoryAndRepoId(String repoId, String category) {
         return issueMapper.getNotSolvedIssueAllListByCategoryAndRepoId(repoId, category);
     }
 
     public void batchUpdateIssueListPriority(List issueUuid, int priority) {
         issueMapper.batchUpdateIssueListPriority(issueUuid, priority);
+    }
+
+    public void batchUpdateIssueListStatus(List issueUuid, String status) {
+        issueMapper.batchUpdateIssueListStatus(issueUuid, status);
     }
 
     public int getNumberOfNewIssueByDuration(String repoId, String start, String end) {

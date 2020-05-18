@@ -62,6 +62,8 @@ public interface RepoMeasureMapper {
 
     int getRepoLOCByDuration(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until,@Param("developer_name")String developerName);
 
+    List<Map<String, Object>> getDeveloperListByRepoId(@Param("repo_id")String repo_id);
+
 
 
 

@@ -260,6 +260,13 @@ public interface MeasureService {
      */
     Object getDeveloperActivenessByDuration(String repo_id, String since, String until, String developer_name);
 
+    /**
+     *
+     * @param repo_id
+     * @return 根据repoid，获取开发者姓名列表
+     */
+    Object getDeveloperListByRepoId(String repo_id);
+
 
 
 

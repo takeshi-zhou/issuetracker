@@ -119,10 +119,10 @@ public class IssueController {
     }
 
     @PutMapping(value = "/issue/status/{issue-id}")
-    public Object updateStatus(@PathVariable("issue-id")String issueId, @RequestParam ("status")String priority,HttpServletRequest request) {
+    public Object updateStatus(@PathVariable("issue-id")String issueId, @RequestParam ("status")String status,HttpServletRequest request) {
         try {
             String userToken = request.getHeader("token");
-            issueService.updateStatus(issueId,priority,userToken);
+            issueService.updateStatus(issueId,status,userToken);
             return new ResponseBean(200, "issues update status success!", null);
         } catch (Exception e) {
             e.printStackTrace();
@@ -141,6 +141,9 @@ public class IssueController {
             return new ResponseBean(401, "issues update issue type failed!", null);
         }
     }
+
+
+
 
 
 
@@ -230,9 +233,31 @@ public class IssueController {
         }
     }
 
+    @PostMapping(value = "/inner/issue/status")
+    public Object batchUpdateIssueListStatus(@RequestBody JSONObject requestParam) {
+        try {
+            List<String> issueUuid = requestParam.getObject( "list",List.class);
+            issueService.batchUpdateIssueListStatus(issueUuid, requestParam.getString("status"));
+            return new ResponseBean(200, "success!", null);
+        }catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "failed!", null);
+        }
+    }
+
+
     @GetMapping(value = "/inner/issue/uuid")
     public List<String> getIssueListByTypeAndRepoId(@RequestParam("repo-id") String repoId,@RequestParam("type") String type) {
         return issueService.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
+    }
+
+    @GetMapping(value = "/inner/issue")
+    public Object getIssueByIssueId(@RequestParam("issue-id") String issueId) {
+        try{
+            return new ResponseBean(200,"success",issueService.getIssueByIssueId(issueId));
+        }catch (Exception e){
+            return new ResponseBean(500,e.getMessage(),null);
+        }
     }
 
 

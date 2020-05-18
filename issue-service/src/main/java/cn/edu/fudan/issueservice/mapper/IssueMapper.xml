@@ -439,15 +439,35 @@
     </select>
 
     <select id="getNotSolvedIssueListByTypeAndRepoId" parameterType="String" resultType="String">
-        select uuid from issue where repo_id = #{repo_id} and type = #{type} and priority != 6
+        select uuid from issue where status != "Solved" and status != "Misinformation"
+        <if test="repo_id != null and repo_id != ''" >
+            and repo_id = #{repo_id}
+        </if>
+        <if test="type != null and type != ''" >
+            and type = #{type}
+        </if>
     </select>
 
     <select id="getNotSolvedIssueAllListByCategoryAndRepoId" parameterType="String" resultType="Issue">
-        select * from issue where repo_id = #{repo_id} and category = #{type} and priority != 6
+        select * from issue where repo_id = #{repo_id} and category = #{type} and status != "Solved"
+    </select>
+
+    <select id="getIssueByIssueId" parameterType="String" resultType="Issue">
+        select * from issue where uuid = #{issue_id}
     </select>
 
     <update id="batchUpdateIssueListPriority" >
         update issue set priority = #{priority}
+        <if test="list != null">
+            where uuid in
+            <foreach collection="list" separator="," open="(" close=")" item="issue_id">
+                #{issue_id}
+            </foreach>
+        </if>
+    </update>
+
+    <update id="batchUpdateIssueListStatus" >
+        update issue set status = #{status}
         <if test="list != null">
             where uuid in
             <foreach collection="list" separator="," open="(" close=")" item="issue_id">

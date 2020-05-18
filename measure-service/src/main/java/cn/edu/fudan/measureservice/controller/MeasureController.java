@@ -3,6 +3,7 @@ package cn.edu.fudan.measureservice.controller;
 import cn.edu.fudan.measureservice.domain.Granularity;
 import cn.edu.fudan.measureservice.domain.ResponseBean;
 import cn.edu.fudan.measureservice.service.MeasureService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -431,7 +432,7 @@ public class MeasureController {
         }
     }
 
-    //根绝时间段获取程序员活跃度画像
+    //根据时间段获取程序员活跃度画像
     @GetMapping("/measure/repository/developer-activeness-duration")
     @CrossOrigin
     public ResponseBean getDeveloperActivenessByDuration(@RequestParam("repo_id")String repo_id,
@@ -441,6 +442,20 @@ public class MeasureController {
 
         try{
             return new ResponseBean(200,"success",measureService.getDeveloperActivenessByDuration(repo_id, since, until, developer_name));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+
+    @ApiOperation(value = "开发者列表", notes = "根据repoid获取开发者列表", httpMethod = "GET")
+    @GetMapping("/measure/repository/developer-list")
+    @CrossOrigin
+    public ResponseBean getDeveloperListByRepoId(@RequestParam("repo_id")String repo_id){
+
+        try{
+            return new ResponseBean(200,"success",measureService.getDeveloperListByRepoId(repo_id));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());
