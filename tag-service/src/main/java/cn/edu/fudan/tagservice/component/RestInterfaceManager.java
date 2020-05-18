@@ -71,10 +71,6 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(issueServicePath + "/inner/issue/uuid?repo-id=" + repoId + "&type=" + type, List.class);
     }
 
-    public List<String> getIssueListByType(String type) {
-        return restTemplate.getForObject(issueServicePath + "/inner/issue/uuid?type=" + type, List.class);
-    }
-
     public String getIssueStatusByIssueId(String issue_id) {
         JSONObject response = restTemplate.getForObject(issueServicePath + "/inner/issue?issue-id=" + issue_id,JSONObject.class);
         String status = response.getJSONObject("data").getString("status");

@@ -79,9 +79,9 @@ public class TagController {
     public Object ignoreOneType(@RequestBody JSONObject requestBody, HttpServletRequest request){
         try {
             tagService.ignoreOneType(requestBody, request.getHeader("token"));
-            return new ResponseBean(200, "ignore success", null);
+            return new ResponseBean(200, "ignore success !", null);
         } catch (Exception e) {
-            return new ResponseBean(401, "ignore failed !" + e.getMessage(), null);
+            return new ResponseBean(401, "ignore failed ! " + e.getMessage(), null);
         }
     }
 
