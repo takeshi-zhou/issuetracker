@@ -196,6 +196,16 @@ public interface IssueMapper {
     List<String> getNotSolvedIssueListByTypeAndRepoId(@Param("repo_id") String repoId,@Param("type")  String type);
 
     /**
+     * get issue list by condition
+     * @param repoId
+     * @param type
+     * @param status
+     * @return
+     */
+    List<String> getIssueUuidListByCondition(@Param("repo_id") String repoId,@Param("type")  String type,@Param("status")  String status);
+
+
+    /**
      * get issue info by issueId
      * @param issueId
      * @return
