@@ -45,5 +45,5 @@ public interface ScanService {
     String getLatestScanFailedCommitIdAndDeveloper( String repoId, String category, String commitId);
 
 
-    Object getScanByRepoIdAndStatus(String repoId,String status);
+    Object getScanByRepoIdAndStatusAndCategory(String repoId,String status,String category);
 }

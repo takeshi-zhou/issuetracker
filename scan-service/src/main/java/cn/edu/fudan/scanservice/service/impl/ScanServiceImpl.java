@@ -11,10 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Service
@@ -165,7 +162,7 @@ public class ScanServiceImpl implements ScanService {
         String repoPath = null;
         List<String> result = null;
         JSONObject jsonObject = restInterfaceManager.getCommitsOfRepoByConditions(repoId, 1, 1, null);
-        if(jsonObject == null){
+         if(jsonObject == null){
             throw new RuntimeException("request base server failed");
         }
         JSONArray scanMessageWithTimeJsonArray = jsonObject.getJSONArray("data");
@@ -192,21 +189,40 @@ public class ScanServiceImpl implements ScanService {
             scannedParents = new ArrayList<>();
         }
 
-        String[] parents = jGitHelper.getCommitParents(commitId);
-        for(String parent : parents){
-            Scan  scan = scanDao.getScanByCategoryAndRepoIdAndCommitId(repoId,category,parent);
-            if(scan == null ){
-                continue;
-            }
-            if("done".equals(scan.getStatus())){
-                if(!scannedParents.contains(parent)){
-                    scannedParents.add(parent);
-                }
-            }else{
-                getPreScannedCommitByJGit(jGitHelper,scannedParents,repoId,category,parent);
-            }
+        List<Scan>  scanList = scanDao.getScanByRepoIdAndStatusAndCategory(repoId,null,category);
+
+        List<String> scanIds = new LinkedList<>();
+        for(Scan scan : scanList){
+            scanIds.add(scan.getUuid());
         }
 
+        LinkedList<String> parentCommits = new LinkedList<>();
+        parentCommits.addFirst(commitId);
+        while (!parentCommits.isEmpty()){
+            String commit = parentCommits.removeFirst();
+            String[] parents = jGitHelper.getCommitParents(commit);
+            for(String parent : parents){
+
+                if(!scanIds.contains(parent)){
+                    continue;
+                }
+
+                for(Scan scan : scanList){
+                    if(scan.getCommit_id().equals(parent)){
+                        if("done".equals(scan.getStatus())){
+                            if(!scannedParents.contains(parent)){
+                                scannedParents.add(parent);
+                            }
+                        }else{
+                            parentCommits.addFirst(parent);
+                        }
+                        break;
+                    }
+                }
+
+
+            }
+        }
         return scannedParents;
     }
 
@@ -229,8 +245,8 @@ public class ScanServiceImpl implements ScanService {
     }
 
     @Override
-    public Object getScanByRepoIdAndStatus(String repoId, String status) {
-        return scanDao.getScanByRepoIdAndStatus(repoId,status);
+    public Object getScanByRepoIdAndStatusAndCategory(String repoId, String status,String category) {
+        return scanDao.getScanByRepoIdAndStatusAndCategory(repoId,status,category);
     }
 
     /**
