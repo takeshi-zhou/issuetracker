@@ -52,6 +52,9 @@ public interface IssueService {
 
     List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type);
 
+    List<String> getIssueUuidListByCondition(String repoId, String type, String status);
+
+
     Issue getIssueByIssueId(String issueId);
 
     /**

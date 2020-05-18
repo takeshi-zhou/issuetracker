@@ -232,9 +232,6 @@ public class TagServiceImpl implements TagService {
         String tool = requestBody.getString("tool");
         String repoId = requestBody.getString("repo_id");
 
-
-
-
         // before ignore tag query the type is ignored or not
         if (isIgnored(userId, ignoreLevel.value(), type, repoId)) {
             throw new RuntimeException("this type has been ignored");
@@ -248,7 +245,7 @@ public class TagServiceImpl implements TagService {
 
         // modify issue list status
         if (ignoreLevel.level().equals("project")) {
-            ignoreUuidList = restInterfaceManager.getIssueListByTypeAndRepoId(repoId,type);
+            ignoreUuidList = restInterfaceManager.getIssueListByCondition(repoId,type,"");
             restInterfaceManager.batchUpdateIssueListStatus(ignoreUuidList, "Ignore");
 
             Date date = new Date();
@@ -267,7 +264,7 @@ public class TagServiceImpl implements TagService {
             // insert ignore relation
             ignoreRecordDao.insertOneRecord(record);
         }else if (ignoreLevel.level().equals("repository")) {
-            ignoreUuidList = restInterfaceManager.getIssueListByTypeAndRepoId("",type);
+            ignoreUuidList = restInterfaceManager.getIssueListByCondition("",type,"");
             restInterfaceManager.batchUpdateIssueListStatus(ignoreUuidList, "Ignore");
 
             Date date = new Date();
@@ -284,6 +281,7 @@ public class TagServiceImpl implements TagService {
             ignoreRecordDao.insertOneRecord(record);
         }
 
+        //更改tagged表的tagID
         List<ModifyTaggedItem> ignoreList = new ArrayList<>();
         for (String uuid : ignoreUuidList) {
             String status = restInterfaceManager.getIssueStatusByIssueId(uuid);
@@ -298,12 +296,32 @@ public class TagServiceImpl implements TagService {
     public void cancelOneIgnoreRecord(String repoId, String level, String type, String token) {
         String userId = restInterfaceManager.getUserId(token);
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(level.toUpperCase());
-
+        List<String> ignoreUuidList = new ArrayList<>();
+        List<ModifyTaggedItem> ignoreList = new ArrayList<>();
         if (ignoreLevel == IgnoreLevelEnum.PROJECT) {
+            ignoreUuidList = restInterfaceManager.getIssueListByCondition("", type, "Ignore");
+            restInterfaceManager.batchUpdateIssueListStatus(ignoreUuidList, "To_Review");
             ignoreRecordDao.cancelInvalidRecord(userId, type);
+
+            //更改tagged表的tagID
+            for (String uuid : ignoreUuidList) {
+                String status = restInterfaceManager.getIssueStatusByIssueId(uuid);
+                String preTagId = getTagIdByItemIdAndScope(uuid, status);
+                ignoreList.add(new ModifyTaggedItem(uuid, preTagId, ignoreTagId));
+            }
+            tagDao.modifyMultiTaggedItem(ignoreList);
             return;
         }
+        ignoreUuidList = restInterfaceManager.getIssueListByCondition(repoId, type, "Ignore");
+        restInterfaceManager.batchUpdateIssueListStatus(ignoreUuidList, "To_Review");
         ignoreRecordDao.cancelOneIgnoreRecord(userId, ignoreLevel.value(), type, repoId);
+        //更改tagged表的tagID
+        for (String uuid : ignoreUuidList) {
+            String status = restInterfaceManager.getIssueStatusByIssueId(uuid);
+            String preTagId = getTagIdByItemIdAndScope(uuid, status);
+            ignoreList.add(new ModifyTaggedItem(uuid, preTagId, ignoreTagId));
+        }
+        tagDao.modifyMultiTaggedItem(ignoreList);
     }
 
     @Override
@@ -345,7 +363,7 @@ public class TagServiceImpl implements TagService {
          * 如果需要设置全局忽略（project），则需要取消掉低级别的忽略
          */
         if (level == IgnoreLevelEnum.PROJECT.value()) {
-            //暂且不覆盖低级别的忽略规则
+//            暂且不覆盖低级别的忽略规则
 //            ignoreRecordDao.cancelInvalidRecord(userId, type);
             return false;
         }

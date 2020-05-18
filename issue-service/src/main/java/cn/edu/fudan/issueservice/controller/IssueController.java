@@ -245,10 +245,13 @@ public class IssueController {
         }
     }
 
-
     @GetMapping(value = "/inner/issue/uuid")
-    public List<String> getIssueListByTypeAndRepoId(@RequestParam("repo-id") String repoId,@RequestParam("type") String type) {
-        return issueService.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
+    public List<String> getIssueListByTypeAndRepoId(@RequestParam("repo-id") String repoId, @RequestParam("type") String type, @RequestParam("status") String status) {
+        if (status == null || "".equals(status)){
+            return issueService.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
+        }else {
+            return issueService.getIssueUuidListByCondition(repoId, type, status);
+        }
     }
 
     @GetMapping(value = "/inner/issue")

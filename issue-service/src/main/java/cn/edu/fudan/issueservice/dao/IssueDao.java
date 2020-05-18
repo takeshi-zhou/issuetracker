@@ -111,6 +111,10 @@ public class IssueDao {
         return issueMapper.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
     }
 
+    public List<String> getIssueUuidListByCondition(String repoId, String type, String status) {
+        return issueMapper.getIssueUuidListByCondition(repoId, type, status);
+    }
+
     public Issue getIssueByIssueId(String issueId) {
         return issueMapper.getIssueByIssueId(issueId);
     }

@@ -629,6 +629,11 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
+    public List<String> getIssueUuidListByCondition(String repoId, String type, String status) {
+        return issueDao.getIssueUuidListByCondition(repoId, type, status);
+    }
+
+    @Override
     public Issue getIssueByIssueId(String issueId) {
         return issueDao.getIssueByIssueId(issueId);
     }
