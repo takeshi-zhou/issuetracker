@@ -224,11 +224,12 @@ public class TagServiceImpl implements TagService {
      * */
     @Override
     @Transactional
-    //待修改
+    //待修改 增加缺陷检测工具
     public void ignoreOneType(JSONObject requestBody,String token) {
         String userId = restInterfaceManager.getUserId(token);
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore_level").toUpperCase());
         String type = requestBody.getString("type");
+        String tool = requestBody.getString("tool");
         String repoId = requestBody.getString("repo_id");
 
 
