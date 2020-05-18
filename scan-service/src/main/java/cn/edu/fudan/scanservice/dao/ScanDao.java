@@ -62,7 +62,7 @@ public class ScanDao {
         return scanMapper.getScanByCategoryAndRepoIdAndCommitId(repo_id,category,commit_id);
     }
 
-    public List<Scan> getScanByRepoIdAndStatus(String repoId,String status) {
-        return scanMapper.getScanByRepoIdAndStatus(repoId,status);
+    public List<Scan> getScanByRepoIdAndStatusAndCategory(String repoId,String status,String category) {
+        return scanMapper.getScanByRepoIdAndStatusAndCategory(repoId,status,category);
     }
 }

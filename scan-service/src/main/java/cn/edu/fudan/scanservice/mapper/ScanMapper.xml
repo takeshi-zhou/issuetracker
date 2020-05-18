@@ -93,12 +93,15 @@
     </select>
 
 
-    <select id="getScanByRepoIdAndStatus" parameterType="String" resultMap="scan">
+    <select id="getScanByRepoIdAndStatusAndCategory" parameterType="String" resultMap="scan">
         select * from scan
         <where>
             repo_id=#{repo_id}
             <if test="status != null and status != ''">
                 and status=#{status}
+            </if>
+            <if test="category != null and category != ''">
+                and category=#{category}
             </if>
         </where>
         order by commit_time desc

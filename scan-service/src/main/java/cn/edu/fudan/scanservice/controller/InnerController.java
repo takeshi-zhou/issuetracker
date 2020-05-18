@@ -147,6 +147,6 @@ public class InnerController {
      */
     @GetMapping(value = "/inner/scan/get-by-status")
     public Object getScanByStatus(@RequestParam("repo_id") String repoId,@RequestParam("status")String status){
-        return scanService.getScanByRepoIdAndStatus(repoId, status);
+        return scanService.getScanByRepoIdAndStatusAndCategory(repoId, status,null);
     }
 }

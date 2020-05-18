@@ -26,5 +26,5 @@ public interface ScanMapper {
 
     Scan  getScanByCategoryAndRepoIdAndCommitId(@Param("repo_id") String repo_id,@Param("category") String category,@Param("commit_id") String commit_id);
 
-    List<Scan> getScanByRepoIdAndStatus(@Param("repo_id") String repoId,@Param("status")String status);
+    List<Scan> getScanByRepoIdAndStatusAndCategory(@Param("repo_id") String repoId,@Param("status")String status,@Param("category") String category);
 }

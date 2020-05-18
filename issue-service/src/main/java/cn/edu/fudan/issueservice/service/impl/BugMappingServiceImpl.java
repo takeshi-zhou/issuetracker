@@ -33,6 +33,7 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
         // 每个merge点应该也需要判断是否是聚合点，如果是聚合点，同时需要对issue的resolution清0，此时可以得出每个issue有多少次被抛弃的修复。
         // 避免对下一次merge的影响。
 
+        log.info("start bug mapping!");
         try{
             //存当前扫描后需要插入的新的issue
             List<Issue> insertIssueList = new ArrayList<>();
@@ -40,12 +41,13 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             //当前时间
             Date date = new Date();
             Date commitDate = getCommitDate(currentCommitId,repoId);
+            log.info("get commit date success!");
             //获取该项目ignore的issue类型
             JSONArray ignoreTypes = restInterfaceManager.getIgnoreTypesOfRepo(repoId);
-
+            log.info("get ignore types success!");
 
             List<String> parentCommits =  restInterfaceManager.getPreScannedCommitByCurrentCommit(repoId,currentCommitId,category);
-
+            log.info("get parent commits success!");
 
             if (parentCommits.isEmpty()) {
                 //当前project第一次扫描，所有的rawIssue都 是issue
@@ -85,11 +87,14 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
             } else {
 
                 if(parentCommits.size() == 1){
+                    log.info("not first mapping and parent commit is one!");
                     preCommitId = parentCommits.get(0);
                     issueMapping(repoId, category, preCommitId, currentCommitId, commitDate,
                             date, insertIssueList, tags, ignoreTypes, committer, committer);
                 }else{
+                    log.info("not first mapping and count of parent commits  is more than one!");
                     boolean isAggregation = verifyWhetherAggregation(repoId, currentCommitId);
+                    log.info("judge is aggregation --> {}",isAggregation);
                     issueMapping(repoId, category, parentCommits, currentCommitId, commitDate,
                             date, insertIssueList, tags, ignoreTypes, committer, committer,isAggregation);
                 }
@@ -127,17 +132,20 @@ public class BugMappingServiceImpl extends BaseMappingServiceImpl {
     private void issueMapping(String repoId, String category, String preCommitId, String currentCommitId, Date commitDate,
                               Date date, List<Issue> insertIssueList, List<JSONObject> tags, JSONArray ignoreTypes, String committer, String developer) {
         //不是第一次扫描，需要和前一次的commit产生的issue进行mapping
+        logger.info("not first mapping!");
         if(preCommitId == null || preCommitId.isEmpty()){
             preCommitId = rawIssueDao.getPreCommitIdByCurrentCommitId(repoId,category,currentCommitId);
         }
+        logger.info("get preCommitId success!");
         List<RawIssue> preRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repoId, category, preCommitId);
+        logger.info("get preRawIssues success!");
         List<RawIssue> currentRawIssues = rawIssueDao.getRawIssueByCommitIDAndCategory(repoId, category, currentCommitId);
+        logger.info("get currentRawIssues success!");
         if (currentRawIssues == null || currentRawIssues.isEmpty()) {
             logger.info("all issues were solved or raw issue insert error , commit id -->  {}", currentCommitId);
         }
 
 
-        logger.info("not first mapping!");
         //mapping开始之前end commit是上一个commit的表示是上个commit存活的issue
         Set<String> existsIssueIds = issueDao.getIssuesByEndCommit(repoId, category, preCommitId).stream().map(Issue::getUuid).collect(Collectors.toSet());
         //装需要更新的
