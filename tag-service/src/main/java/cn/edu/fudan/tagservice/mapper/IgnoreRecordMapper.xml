@@ -8,6 +8,7 @@
         <result property="userId" column="user_id"/>
         <result property="level" column="level"/>
         <result property="type" column="type"/>
+        <result property="tool" column="tool"/>
         <result property="repoId" column="repo_id"/>
         <result property="repoName" column="repo_name"/>
         <result property="branch" column="branch"/>
@@ -21,6 +22,7 @@
         user_id,
         level,
         type,
+        tool,
         repo_id,
         repo_name,
         branch,
@@ -32,6 +34,7 @@
         #{userId},
         #{level},
         #{type},
+        #{tool},
         #{repoId},
         #{repoName},
         #{branch},

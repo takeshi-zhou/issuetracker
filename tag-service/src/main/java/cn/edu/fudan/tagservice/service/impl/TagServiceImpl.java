@@ -257,6 +257,7 @@ public class TagServiceImpl implements TagService {
             record.setUuid(UUID.randomUUID().toString());
             record.setUserId(userId);
             record.setType(type);
+            record.setTool(tool);
             record.setLevel(ignoreLevel.value());
             record.setRepoId(repoId);
             record.setRepoName(repoName);
@@ -275,6 +276,7 @@ public class TagServiceImpl implements TagService {
             record.setUuid(UUID.randomUUID().toString());
             record.setUserId(userId);
             record.setType(type);
+            record.setTool(tool);
             record.setLevel(ignoreLevel.value());
             record.setUpdateTime(date);
 
