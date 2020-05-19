@@ -28,6 +28,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Created by njzhan
@@ -65,6 +66,43 @@ public class JGitUtil {
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
+    }
+
+    private Long getLongCommitTime(String version) {
+        try {
+            RevCommit revCommit = revWalk.parseCommit(ObjectId.fromString(version));
+            return revCommit.getCommitTime() * 1000L;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return 0L;
+        }
+    }
+
+    private <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+        Map<K, V> result = new LinkedHashMap<>();
+        Stream<Map.Entry<K, V>> st = map.entrySet().stream();
+        st.sorted(Comparator.comparing(Map.Entry::getValue)).forEach(e -> result.put(e.getKey(), e.getValue()));
+        return result;
+    }
+
+    public List<String> getCommitListByBranchAndBeginCommit(String beginCommit) {
+        Map<String, Long> commitMap = new HashMap<>(512);
+        Long start = getLongCommitTime(beginCommit);
+        if (start == 0) {
+            throw new RuntimeException("beginCommit Error!");
+        }
+        try {
+            Iterable<RevCommit> commits = git.log().call();
+            for (RevCommit commit : commits) {
+                Long commitTime = commit.getCommitTime() * 1000L;
+                if (commitTime >= start) {
+                    commitMap.put(commit.getName(), commitTime);
+                }
+            }
+        } catch (GitAPIException e) {
+            e.getMessage();
+        }
+        return new ArrayList<>(sortByValue(commitMap).keySet());
     }
 
 
@@ -370,6 +408,26 @@ public class JGitUtil {
         ObjectId versionId=repository.resolve(commitId);
         return walk.parseCommit(versionId);
 
+    }
+
+    public static String getPreCommitId(String repoPath, String commitId){
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        builder.setMustExist(true);
+        builder.addCeilingDirectory(new File(repoPath));
+        builder.findGitDir(new File(repoPath));
+        String commit = null;
+        try {
+            Repository repository = builder.build();
+            RevCommit revCommit = getCurrentRevCommit(repoPath,commitId);
+            RevCommit preCommit = getPrevHash(revCommit, repository);
+            if(preCommit != null){
+                commit = preCommit.getName();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return commit;
     }
 
     public static CommitChange getNewlyIncreasedLines(String repoPath, String commitId){

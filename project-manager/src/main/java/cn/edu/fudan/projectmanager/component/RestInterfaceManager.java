@@ -36,11 +36,18 @@ public class RestInterfaceManager {
     private String codeTrackerServicePath;
     @Value("${commit.service.path}")
     private String commitServicePath;
+    @Value("${clone.service.path}")
+    private String cloneServicePath;
 
     private RestTemplate restTemplate;
 
     public RestInterfaceManager(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    //----------------------------------account service----------------------------------------------------
+    public void deleteCloneMeasure(String repoId){
+        restTemplate.delete(cloneServicePath + "/cloneMeasure/" + repoId);
     }
 
     //----------------------------------account service----------------------------------------------------

@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 
@@ -191,7 +192,7 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
         int newCloneLines = 0;
         int selfCloneLines = 0;
         int increasedLines = 0;
-
+        int addCloneLines = 0;
         List<CloneMeasure> cloneMeasures = cloneMeasureDao.getCloneMeasures(repoId);
 
         for(CloneMeasure cloneMeasure1 : cloneMeasures){
@@ -199,8 +200,15 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
                 if(cloneMeasure1.getCommitId().equals(commitId)){
                     newCloneLines += Integer.parseInt(cloneMeasure1.getIncreasedCloneLines());
                     selfCloneLines += Integer.parseInt(cloneMeasure1.getSelfIncreasedCloneLines());
-                    String[] tmp = cloneMeasure1.getIncreasedCloneLinesRate().split("/");
-                    increasedLines += Integer.parseInt(tmp[1]);
+                    String[] tmp1 = cloneMeasure1.getIncreasedCloneLinesRate().split("/");
+                    if(tmp1.length == 2){
+                        increasedLines += Integer.parseInt(tmp1[1]);
+                    }
+                    String[] tmp2 = cloneMeasure1.getAddCloneLines().split("-");
+                    //消除clone行数,只计算消除
+                    if(Integer.parseInt(tmp2[0]) > 0 && (Integer.parseInt(tmp2[1]) - Integer.parseInt(tmp2[0])) > 0){
+                        addCloneLines += (Integer.parseInt(tmp2[1]) - Integer.parseInt(tmp2[0]));
+                    }
                 }
             }
         }
@@ -209,8 +217,44 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
         cloneMeasure.setIncreasedCloneLines(newCloneLines+"");
         cloneMeasure.setSelfIncreasedCloneLines(selfCloneLines+"");
         cloneMeasure.setIncreasedCloneLinesRate(newCloneLines+"/"+increasedLines);
+        cloneMeasure.setAddCloneLines(addCloneLines+"");
         return cloneMeasure;
     }
+
+    @Override
+    public void deleteCloneMeasureByRepoId(String repoId) {
+        cloneMeasureDao.deleteCloneMeasureByRepoId(repoId);
+    }
+
+    private int getCloneLines(String repoId, String commitId){
+
+        int cloneLinesWithOutTest = 0;
+        if(commitId != null){
+            int oneLocationCloneLines;
+
+            String className;
+            String fullName;
+
+            List<CloneLocation> cloneLocations = locationDao.getCloneLocations(repoId, commitId);
+
+            for(CloneLocation location: cloneLocations){
+                className = location.getFilePath().toLowerCase();
+                fullName = className.substring(className.lastIndexOf("/") + 1);
+                if(className.contains("/test/") || fullName.startsWith("test") || fullName.endsWith("test.java") || fullName.endsWith("tests.java")){
+                    continue;
+                }
+                String [] ss = location.getBugLines().split(",");
+                oneLocationCloneLines = Integer.parseInt(ss[1]) - Integer.parseInt(ss[0]) + 1;
+                cloneLinesWithOutTest += oneLocationCloneLines;
+
+            }
+            logger.info("repoId:{} - commitId:{}--->cloneLines:{}",repoId, commitId, cloneLinesWithOutTest);
+            return cloneLinesWithOutTest;
+        }
+
+        return -1;
+    }
+
 
     @Override
     public CloneMeasure insertCloneMeasure(String repoId, String commitId){
@@ -219,13 +263,18 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
 
         int increasedCloneLines = 0;
         int increasedSameCloneLines = 0;
-        int increasedLines = 0;
+        int increasedLines;
+        int preCloneLines;
+        int currentCloneLines;
         String repoPath=null;
         Map<String, String> map;
         try {
             repoPath=restInterfaceManager.getRepoPath(repoId,commitId);
 
             CommitChange commitChange = JGitUtil.getNewlyIncreasedLines(repoPath, commitId);
+            String preCommitId = JGitUtil.getPreCommitId(repoPath, commitId);
+            preCloneLines = getCloneLines(repoId, preCommitId);
+            currentCloneLines = getCloneLines(repoId, commitId);
 
             map = commitChange.getAddMap();
             increasedLines = commitChange.getAddLines();
@@ -291,6 +340,8 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
             cloneMeasure.setIncreasedCloneLines(increasedCloneLines+"");
             cloneMeasure.setIncreasedCloneLinesRate(increasedCloneLines+"/"+increasedLines);
             cloneMeasure.setSelfIncreasedCloneLines(increasedSameCloneLines+"");
+            cloneMeasure.setAddCloneLines(currentCloneLines + "-" + preCloneLines);
+            cloneMeasure.setCloneLines(currentCloneLines+"");
             cloneMeasureDao.insertCloneMeasure(cloneMeasure);
         } catch (Exception e) {
             e.printStackTrace();
@@ -301,6 +352,34 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
         }
 
         return cloneMeasure;
+
+    }
+
+    @Async("forRequest")
+    @Override
+    public void scanCloneMeasure(String repoId, String startCommitId){
+        logger.info("start clone measure scan");
+        String repoPath = null;
+        List<String> commitList = null;
+        try {
+            repoPath=restInterfaceManager.getRepoPath1(repoId);
+            logger.info("repoPath:{}", repoPath);
+            JGitUtil jGitHelper = new JGitUtil(repoPath);
+            commitList = jGitHelper.getCommitListByBranchAndBeginCommit(startCommitId);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if(repoPath!=null){
+                //restInterfaceManager.freeRepo1(repoId,repoPath);
+            }
+        }
+        if(commitList != null){
+            logger.info("need scan {} commits",commitList.size());
+            for(String commitId : commitList){
+                insertCloneMeasure(repoId, commitId);
+            }
+        }
 
     }
 

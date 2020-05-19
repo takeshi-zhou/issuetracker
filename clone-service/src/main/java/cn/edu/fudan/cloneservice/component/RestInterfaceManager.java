@@ -130,4 +130,14 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
     }
 
+    public String getRepoPath1(String repoId) {
+        JSONObject jsonObject = restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
+
+        return jsonObject.getJSONObject("data").getString("local_addr");
+    }
+
+    public void freeRepo1(String repoId, String path) {
+        restTemplate.getForObject(codeServicePath + "/free?repo_id=" + repoId + "&path=" + path,JSONObject.class).getJSONObject("data").getString("status");
+    }
+
 }

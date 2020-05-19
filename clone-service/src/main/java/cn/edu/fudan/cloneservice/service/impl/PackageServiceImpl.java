@@ -7,6 +7,7 @@ import cn.edu.fudan.cloneservice.domain.ScanInitialInfo;
 import cn.edu.fudan.cloneservice.service.PackageService;
 import cn.edu.fudan.cloneservice.task.PackageScanTask;
 import cn.edu.fudan.cloneservice.task.ScanTask;
+import cn.edu.fudan.cloneservice.thread.MultiThreadingExtractor;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ public class PackageServiceImpl implements PackageService {
 
     @SuppressWarnings("unchecked")
     @Override
-    @KafkaListener(id = "cloneScan", topics = {"CloneZNJ"}, groupId = "clone")
+    //@KafkaListener(id = "cloneScan", topics = {"CloneZNJ"}, groupId = "clone")
     public void cloneMessageListener(ConsumerRecord<String, String> consumerRecord) {
         String msg = consumerRecord.value();
 
@@ -51,17 +52,26 @@ public class PackageServiceImpl implements PackageService {
 
         List<String> commits = cloneScanInfo.getCommitIds();
 
-        for(String commitId:commits){
-            scanTask.runSynchronously(repoId, commitId, "clone");
-        }
+//        for(String commitId:commits){
+//            scanTask.runSynchronously(repoId, commitId, "clone");
+//        }
 
+
+    }
+
+    @Autowired
+    MultiThreadingExtractor extractor;
+
+    private void cloneScan(String repoId, List<String> commits){
+
+        extractor.extract(repoId,commits);
 
     }
 
 
     @SuppressWarnings("unchecked")
     @Override
-    @KafkaListener(id = "rePackageScan", topics = {"CloneZNJReScan"}, groupId = "clone")
+    //@KafkaListener(id = "rePackageScan", topics = {"CloneZNJReScan"}, groupId = "clone")
     public void ReCloneMessageListener(ConsumerRecord<String, String> consumerRecord) {
 //        String msg = consumerRecord.value();
 ////        System.out.println(msg);

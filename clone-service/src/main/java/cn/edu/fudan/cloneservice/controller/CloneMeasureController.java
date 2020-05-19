@@ -58,6 +58,30 @@ public class CloneMeasureController {
         return location.getLocationsByCommitIdAndRepoId(commitId, repoId);
     }
 
+    @DeleteMapping(value = {"/cloneMeasure/{repoId}"})
+    public Object deleteScans(@PathVariable("repoId") String repoId) {
+        try {
+            cloneMeasureService.deleteCloneMeasureByRepoId(repoId);
+            return new ResponseBean(200, "clone measure delete success!", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "clone measure delete failed", null);
+        }
+    }
+
+    @GetMapping(value = {"/cloneMeasure/scan"})
+    public ResponseBean scan(@RequestParam("repoId") String repoId,
+                             @RequestParam("startCommitId") String commitId
+                                            ){
+        try{
+            cloneMeasureService.scanCloneMeasure(repoId,commitId);
+            return new ResponseBean(200,"success",null);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
 //
 //    @GetMapping(value = {"/clonemeasure/repository"})
 //    public ResponseBean getMeasureCloneData(@RequestParam("repo_id") String repo_id,

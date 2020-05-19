@@ -13,6 +13,8 @@ public class CloneMeasure {
     private String increasedCloneLines;
     private String selfIncreasedCloneLines;
     private String increasedCloneLinesRate;
+    private String cloneLines;
+    private String addCloneLines;
 
     public String getUuid() {
         return uuid;
@@ -61,4 +63,21 @@ public class CloneMeasure {
     public void setIncreasedCloneLinesRate(String increasedCloneLinesRate) {
         this.increasedCloneLinesRate = increasedCloneLinesRate;
     }
+
+    public String getCloneLines() {
+        return cloneLines;
+    }
+
+    public void setCloneLines(String cloneLines) {
+        this.cloneLines = cloneLines;
+    }
+
+    public String getAddCloneLines() {
+        return addCloneLines;
+    }
+
+    public void setAddCloneLines(String addCloneLines) {
+        this.addCloneLines = addCloneLines;
+    }
+
 }

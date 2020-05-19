@@ -41,22 +41,8 @@ public class ScanOperationAdapter implements ScanOperation{
     }
 
     @Override
-    public boolean checkCommit(String repoId,String commitId,String category) throws RuntimeException{
-        Date lastScannedCommitTime = scanDao.getLastScannedCommitTime(repoId,category);
-        if(lastScannedCommitTime==null) {
-            return true;
-        }
-        JSONObject jsonObject = restInterfaceManager.getCommitTime(commitId,repoId);
-        if(jsonObject == null){
-            throw new RuntimeException("request base server failed");
-        }
-        Date commitTime = jsonObject.getJSONObject("data").getDate("commit_time");
-        return !lastScannedCommitTime.after(commitTime) ;
-    }
-
-    @Override
     public ScanInitialInfo initialScan(String repoId, String commitId, String category) throws RuntimeException{
-        //没有拿到repoPath
+        //从初始化scan开始锁
         String repoPath = restInterfaceManager.getRepoPath(repoId,commitId);
         if(repoPath==null) {
             logger.error("scan initial failed ,  repo id --> {}, commit id --> {} , can't get repo path. ",repoId,commitId);
@@ -95,22 +81,6 @@ public class ScanOperationAdapter implements ScanOperation{
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public boolean mapping(String repoId, String commitId,String category) {
-        String preCommitId = scanDao.getLatestScannedCommitId(repoId,category);
-        JSONObject requestParam = new JSONObject();
-        requestParam.put("repo_id", repoId);
-        requestParam.put("category",category);
-        if (preCommitId != null) {
-            requestParam.put("pre_commit_id", preCommitId);
-        } else {
-            requestParam.put("pre_commit_id", commitId);
-        }
-        requestParam.put("current_commit_id", commitId);
-        logger.info("mapping between " + requestParam.toJSONString());
-        JSONObject result = restInterfaceManager.mapping(requestParam);
-        return result != null && result.getIntValue("code") == 200;
-    }
 
     @Override
     public boolean updateScan(ScanInitialInfo scanInitialInfo) {

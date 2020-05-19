@@ -18,6 +18,10 @@ public class ScanInitialInfo {
         this.isSuccess = isSuccess;
     }
 
+    public ScanInitialInfo(){
+
+    }
+
     public ScanInitialInfo(Scan scan, String repoName, String repoId, String repoPath, boolean isSuccess) {
         this.scan = scan;
         this.repoName = repoName;

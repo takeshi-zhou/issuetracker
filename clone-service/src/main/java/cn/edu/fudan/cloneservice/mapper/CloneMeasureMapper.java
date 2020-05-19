@@ -13,4 +13,6 @@ public interface CloneMeasureMapper {
     void insertCloneMeasure(CloneMeasure cloneMeasure);
 
     List<CloneMeasure> getCloneMeasures(@Param("repo_id") String repoId);
+
+    void deleteCloneMeasureByRepoId(@Param("repo_id") String repoId);
 }
