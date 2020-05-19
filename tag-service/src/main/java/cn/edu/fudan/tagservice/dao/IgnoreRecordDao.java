@@ -27,20 +27,20 @@ public class IgnoreRecordDao {
         ignoreRecordMapper.insertOneRecord(ignoreRecord);
     }
 
-    public void cancelOneIgnoreRecord(String userId, int level, String type, String repoId) {
-        ignoreRecordMapper.cancelOneIgnoreRecord(userId, level, type, repoId);
+    public void cancelOneIgnoreRecord(String userId, int level, String type, String repoId, String tool) {
+        ignoreRecordMapper.cancelOneIgnoreRecord(userId, level, type, repoId, tool);
     }
 
     public Integer queryMinIgnoreLevelByUserId(String userId, String type) {
         return ignoreRecordMapper.queryMinIgnoreLevelByUserId(userId, type);
     }
 
-    public void cancelInvalidRecord(String userId, String type) {
-        ignoreRecordMapper.cancelInvalidRecord(userId, type);
+    public void cancelInvalidRecord(String userId, String type, String tool) {
+        ignoreRecordMapper.cancelInvalidRecord(userId, type, tool);
     }
 
-    public IgnoreRecord queryOneRecord(String userId, int level, String type, String repoId) {
-        return ignoreRecordMapper.queryOneRecord(userId, level, type, repoId);
+    public IgnoreRecord queryOneRecord(String userId, int level, String type, String repoId, String tool) {
+        return ignoreRecordMapper.queryOneRecord(userId, level, type, repoId, tool);
     }
 
     public List<IgnoreRecord> getIgnoreRecordList(String userId) {

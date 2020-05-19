@@ -624,13 +624,13 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type) {
-        return issueDao.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
+    public List<String> getNotSolvedAndNotMisinformationIssueListByTypeAndRepoId(String repoId, String type, String tool) {
+        return issueDao.getNotSolvedAndNotMisinformationIssueListByTypeAndRepoId(repoId, type, tool);
     }
 
     @Override
-    public List<String> getIssueUuidListByCondition(String repoId, String type, String status) {
-        return issueDao.getIssueUuidListByCondition(repoId, type, status);
+    public List<String> getIssueUuidListByCondition(String repoId, String type, String status, String tool) {
+        return issueDao.getIssueUuidListByCondition(repoId, type, status, tool);
     }
 
     @Override

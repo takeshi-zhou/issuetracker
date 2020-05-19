@@ -246,11 +246,11 @@ public class IssueController {
     }
 
     @GetMapping(value = "/inner/issue/uuid")
-    public List<String> getIssueListByTypeAndRepoId(@RequestParam("repo-id") String repoId, @RequestParam("type") String type, @RequestParam("status") String status) {
+    public List<String> getIssueListByTypeAndRepoId(@RequestParam("repo-id") String repoId, @RequestParam("type") String type, @RequestParam("status") String status, @RequestParam("tool") String tool) {
         if (status == null || "".equals(status)){
-            return issueService.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
+            return issueService.getNotSolvedAndNotMisinformationIssueListByTypeAndRepoId(repoId, type, tool);
         }else {
-            return issueService.getIssueUuidListByCondition(repoId, type, status);
+            return issueService.getIssueUuidListByCondition(repoId, type, status, tool);
         }
     }
 

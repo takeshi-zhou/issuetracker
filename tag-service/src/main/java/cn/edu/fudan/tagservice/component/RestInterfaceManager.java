@@ -67,8 +67,8 @@ public class RestInterfaceManager {
      * issue service
      * */
     @SuppressWarnings("unchecked")
-    public List<String> getIssueListByCondition(String repoId, String type, String status) {
-        return restTemplate.getForObject(issueServicePath + "/inner/issue/uuid?repo-id=" + repoId + "&type=" + type + "&status=" + status, List.class);
+    public List<String> getIssueListByCondition(String repoId, String type, String status, String tool) {
+        return restTemplate.getForObject(issueServicePath + "/inner/issue/uuid?repo-id=" + repoId + "&type=" + type + "&status=" + status + "&tool=" + tool, List.class);
     }
 
     public String getIssueStatusByIssueId(String issue_id) {

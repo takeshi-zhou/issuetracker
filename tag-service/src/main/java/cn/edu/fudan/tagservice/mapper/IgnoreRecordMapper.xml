@@ -44,6 +44,9 @@
 
     <delete id="cancelOneIgnoreRecord"  >
         delete from ignore_record where user_id = #{user_id} and level = #{level} and type = #{type} and repo_id = #{repo_id}
+        <if test="tool != null and tool != ''" >
+            and tool = #{tool}
+        </if>
     </delete>
 
     <select id="queryMinIgnoreLevelByUserId" parameterType="String" resultType="Integer">
@@ -52,10 +55,16 @@
 
     <delete id="cancelInvalidRecord" parameterType="String">
         delete from ignore_record where user_id = #{user_id} and type = #{type}
+        <if test="tool != null and tool != ''" >
+            and tool = #{tool}
+        </if>
     </delete>
 
     <select id="queryOneRecord" resultMap="ignoreRecord">
         select * from ignore_record where user_id = #{user_id} and level = #{level} and type = #{type} and repo_id = #{repo_id}
+        <if test="tool != null and tool != ''" >
+            and tool = #{tool}
+        </if>
     </select>
 
     <select id="getIgnoreRecordList" resultMap="ignoreRecord">

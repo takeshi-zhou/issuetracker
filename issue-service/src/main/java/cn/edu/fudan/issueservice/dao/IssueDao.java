@@ -107,12 +107,12 @@ public class IssueDao {
         return issueMapper.getMaxIssueDisplayId(repoId);
     }
 
-    public List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type) {
-        return issueMapper.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
+    public List<String> getNotSolvedAndNotMisinformationIssueListByTypeAndRepoId(String repoId, String type, String tool) {
+        return issueMapper.getNotSolvedAndNotMisinformationIssueListByTypeAndRepoId(repoId, type, tool);
     }
 
-    public List<String> getIssueUuidListByCondition(String repoId, String type, String status) {
-        return issueMapper.getIssueUuidListByCondition(repoId, type, status);
+    public List<String> getIssueUuidListByCondition(String repoId, String type, String status, String tool) {
+        return issueMapper.getIssueUuidListByCondition(repoId, type, status, tool);
     }
 
     public Issue getIssueByIssueId(String issueId) {

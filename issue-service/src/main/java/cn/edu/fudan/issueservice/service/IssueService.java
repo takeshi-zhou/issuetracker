@@ -50,9 +50,9 @@ public interface IssueService {
 
     void batchUpdateIssueListStatus(List<String> issueUuid, String status);
 
-    List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type);
+    List<String> getNotSolvedAndNotMisinformationIssueListByTypeAndRepoId(String repoId, String type, String tool);
 
-    List<String> getIssueUuidListByCondition(String repoId, String type, String status);
+    List<String> getIssueUuidListByCondition(String repoId, String type, String status, String tool);
 
 
     Issue getIssueByIssueId(String issueId);

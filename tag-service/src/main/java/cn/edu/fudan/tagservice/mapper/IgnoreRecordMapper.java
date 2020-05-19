@@ -24,7 +24,7 @@ public interface IgnoreRecordMapper {
      * @param type get record type
      * @param repoId get record repo id
      */
-    void cancelOneIgnoreRecord(@Param("user_id")String userId,@Param("level") int level,@Param("type") String type,@Param("repo_id") String repoId);
+    void cancelOneIgnoreRecord(@Param("user_id")String userId,@Param("level") int level,@Param("type") String type,@Param("repo_id") String repoId,@Param("tool") String tool);
 
     /**
      * query min ignore level by user id
@@ -40,8 +40,9 @@ public interface IgnoreRecordMapper {
      *
      * @param userId get record user id
      * @param type get record type
+     * @param tool get record tool
      */
-    void cancelInvalidRecord(@Param("user_id") String userId,@Param("type") String type);
+    void cancelInvalidRecord(@Param("user_id") String userId,@Param("type") String type,@Param("tool") String tool);
 
     /**
      * query one record
@@ -52,7 +53,7 @@ public interface IgnoreRecordMapper {
      * @param repoId get record repo id
      * @return IgnoreRecord
      */
-    IgnoreRecord queryOneRecord(@Param("user_id")String userId,@Param("level") int level,@Param("type") String type,@Param("repo_id") String repoId);
+    IgnoreRecord queryOneRecord(@Param("user_id")String userId,@Param("level") int level,@Param("type") String type,@Param("repo_id") String repoId,@Param("tool") String tool);
 
     /**
      * get ignore record list
