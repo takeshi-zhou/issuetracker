@@ -198,6 +198,10 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(projectServicePath + "/inner/projects?account_id=" + account_id,JSONArray.class);
     }
 
+    public JSONObject getProjectByRepoId(String repo_id) {
+        return restTemplate.getForObject(projectServicePath + "/inner/project?repo_id=" + repo_id, JSONObject.class);
+    }
+
     //-------------------------------------------------end-------------------------------------------------------------
 
     //---------------------------------------------commit service------------------------------------------------------

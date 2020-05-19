@@ -5,24 +5,34 @@
  **/
 package cn.edu.fudan.tagservice.domain;
 
+import java.util.Date;
+
 public class IgnoreRecord {
 
     private String uuid;
     private String userId;
     private int level;
     private String type;
+    private String tool;
     private String repoId;
     private String repoName;
+    private String branch;
+    private Date updateTime;
 
-    public IgnoreRecord(String uuid, String userId, int level, String type, String repoId, String repoName) {
+    public IgnoreRecord(){
+    }
+
+    public IgnoreRecord(String uuid, String userId, int level, String type, String tool, String repoId, String repoName, String branch, Date updateTime) {
         this.uuid = uuid;
         this.userId = userId;
         this.level = level;
         this.type = type;
+        this.tool = tool;
         this.repoId = repoId;
         this.repoName = repoName;
+        this.branch = branch;
+        this.updateTime = updateTime;
     }
-
 
     public String getUuid() {
         return uuid;
@@ -56,6 +66,14 @@ public class IgnoreRecord {
         this.type = type;
     }
 
+    public String getTool() {
+        return tool;
+    }
+
+    public void setTool(String tool) {
+        this.tool = tool;
+    }
+
     public String getRepoId() {
         return repoId;
     }
@@ -70,5 +88,21 @@ public class IgnoreRecord {
 
     public void setRepoName(String repoName) {
         this.repoName = repoName;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 }

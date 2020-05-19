@@ -619,11 +619,26 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type) {
-        return issueDao.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
+    public void batchUpdateIssueListStatus(List<String> issueUuid, String status) {
+        issueDao.batchUpdateIssueListStatus(issueUuid, status);
     }
 
-    private String getPriorityTagIdByIntValue(int priorityInt,String token){
+    @Override
+    public List<String> getNotSolvedAndNotMisinformationIssueListByTypeAndRepoId(String repoId, String type, String tool) {
+        return issueDao.getNotSolvedAndNotMisinformationIssueListByTypeAndRepoId(repoId, type, tool);
+    }
+
+    @Override
+    public List<String> getIssueUuidListByCondition(String repoId, String type, String status, String tool) {
+        return issueDao.getIssueUuidListByCondition(repoId, type, status, tool);
+    }
+
+    @Override
+    public Issue getIssueByIssueId(String issueId) {
+        return issueDao.getIssueByIssueId(issueId);
+    }
+
+    private String getPriorityTagIdByIntValue(int priorityInt, String token){
         String priorityTagId = null;
         JSONArray tagList = restInterfaceManager.getTagByScope("priority", token);
         String lowTagId = null;
@@ -674,12 +689,6 @@ public class IssueServiceImpl implements IssueService {
                 priorityTagId = null;
         }
         return priorityTagId;
-    }
-
-    //把日期格式从“2010.10.10转化为2010-10-10”
-    private String dateFormatChange(String dateStr){
-        String newdateStr = dateStr.replace('.','-');
-        return newdateStr;
     }
 
 }

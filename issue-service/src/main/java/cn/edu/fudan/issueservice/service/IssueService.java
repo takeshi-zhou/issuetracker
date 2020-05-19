@@ -4,6 +4,7 @@ package cn.edu.fudan.issueservice.service;
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.domain.IssueParam;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.kafka.common.protocol.types.Field;
 
 import java.util.List;
 
@@ -47,7 +48,14 @@ public interface IssueService {
 
     void batchUpdateIssueListPriority(List<String> issueUuid, Integer priority);
 
-    List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type);
+    void batchUpdateIssueListStatus(List<String> issueUuid, String status);
+
+    List<String> getNotSolvedAndNotMisinformationIssueListByTypeAndRepoId(String repoId, String type, String tool);
+
+    List<String> getIssueUuidListByCondition(String repoId, String type, String status, String tool);
+
+
+    Issue getIssueByIssueId(String issueId);
 
     /**
      *

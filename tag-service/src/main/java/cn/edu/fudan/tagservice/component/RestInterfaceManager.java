@@ -5,6 +5,7 @@
  **/
 package cn.edu.fudan.tagservice.component;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -51,6 +52,10 @@ public class RestInterfaceManager {
         return currentRepo.getJSONObject("data").getString("repo_name");
     }
 
+    public JSONArray getProjectsByRepoId(String repo_id) {
+        return restTemplate.getForObject(projectServicePath + "/inner/project?repo_id=" + repo_id, JSONArray.class);
+    }
+
     /**
      * fundamental service
      * */
@@ -62,9 +67,16 @@ public class RestInterfaceManager {
      * issue service
      * */
     @SuppressWarnings("unchecked")
-    public List<String> getIssueListByTypeAndRepoId(String repoId, String type) {
-        return restTemplate.getForObject(issueServicePath + "/inner/issue/uuid?repo-id=" + repoId + "&type=" + type, List.class);
+    public List<String> getIssueListByCondition(String repoId, String type, String status, String tool) {
+        return restTemplate.getForObject(issueServicePath + "/inner/issue/uuid?repo-id=" + repoId + "&type=" + type + "&status=" + status + "&tool=" + tool, List.class);
     }
+
+    public String getIssueStatusByIssueId(String issue_id) {
+        JSONObject response = restTemplate.getForObject(issueServicePath + "/inner/issue?issue-id=" + issue_id,JSONObject.class);
+        String status = response.getJSONObject("data").getString("status");
+        return status;
+    }
+
 
     public void batchUpdateIssueListPriority(List<String> ignoreUuidList, int priority) {
         JSONObject jsonObject = new JSONObject();
@@ -75,4 +87,15 @@ public class RestInterfaceManager {
             throw new RuntimeException("Batch Update Issue List Priority ERROR!");
         }
     }
+
+    public void batchUpdateIssueListStatus(List<String> ignoreUuidList, String status) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("list",ignoreUuidList);
+        jsonObject.put("status",status);
+        Object o = restTemplate.postForObject(issueServicePath + "/inner/issue/status" ,jsonObject , Object.class);
+        if (o == null || o.toString().contains("failed")) {
+            throw new RuntimeException("Batch Update Issue List Status ERROR!");
+        }
+    }
+
 }

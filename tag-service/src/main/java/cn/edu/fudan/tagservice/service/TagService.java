@@ -40,7 +40,7 @@ public interface TagService {
 
     void ignoreOneType(JSONObject requestBody, String token);
 
-    void cancelOneIgnoreRecord(String repoId, String level, String type, String token);
+    void cancelOneIgnoreRecord(String repoId, String level, String type, String tool, String token);
 
     Object getIgnoreRecordList(String token);
 

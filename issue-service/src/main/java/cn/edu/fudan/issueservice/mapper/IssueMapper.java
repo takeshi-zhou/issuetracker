@@ -193,7 +193,26 @@ public interface IssueMapper {
      * @param type get issue type
      * @return List<String>
      */
-    List<String> getNotSolvedIssueListByTypeAndRepoId(@Param("repo_id") String repoId,@Param("type")  String type);
+    List<String> getNotSolvedAndNotMisinformationIssueListByTypeAndRepoId(@Param("repo_id") String repoId,@Param("type")  String type,@Param("category")  String tool);
+
+    /**
+     * get issue list by condition
+     * @param repoId
+     * @param type
+     * @param status
+     * @param tool
+     * @return
+     */
+    List<String> getIssueUuidListByCondition(@Param("repo_id") String repoId,@Param("type")  String type,@Param("status")  String status,@Param("category")  String tool);
+
+
+    /**
+     * get issue info by issueId
+     * @param issueId
+     * @return
+     */
+    Issue getIssueByIssueId(@Param("issue_id") String issueId);
+
 
     /**
      * get not solved issue all list by category and repo id
@@ -211,6 +230,14 @@ public interface IssueMapper {
      * @param priority get issue priority
      */
     void batchUpdateIssueListPriority(@Param("list")List<String> issueUuid,@Param("priority") int priority);
+
+    /**
+     * batch update issue list status
+     * @param issueUuid
+     * @param status
+     */
+    void batchUpdateIssueListStatus(@Param("list")List<String> issueUuid,@Param("status") String status);
+
 
     /**
      * get number of new issue by duration

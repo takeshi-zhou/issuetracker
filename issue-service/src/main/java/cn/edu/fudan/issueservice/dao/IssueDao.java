@@ -2,6 +2,7 @@ package cn.edu.fudan.issueservice.dao;
 
 import cn.edu.fudan.issueservice.domain.Issue;
 import cn.edu.fudan.issueservice.mapper.IssueMapper;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -106,8 +107,16 @@ public class IssueDao {
         return issueMapper.getMaxIssueDisplayId(repoId);
     }
 
-    public List<String> getNotSolvedIssueListByTypeAndRepoId(String repoId, String type) {
-        return issueMapper.getNotSolvedIssueListByTypeAndRepoId(repoId, type);
+    public List<String> getNotSolvedAndNotMisinformationIssueListByTypeAndRepoId(String repoId, String type, String tool) {
+        return issueMapper.getNotSolvedAndNotMisinformationIssueListByTypeAndRepoId(repoId, type, tool);
+    }
+
+    public List<String> getIssueUuidListByCondition(String repoId, String type, String status, String tool) {
+        return issueMapper.getIssueUuidListByCondition(repoId, type, status, tool);
+    }
+
+    public Issue getIssueByIssueId(String issueId) {
+        return issueMapper.getIssueByIssueId(issueId);
     }
 
     public List<Issue> getNotSolvedIssueAllListByCategoryAndRepoId(String repoId, String category) {
@@ -116,6 +125,10 @@ public class IssueDao {
 
     public void batchUpdateIssueListPriority(List issueUuid, int priority) {
         issueMapper.batchUpdateIssueListPriority(issueUuid, priority);
+    }
+
+    public void batchUpdateIssueListStatus(List issueUuid, String status) {
+        issueMapper.batchUpdateIssueListStatus(issueUuid, status);
     }
 
     public int getNumberOfNewIssueByDuration(String repoId, String start, String end) {
