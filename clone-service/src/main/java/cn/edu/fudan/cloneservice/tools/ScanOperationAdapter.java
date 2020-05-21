@@ -49,6 +49,7 @@ public class ScanOperationAdapter implements ScanOperation{
             throw new RuntimeException("request base server failed");
         }
         Date startTime = new Date();
+        //不通过这样拿repo
         JSONObject currentRepo = restInterfaceManager.getRepoById(repoId);
         String localAddress=currentRepo.getJSONObject("data").getString("local_addr");
         String repoName = localAddress.substring(localAddress.lastIndexOf("/")+1);

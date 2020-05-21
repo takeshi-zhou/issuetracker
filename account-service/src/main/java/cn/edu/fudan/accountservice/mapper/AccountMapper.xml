@@ -14,12 +14,12 @@
     </resultMap>
 
     <resultMap id="tool" type="Tool">
-        <id property="uuid" column="uuid"/>
+        <id property="uuid" column="id"/>
         <result property="toolType" column="tool_type"/>
         <result property="toolName" column="tool_name"/>
         <result property="description" column="description"/>
-        <result property="enabled" column="enabled"/>
-        <result property="installed" column="installed"/>
+        <result property="enabled" column="is_enabled"/>
+        <result property="installed" column="is_installed"/>
     </resultMap>
 
     <insert id="addAccount" parameterType="Account">
@@ -78,7 +78,7 @@
             update tool
             <set >
                 <if test="item.enabled != null" >
-                    enabled = #{item.enabled},
+                    is_enabled = #{item.enabled},
                 </if>
                 <if test="item.toolName != null" >
                     tool_name = #{item.toolName},
@@ -87,12 +87,12 @@
                     description = #{item.description},
                 </if>
             </set>
-            where uuid = #{item.uuid}
+            where id = #{item.uuid}
         </foreach>
 
     </update>
 
     <select id="getTools" resultMap="tool">
-        select * from tool;
+        select * from tool
     </select>
 </mapper>
