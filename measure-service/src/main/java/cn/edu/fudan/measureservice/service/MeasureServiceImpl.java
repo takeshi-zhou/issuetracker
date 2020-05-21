@@ -8,6 +8,8 @@ import cn.edu.fudan.measureservice.domain.test.Commit;
 import cn.edu.fudan.measureservice.handler.ResultHandler;
 import cn.edu.fudan.measureservice.mapper.PackageMeasureMapper;
 import cn.edu.fudan.measureservice.mapper.RepoMeasureMapper;
+import cn.edu.fudan.measureservice.portrait.DeveloperMetrics;
+import cn.edu.fudan.measureservice.portrait.Efficiency;
 import cn.edu.fudan.measureservice.util.DateTimeUtil;
 import cn.edu.fudan.measureservice.util.GitUtil;
 import cn.edu.fudan.measureservice.util.JGitHelper;
@@ -1303,5 +1305,61 @@ public class MeasureServiceImpl implements MeasureService {
     @Override
     public Object getDeveloperListByRepoId(String repo_id) {
         return repoMeasureMapper.getDeveloperListByRepoId(repo_id);
+    }
+
+    @Override
+    public Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token) {
+        //--------------------------以下是开发效率相关指标-----------------------------
+        Efficiency efficiency = new Efficiency(restInterfaceManager);
+
+        //提交频率指标
+        int totalCommitCount = getCommitCountsByDuration(repoId, beginDate, endDate);
+        int developerCommitCount = repoMeasureMapper.getCommitCountsByDuration(repoId, beginDate, endDate, developer);
+        double commitFrequency = developerCommitCount*(1.0)/totalCommitCount;
+        efficiency.setCommitFrequency(commitFrequency);
+
+        //代码量指标
+        int developerLOC = repoMeasureMapper.getRepoLOCByDuration(repoId, beginDate, endDate, developer);
+        int totalLOC = repoMeasureMapper.getRepoLOCByDuration(repoId, beginDate, endDate, "");
+        double workLoad = developerLOC*(1.0)/totalLOC;
+        efficiency.setWorkLoad(workLoad);
+
+        //获取代码新增、删除逻辑行数数据
+        JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
+        String branch = projects.getJSONObject(0).getString("branch");
+        JSONObject statements = restInterfaceManager.getStatements(repoId, beginDate, endDate, branch);
+        int developerAddStatement = 0;
+        int totalAddStatement = 0;
+        int developerDelStatement = 0;
+        int totalDelStatement = 0;
+        for(String str:statements.keySet()){
+            if (str.equals(developer)){
+                developerAddStatement = statements.getJSONObject(str).getIntValue("ADD");
+                developerDelStatement = statements.getJSONObject(str).getIntValue("DELETE");
+            }
+            totalAddStatement += statements.getJSONObject(str).getIntValue("ADD");
+            totalDelStatement += statements.getJSONObject(str).getIntValue("DELETE");
+        }
+        //新增逻辑行指标
+        efficiency.setNewLogicLine(developerAddStatement*(1.0)/totalAddStatement);
+        //删除逻辑行指标
+        efficiency.setDelLogicLine(developerDelStatement*(1.0)/totalDelStatement);
+
+        JSONObject validLines = restInterfaceManager.getValidLine(repoId, beginDate, endDate, branch);
+        int developerValidLine = 0;
+        int totalValidLine = 0;
+        for(String key:validLines.keySet()){
+            if (key.equals(developer)){
+                developerValidLine = validLines.getIntValue(key);
+            }
+            totalValidLine += validLines.getIntValue(key);
+        }
+        //有效代码行指标
+        if (totalAddStatement != 0){
+            efficiency.setValidStatement(developerValidLine*(1.0)/totalValidLine);
+        }else {
+            efficiency.setValidStatement(-1);
+        }
+        return efficiency;
     }
 }

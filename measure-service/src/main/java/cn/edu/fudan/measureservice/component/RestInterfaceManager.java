@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,7 +38,6 @@ public class RestInterfaceManager {
     @Value("${issue.service.path}")
     private String issueServicePath;
 
-
     private RestTemplate restTemplate;
 
     public RestInterfaceManager(RestTemplate restTemplate) {
@@ -45,6 +45,7 @@ public class RestInterfaceManager {
     }
 
     private Logger logger = LoggerFactory.getLogger(RestInterfaceManager.class);
+
 
     //----------------------------------account service----------------------------------------------------
     public String getAccountId(String userToken){
@@ -87,7 +88,8 @@ public class RestInterfaceManager {
     }
 
     public JSONArray getProjectsOfRepo(String repoId){
-        return restTemplate.getForObject(projectServicePath + "/inner/project?repo_id=" + repoId,JSONArray.class);
+        JSONArray result = restTemplate.getForObject(projectServicePath + "/inner/project?repo_id=" + repoId,JSONArray.class);
+        return result;
     }
 
     //---------------------------------------------code service---------------------------------------------------------
@@ -175,6 +177,17 @@ public class RestInterfaceManager {
         JSONArray data = response.getJSONArray("data");
         return data;
     }
+
+    //--------------------------------code-tracker service------------------------------------------------
+    public JSONObject getStatements(String repoUuid, String beginDate, String endDate, String branch){
+        return restTemplate.getForObject("http://10.141.221.85:8000/statistics/statements"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&branch=" + branch, JSONObject.class).getJSONObject("data");
+    }
+
+    public JSONObject getValidLine(String repoUuid, String beginDate, String endDate, String branch){
+        return restTemplate.getForObject("http://10.141.221.85:8000/statistics/committer/line/valid"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&branch=" + branch, JSONObject.class).getJSONObject("data");
+    }
+
+
 
 
 }

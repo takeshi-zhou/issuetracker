@@ -267,6 +267,10 @@ public interface MeasureService {
      */
     Object getDeveloperListByRepoId(String repo_id);
 
+    Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token) throws IllegalAccessException;
+
+
+
 
 
 
