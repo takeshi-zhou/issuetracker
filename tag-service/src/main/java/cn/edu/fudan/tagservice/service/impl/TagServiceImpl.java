@@ -230,6 +230,7 @@ public class TagServiceImpl implements TagService {
     //待修改 增加缺陷检测工具
     public void ignoreOneType(JSONObject requestBody,String token) {
         String userId = restInterfaceManager.getUserId(token);
+        String userName = requestBody.getString("user_name");
         IgnoreLevelEnum ignoreLevel = IgnoreLevelEnum.valueOf(requestBody.getString("ignore_level").toUpperCase());
         String type = requestBody.getString("type");
         String tool = requestBody.getString("tool");
@@ -255,6 +256,7 @@ public class TagServiceImpl implements TagService {
             IgnoreRecord record = new IgnoreRecord();
             record.setUuid(UUID.randomUUID().toString());
             record.setUserId(userId);
+            record.setUserName(userName);
             record.setType(type);
             record.setTool(tool);
             record.setLevel(ignoreLevel.value());
@@ -273,6 +275,7 @@ public class TagServiceImpl implements TagService {
             IgnoreRecord record = new IgnoreRecord();
             record.setUuid(UUID.randomUUID().toString());
             record.setUserId(userId);
+            record.setUserName(userName);
             record.setType(type);
             record.setTool(tool);
             record.setLevel(ignoreLevel.value());

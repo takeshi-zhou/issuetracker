@@ -6,6 +6,7 @@
     <resultMap id="ignoreRecord" type="IgnoreRecord">
         <id property="uuid" column="uuid"/>
         <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
         <result property="level" column="level"/>
         <result property="type" column="type"/>
         <result property="tool" column="tool"/>
@@ -20,6 +21,7 @@
         (
         uuid,
         user_id,
+        user_name,
         level,
         type,
         tool,
@@ -32,6 +34,7 @@
         (
         #{uuid},
         #{userId},
+        #{userName},
         #{level},
         #{type},
         #{tool},
