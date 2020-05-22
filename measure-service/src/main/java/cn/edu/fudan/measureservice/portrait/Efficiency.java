@@ -35,20 +35,8 @@ public class Efficiency {
     //存活语句数评分
     private double validStatement;
 
-    private RestInterfaceManager restInterfaceManager;
-
-    public Efficiency(RestInterfaceManager restInterfaceManager) {
-        this.restInterfaceManager = restInterfaceManager;
-    }
-
     public Efficiency() {
     }
-
-//    @Autowired
-//    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
-//        this.restInterfaceManager = restInterfaceManager;
-//    }
-
 
     public double getCommitFrequency() {
         return commitFrequency;

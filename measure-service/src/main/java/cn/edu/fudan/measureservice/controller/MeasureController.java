@@ -468,11 +468,12 @@ public class MeasureController {
                                     @RequestParam("developer")String developer,
                                     @RequestParam("begin-date")String beginDate,
                                     @RequestParam("end-date")String endDate,
+                                    @RequestParam("tool")String tool,
                                     HttpServletRequest request){
 
         try{
             String token = request.getHeader("token");
-            return new ResponseBean(200,"success",measureService.getPortrait(repoId,developer,beginDate,endDate,token));
+            return new ResponseBean(200,"success",measureService.getPortrait(repoId,developer,beginDate,endDate,token,tool));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());

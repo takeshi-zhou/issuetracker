@@ -267,7 +267,17 @@ public interface MeasureService {
      */
     Object getDeveloperListByRepoId(String repo_id);
 
-    Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token) throws IllegalAccessException;
+    /**
+     *
+     * @param repoId
+     * @param developer
+     * @param beginDate
+     * @param endDate
+     * @param token
+     * @param tool
+     * @return 返回开发者雷达图数据
+     */
+    Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool);
 
 
 
