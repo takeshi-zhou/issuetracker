@@ -111,7 +111,7 @@ public class JGitUtil {
         List<String> commitIds = new ArrayList<>();
 
         FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
-        Repository repository = null;
+        Repository repository;
         try {
             repository = repositoryBuilder.setGitDir(new File(repoPath + "/.git"))
                     .readEnvironment() // scan environment GIT_* variables
@@ -126,9 +126,16 @@ public class JGitUtil {
                 Iterable<RevCommit> commits = git.log().call();
                 for (RevCommit commit : commits) {
                     long commitTime = commit.getCommitTime() * 1000L;
-                    if (commitTime <= end && commitTime >= start && commit.getAuthorIdent().getName().equals(developer)) {
-                        commitIds.add(commit.getName());
+                    if(developer != null){
+                        if (commitTime <= end && commitTime >= start && commit.getAuthorIdent().getName().equals(developer)) {
+                            commitIds.add(commit.getName());
+                        }
+                    }else {
+                        if (commitTime <= end && commitTime >= start) {
+                            commitIds.add(commit.getName());
+                        }
                     }
+
                 }
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -227,6 +234,7 @@ public class JGitUtil {
         return isSameDeveloperClone;
 
     }
+
 
     public static Set<String> getDeveloperList(String repoPath){
         Set<String> spi = new HashSet<>();
@@ -434,7 +442,7 @@ public class JGitUtil {
 
         CommitChange commitChange = new CommitChange();
 
-        Map<String, String> map = new HashMap<>();
+        //Map<String, String> map = new HashMap<>(512);
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
         builder.addCeilingDirectory(new File(repoPath));
@@ -457,9 +465,7 @@ public class JGitUtil {
     }
 
     public static void main(String[] args) {
-//        getNewlyIncreasedLines("C:\\Users\\Thinkpad\\Desktop\\config\\IssueTracker-Master",
-//                "673c8264a7c972c7bba47e14b446baeca4846c6e");
-        //System.out.println(getCommitList("C:\\Users\\Thinkpad\\Desktop\\config\\IssueTracker-Master", "2018-12-11", "2020-4-29", "bfkh"));
-
+        Set<String> list = getDeveloperList("C:\\Users\\Thinkpad\\Desktop\\config\\IssueTracker-Master");
+        System.out.println(list);
     }
 }

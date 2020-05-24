@@ -27,7 +27,7 @@ public interface CloneMeasureService {
 
     CloneMeasure insertCloneMeasure(String repoId, String commitId);
 
-    CloneMeasure getCloneMeasure(String repoId, String developer, String start, String end);
+    CloneMessage getCloneMeasure(String repoId, String developer, String start, String end);
 
     void deleteCloneMeasureByRepoId(String repoId);
 
