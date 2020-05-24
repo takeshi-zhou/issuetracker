@@ -1,5 +1,6 @@
 package cn.edu.fudan.cloneservice.controller;
 
+import cn.edu.fudan.cloneservice.component.RestInterfaceManager;
 import cn.edu.fudan.cloneservice.dao.LocationDao;
 import cn.edu.fudan.cloneservice.domain.Location;
 import cn.edu.fudan.cloneservice.domain.ResponseBean;
@@ -81,6 +82,7 @@ public class CloneMeasureController {
             return new ResponseBean(401,"failed",null);
         }
     }
+
 
 //
 //    @GetMapping(value = {"/clonemeasure/repository"})
