@@ -1454,14 +1454,14 @@ public class MeasureServiceImpl implements MeasureService {
             oldCodeModification = (changedCodeAVGAge + deletedCodeAVGAge)*(1.0)/repoAge;
         }
 
-        double changedOrDeletedCodeMAXAge = Math.max(changedCodeMAXAge, deletedCodeMAXAge);
 
         competence.setNonRepetitiveCodeRate(nonRepetitiveCodeRate);
         competence.setNonSelfRepetitiveCodeRate(nonSelfRepetitiveCodeRate);
         competence.setFocusRange(focusRange);
         competence.setEliminateDuplicateCodeRate(eliminateDuplicateCodeRate);
         competence.setOldCodeModification(oldCodeModification);
-        competence.setChangedOrDeletedCodeMAXAge(changedOrDeletedCodeMAXAge);
+        competence.setChangedCodeMAXAge(changedCodeMAXAge);
+        competence.setDeletedCodeMAXAge(deletedCodeMAXAge);
 
         DeveloperMetrics res = new DeveloperMetrics(developer, efficiency, quality, competence);
         return res;
