@@ -11,9 +11,7 @@ import java.util.Date;
 public abstract class BaseMetrics {
 
     private String repoUuid;
-    private String commitId;
-
-    private Date start;
-    private Date end;
+    private String startDate;
+    private String endDate;
 
 }

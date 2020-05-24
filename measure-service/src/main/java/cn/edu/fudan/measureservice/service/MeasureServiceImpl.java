@@ -8,6 +8,10 @@ import cn.edu.fudan.measureservice.domain.test.Commit;
 import cn.edu.fudan.measureservice.handler.ResultHandler;
 import cn.edu.fudan.measureservice.mapper.PackageMeasureMapper;
 import cn.edu.fudan.measureservice.mapper.RepoMeasureMapper;
+import cn.edu.fudan.measureservice.portrait.Competence;
+import cn.edu.fudan.measureservice.portrait.DeveloperMetrics;
+import cn.edu.fudan.measureservice.portrait.Efficiency;
+import cn.edu.fudan.measureservice.portrait.Quality;
 import cn.edu.fudan.measureservice.util.DateTimeUtil;
 import cn.edu.fudan.measureservice.util.GitUtil;
 import cn.edu.fudan.measureservice.util.JGitHelper;
@@ -595,8 +599,8 @@ public class MeasureServiceImpl implements MeasureService {
         String untilDay = dateFormatChange(until);
 
         List<CommitInfoDeveloper> CommitInfoDeveloper = repoMeasureMapper.getCommitInfoDeveloperListByDuration(repo_id, sinceDay, untilDay, developer_name);
-        int addLines = repoMeasureMapper.getAddLinesByDuration(repo_id, sinceDay, untilDay);
-        int delLines = repoMeasureMapper.getDelLinesByDuration(repo_id, sinceDay, untilDay);
+        int addLines = repoMeasureMapper.getAddLinesByDuration(repo_id, sinceDay, untilDay, "");
+        int delLines = repoMeasureMapper.getDelLinesByDuration(repo_id, sinceDay, untilDay, "");
         int sumCommitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceDay, untilDay,null);
         int sumChangedFiles = repoMeasureMapper.getChangedFilesByDuration(repo_id, sinceDay, untilDay,null);
         commitBaseInfoDuration.setCommitInfoList(CommitInfoDeveloper);
@@ -1303,5 +1307,145 @@ public class MeasureServiceImpl implements MeasureService {
     @Override
     public Object getDeveloperListByRepoId(String repo_id) {
         return repoMeasureMapper.getDeveloperListByRepoId(repo_id);
+    }
+
+    @Override
+    public Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool) {
+        //--------------------------以下是开发效率相关指标-----------------------------
+        Efficiency efficiency = new Efficiency();
+
+        //提交频率指标
+        int totalCommitCount = getCommitCountsByDuration(repoId, beginDate, endDate);
+        int developerCommitCount = repoMeasureMapper.getCommitCountsByDuration(repoId, beginDate, endDate, developer);
+        double commitFrequency = developerCommitCount*(1.0)/totalCommitCount;
+        efficiency.setCommitFrequency(commitFrequency);
+
+        //代码量指标
+        int developerLOC = repoMeasureMapper.getRepoLOCByDuration(repoId, beginDate, endDate, developer);
+        int totalLOC = repoMeasureMapper.getRepoLOCByDuration(repoId, beginDate, endDate, "");
+        double workLoad = developerLOC*(1.0)/totalLOC;
+        efficiency.setWorkLoad(workLoad);
+
+        //获取代码新增、删除逻辑行数数据
+        JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
+        String branch = projects.getJSONObject(0).getString("branch");
+        JSONObject statements = restInterfaceManager.getStatements(repoId, beginDate, endDate, branch);
+        int developerAddStatement = 0;
+        int totalAddStatement = 0;
+        int developerDelStatement = 0;
+        int totalDelStatement = 0;
+        for(String str:statements.keySet()){
+            if (str.equals(developer)){
+                developerAddStatement = statements.getJSONObject(str).getIntValue("ADD");
+                developerDelStatement = statements.getJSONObject(str).getIntValue("DELETE");
+            }
+            totalAddStatement += statements.getJSONObject(str).getIntValue("ADD");
+            totalDelStatement += statements.getJSONObject(str).getIntValue("DELETE");
+        }
+        //新增逻辑行指标
+        efficiency.setNewLogicLine(developerAddStatement*(1.0)/totalAddStatement);
+        //删除逻辑行指标
+        efficiency.setDelLogicLine(developerDelStatement*(1.0)/totalDelStatement);
+
+        JSONObject validLines = restInterfaceManager.getValidLine(repoId, beginDate, endDate, branch);
+        int developerValidLine = 0;
+        int totalValidLine = 0;
+        for(String key:validLines.keySet()){
+            if (key.equals(developer)){
+                developerValidLine = validLines.getIntValue(key);
+            }
+            totalValidLine += validLines.getIntValue(key);
+        }
+        //有效代码行指标
+        if (totalAddStatement != 0){
+            efficiency.setValidStatement(developerValidLine*(1.0)/totalValidLine);
+        }else {
+            efficiency.setValidStatement(-1);
+        }
+//
+        //----------------------------------以下是代码质量相关指标-------------------------------------
+        //个人规范类issue数
+        int developerStandardIssueCount = restInterfaceManager.getIssueCountByConditions(developer, repoId, beginDate, endDate, tool, "standard", token);
+        //个人安全类issue数
+        int developerSecurityIssueCount = restInterfaceManager.getIssueCountByConditions(developer, repoId, beginDate, endDate, tool, "security", token);
+        //repo总issue数
+        int totalIssueCount = restInterfaceManager.getIssueCountByConditions("", repoId, beginDate, endDate, tool, "", token);
+        JSONArray issueList = restInterfaceManager.getNewElmIssueCount(repoId, beginDate, endDate, tool, token);
+        int developerNewIssueCount = 0;//个人新增缺陷数
+        int totalNewIssueCount = 0;//总新增缺陷数
+        for (int i = 0; i < issueList.size(); i++){
+            JSONObject each = issueList.getJSONObject(i);
+            String developerName = each.getString("developer");
+            int newIssueCount = each.getIntValue("newIssueCount");
+            if (developer.equals(developerName)){
+                developerNewIssueCount = newIssueCount;
+            }
+            totalNewIssueCount += newIssueCount;
+        }
+
+        Quality quality = new Quality();
+        //规范性指标
+        double standardScore = -1; //分母为0时返回-1
+        if (developerStandardIssueCount != 0){
+            standardScore = totalIssueCount*(1.0)/developerStandardIssueCount;
+        }
+        //安全性指标
+        double securityScore = -1;//分母为0时返回-1
+        if (developerSecurityIssueCount != 0){
+            securityScore = totalIssueCount*(1.0)/developerSecurityIssueCount;
+        }
+        //缺陷率指标
+        double issueRate = -1;//分母为0时返回-1
+        if (developerNewIssueCount != 0){
+            issueRate = totalNewIssueCount*(1.0)/developerNewIssueCount;
+        }
+        //总体问题密度指标
+        double issueDensity = -1;//分母为0时返回-1
+        if (developerNewIssueCount != 0){
+            issueDensity = totalLOC*(1.0)/developerNewIssueCount;
+        }
+
+        quality.setStandard(standardScore);
+        quality.setSecurity(securityScore);
+        quality.setIssueRate(issueRate);
+        quality.setIssueDensity(issueDensity);
+
+        //----------------------------------开发能力相关指标-------------------------------------
+        int developerAddLine = repoMeasureMapper.getAddLinesByDuration(repoId, beginDate, endDate, developer);
+        JSONObject cloneMeasure = restInterfaceManager.getCloneMeasure(repoId, developer, beginDate, endDate);
+        int increasedCloneLines = Integer.parseInt(cloneMeasure.getString("increasedCloneLines"));
+        int selfIncreasedCloneLines = Integer.parseInt(cloneMeasure.getString("selfIncreasedCloneLines"));
+        JSONObject focusMeasure = restInterfaceManager.getFocusFilesCount(repoId, beginDate, endDate);
+        int totalChangedFile = focusMeasure.getIntValue("total");
+        int developerFocusFile = focusMeasure.getJSONObject("developer").getIntValue(developer);
+
+
+
+
+
+
+
+        Competence competence = new Competence();
+        double nonRepetitiveCodeRate = -1;
+        if (developerAddLine != 0){
+            nonRepetitiveCodeRate = (developerAddLine - increasedCloneLines)*(1.0)/developerAddLine;
+        }
+
+        double nonSelfRepetitiveCodeRate = -1;
+        if (developerAddLine != 0){
+            nonSelfRepetitiveCodeRate = (developerAddLine - selfIncreasedCloneLines)*(1.0)/developerAddLine;
+        }
+
+        double focusRange = -1;
+        if (totalChangedFile != 0){
+            focusRange = (developerFocusFile)*(1.0)/totalChangedFile;
+        }
+
+        competence.setNonRepetitiveCodeRate(nonRepetitiveCodeRate);
+        competence.setNonSelfRepetitiveCodeRate(nonSelfRepetitiveCodeRate);
+        competence.setFocusRange(focusRange);
+
+        DeveloperMetrics res = new DeveloperMetrics(developer, efficiency, quality, competence);
+        return res;
     }
 }

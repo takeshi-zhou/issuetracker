@@ -1,12 +1,15 @@
 package cn.edu.fudan.measureservice.component;
 
+import cn.edu.fudan.measureservice.domain.Category;
 import cn.edu.fudan.measureservice.domain.CommitCountsMonthly;
 import cn.edu.fudan.measureservice.service.MeasureServiceImpl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.protocol.types.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,7 +40,6 @@ public class RestInterfaceManager {
     @Value("${issue.service.path}")
     private String issueServicePath;
 
-
     private RestTemplate restTemplate;
 
     public RestInterfaceManager(RestTemplate restTemplate) {
@@ -45,6 +47,7 @@ public class RestInterfaceManager {
     }
 
     private Logger logger = LoggerFactory.getLogger(RestInterfaceManager.class);
+
 
     //----------------------------------account service----------------------------------------------------
     public String getAccountId(String userToken){
@@ -87,7 +90,19 @@ public class RestInterfaceManager {
     }
 
     public JSONArray getProjectsOfRepo(String repoId){
-        return restTemplate.getForObject(projectServicePath + "/inner/project?repo_id=" + repoId,JSONArray.class);
+        JSONArray result = restTemplate.getForObject(projectServicePath + "/inner/project?repo_id=" + repoId,JSONArray.class);
+        return result;
+    }
+
+    public List<JSONObject> getProjectListByCategory(String token,String category){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("token",token);
+        HttpEntity request = new HttpEntity(headers);
+
+        ResponseEntity responseEntity = restTemplate.exchange(projectServicePath  + "/project" + "?type=" + category ,HttpMethod.GET,request,JSONArray.class);
+        String body = responseEntity.getBody().toString();
+        List<JSONObject> result = JSONArray.parseArray(body,JSONObject.class);
+        return result;
     }
 
     //---------------------------------------------code service---------------------------------------------------------
@@ -128,6 +143,9 @@ public class RestInterfaceManager {
     }
 
 
+
+    //---------------------------------------------issue service---------------------------------------------------------
+
     public int getNumberOfNewIssueByCommit(String repoId,String commit,String category,String spaceType,String token){
         HttpHeaders headers = new HttpHeaders();
         headers.add("token",token);
@@ -158,16 +176,38 @@ public class RestInterfaceManager {
         return result;
     }
 
-    public List<JSONObject> getProjectListByCategory(String token,String category){
+    public int getIssueCountByConditions(String developer, String repoId, String since, String until, String tool, String general_category, String token){
         HttpHeaders headers = new HttpHeaders();
         headers.add("token",token);
         HttpEntity request = new HttpEntity(headers);
-
-        ResponseEntity responseEntity = restTemplate.exchange(projectServicePath  + "/project" + "?type=" + category ,HttpMethod.GET,request,JSONArray.class);
+        StringBuilder url = new StringBuilder();
+        url.append(issueServicePath).append("/measurement/issueCount").append("?repoId=").append(repoId).append("&since=").append(since).append("&until=").append(until).append("&tool=").append(tool);
+        if (developer != null && !developer.equals("")){
+            url.append("&developer=").append(developer);
+        }
+        if (general_category != null && !general_category.equals("")){
+            url.append("&general_category=").append(general_category);
+        }
+        ResponseEntity responseEntity = restTemplate.exchange(url.toString(), HttpMethod.GET, request, JSONObject.class);
         String body = responseEntity.getBody().toString();
-        List<JSONObject> result = JSONArray.parseArray(body,JSONObject.class);
-        return result;
+        JSONObject result = JSONObject.parseObject(body);
+        return result.getIntValue("data");
     }
+
+
+    public JSONArray getNewElmIssueCount(String repoId, String since, String until, String tool, String token){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("token",token);
+        HttpEntity request = new HttpEntity(headers);
+        StringBuilder url = new StringBuilder();
+        url.append(issueServicePath).append("/measurement/issue/developer").append("?repo_id=").append(repoId).append("&since=").append(since).append("&until=").append(until).append("&category=").append(tool);
+        ResponseEntity responseEntity = restTemplate.exchange(url.toString(), HttpMethod.GET, request, JSONObject.class);
+        String body = responseEntity.getBody().toString();
+        JSONObject result = JSONObject.parseObject(body);
+        return result.getJSONArray("data");
+    }
+
+
 
     //----------------------------------commit service----------------------------------------------------
     public JSONArray getCommitList(String repo_id){
@@ -175,6 +215,26 @@ public class RestInterfaceManager {
         JSONArray data = response.getJSONArray("data");
         return data;
     }
+
+    //--------------------------------code-tracker service------------------------------------------------
+    public JSONObject getStatements(String repoUuid, String beginDate, String endDate, String branch){
+        return restTemplate.getForObject("http://10.141.221.85:8000/statistics/statements"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&branch=" + branch, JSONObject.class).getJSONObject("data");
+    }
+
+    public JSONObject getValidLine(String repoUuid, String beginDate, String endDate, String branch){
+        return restTemplate.getForObject("http://10.141.221.85:8000/statistics/committer/line/valid"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&branch=" + branch, JSONObject.class).getJSONObject("data");
+    }
+
+    public JSONObject getFocusFilesCount(String repoUuid, String beginDate, String endDate){
+        return restTemplate.getForObject("http://10.141.221.85:8000/statistics/focus/file/num"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate, JSONObject.class).getJSONObject("data");
+    }
+
+
+    //-------------------------------------------clone service---------------------------------------
+    public JSONObject getCloneMeasure(String repo_id, String developer, String start, String end){
+        return restTemplate.getForObject("http://10.141.221.85:8000/cloneMeasure/getMeasureClone"  + "?repo_id=" + repo_id + "&developer=" + developer + "&start=" + start + "&end=" + end, JSONObject.class).getJSONObject("data");
+    }
+
 
 
 }
