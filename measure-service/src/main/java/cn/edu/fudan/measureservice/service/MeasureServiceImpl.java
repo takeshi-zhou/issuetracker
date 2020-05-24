@@ -1415,15 +1415,18 @@ public class MeasureServiceImpl implements MeasureService {
         JSONObject cloneMeasure = restInterfaceManager.getCloneMeasure(repoId, developer, beginDate, endDate);
         int increasedCloneLines = Integer.parseInt(cloneMeasure.getString("increasedCloneLines"));
         int selfIncreasedCloneLines = Integer.parseInt(cloneMeasure.getString("selfIncreasedCloneLines"));
+        int eliminateCloneLines = Integer.parseInt(cloneMeasure.getString("eliminateCloneLines"));
+        int allEliminateCloneLines = Integer.parseInt(cloneMeasure.getString("allEliminateCloneLines"));
         JSONObject focusMeasure = restInterfaceManager.getFocusFilesCount(repoId, beginDate, endDate);
         int totalChangedFile = focusMeasure.getIntValue("total");
         int developerFocusFile = focusMeasure.getJSONObject("developer").getIntValue(developer);
-
-
-
-
-
-
+        JSONObject changedCodeInfo = restInterfaceManager.getChangedCodeAge(repoId, beginDate, endDate, developer);
+        int changedCodeAVGAge = changedCodeInfo.getIntValue("average");
+        int changedCodeMAXAge = changedCodeInfo.getIntValue("max");
+        JSONObject deletedCodeInfo = restInterfaceManager.getDeletedCodeAge(repoId, beginDate, endDate, developer);
+        int deletedCodeAVGAge = deletedCodeInfo.getIntValue("average");
+        int deletedCodeMAXAge = deletedCodeInfo.getIntValue("max");
+        int repoAge = restInterfaceManager.getRepoAge(repoId, endDate);
 
         Competence competence = new Competence();
         double nonRepetitiveCodeRate = -1;
@@ -1441,9 +1444,24 @@ public class MeasureServiceImpl implements MeasureService {
             focusRange = (developerFocusFile)*(1.0)/totalChangedFile;
         }
 
+        double eliminateDuplicateCodeRate = -1;
+        if (allEliminateCloneLines != 0){
+            eliminateDuplicateCodeRate = (eliminateCloneLines)*(1.0)/allEliminateCloneLines;
+        }
+
+        double oldCodeModification = -1;
+        if (repoAge != 0){
+            oldCodeModification = (changedCodeAVGAge + deletedCodeAVGAge)*(1.0)/repoAge;
+        }
+
+        double changedOrDeletedCodeMAXAge = Math.max(changedCodeMAXAge, deletedCodeMAXAge);
+
         competence.setNonRepetitiveCodeRate(nonRepetitiveCodeRate);
         competence.setNonSelfRepetitiveCodeRate(nonSelfRepetitiveCodeRate);
         competence.setFocusRange(focusRange);
+        competence.setEliminateDuplicateCodeRate(eliminateDuplicateCodeRate);
+        competence.setOldCodeModification(oldCodeModification);
+        competence.setChangedOrDeletedCodeMAXAge(changedOrDeletedCodeMAXAge);
 
         DeveloperMetrics res = new DeveloperMetrics(developer, efficiency, quality, competence);
         return res;

@@ -138,9 +138,16 @@ public class RestInterfaceManager {
         return response;
     }
 
+
+    //---------------------------------------------repo service---------------------------------------------------------
     public JSONObject getRepoById(String repoId){
         return restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
     }
+
+    public int getRepoAge(String repoId, String endDate){
+        return restTemplate.getForObject(repoServicePath + "/repository_year" + "?repo_id=" + repoId + "&end_date=" + endDate, JSONObject.class).getJSONObject("data").getIntValue("commit_time");
+    }
+
 
 
 
@@ -227,6 +234,14 @@ public class RestInterfaceManager {
 
     public JSONObject getFocusFilesCount(String repoUuid, String beginDate, String endDate){
         return restTemplate.getForObject("http://10.141.221.85:8000/statistics/focus/file/num"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate, JSONObject.class).getJSONObject("data");
+    }
+
+    public JSONObject getChangedCodeAge(String repoUuid, String beginDate, String endDate, String developer){
+        return restTemplate.getForObject("http://10.141.221.85:8000/statistics/change/info"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&developer=" + developer, JSONObject.class).getJSONObject("data");
+    }
+
+    public JSONObject getDeletedCodeAge(String repoUuid, String beginDate, String endDate, String developer){
+        return restTemplate.getForObject("http://10.141.221.85:8000/statistics/delete/info"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&developer=" + developer, JSONObject.class).getJSONObject("data");
     }
 
 
