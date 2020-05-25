@@ -1317,13 +1317,19 @@ public class MeasureServiceImpl implements MeasureService {
         //提交频率指标
         int totalCommitCount = getCommitCountsByDuration(repoId, beginDate, endDate);
         int developerCommitCount = repoMeasureMapper.getCommitCountsByDuration(repoId, beginDate, endDate, developer);
-        double commitFrequency = developerCommitCount*(1.0)/totalCommitCount;
+        double commitFrequency = -1;
+        if (totalCommitCount != 0){
+            commitFrequency = developerCommitCount*(1.0)/totalCommitCount;
+        }
         efficiency.setCommitFrequency(commitFrequency);
 
         //代码量指标
         int developerLOC = repoMeasureMapper.getRepoLOCByDuration(repoId, beginDate, endDate, developer);
         int totalLOC = repoMeasureMapper.getRepoLOCByDuration(repoId, beginDate, endDate, "");
-        double workLoad = developerLOC*(1.0)/totalLOC;
+        double workLoad = -1;
+        if (totalLOC != 0){
+            workLoad = developerLOC*(1.0)/totalLOC;
+        }
         efficiency.setWorkLoad(workLoad);
 
         //获取代码新增、删除逻辑行数数据
@@ -1343,9 +1349,9 @@ public class MeasureServiceImpl implements MeasureService {
             totalDelStatement += statements.getJSONObject(str).getIntValue("DELETE");
         }
         //新增逻辑行指标
-        efficiency.setNewLogicLine(developerAddStatement*(1.0)/totalAddStatement);
+        efficiency.setNewLogicLine((totalAddStatement == 0) ? -1 : developerAddStatement*(1.0)/totalAddStatement);
         //删除逻辑行指标
-        efficiency.setDelLogicLine(developerDelStatement*(1.0)/totalDelStatement);
+        efficiency.setDelLogicLine((totalDelStatement == 0) ? -1 : developerDelStatement*(1.0)/totalDelStatement);
 
         JSONObject validLines = restInterfaceManager.getValidLine(repoId, beginDate, endDate, branch);
         int developerValidLine = 0;
@@ -1357,11 +1363,7 @@ public class MeasureServiceImpl implements MeasureService {
             totalValidLine += validLines.getIntValue(key);
         }
         //有效代码行指标
-        if (totalAddStatement != 0){
-            efficiency.setValidStatement(developerValidLine*(1.0)/totalValidLine);
-        }else {
-            efficiency.setValidStatement(-1);
-        }
+        efficiency.setValidStatement((totalValidLine == 0) ? -1 : developerValidLine*(1.0)/totalValidLine);
 //
         //----------------------------------以下是代码质量相关指标-------------------------------------
         //个人规范类issue数

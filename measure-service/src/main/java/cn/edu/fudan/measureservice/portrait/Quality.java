@@ -1,6 +1,5 @@
 package cn.edu.fudan.measureservice.portrait;
 
-import com.sun.xml.internal.bind.api.impl.NameConverter;
 
 /**
  * description:
