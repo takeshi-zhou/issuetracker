@@ -606,10 +606,10 @@ public class IssueServiceImpl implements IssueService {
             Map<String, Object> map = new HashMap<>();
             //没有提交commit的所有数据都置为-1（newIssue, eliminatedIssue可以直接返回-1，但是remainingIssue需要做处理）
             if (queryResultList.size() == 0){
-                map.put("commit_date", indexDay.toString());
-                map.put("new_count", -1);
-                map.put("eliminated_count", -1);
-                map.put("remaining_count", -1);
+                map.put("date", indexDay.toString());
+                map.put("newIssueCount", -1);
+                map.put("eliminatedIssueCount", -1);
+                map.put("remainingIssueCount", -1);
             }else {
                 map = queryResultList.get(0);
             }
@@ -618,31 +618,31 @@ public class IssueServiceImpl implements IssueService {
         }
 
         //若since这一天为空数据，则查找所选日期范围内的第一次正式提交commit的index，并以此来修改since这一天的数据
-        if (Integer.parseInt(result.get(0).get("remaining_count").toString()) == -1){
+        if (Integer.parseInt(result.get(0).get("remainingIssueCount").toString()) == -1){
             int firstCommitIndex = 0;//第一次正式提交commit的index
             for (int i = 0; i < result.size(); i++){
-                if (Integer.parseInt(result.get(i).get("remaining_count").toString()) != -1){
+                if (Integer.parseInt(result.get(i).get("remainingIssueCount").toString()) != -1){
                     firstCommitIndex = i;
                     break;
                 }
             }
             //修改since这一天的数据
             Map<String, Object> sinceDayMap = new HashMap<>();
-            sinceDayMap.put("commit_date", result.get(0).get("commit_date"));
-            sinceDayMap.put("new_count", -1);
-            sinceDayMap.put("eliminated_count", -1);
-            int sinceDayRemainingCount = Integer.parseInt(result.get(firstCommitIndex).get("remaining_count").toString()) - Integer.parseInt(result.get(firstCommitIndex).get("new_count").toString()) + Integer.parseInt(result.get(firstCommitIndex).get("eliminated_count").toString());
-            sinceDayMap.put("remaining_count", sinceDayRemainingCount);
+            sinceDayMap.put("date", result.get(0).get("date"));
+            sinceDayMap.put("newIssueCount", -1);
+            sinceDayMap.put("eliminatedIssueCount", -1);
+            int sinceDayRemainingCount = Integer.parseInt(result.get(firstCommitIndex).get("remainingIssueCount").toString()) - Integer.parseInt(result.get(firstCommitIndex).get("newIssueCount").toString()) + Integer.parseInt(result.get(firstCommitIndex).get("eliminatedIssueCount").toString());
+            sinceDayMap.put("remainingIssueCount", sinceDayRemainingCount);
             result.set(0,sinceDayMap);
         }
         //修改其余日期中的remaining_count为-1的情况，直接继承上一天的remaining_count
         for (int i = 1; i < result.size(); i++){
-            if (Integer.parseInt(result.get(i).get("remaining_count").toString()) == -1){
+            if (Integer.parseInt(result.get(i).get("remainingIssueCount").toString()) == -1){
                 Map<String, Object> newMap = new HashMap<>();
-                newMap.put("commit_date",result.get(i).get("commit_date"));
-                newMap.put("new_count", -1);
-                newMap.put("eliminated_count", -1);
-                newMap.put("remaining_count",result.get(i-1).get("remaining_count"));
+                newMap.put("date",result.get(i).get("date"));
+                newMap.put("newIssueCount", -1);
+                newMap.put("eliminatedIssueCount", -1);
+                newMap.put("remainingIssueCount",result.get(i-1).get("remainingIssueCount"));
                 result.set(i,newMap);
             }
         }

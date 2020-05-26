@@ -186,10 +186,10 @@
 
     <select id="getRepoIssueCounts" parameterType="String" resultType="java.util.HashMap">
         SELECT
-        `commit_date`,
-        SUM( new_count ) AS new_count,
-        SUM( eliminated_count ) AS eliminated_count,
-        SUBSTRING_INDEX( GROUP_CONCAT( `remaining_count` ORDER BY `id` DESC SEPARATOR '||' ), '||', 1 )remaining_count
+        `commit_date` AS date,
+        SUM( new_count ) AS newIssueCount,
+        SUM( eliminated_count ) AS eliminatedIssueCount,
+        SUBSTRING_INDEX( GROUP_CONCAT( `remaining_count` ORDER BY `id` DESC SEPARATOR '||' ), '||', 1 )remainingIssueCount
         FROM
         scan_result
         where repo_id = #{repo_id} and DATE(commit_date) BETWEEN #{since} AND #{until}
@@ -199,7 +199,7 @@
         <if test="category != null">
             and category = #{category}
         </if>
-        GROUP BY `commit_date`
+        GROUP BY `date`
 
     </select>
 
