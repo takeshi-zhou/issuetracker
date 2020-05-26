@@ -598,12 +598,12 @@ public class MeasureServiceImpl implements MeasureService {
         String sinceDay = dateFormatChange(since);
         String untilDay = dateFormatChange(until);
 
-        List<CommitInfoDeveloper> CommitInfoDeveloper = repoMeasureMapper.getCommitInfoDeveloperListByDuration(repo_id, sinceDay, untilDay, developer_name);
+        List<CommitInfoDeveloper> commitInfoDeveloper = repoMeasureMapper.getCommitInfoDeveloperListByDuration(repo_id, sinceDay, untilDay, developer_name);
         int addLines = repoMeasureMapper.getAddLinesByDuration(repo_id, sinceDay, untilDay, "");
         int delLines = repoMeasureMapper.getDelLinesByDuration(repo_id, sinceDay, untilDay, "");
         int sumCommitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceDay, untilDay,null);
         int sumChangedFiles = repoMeasureMapper.getChangedFilesByDuration(repo_id, sinceDay, untilDay,null);
-        commitBaseInfoDuration.setCommitInfoList(CommitInfoDeveloper);
+        commitBaseInfoDuration.setCommitInfoList(commitInfoDeveloper);
         commitBaseInfoDuration.setSumAddLines(addLines);
         commitBaseInfoDuration.setSumDelLines(delLines);
         commitBaseInfoDuration.setSumCommitCounts(sumCommitCounts);
@@ -1212,12 +1212,17 @@ public class MeasureServiceImpl implements MeasureService {
             int LOC = repoMeasureMapper.getRepoLOCByDuration(repo_id, indexDay.toString(), indexDay.toString(),null);
             int CommitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, indexDay.toString(), indexDay.toString(),null);
             //这里只返回有commit的数据，并不是每天都返回
-            if (CommitCounts > 0){
-                map.put("commit_date", indexDay.toString());
-                map.put("LOC", LOC);
-                map.put("commit_count", CommitCounts);
-                result.add(map);
-            }
+//            if (CommitCounts > 0){
+//                map.put("commit_date", indexDay.toString());
+//                map.put("LOC", LOC);
+//                map.put("commit_count", CommitCounts);
+//                result.add(map);
+//            }
+            //现在采用返回每天的数据，无论当天是否有commit
+            map.put("commit_date", indexDay.toString());
+            map.put("LOC", LOC);
+            map.put("commit_count", CommitCounts);
+            result.add(map);
             indexDay = indexDay.plusDays(1);
         }
         return result;
