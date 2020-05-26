@@ -30,6 +30,6 @@ public interface ScanResultMapper {
 
     List<ScanResult> getScanResultByCondition(@Param("repo_id") String repoId,@Param("since") String since,@Param("until") String until,@Param("category") String category,@Param("developer") String developer);
 
-    Map<String, Object> getRepoIssueCounts(@Param("repo_id")String repo_id, @Param("since")String since, @Param("until")String until,@Param("category") String category,@Param("developer")String developer);
+    List<Map<String, Object>> getRepoIssueCounts(@Param("repo_id")String repo_id, @Param("since")String since, @Param("until")String until,@Param("category") String category,@Param("developer")String developer);
 
 }

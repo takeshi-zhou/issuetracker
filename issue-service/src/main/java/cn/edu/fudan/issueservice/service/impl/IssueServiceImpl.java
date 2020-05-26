@@ -598,17 +598,58 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public Object getRepoIssueCounts(String repo_id, String since, String until, String category) {
-//        LocalDate indexDay = LocalDate.parse(since,DateTimeUtil.Y_M_D_formatter);
-//        LocalDate untilDay = LocalDate.parse(until,DateTimeUtil.Y_M_D_formatter);
-//        while(untilDay.isAfter(indexDay) || untilDay.isEqual(indexDay)){
-//            Map<String, Object> map = scanResultDao.getRepoIssueCounts(repo_id, indexDay.toString(), indexDay.toString(), category, null);
-//            if (map.get("commit_date") == null){
-//                map.put("commit_date", indexDay.toString());
-//            }
-//            result.add(map);
-//            indexDay = indexDay.plusDays(1);
-//        }
-        return scanResultDao.getScanResultsGroupByDay(Collections.singletonList(repo_id),category, since, until);
+        List<Map<String, Object>> result = new ArrayList<>();
+        LocalDate indexDay = LocalDate.parse(since,DateTimeUtil.Y_M_D_formatter);
+        LocalDate untilDay = LocalDate.parse(until,DateTimeUtil.Y_M_D_formatter);
+        while(untilDay.isAfter(indexDay) || untilDay.isEqual(indexDay)){
+            List<Map<String, Object>> queryResultList = scanResultDao.getRepoIssueCounts(repo_id, indexDay.toString(), indexDay.toString(), category, null);
+            Map<String, Object> map = new HashMap<>();
+            //没有提交commit的所有数据都置为-1（newIssue, eliminatedIssue可以直接返回-1，但是remainingIssue需要做处理）
+            if (queryResultList.size() == 0){
+                map.put("commit_date", indexDay.toString());
+                map.put("new_count", -1);
+                map.put("eliminated_count", -1);
+                map.put("remaining_count", -1);
+            }else {
+                map = queryResultList.get(0);
+            }
+            result.add(map);
+            indexDay = indexDay.plusDays(1);
+        }
+
+        //若since这一天为空数据，则查找所选日期范围内的第一次正式提交commit的index，并以此来修改since这一天的数据
+        if (Integer.parseInt(result.get(0).get("remaining_count").toString()) == -1){
+            int firstCommitIndex = 0;//第一次正式提交commit的index
+            for (int i = 0; i < result.size(); i++){
+                if (Integer.parseInt(result.get(i).get("remaining_count").toString()) != -1){
+                    firstCommitIndex = i;
+                    break;
+                }
+            }
+            //修改since这一天的数据
+            Map<String, Object> sinceDayMap = new HashMap<>();
+            sinceDayMap.put("commit_date", result.get(0).get("commit_date"));
+            sinceDayMap.put("new_count", -1);
+            sinceDayMap.put("eliminated_count", -1);
+            int sinceDayRemainingCount = Integer.parseInt(result.get(firstCommitIndex).get("remaining_count").toString()) - Integer.parseInt(result.get(firstCommitIndex).get("new_count").toString()) + Integer.parseInt(result.get(firstCommitIndex).get("eliminated_count").toString());
+            sinceDayMap.put("remaining_count", sinceDayRemainingCount);
+            result.set(0,sinceDayMap);
+        }
+        //修改其余日期中的remaining_count为-1的情况，直接继承上一天的remaining_count
+        for (int i = 1; i < result.size(); i++){
+            if (Integer.parseInt(result.get(i).get("remaining_count").toString()) == -1){
+                Map<String, Object> newMap = new HashMap<>();
+                newMap.put("commit_date",result.get(i).get("commit_date"));
+                newMap.put("new_count", -1);
+                newMap.put("eliminated_count", -1);
+                newMap.put("remaining_count",result.get(i-1).get("remaining_count"));
+                result.set(i,newMap);
+            }
+        }
+
+        return result;
+        //下面是只返回有commit的数据
+//        return scanResultDao.getScanResultsGroupByDay(Collections.singletonList(repo_id),category, since, until);
     }
 
 
