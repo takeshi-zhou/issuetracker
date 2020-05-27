@@ -604,7 +604,7 @@ public class IssueServiceImpl implements IssueService {
         while(untilDay.isAfter(indexDay) || untilDay.isEqual(indexDay)){
             List<Map<String, Object>> queryResultList = scanResultDao.getRepoIssueCounts(repo_id, indexDay.toString(), indexDay.toString(), category, null);
             Map<String, Object> map = new HashMap<>();
-            //没有提交commit的所有数据都置为0（newIssue, eliminatedIssue可以直接返回-1，但是remainingIssue需要做处理）
+            //没有提交commit的所有数据都置为0（newIssue, eliminatedIssue可以直接返回0，但是remainingIssue需要做处理）
             if (queryResultList.size() == 0){
                 map.put("date", indexDay.toString());
                 map.put("newIssueCount", 0);

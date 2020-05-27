@@ -108,8 +108,13 @@ public class RestInterfaceManager {
     //---------------------------------------------code service---------------------------------------------------------
     public String getRepoPath(String repoId,String commit_id){
         String repoPath=null;
+        StringBuilder url = new StringBuilder();
+        url.append(codeServicePath).append("?repo_id=").append(repoId);
+        if (commit_id != null){
+            url.append("&commit_id=").append(commit_id);
+        }
         try{
-            JSONObject response=restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId+"&commit_id="+commit_id, JSONObject.class).getJSONObject("data");
+            JSONObject response=restTemplate.getForObject(url.toString(), JSONObject.class).getJSONObject("data");
             if (response != null ){
                 if(response.getString("status").equals("Successful")) {
                     repoPath = response.getString("content");

@@ -1473,4 +1473,35 @@ public class MeasureServiceImpl implements MeasureService {
         DeveloperMetrics res = new DeveloperMetrics(developer, efficiency, quality, competence);
         return res;
     }
+
+    @Override
+    public void startMeasureScan(String repoId, String startCommitId) {
+        JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
+        String branch = projects.getJSONObject(0).getString("branch");
+        String repoPath = null;
+        JGitHelper jGitHelper = new JGitHelper(repoPath);
+        List<String> commitList = jGitHelper.getCommitListByBranchAndBeginCommit(branch, startCommitId);
+        for (int i = 0; i < commitList.size(); i++){
+
+        }
+
+//        System.out.println(1);
+//        try {
+//            repoPath = restInterfaceManager.getRepoPath(repoId,null);
+//            if (repoPath!=null){
+////                logger.info("Start to save measure info: repoId is " + repoId + " commitId is " + commitId);
+//                JGitHelper jGitHelper = new JGitHelper(repoPath);
+////                jGitHelper.checkout(branch);
+//                List<String> commitList = jGitHelper.getCommitListByBranchAndBeginCommit(branch, startCommitId);
+//                System.out.println(1);
+//
+////                saveMeasureData(commit.getRepoId(),commitId,commit.getCommitTime(),repoPath);
+//            }
+//        }finally {
+//            if(repoPath!=null) {
+//                restInterfaceManager.freeRepoPath(repoId,repoPath);
+//            }
+//        }
+
+    }
 }

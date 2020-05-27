@@ -462,6 +462,16 @@ public class MeasureController {
         }
     }
 
+    /**
+     *
+     * @param repoId
+     * @param developer
+     * @param beginDate
+     * @param endDate
+     * @param tool
+     * @param request
+     * @return 获取开发者雷达图度量数据
+     */
     @GetMapping("/measure/portrait")
     @CrossOrigin
     public ResponseBean getPortrait(@RequestParam("repo-id")String repoId,
@@ -479,6 +489,21 @@ public class MeasureController {
             return new ResponseBean(401,"failed",e.getMessage());
         }
     }
+
+    @PostMapping("/measure/scan")
+    @CrossOrigin
+    public ResponseBean startMeasureScan(@RequestParam("repo-id")String repoId,
+                                    @RequestParam("start-commit-id")String startCommitId){
+        try{
+            measureService.startMeasureScan(repoId,startCommitId);
+            return new ResponseBean(200,"success",null);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+
 
 
 }
