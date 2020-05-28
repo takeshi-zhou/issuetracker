@@ -11,6 +11,7 @@ public class IgnoreRecord {
 
     private String uuid;
     private String userId;
+    private String userName;
     private int level;
     private String type;
     private String tool;
@@ -22,9 +23,10 @@ public class IgnoreRecord {
     public IgnoreRecord(){
     }
 
-    public IgnoreRecord(String uuid, String userId, int level, String type, String tool, String repoId, String repoName, String branch, Date updateTime) {
+    public IgnoreRecord(String uuid, String userId, String userName, int level, String type, String tool, String repoId, String repoName, String branch, Date updateTime) {
         this.uuid = uuid;
         this.userId = userId;
+        this.userName = userName;
         this.level = level;
         this.type = type;
         this.tool = tool;
@@ -52,6 +54,14 @@ public class IgnoreRecord {
 
     public int getLevel() {
         return level;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public void setLevel(int level) {

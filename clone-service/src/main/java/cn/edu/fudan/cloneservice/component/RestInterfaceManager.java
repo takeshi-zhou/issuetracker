@@ -1,5 +1,6 @@
 package cn.edu.fudan.cloneservice.component;
 
+import cn.edu.fudan.cloneservice.domain.CommitInfo;
 import cn.edu.fudan.cloneservice.domain.Scan;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -29,6 +30,8 @@ public class RestInterfaceManager {
     private String projectServicePath;
     @Value("${issue.service.path}")
     private String issueServicePath;
+    @Value("${measure.service.path}")
+    private String measureServicePath;
 
     private RestTemplate restTemplate;
 
@@ -38,40 +41,12 @@ public class RestInterfaceManager {
 
 
     //-----------------------------------issue service-------------------------------------------------------
-    public JSONObject mapping(JSONObject requestParam) {
-        return restTemplate.postForObject(issueServicePath + "/inner/issue/mapping", requestParam, JSONObject.class);
-    }
+
 
     public void insertRawIssuesWithLocations(List<JSONObject> rawIssues) {
         restTemplate.postForObject(issueServicePath + "/inner/raw-issue", rawIssues, JSONObject.class);
     }
 
-    public void deleteRawIssueOfRepo(String repoId, String category) {
-        restTemplate.delete(issueServicePath + "/inner/raw-issue/" + category + "/" + repoId);
-    }
-
-
-    //-----------------------------------commit service-------------------------------------------------------
-    public JSONObject checkOut(String repo_id,String commit_id){
-        return restTemplate.getForObject(commitServicePath + "/checkout?repo_id=" + repo_id + "&commit_id=" + commit_id, JSONObject.class);
-    }
-
-    //-----------------------------------------------project service-------------------------------------------------
-    public String getRepoIdOfProject(String projectId) {
-        return restTemplate.getForObject(projectServicePath + "/inner/project/repo-id?project-id=" + projectId, String.class);
-    }
-
-    public JSONArray getCommitsOfRepo(String repoId){
-        JSONObject response=restTemplate.getForObject(commitServicePath + "?repo_id=" + repoId + "&is_whole=true", JSONObject.class);
-        if(response==null||response.getJSONArray("data")==null) {
-            return null;
-        }
-        return response.getJSONArray("data");
-    }
-
-    public JSONArray getProjectList(String account_id) {
-        return restTemplate.getForObject(projectServicePath + "/inner/projects?account_id=" + account_id,JSONArray.class);
-    }
 
     public JSONObject getCommitTime(String commitId,String repoId) {
         JSONObject result = null;
@@ -129,5 +104,25 @@ public class RestInterfaceManager {
     public JSONObject getRepoById(String repoId){
         return restTemplate.getForObject(repoServicePath + "/" + repoId, JSONObject.class);
     }
+
+    public String getRepoPath1(String repoId) {
+        JSONObject jsonObject = restTemplate.getForObject(codeServicePath + "?repo_id=" + repoId, JSONObject.class);
+
+        return jsonObject.getJSONObject("data").getString("content");
+    }
+
+    public int getAddLines(String repoId, String start, String end, String developer){
+        int addLines = 0;
+        JSONObject response = restTemplate.getForObject(measureServicePath + "/repository/duration?repo_id=" + repoId +
+                "&since=" + start + "&until=" + end, JSONObject.class);
+        List<CommitInfo> list = response.getJSONObject("data").getJSONArray("commitInfoList").toJavaList(CommitInfo.class);
+        for(CommitInfo commitInfo : list){
+            if(commitInfo.getAuthor().equals(developer)){
+                addLines = commitInfo.getAdd();
+            }
+        }
+        return addLines;
+    }
+
 
 }

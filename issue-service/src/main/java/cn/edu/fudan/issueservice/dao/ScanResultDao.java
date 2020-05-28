@@ -107,7 +107,7 @@ public class ScanResultDao {
         }
     }
 
-    public Map<String, Object> getRepoIssueCounts(String repoId, String since, String until, String category, String developer){
+    public List<Map<String, Object>> getRepoIssueCounts(String repoId, String since, String until, String category, String developer){
         try{
             return scanResultMapper.getRepoIssueCounts(repoId, since, until, category, developer);
         }catch (Exception e){

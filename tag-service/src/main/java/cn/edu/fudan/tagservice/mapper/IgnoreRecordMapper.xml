@@ -6,8 +6,10 @@
     <resultMap id="ignoreRecord" type="IgnoreRecord">
         <id property="uuid" column="uuid"/>
         <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
         <result property="level" column="level"/>
         <result property="type" column="type"/>
+        <result property="tool" column="tool"/>
         <result property="repoId" column="repo_id"/>
         <result property="repoName" column="repo_name"/>
         <result property="branch" column="branch"/>
@@ -19,8 +21,10 @@
         (
         uuid,
         user_id,
+        user_name,
         level,
         type,
+        tool,
         repo_id,
         repo_name,
         branch,
@@ -30,8 +34,10 @@
         (
         #{uuid},
         #{userId},
+        #{userName},
         #{level},
         #{type},
+        #{tool},
         #{repoId},
         #{repoName},
         #{branch},
@@ -41,6 +47,9 @@
 
     <delete id="cancelOneIgnoreRecord"  >
         delete from ignore_record where user_id = #{user_id} and level = #{level} and type = #{type} and repo_id = #{repo_id}
+        <if test="tool != null and tool != ''" >
+            and tool = #{tool}
+        </if>
     </delete>
 
     <select id="queryMinIgnoreLevelByUserId" parameterType="String" resultType="Integer">
@@ -49,10 +58,16 @@
 
     <delete id="cancelInvalidRecord" parameterType="String">
         delete from ignore_record where user_id = #{user_id} and type = #{type}
+        <if test="tool != null and tool != ''" >
+            and tool = #{tool}
+        </if>
     </delete>
 
     <select id="queryOneRecord" resultMap="ignoreRecord">
         select * from ignore_record where user_id = #{user_id} and level = #{level} and type = #{type} and repo_id = #{repo_id}
+        <if test="tool != null and tool != ''" >
+            and tool = #{tool}
+        </if>
     </select>
 
     <select id="getIgnoreRecordList" resultMap="ignoreRecord">

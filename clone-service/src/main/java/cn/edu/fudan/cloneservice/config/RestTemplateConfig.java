@@ -7,15 +7,21 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * @author WZY
- * @version 1.0
- **/
-//@Configuration
-//public class HttpConfig {
-//
-//    @Bean
-//    public RestTemplate restTemplate() {
-//        return new RestTemplate();
-//    }
-//}
+ * @author zyh
+ * @date 2020/5/19
+ */
+@Configuration
+public class RestTemplateConfig {
 
+    private RestTemplateBuilder builder;
+
+    @Autowired
+    public void setBuilder(RestTemplateBuilder builder) {
+        this.builder = builder;
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return builder.build();
+    }
+}

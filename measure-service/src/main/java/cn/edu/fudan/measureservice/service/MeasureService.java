@@ -267,7 +267,22 @@ public interface MeasureService {
      */
     Object getDeveloperListByRepoId(String repo_id);
 
+    /**
+     *
+     * @param repoId
+     * @param developer
+     * @param beginDate
+     * @param endDate
+     * @param token
+     * @param tool
+     * @return 返回开发者雷达图数据
+     */
+    Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool);
 
-
-
+    /**
+     * 根据repoId和起始commit，对项目进行度量方面的扫描，即将数据入库到repo_measure表中
+     * @param repoId
+     * @param startCommitId
+     */
+    void startMeasureScan(String repoId, String startCommitId);
 }

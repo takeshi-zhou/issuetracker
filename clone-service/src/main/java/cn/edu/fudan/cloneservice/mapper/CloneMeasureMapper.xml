@@ -9,6 +9,8 @@
         <result property="increasedCloneLines" column="new_clone_lines"/>
         <result property="selfIncreasedCloneLines" column="self_clone_lines"/>
         <result property="increasedCloneLinesRate" column="clone_lines_rate"/>
+        <result property="cloneLines" column="clone_lines"/>
+        <result property="addCloneLines" column="add_clone_lines"/>
     </resultMap>
 
     <select id="getCloneMeasure" resultMap="cloneMeasure">
@@ -27,7 +29,9 @@
         commit_id,
         new_clone_lines,
         self_clone_lines,
-        clone_lines_rate
+        clone_lines_rate,
+        clone_lines,
+        add_clone_lines
         )
         VALUES
         (
@@ -36,9 +40,15 @@
         #{commitId},
         #{increasedCloneLines},
         #{selfIncreasedCloneLines},
-        #{increasedCloneLinesRate}
+        #{increasedCloneLinesRate},
+        #{cloneLines},
+        #{addCloneLines}
         )
     </insert>
+
+    <delete id="deleteCloneMeasureByRepoId" parameterType="String">
+        delete from clone_measure where repo_id=#{repo_id}
+    </delete>
 
 </mapper>
 

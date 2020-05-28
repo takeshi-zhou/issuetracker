@@ -1,3 +1,4 @@
+
 package cn.edu.fudan.cloneservice.dao;
 
 import cn.edu.fudan.cloneservice.domain.CloneMeasure;
@@ -27,5 +28,9 @@ public class CloneMeasureDao {
 
     public void insertCloneMeasure(CloneMeasure cloneMeasure){
         cloneMeasureMapper.insertCloneMeasure(cloneMeasure);
+    }
+
+    public void deleteCloneMeasureByRepoId(String repoId){
+        cloneMeasureMapper.deleteCloneMeasureByRepoId(repoId);
     }
 }

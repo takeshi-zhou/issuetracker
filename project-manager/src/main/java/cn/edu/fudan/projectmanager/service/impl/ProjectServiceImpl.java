@@ -372,27 +372,18 @@ public class ProjectServiceImpl implements ProjectService {
                 restInterfaceManager.deleteCodeTeackerOfRepo(branch,repoId);
                 restInterfaceManager.deleteIgnoreRecord(accountId, repoId);
                 restInterfaceManager.deleteRepoMeasure(repoId);
+                restInterfaceManager.deleteCloneMeasure(repoId);
                 deleteCloneResPreFile(repoId);
-//                if(type.equals("bug")){
-//                    logger.info("start to request measure to delete measure info ...");
-//
-//                    logger.info("delete measure info success");
-//                }
-//
-//                if(type.equals("clone")){
-//                    //对于clone的CPU版本，删除时需要删除前一次commit扫描的结果文件
-//
-//                }
 
             }else if (!projectDao.existOtherProjectWithThisRepoIdAndType(repoId, type) ) {
                 Project project = projectDao.getProjectByID(projectId);
                 project.setAccount_id("1");
-                //project.setScan_status("Scanned");
                 projectDao.updateProjectStatus(project);
             }else {
                 projectDao.remove(projectId);
             }
         }else{
+            //repoId为空表示没有下载完成，直接删除
             projectDao.remove(projectId);
         }
         logger.info("project delete success!");
