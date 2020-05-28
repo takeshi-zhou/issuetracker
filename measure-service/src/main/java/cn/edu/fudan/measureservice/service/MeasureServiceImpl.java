@@ -272,6 +272,9 @@ public class MeasureServiceImpl implements MeasureService {
             repoMeasure.setDeveloper_name(developerName);
             repoMeasure.setDeveloper_email(developerEmail);
 
+            //获取该commit是否是merge
+            repoMeasure.setIs_merge(jGitHelper.isMerge(revCommit));
+
             //如果是最初始的那个commit，那么工作量记为0，否则  则进行git diff 对比获取工作量
             boolean isInitCommitByJGit = jGitHelper.isInitCommit(revCommit);
             if (isInitCommitByJGit){
@@ -289,8 +292,7 @@ public class MeasureServiceImpl implements MeasureService {
                 repoMeasure.setChanged_files(getChangedFilesCount(jGitHelper, repoPath, commitId));
             }
 
-            //获取该commit是否是merge
-            repoMeasure.setIs_merge(jGitHelper.isMerge(revCommit));
+
 
             try{
                 if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
@@ -1085,8 +1087,13 @@ public class MeasureServiceImpl implements MeasureService {
         try {
             Repository repository = builder.build();
             RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
-            List<DiffEntry> diffFix = JGitHelper.getChangedFileList(revCommit,repository);//获取变更的文件列表
-            map = JGitHelper.getLinesData(diffFix);
+            if (jGitHelper.isMerge(revCommit)){
+                List<DiffEntry> mergeDiffFix = jGitHelper.getConflictDiffEntryList(commit_id);//获取merge情况变更的文件列表
+                map = JGitHelper.getLinesData(mergeDiffFix);
+            } else {
+                List<DiffEntry> diffFix = JGitHelper.getChangedFileList(revCommit,repository);//获取非merge情况变更的文件列表
+                map = JGitHelper.getLinesData(diffFix);
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -1479,7 +1486,6 @@ public class MeasureServiceImpl implements MeasureService {
         JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
         String branch = projects.getJSONObject(0).getString("branch");
         String repoPath = null;
-
         try {
             repoPath = restInterfaceManager.getRepoPath(repoId,null);
             if (repoPath!=null){

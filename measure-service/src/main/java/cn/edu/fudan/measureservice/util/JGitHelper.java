@@ -6,6 +6,7 @@
 package cn.edu.fudan.measureservice.util;
 
 import ch.qos.logback.classic.pattern.SyslogStartConverter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.Git;
@@ -21,6 +22,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -560,6 +562,67 @@ public class JGitHelper {
         map.put("addWhiteLines", sumAddWhiteLines);
         map.put("delWhiteLines", sumDelWhiteLines);
         return map;
+    }
+
+    @SneakyThrows
+    public List<DiffEntry> getConflictDiffEntryList (String commit) {
+        RevCommit currCommit = revWalk.parseCommit(ObjectId.fromString(commit));
+        RevCommit[] parentCommits = currCommit.getParents();
+        if (parentCommits.length != 2) {
+            return null;
+        }
+
+        List<DiffEntry> parent1 = getDiffEntry(parentCommits[0], currCommit);
+        List<DiffEntry> parent2 = getDiffEntry(parentCommits[1], currCommit);
+        List<DiffEntry> result = new ArrayList<>();
+        if (isParent2(parentCommits[0], parentCommits[1], currCommit)) {
+            List<DiffEntry> tmp = parent1;
+            parent1 = parent2;
+            parent2 = tmp;
+        }
+
+        // oldPath 相同
+        for (DiffEntry diffEntry1 : parent1) {
+            for (DiffEntry diffEntry2 :parent2) {
+                // todo 暂未考虑重命名的情况 或者无需考虑重命名的情况
+                //  如 p1 a=a1  p2 a=>a2 是否冲突待验证
+                boolean isSame = diffEntry1.getOldPath().equals(diffEntry2.getOldPath()) &&
+                        diffEntry1.getNewPath().equals(diffEntry2.getNewPath());
+
+                if (isSame) {
+                    result.add(diffEntry1);
+                }
+            }
+        }
+        return result;
+    }
+
+    @SneakyThrows
+    private List<DiffEntry> getDiffEntry(RevCommit parentCommit, RevCommit currCommit) {
+        parentCommit = revWalk.parseCommit(ObjectId.fromString(parentCommit.getName()));
+        TreeWalk tw = new TreeWalk(repository);
+        tw.addTree(parentCommit.getTree());
+        tw.addTree(currCommit.getTree());
+        tw.setRecursive(true);
+        RenameDetector rd = new RenameDetector(repository);
+        rd.addAll(DiffEntry.scan(tw));
+        rd.setRenameScore(50);
+        return rd.compute();
+    }
+
+    private boolean isParent2(RevCommit parent1, RevCommit parent2, RevCommit currCommit) {
+        String author1 = parent1.getAuthorIdent().getName();
+        String author2 = parent2.getAuthorIdent().getName();
+        String author = currCommit.getAuthorIdent().getName();
+        if (author.equals(author2) && !author.equals(author1)) {
+            return true;
+        }
+
+        if (!author.equals(author2) && author.equals(author1)) {
+            return false;
+        }
+
+        return parent2.getCommitTime() > parent1.getCommitTime();
     }
 
     public static void main(String[] args) throws ParseException {
