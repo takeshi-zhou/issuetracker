@@ -1,5 +1,9 @@
 package cn.edu.fudan.issueservice.domain;
 
+
+import lombok.Getter;
+
+@Getter
 public enum IssueTypeEnum {
 
     /**
@@ -9,32 +13,33 @@ public enum IssueTypeEnum {
      * MULTITHREADED_CORRECTNESS,EXPERIMENTAL   属于 findbugs issue type
      */
 
-    BUG("Bug"),
-    CODE_SMELL("Code smell"),
-    SECURITY_HOTSPOT("Security hotspot"),
-    VULNERABILITY("Vulnerability"),
+    BUG("Bug","sonar","security"),
+    CODE_SMELL("Code smell","sonar","standard"),
+    SECURITY_HOTSPOT("Security hotspot","sonar","security"),
+    VULNERABILITY("Vulnerability","sonar","security"),
 
-    MALICIOUS_CODE_VULNERABILITY("Malicious code vulnerability"),
-    DODGY_CODE("Dodgy code"),
-    SECURITY("Security"),
-    INTERNATIONALIZATION("Internationalization"),
-    CORRECTNESS("Correctness"),
-    BAD_PRACTICE("Bad practice"),
-    PERFORMANCE("Performance"),
-    MULTITHREADED_CORRECTNESS("Multithreaded correctness"),
-    EXPERIMENTAL("Experimental");
+    MALICIOUS_CODE_VULNERABILITY("Malicious code vulnerability","findbugs","security"),
+    DODGY_CODE("Dodgy code","findbugs","standard"),
+    SECURITY("Security","findbugs","security"),
+    INTERNATIONALIZATION("Internationalization","findbugs","standard"),
+    CORRECTNESS("Correctness","findbugs","security"),
+    BAD_PRACTICE("Bad practice","findbugs","standard"),
+    PERFORMANCE("Performance","findbugs","standard"),
+    MULTITHREADED_CORRECTNESS("Multithreaded correctness","findbugs","security"),
+    EXPERIMENTAL("Experimental","findbugs","standard");
 
 
 
 
     private String name;
-    IssueTypeEnum(String name) {
+    private String category;
+    private String tool;
+    IssueTypeEnum(String name,String tool,String category) {
         this.name = name;
+        this.category = category;
+        this.tool = tool;
     }
 
-    public String getName() {
-        return name;
-    }
 
     public static IssueTypeEnum getIssueTypeEnum(String name){
         for(IssueTypeEnum issueTypeEnum : IssueTypeEnum.values()){

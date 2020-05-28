@@ -33,7 +33,7 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
+public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService  {
 
 
     private static Logger logger = LoggerFactory.getLogger(IssueMeasureInfoServiceImpl.class);
@@ -485,6 +485,42 @@ public class IssueMeasureInfoServiceImpl implements IssueMeasureInfoService {
     public Object getLatestScannedCommitCloneLines(String repoId) {
         String latestCommitId = rawIssueDao.getLatestScannedCommitId(repoId,"clone");
         return getCloneLinesByCommit(repoId,latestCommitId);
+    }
+
+    @Override
+    public Object getIssueCountByConditions(String developer, String repoId, String since, String until, String tool, String generalCategory) {
+        Map<String, Object> map = new HashMap<>();
+        if(since != null ){
+            if(!since.matches("([0-9]+)-([0-9]{2})-([0-9]{2})")){
+                throw new RuntimeException(" The input format of since should be like 2019-10-01") ;
+            }
+            map.put("since",since);
+        }
+
+        if(until  != null ){
+            if(!until.matches("([0-9]+)-([0-9]{2})-([0-9]{2})")){
+                throw new RuntimeException(" The input format of until should be like 2019-10-01") ;
+            }
+            until = DateTimeUtil.stringToLocalDate(until).plusDays(1).toString();
+            map.put("until",until);
+        }
+        map.put("repo_id", repoId);
+        map.put("developer", developer);
+        map.put("category", tool);
+        List<Issue> issues = issueDao.getIssueList(map);
+
+        if(generalCategory == null || "".equals(generalCategory)){
+            return issues.size();
+        }
+
+        List<Issue> result = new ArrayList<>();
+        for(Issue issue : issues){
+            IssueTypeEnum issueTypeEnum = IssueTypeEnum.getIssueTypeEnum(issue.getIssueType().getCategory());
+            if(issueTypeEnum.getCategory().equals(generalCategory)){
+                result.add(issue) ;
+            }
+        }
+        return result.size();
     }
 
     private Integer getCloneLinesByCommit(String repoId, String commitId){

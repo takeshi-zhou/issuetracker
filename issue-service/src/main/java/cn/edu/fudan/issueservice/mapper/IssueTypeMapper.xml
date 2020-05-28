@@ -9,6 +9,7 @@
         <result property="tool" column="tool"/>
         <result property="category" column="category"/>
         <result property="description" column="description"/>
+        <result property="language" column="language"/>
     </resultMap>
 
 

@@ -9,6 +9,9 @@ public class IssueType {
     private String description;
     private String language;
 
+
+    private String generalCategory;
+
     public String getUuid() {
         return uuid;
     }
@@ -55,5 +58,13 @@ public class IssueType {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public String getGeneralCategory() {
+        return generalCategory;
+    }
+
+    public void setGeneralCategory(String generalCategory) {
+        this.generalCategory = generalCategory;
     }
 }

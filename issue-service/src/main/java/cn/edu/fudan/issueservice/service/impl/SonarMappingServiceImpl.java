@@ -30,11 +30,6 @@ public class SonarMappingServiceImpl extends BaseMappingServiceImpl{
 
     private int judgeChangedLines = 10;
 
-    @Autowired
-    public void setLocationDao(LocationDao locationDao) {
-        this.locationDao = locationDao;
-    }
-
 
     @Override
     public void mapping(String repo_id, String pre_commit_id, String current_commit_id, String category, String committer) {
