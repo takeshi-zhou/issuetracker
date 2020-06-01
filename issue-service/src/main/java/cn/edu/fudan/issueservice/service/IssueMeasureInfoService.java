@@ -59,4 +59,16 @@ public interface IssueMeasureInfoService {
     Object getCloneLines(String repoId, String since, String until);
 
     Object getLatestScannedCommitCloneLines(String repoId);
+
+    /**
+     *  根据条件获取缺陷数量
+     * @param developer
+     * @param repoId
+     * @param since
+     * @param until
+     * @param tool
+     * @param generalCategory
+     * @return
+     */
+    Object getIssueCountByConditions(String developer,String repoId,String since,String until,String tool,String generalCategory);
 }

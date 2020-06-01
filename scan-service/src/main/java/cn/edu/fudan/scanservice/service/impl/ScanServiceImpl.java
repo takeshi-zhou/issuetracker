@@ -193,7 +193,7 @@ public class ScanServiceImpl implements ScanService {
 
         List<String> scanIds = new LinkedList<>();
         for(Scan scan : scanList){
-            scanIds.add(scan.getUuid());
+            scanIds.add(scan.getCommit_id());
         }
 
         LinkedList<String> parentCommits = new LinkedList<>();

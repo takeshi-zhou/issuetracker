@@ -13,6 +13,8 @@ public class Competence {
     private double focusRange;
     private double oldCodeModification;
     private double eliminateDuplicateCodeRate;
+    private double changedCodeMAXAge;
+    private double deletedCodeMAXAge;
 
     public Competence() {
     }
@@ -55,5 +57,21 @@ public class Competence {
 
     public void setEliminateDuplicateCodeRate(double eliminateDuplicateCodeRate) {
         this.eliminateDuplicateCodeRate = eliminateDuplicateCodeRate;
+    }
+
+    public double getChangedCodeMAXAge() {
+        return changedCodeMAXAge;
+    }
+
+    public void setChangedCodeMAXAge(double changedCodeMAXAge) {
+        this.changedCodeMAXAge = changedCodeMAXAge;
+    }
+
+    public double getDeletedCodeMAXAge() {
+        return deletedCodeMAXAge;
+    }
+
+    public void setDeletedCodeMAXAge(double deletedCodeMAXAge) {
+        this.deletedCodeMAXAge = deletedCodeMAXAge;
     }
 }

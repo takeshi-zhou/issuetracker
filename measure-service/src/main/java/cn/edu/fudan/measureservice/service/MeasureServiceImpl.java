@@ -272,6 +272,9 @@ public class MeasureServiceImpl implements MeasureService {
             repoMeasure.setDeveloper_name(developerName);
             repoMeasure.setDeveloper_email(developerEmail);
 
+            //获取该commit是否是merge
+            repoMeasure.setIs_merge(jGitHelper.isMerge(revCommit));
+
             //如果是最初始的那个commit，那么工作量记为0，否则  则进行git diff 对比获取工作量
             boolean isInitCommitByJGit = jGitHelper.isInitCommit(revCommit);
             if (isInitCommitByJGit){
@@ -289,8 +292,7 @@ public class MeasureServiceImpl implements MeasureService {
                 repoMeasure.setChanged_files(getChangedFilesCount(jGitHelper, repoPath, commitId));
             }
 
-            //获取该commit是否是merge
-            repoMeasure.setIs_merge(jGitHelper.isMerge(revCommit));
+
 
             try{
                 if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
@@ -598,12 +600,12 @@ public class MeasureServiceImpl implements MeasureService {
         String sinceDay = dateFormatChange(since);
         String untilDay = dateFormatChange(until);
 
-        List<CommitInfoDeveloper> CommitInfoDeveloper = repoMeasureMapper.getCommitInfoDeveloperListByDuration(repo_id, sinceDay, untilDay, developer_name);
+        List<CommitInfoDeveloper> commitInfoDeveloper = repoMeasureMapper.getCommitInfoDeveloperListByDuration(repo_id, sinceDay, untilDay, developer_name);
         int addLines = repoMeasureMapper.getAddLinesByDuration(repo_id, sinceDay, untilDay, "");
         int delLines = repoMeasureMapper.getDelLinesByDuration(repo_id, sinceDay, untilDay, "");
         int sumCommitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceDay, untilDay,null);
         int sumChangedFiles = repoMeasureMapper.getChangedFilesByDuration(repo_id, sinceDay, untilDay,null);
-        commitBaseInfoDuration.setCommitInfoList(CommitInfoDeveloper);
+        commitBaseInfoDuration.setCommitInfoList(commitInfoDeveloper);
         commitBaseInfoDuration.setSumAddLines(addLines);
         commitBaseInfoDuration.setSumDelLines(delLines);
         commitBaseInfoDuration.setSumCommitCounts(sumCommitCounts);
@@ -1085,8 +1087,13 @@ public class MeasureServiceImpl implements MeasureService {
         try {
             Repository repository = builder.build();
             RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
-            List<DiffEntry> diffFix = JGitHelper.getChangedFileList(revCommit,repository);//获取变更的文件列表
-            map = JGitHelper.getLinesData(diffFix);
+            if (jGitHelper.isMerge(revCommit)){
+                List<DiffEntry> mergeDiffFix = jGitHelper.getConflictDiffEntryList(commit_id);//获取merge情况变更的文件列表
+                map = JGitHelper.getLinesData(mergeDiffFix);
+            } else {
+                List<DiffEntry> diffFix = JGitHelper.getChangedFileList(revCommit,repository);//获取非merge情况变更的文件列表
+                map = JGitHelper.getLinesData(diffFix);
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -1212,12 +1219,17 @@ public class MeasureServiceImpl implements MeasureService {
             int LOC = repoMeasureMapper.getRepoLOCByDuration(repo_id, indexDay.toString(), indexDay.toString(),null);
             int CommitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, indexDay.toString(), indexDay.toString(),null);
             //这里只返回有commit的数据，并不是每天都返回
-            if (CommitCounts > 0){
-                map.put("commit_date", indexDay.toString());
-                map.put("LOC", LOC);
-                map.put("commit_count", CommitCounts);
-                result.add(map);
-            }
+//            if (CommitCounts > 0){
+//                map.put("commit_date", indexDay.toString());
+//                map.put("LOC", LOC);
+//                map.put("commit_count", CommitCounts);
+//                result.add(map);
+//            }
+            //现在采用返回每天的数据，无论当天是否有commit
+            map.put("commit_date", indexDay.toString());
+            map.put("LOC", LOC);
+            map.put("commit_count", CommitCounts);
+            result.add(map);
             indexDay = indexDay.plusDays(1);
         }
         return result;
@@ -1317,13 +1329,19 @@ public class MeasureServiceImpl implements MeasureService {
         //提交频率指标
         int totalCommitCount = getCommitCountsByDuration(repoId, beginDate, endDate);
         int developerCommitCount = repoMeasureMapper.getCommitCountsByDuration(repoId, beginDate, endDate, developer);
-        double commitFrequency = developerCommitCount*(1.0)/totalCommitCount;
+        double commitFrequency = -1;
+        if (totalCommitCount != 0){
+            commitFrequency = developerCommitCount*(1.0)/totalCommitCount;
+        }
         efficiency.setCommitFrequency(commitFrequency);
 
         //代码量指标
         int developerLOC = repoMeasureMapper.getRepoLOCByDuration(repoId, beginDate, endDate, developer);
         int totalLOC = repoMeasureMapper.getRepoLOCByDuration(repoId, beginDate, endDate, "");
-        double workLoad = developerLOC*(1.0)/totalLOC;
+        double workLoad = -1;
+        if (totalLOC != 0){
+            workLoad = developerLOC*(1.0)/totalLOC;
+        }
         efficiency.setWorkLoad(workLoad);
 
         //获取代码新增、删除逻辑行数数据
@@ -1343,9 +1361,9 @@ public class MeasureServiceImpl implements MeasureService {
             totalDelStatement += statements.getJSONObject(str).getIntValue("DELETE");
         }
         //新增逻辑行指标
-        efficiency.setNewLogicLine(developerAddStatement*(1.0)/totalAddStatement);
+        efficiency.setNewLogicLine((totalAddStatement == 0) ? -1 : developerAddStatement*(1.0)/totalAddStatement);
         //删除逻辑行指标
-        efficiency.setDelLogicLine(developerDelStatement*(1.0)/totalDelStatement);
+        efficiency.setDelLogicLine((totalDelStatement == 0) ? -1 : developerDelStatement*(1.0)/totalDelStatement);
 
         JSONObject validLines = restInterfaceManager.getValidLine(repoId, beginDate, endDate, branch);
         int developerValidLine = 0;
@@ -1357,11 +1375,7 @@ public class MeasureServiceImpl implements MeasureService {
             totalValidLine += validLines.getIntValue(key);
         }
         //有效代码行指标
-        if (totalAddStatement != 0){
-            efficiency.setValidStatement(developerValidLine*(1.0)/totalValidLine);
-        }else {
-            efficiency.setValidStatement(-1);
-        }
+        efficiency.setValidStatement((totalValidLine == 0) ? -1 : developerValidLine*(1.0)/totalValidLine);
 //
         //----------------------------------以下是代码质量相关指标-------------------------------------
         //个人规范类issue数
@@ -1415,15 +1429,18 @@ public class MeasureServiceImpl implements MeasureService {
         JSONObject cloneMeasure = restInterfaceManager.getCloneMeasure(repoId, developer, beginDate, endDate);
         int increasedCloneLines = Integer.parseInt(cloneMeasure.getString("increasedCloneLines"));
         int selfIncreasedCloneLines = Integer.parseInt(cloneMeasure.getString("selfIncreasedCloneLines"));
+        int eliminateCloneLines = Integer.parseInt(cloneMeasure.getString("eliminateCloneLines"));
+        int allEliminateCloneLines = Integer.parseInt(cloneMeasure.getString("allEliminateCloneLines"));
         JSONObject focusMeasure = restInterfaceManager.getFocusFilesCount(repoId, beginDate, endDate);
         int totalChangedFile = focusMeasure.getIntValue("total");
         int developerFocusFile = focusMeasure.getJSONObject("developer").getIntValue(developer);
-
-
-
-
-
-
+        JSONObject changedCodeInfo = restInterfaceManager.getChangedCodeAge(repoId, beginDate, endDate, developer);
+        int changedCodeAVGAge = changedCodeInfo.getIntValue("average");
+        int changedCodeMAXAge = changedCodeInfo.getIntValue("max");
+        JSONObject deletedCodeInfo = restInterfaceManager.getDeletedCodeAge(repoId, beginDate, endDate, developer);
+        int deletedCodeAVGAge = deletedCodeInfo.getIntValue("average");
+        int deletedCodeMAXAge = deletedCodeInfo.getIntValue("max");
+        int repoAge = restInterfaceManager.getRepoAge(repoId, endDate);
 
         Competence competence = new Competence();
         double nonRepetitiveCodeRate = -1;
@@ -1441,11 +1458,50 @@ public class MeasureServiceImpl implements MeasureService {
             focusRange = (developerFocusFile)*(1.0)/totalChangedFile;
         }
 
+        double eliminateDuplicateCodeRate = -1;
+        if (allEliminateCloneLines != 0){
+            eliminateDuplicateCodeRate = (eliminateCloneLines)*(1.0)/allEliminateCloneLines;
+        }
+
+        double oldCodeModification = -1;
+        if (repoAge != 0){
+            oldCodeModification = (changedCodeAVGAge + deletedCodeAVGAge)*(1.0)/repoAge;
+        }
+
+
         competence.setNonRepetitiveCodeRate(nonRepetitiveCodeRate);
         competence.setNonSelfRepetitiveCodeRate(nonSelfRepetitiveCodeRate);
         competence.setFocusRange(focusRange);
+        competence.setEliminateDuplicateCodeRate(eliminateDuplicateCodeRate);
+        competence.setOldCodeModification(oldCodeModification);
+        competence.setChangedCodeMAXAge(changedCodeMAXAge);
+        competence.setDeletedCodeMAXAge(deletedCodeMAXAge);
 
         DeveloperMetrics res = new DeveloperMetrics(developer, efficiency, quality, competence);
         return res;
+    }
+
+    @Override
+    public void startMeasureScan(String repoId, String startCommitId) {
+        JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
+        String branch = projects.getJSONObject(0).getString("branch");
+        String repoPath = null;
+        try {
+            repoPath = restInterfaceManager.getRepoPath(repoId,null);
+            if (repoPath!=null){
+                JGitHelper jGitHelper = new JGitHelper(repoPath);
+                List<String> commitList = jGitHelper.getCommitListByBranchAndBeginCommit(branch, startCommitId);
+                for (int i = 0; i < commitList.size(); i++){
+                    String commitTime = jGitHelper.getCommitTime(commitList.get(i));
+                    logger.info("Start to save measure info: repoId is " + repoId + " commitId is " + commitList.get(i));
+                    saveMeasureData(repoId,commitList.get(i),commitTime,repoPath);
+                }
+            }
+        }finally {
+            if(repoPath!=null) {
+                restInterfaceManager.freeRepoPath(repoId,repoPath);
+            }
+        }
+        logger.info("Measure scan complete!!!");
     }
 }

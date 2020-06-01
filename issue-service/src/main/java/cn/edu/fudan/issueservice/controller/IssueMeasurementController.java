@@ -195,4 +195,23 @@ public class IssueMeasurementController {
         return issueMeasureInfoService.getLatestScannedCommitCloneLines(repoId);
     }
 
+
+    @GetMapping(value = "/measurement/issueCount")
+    public Object getIssueCountByConditions(@RequestParam(value = "developer",required = false) String developer,
+                                            @RequestParam(value = "repoId") String repoId,
+                                            @RequestParam(value = "since",required = false) String since,
+                                            @RequestParam(value = "until",required = false) String until,
+                                            @RequestParam(value = "tool",required = false) String tool,
+                                            @RequestParam(value = "general_category",required = false) String generalCategory) {
+
+        try {
+            return new ResponseBean(200, "success!", issueMeasureInfoService.getIssueCountByConditions(developer,repoId, since,until,tool,generalCategory));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseBean(401, "failed!", Collections.emptyList());
+        }
+    }
+
+
+
 }
