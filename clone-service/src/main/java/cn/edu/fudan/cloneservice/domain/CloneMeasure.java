@@ -10,11 +10,11 @@ public class CloneMeasure {
     private String repoId;
     private String commitId;
 
-    private String increasedCloneLines;
-    private String selfIncreasedCloneLines;
-    private String increasedCloneLinesRate;
-    private String cloneLines;
-    private String addCloneLines;
+    private int newCloneLines;
+    private int selfCloneLines;
+    private int addLines;
+    private int cloneLines;
+    private int preCloneLines;
 
     public String getUuid() {
         return uuid;
@@ -40,44 +40,43 @@ public class CloneMeasure {
         this.commitId = commitId;
     }
 
-    public String getIncreasedCloneLines() {
-        return increasedCloneLines;
+    public int getNewCloneLines() {
+        return newCloneLines;
     }
 
-    public void setIncreasedCloneLines(String increasedCloneLines) {
-        this.increasedCloneLines = increasedCloneLines;
+    public void setNewCloneLines(int newCloneLines) {
+        this.newCloneLines = newCloneLines;
     }
 
-    public String getSelfIncreasedCloneLines() {
-        return selfIncreasedCloneLines;
+    public int getSelfCloneLines() {
+        return selfCloneLines;
     }
 
-    public void setSelfIncreasedCloneLines(String selfIncreasedCloneLines) {
-        this.selfIncreasedCloneLines = selfIncreasedCloneLines;
+    public void setSelfCloneLines(int selfCloneLines) {
+        this.selfCloneLines = selfCloneLines;
     }
 
-    public String getIncreasedCloneLinesRate() {
-        return increasedCloneLinesRate;
+    public int getAddLines() {
+        return addLines;
     }
 
-    public void setIncreasedCloneLinesRate(String increasedCloneLinesRate) {
-        this.increasedCloneLinesRate = increasedCloneLinesRate;
+    public void setAddLines(int addLines) {
+        this.addLines = addLines;
     }
 
-    public String getCloneLines() {
+    public int getCloneLines() {
         return cloneLines;
     }
 
-    public void setCloneLines(String cloneLines) {
+    public void setCloneLines(int cloneLines) {
         this.cloneLines = cloneLines;
     }
 
-    public String getAddCloneLines() {
-        return addCloneLines;
+    public int getPreCloneLines() {
+        return preCloneLines;
     }
 
-    public void setAddCloneLines(String addCloneLines) {
-        this.addCloneLines = addCloneLines;
+    public void setPreCloneLines(int preCloneLines) {
+        this.preCloneLines = preCloneLines;
     }
-
 }

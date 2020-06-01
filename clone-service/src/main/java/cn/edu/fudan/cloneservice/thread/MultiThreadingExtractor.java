@@ -124,7 +124,7 @@ public class MultiThreadingExtractor {
                 if(commitId == null){
                     break;
                 }
-                scanThreadPool.submit(new ScanSynchronouslyTask(commitId, repoId, measureQueue));
+                //scanThreadPool.submit(new ScanSynchronouslyTask(commitId, repoId, measureQueue));
 
                 //measureQueue.offer(commitId);
             } catch (InterruptedException e) {

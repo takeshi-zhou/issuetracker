@@ -1,6 +1,5 @@
 package cn.edu.fudan.cloneservice.util;
 
-import cn.edu.fudan.cloneservice.bean.CloneInstanceInfo;
 import cn.edu.fudan.cloneservice.domain.CommitChange;
 import org.eclipse.jgit.api.BlameCommand;
 import org.eclipse.jgit.api.Git;
@@ -152,44 +151,6 @@ public class JGitUtil {
         return commitIds;
     }
 
-    public static Integer getCloneLineByDeveloper(String repoPath, String commitId, List<CloneInstanceInfo> lci, String developerName){
-        Integer cloneLine = 0;
-        try {
-
-            FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
-            Repository repository = repositoryBuilder.setGitDir(new File(repoPath + "/.git"))
-                    .readEnvironment() // scan environment GIT_* variables
-                    .findGitDir() // scan up the file system tree
-                    .setMustExist(true)
-                    .build();
-            // find the current commit id
-
-            ObjectId curCommitId = repository.resolve(commitId);
-            for(CloneInstanceInfo ci: lci){
-                BlameCommand blamer = new BlameCommand(repository);
-                blamer.setStartCommit(curCommitId);
-                blamer.setFilePath(ci.getFile_path());
-                try {
-                    BlameResult blame = blamer.call();
-                    for (int i = ci.getStart_line(); i <= ci.getEnd_line(); i ++){
-                        PersonIdent personIdent =  blame.getSourceAuthor(i);
-                        if(personIdent.getName().equals(developerName)){
-                            cloneLine ++;
-                        }
-                    }
-                } catch (GitAPIException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return cloneLine;
-    }
-
     public static boolean isSameDeveloperClone(String repoPath, String commitId, String filePath, String nums){
 
         boolean isSameDeveloperClone = false;
@@ -262,7 +223,7 @@ public class JGitUtil {
         return spi;
     }
 
-    public static CommitChange getNewlyIncreasedLinesNum(List<DiffEntry> diffEntryList) throws IOException{
+    private static CommitChange getNewlyIncreasedLinesNum(List<DiffEntry> diffEntryList) throws IOException{
 
         CommitChange commitChange = new CommitChange();
 
@@ -465,7 +426,8 @@ public class JGitUtil {
     }
 
     public static void main(String[] args) {
-        Set<String> list = getDeveloperList("C:\\Users\\Thinkpad\\Desktop\\config\\IssueTracker-Master");
-        System.out.println(list);
+        CommitChange commitChange = getNewlyIncreasedLines("C:\\Users\\Thinkpad\\Desktop\\config\\IssueTracker-Master",
+                "b553c9fb2a99bdb0db5b86d908650511ccaf8f8b");
+        System.out.println(commitChange.getAddMap());
     }
 }

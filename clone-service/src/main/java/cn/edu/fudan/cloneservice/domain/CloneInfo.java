@@ -1,49 +1,31 @@
 package cn.edu.fudan.cloneservice.domain;
 
+/**
+ * @author zyh
+ * @date 2020/5/28
+ */
 public class CloneInfo {
+
     private String uuid;
-    private int start_line;
-    private int end_line;
-    private String file_path;
-    private String class_name;
-    private String method_name;
-    private String bug_lines;
+    private String repoId;
+    private String commitId;
+    private String filePath;
+    private String newCloneLines;
+    private String selfCloneLines;
+    private String type;
 
-    public CloneInfo(String uuid, int start_line, int end_line, String file_path, String class_name, String method_name, String bug_lines) {
+    public CloneInfo(){
+
+    }
+
+    public CloneInfo(String uuid, String repoId, String commitId, String filePath, String newCloneLines, String selfCloneLines, String type) {
         this.uuid = uuid;
-        this.start_line = start_line;
-        this.end_line = end_line;
-        this.file_path = file_path;
-        this.class_name = class_name;
-        this.method_name = method_name;
-        this.bug_lines = bug_lines;
-    }
-
-    public String getPackageName(){
-//        String div[] = class_name.split("-\\*-");
-        String[] div = class_name.split("-\\*-");
-        if(div.length != 2){
-            return "get_package_name_error";
-        }else {
-            return div[0];
-        }
-    }
-    public String getClassName(){
-//        String div[] = class_name.split("-\\*-");
-        String[] div = class_name.split("-\\*-");
-        if(div.length != 2){
-            return "get_class_name_error";
-        }else {
-            return div[1];
-        }
-    }
-
-    public String getBug_lines() {
-        return bug_lines;
-    }
-
-    public void setBug_lines(String bug_lines) {
-        this.bug_lines = bug_lines;
+        this.repoId = repoId;
+        this.commitId = commitId;
+        this.filePath = filePath;
+        this.newCloneLines = newCloneLines;
+        this.selfCloneLines = selfCloneLines;
+        this.type = type;
     }
 
     public String getUuid() {
@@ -54,45 +36,51 @@ public class CloneInfo {
         this.uuid = uuid;
     }
 
-    public int getStart_line() {
-        return start_line;
+    public String getRepoId() {
+        return repoId;
     }
 
-    public void setStart_line(int start_line) {
-        this.start_line = start_line;
+    public void setRepoId(String repoId) {
+        this.repoId = repoId;
     }
 
-    public int getEnd_line() {
-        return end_line;
+    public String getCommitId() {
+        return commitId;
     }
 
-    public void setEnd_line(int end_line) {
-        this.end_line = end_line;
+    public void setCommitId(String commitId) {
+        this.commitId = commitId;
     }
 
-    public String getFile_path() {
-        return file_path;
+    public String getFilePath() {
+        return filePath;
     }
 
-    public void setFile_path(String file_path) {
-        this.file_path = file_path;
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
-    public String getClass_name() {
-        return class_name;
+    public String getNewCloneLines() {
+        return newCloneLines;
     }
 
-    public void setClass_name(String class_name) {
-        this.class_name = class_name;
+    public void setNewCloneLines(String newCloneLines) {
+        this.newCloneLines = newCloneLines;
     }
 
-    public String getMethod_name() {
-        return method_name;
+    public String getSelfCloneLines() {
+        return selfCloneLines;
     }
 
-    public void setMethod_name(String method_name) {
-        this.method_name = method_name;
+    public void setSelfCloneLines(String selfCloneLines) {
+        this.selfCloneLines = selfCloneLines;
     }
 
+    public String getType() {
+        return type;
+    }
 
+    public void setType(String type) {
+        this.type = type;
+    }
 }

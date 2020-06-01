@@ -1,8 +1,6 @@
 package cn.edu.fudan.cloneservice.component;
 
 import cn.edu.fudan.cloneservice.domain.CommitInfo;
-import cn.edu.fudan.cloneservice.domain.Scan;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
