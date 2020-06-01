@@ -39,6 +39,10 @@ public class RestInterfaceManager {
     private String projectServicePath;
     @Value("${issue.service.path}")
     private String issueServicePath;
+    @Value("${uniform.service.path}")
+    private String uniformServicePath;
+
+
 
     private RestTemplate restTemplate;
 
@@ -230,29 +234,29 @@ public class RestInterfaceManager {
 
     //--------------------------------code-tracker service------------------------------------------------
     public JSONObject getStatements(String repoUuid, String beginDate, String endDate, String branch){
-        return restTemplate.getForObject("http://10.141.221.85:8000/statistics/statements"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&branch=" + branch, JSONObject.class).getJSONObject("data");
+        return restTemplate.getForObject(uniformServicePath+"/statistics/statements"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&branch=" + branch, JSONObject.class).getJSONObject("data");
     }
 
     public JSONObject getValidLine(String repoUuid, String beginDate, String endDate, String branch){
-        return restTemplate.getForObject("http://10.141.221.85:8000/statistics/committer/line/valid"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&branch=" + branch, JSONObject.class).getJSONObject("data");
+        return restTemplate.getForObject(uniformServicePath+"/statistics/committer/line/valid"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&branch=" + branch, JSONObject.class).getJSONObject("data");
     }
 
     public JSONObject getFocusFilesCount(String repoUuid, String beginDate, String endDate){
-        return restTemplate.getForObject("http://10.141.221.85:8000/statistics/focus/file/num"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate, JSONObject.class).getJSONObject("data");
+        return restTemplate.getForObject(uniformServicePath+"/statistics/focus/file/num"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate, JSONObject.class).getJSONObject("data");
     }
 
     public JSONObject getChangedCodeAge(String repoUuid, String beginDate, String endDate, String developer){
-        return restTemplate.getForObject("http://10.141.221.85:8000/statistics/change/info"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&developer=" + developer, JSONObject.class).getJSONObject("data");
+        return restTemplate.getForObject(uniformServicePath+"/statistics/change/info"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&developer=" + developer, JSONObject.class).getJSONObject("data");
     }
 
     public JSONObject getDeletedCodeAge(String repoUuid, String beginDate, String endDate, String developer){
-        return restTemplate.getForObject("http://10.141.221.85:8000/statistics/delete/info"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&developer=" + developer, JSONObject.class).getJSONObject("data");
+        return restTemplate.getForObject(uniformServicePath+"/statistics/delete/info"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&developer=" + developer, JSONObject.class).getJSONObject("data");
     }
 
 
     //-------------------------------------------clone service---------------------------------------
     public JSONObject getCloneMeasure(String repo_id, String developer, String start, String end){
-        return restTemplate.getForObject("http://10.141.221.85:8000/cloneMeasure/getMeasureClone"  + "?repo_id=" + repo_id + "&developer=" + developer + "&start=" + start + "&end=" + end, JSONObject.class).getJSONObject("data");
+        return restTemplate.getForObject(uniformServicePath+"/cloneMeasure/getMeasureClone"  + "?repo_id=" + repo_id + "&developer=" + developer + "&start=" + start + "&end=" + end, JSONObject.class).getJSONObject("data");
     }
 
 
