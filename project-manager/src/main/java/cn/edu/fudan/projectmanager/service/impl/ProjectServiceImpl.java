@@ -8,6 +8,7 @@ import cn.edu.fudan.projectmanager.domain.NeedDownload;
 import cn.edu.fudan.projectmanager.domain.Project;
 import cn.edu.fudan.projectmanager.domain.ScanMessageWithTime;
 import cn.edu.fudan.projectmanager.service.ProjectService;
+import cn.edu.fudan.projectmanager.util.DateTimeUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -299,11 +300,23 @@ public class ProjectServiceImpl implements ProjectService {
             List<Project> projects = projectDao.getAllProjectByKeyWord(keyWord,module,type).stream()
                     .filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
             projects.stream().forEach(project -> project.setAccount_name(restInterfaceManager.getAccountName(project.getAccount_id())));
-            return projects;
+            //遍历projects，将till_commit_time + 8小时，更改为北京时间
+            return resetTillCommitTime(projects);
         }else {
-            return projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim(), module, type).stream()
+            List<Project> projects = projectDao.getProjectByKeyWordAndAccountId(account_id, keyWord.trim(), module, type).stream()
                     .filter(project -> project.getRecycled()==isRecycled).collect(Collectors.toList());
+            //遍历projects，将till_commit_time + 8小时，更改为北京时间
+            return resetTillCommitTime(projects);
         }
+    }
+
+    private Object resetTillCommitTime(List<Project> projects) {
+        for (Project project : projects) {
+            Date oldTime = project.getTill_commit_time();
+            Date newTime = DateTimeUtil.addHourOfDate(oldTime, 8);
+            project.setTill_commit_time(newTime);
+        }
+        return projects;
     }
 
     @Override
