@@ -269,8 +269,20 @@ public class MeasureServiceImpl implements MeasureService {
 
             String developerName = revCommit.getAuthorIdent().getName();
             String developerEmail = revCommit.getAuthorIdent().getEmailAddress();
+            String commitMessage = revCommit.getShortMessage();
+            if (revCommit.getParentCount()!=0){
+                String firstParentCommitId = revCommit.getParent(0).getId().getName();
+                repoMeasure.setFirst_parent_commit_id(firstParentCommitId);
+            }
+            if (revCommit.getParentCount()==2){
+                String secondParentCommitId = revCommit.getParent(1).getId().getName();
+                repoMeasure.setSecond_parent_commit_id(secondParentCommitId);
+            }
             repoMeasure.setDeveloper_name(developerName);
             repoMeasure.setDeveloper_email(developerEmail);
+            repoMeasure.setCommit_message(commitMessage);
+
+
 
             //获取该commit是否是merge
             repoMeasure.setIs_merge(jGitHelper.isMerge(revCommit));

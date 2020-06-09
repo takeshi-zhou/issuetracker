@@ -477,6 +477,11 @@ public class JGitHelper {
         }
     }
 
+    //判断该次commit的提交信息message
+    public String getCommitMessage(RevCommit revCommit){
+        return revCommit.getShortMessage();
+    }
+
     //获取本次commit工作量行数数据（包括新增行数、删除行数、新增注释行、删除注释行、新增空白行、删除空白行）
     public static Map<String, Integer> getLinesData(List<DiffEntry> diffEntryList) throws IOException{
         Map<String,Integer> map = new HashMap<>();
@@ -643,8 +648,8 @@ public class JGitHelper {
 //            jGitHelper.checkout(s);
 //        }
 //        String versionTag="v2.6.19";//定位到某一次Commit，既可以使用Tag，也可以使用其hash
-        String versionTag="8868523b3e4bc97188a018e7e2e54251631c948e";
-        String path="E:\\Project\\FDSELab\\平台相关文档\\开源项目列表\\测试项目\\maven-surefire";
+        String versionTag="fd179bac2fc597f432604d3ba29ab33c1061113e";
+        String path="D:\\Project\\FDSELab\\IssueTracker-Master";
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
         builder.addCeilingDirectory(new File(path));
@@ -662,7 +667,12 @@ public class JGitHelper {
             System.out.println("This version is: "+versionTag+", It hash: "+commitName);//如果通过Tag定位，可以获得其SHA-1 Hash Value
             int verCommitTime=verCommit.getCommitTime();
             printTime(verCommitTime);//打印出本次Commit的时间
+            System.out.println("The first parent id is: " + verCommit.getParent(0).getId().getName());
+            System.out.println("The second parent id is: " + verCommit.getParent(1).getId().getName());
 
+
+            System.out.println("The commit id is: " + verCommit.getId().getName());
+            System.out.println("The message is: " + verCommit.getShortMessage());//获取commit的提交信息message
             System.out.println("The author is: "+verCommit.getAuthorIdent().getName());//获得本次Commit Author的姓名
             System.out.println("The author's email is: "+verCommit.getAuthorIdent().getEmailAddress());//获得本次Commit Author的邮箱
 
