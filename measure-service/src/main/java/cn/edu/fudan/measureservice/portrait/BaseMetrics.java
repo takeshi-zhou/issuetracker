@@ -1,6 +1,7 @@
 package cn.edu.fudan.measureservice.portrait;
 
-import java.util.Date;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * description: 指标基类
@@ -8,10 +9,11 @@ import java.util.Date;
  * @author fancying
  * create: 2020-05-18 21:20
  **/
+@Getter
+@Setter
 public abstract class BaseMetrics {
 
-    private String repoUuid;
-    private String startDate;
-    private String endDate;
-
+    int addLine;
+    int deleteLine;
+    int totalLine;
 }

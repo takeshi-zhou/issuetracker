@@ -44,12 +44,30 @@ public class JavaNcss {
     }
 
     /**
+     * 得到某个地址下面所有文件的圈复杂度
+     *
+     * @param filePathList  文件的绝对地址
+     * @param preFix 代码库地址前缀  getRepoPath 得到的目录地址
+     * @return key 文件的相对地址 value 文件的圈复杂度
+     */
+    public static Map<String, Integer> getFileCcn(List<String> filePathList, String preFix) {
+        Map<String, Integer> result = new LinkedHashMap<>(128);
+        for (String path : filePathList) {
+            // 构造相对地址
+            String relativePath = path.replace(preFix, "");
+            int ccn = getFileCcn1(path);
+            result.put(relativePath, ccn);
+        }
+        return result;
+    }
+
+    /**
      * 得到某个文件的圈复杂度
      *
      * @param path  文件地址
      * @return 文件的圈复杂度
      */
-    public static int getFileCcn1(String path) {
+    private static int getFileCcn1(String path) {
 
         File tempFile = new File(path);
         Javancss javancss = new Javancss(tempFile);

@@ -2,12 +2,17 @@ package cn.edu.fudan.measureservice.domain;
 
 
 
+import lombok.Builder;
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
  * @author WZY
  * @version 1.0
  **/
+@Data
+@Builder
 public class ResponseBean implements Serializable {
 
     private int code;
@@ -25,27 +30,4 @@ public class ResponseBean implements Serializable {
         this.data = data;
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public java.lang.Object getData() {
-        return data;
-    }
-
-    public void setData(java.lang.Object data) {
-        this.data = data;
-    }
 }
