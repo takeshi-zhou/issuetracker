@@ -3,6 +3,8 @@ package cn.edu.fudan.measureservice.domain.core;
 import cn.edu.fudan.measureservice.portrait.BaseMetrics;
 import lombok.*;
 
+import java.util.Date;
+
 /**
  * description:
  *
@@ -13,10 +15,11 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 public class FileMeasure extends BaseMetrics {
-
+    String uuid;
     String repoId;
     String commitId;
-    int filePath;
+    String commitTime;
+    String filePath;
 
     int ccn;
     int addLine;

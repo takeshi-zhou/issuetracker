@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.fudan.measureservice.mapper.FileMeasureMapper">
+
+    <resultMap id="fileMeasure" type="FileMeasure">
+        <id property="uuid" column="uuid"/>
+        <result property="repoId" column="repo_id"/>
+        <result property="commitId" column="commit_id"/>
+        <result property="commitTime" column="commit_time"/>
+        <result property="filePath" column="file_path"/>
+        <result property="ccn" column="ccn"/>
+        <result property="addLine" column="add_lines"/>
+        <result property="delLine" column="del_lines"/>
+        <result property="totalLine" column="total_lines"/>
+    </resultMap>
+
+    <insert id="insertOneFileMeasure" >
+        insert into file_measure
+            (
+               uuid,
+               repo_id,
+               commit_id,
+               commit_time,
+               file_path,
+               ccn,
+               add_lines,
+               del_lines,
+               total_lines
+            )
+        values
+           (
+              #{uuid},
+              #{repoId},
+              #{commitId},
+              #{commitTime},
+              #{filePath},
+              #{ccn},
+              #{addLine},
+              #{delLine},
+              #{totalLine}
+           )
+    </insert>
+
+
+
+
+</mapper>

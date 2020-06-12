@@ -1,5 +1,6 @@
 package cn.edu.fudan.measureservice.mapper;
 
+import cn.edu.fudan.measureservice.domain.core.FileMeasure;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -10,5 +11,7 @@ import org.springframework.stereotype.Repository;
  **/
 @Repository
 public interface FileMeasureMapper {
+
+    void insertOneFileMeasure(FileMeasure fileMeasure);
 
 }

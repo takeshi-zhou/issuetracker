@@ -2,6 +2,7 @@ package cn.edu.fudan.measureservice.controller;
 
 import cn.edu.fudan.measureservice.domain.ResponseBean;
 import cn.edu.fudan.measureservice.service.MeasureScanService;
+import cn.edu.fudan.measureservice.service.MeasureScanServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,8 @@ public class MeasureScanController {
      * description 接收请求开始扫描 servicePath + toolName + "/scan", jsonObject, JSONObject.class 接收scan服务的请求进行扫描
      * @param jsonObject : repoId branch beginCommit
      */
-    @PostMapping(value = {"/measure/{toolName}"})
-    public ResponseBean scan(@PathVariable("toolName") String toolName, @RequestBody JSONObject jsonObject) {
+    @PostMapping(value = {"/measure/scan"})
+    public ResponseBean scan(@RequestBody JSONObject jsonObject) {
         String repoId = "repoId";
         String branch = "branch";
         String beginCommit = "beginCommit";
@@ -37,13 +38,11 @@ public class MeasureScanController {
         beginCommit = jsonObject.getString(beginCommit);
         // TODO 调用 tool scan 流程
         try {
-//            RepoResourceDTO repoResourceDTO = RepoResourceDTO.builder ().repoId (repoId).build ();
-//            issueScanService.prepareForScan (repoResourceDTO, branch, beginCommit, toolName);
             // measure service scan
             measureScanService.scan(repoId, branch, beginCommit);
             return ResponseBean.builder().code(200).build();
         }catch (Exception e) {
-            log.error("invoke tool:[{}] failed! message is {}", toolName, e.getMessage());
+            log.error("measure scan failed! message is {}", e.getMessage());
             return ResponseBean.builder().code(500).data(e.getMessage()).build();
         }
     }

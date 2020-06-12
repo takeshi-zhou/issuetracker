@@ -44,7 +44,7 @@ public class JavaNcss {
     }
 
     /**
-     * 得到某个地址下面所有文件的圈复杂度
+     * 得到指定文件（list）的圈复杂度
      *
      * @param filePathList  文件的绝对地址
      * @param preFix 代码库地址前缀  getRepoPath 得到的目录地址
@@ -67,7 +67,7 @@ public class JavaNcss {
      * @param path  文件地址
      * @return 文件的圈复杂度
      */
-    private static int getFileCcn1(String path) {
+    public static int getFileCcn1(String path) {
 
         File tempFile = new File(path);
         Javancss javancss = new Javancss(tempFile);
@@ -75,8 +75,19 @@ public class JavaNcss {
         for (FunctionMetric functionMetric : javancss.getFunctionMetrics()) {
             ccn += functionMetric.ccn;
         }
-
         return ccn;
+    }
+
+    public static int getFileTotalLines(String path){
+        File tempFile = new File(path);
+        Javancss javancss = new Javancss(tempFile);
+        return javancss.getNcss();
+    }
+
+    public static void main(String[] args) {
+        String path="D:\\Project\\FDSELab\\IssueTracker-Master\\measure-service\\src\\main\\java\\cn\\edu\\fudan\\measureservice\\analyzer\\JavaNcss.java";
+        System.out.println(getFileCcn1(path));
+        System.out.println(getFileTotalLines(path));
     }
 
 }
