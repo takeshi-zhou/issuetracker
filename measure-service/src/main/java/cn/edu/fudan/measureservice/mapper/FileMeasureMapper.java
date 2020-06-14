@@ -21,5 +21,8 @@ public interface FileMeasureMapper {
 
     List<Map<String, Object>> getDevHistoryCommitInfo(@Param("repo_id")String repo_id, @Param("since")String since, @Param("until")String until);
 
+    List<Map<String, Object>> getDevHistoryFileInfo(@Param("commit_id")String commit_id);
+
+    Integer getCcnByCommitIdAndFilePath(@Param("commit_id")String commit_id,@Param("file_path")String file_path);
 
 }

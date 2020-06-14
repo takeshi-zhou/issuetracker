@@ -21,6 +21,13 @@ public class MeasureDevHistoryController {
 
     private MeasureDevHistoryService measureDevHistoryService;
 
+    /**
+     *
+     * @param repoId
+     * @param beginDate
+     * @param endDate
+     * @return 开发历史动画 commit相关数据
+     */
     @GetMapping("/measure/development-history/commit-info")
     @CrossOrigin
     public ResponseBean getDevHistoryCommitInfo(@RequestParam("repo_id")String repoId,
@@ -29,6 +36,18 @@ public class MeasureDevHistoryController {
 
         try{
             return new ResponseBean(200,"success",measureDevHistoryService.getDevHistoryCommitInfo(repoId,beginDate,endDate));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+    @GetMapping("/measure/development-history/file-info")
+    @CrossOrigin
+    public ResponseBean getDevHistoryFileInfo(@RequestParam("commit_id")String commitId){
+
+        try{
+            return new ResponseBean(200,"success",measureDevHistoryService.getDevHistoryFileInfo(commitId));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());

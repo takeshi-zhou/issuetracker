@@ -67,4 +67,28 @@ public class MeasureDevHistoryServiceImpl implements MeasureDevHistoryService {
         }
         return result;
     }
+
+    @Override
+    public Object getDevHistoryFileInfo(String commitId) {
+        String currentCommitId = commitId;
+        String lastCommitId = repoMeasureMapper.getLastCommitId(currentCommitId);
+        List<Map<String, Object>> fileInfoList = fileMeasureMapper.getDevHistoryFileInfo(currentCommitId);
+        for (int i = 0; i < fileInfoList.size(); i++){
+            Map<String, Object> map;
+            map = fileInfoList.get(i);
+            String filePath = (String) map.get("file_path");
+            Integer lastCcn = fileMeasureMapper.getCcnByCommitIdAndFilePath(lastCommitId,filePath);
+            Integer currentCcn = (Integer) map.get("ccn");
+            map.put("currentCcn",currentCcn);
+            //此处ccn代表ccn的增量
+            if (lastCcn == null){//此情况代表上一次commit没有本文件
+                map.put("ccn",currentCcn);
+            }else {
+                Integer ccn = currentCcn - lastCcn;
+                map.put("ccn", ccn);
+            }
+            map.put("lastCcn", lastCcn);
+        }
+        return fileInfoList;
+    }
 }

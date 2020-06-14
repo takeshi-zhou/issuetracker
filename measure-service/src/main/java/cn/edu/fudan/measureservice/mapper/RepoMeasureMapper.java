@@ -64,6 +64,9 @@ public interface RepoMeasureMapper {
 
     List<Map<String, Object>> getDeveloperListByRepoId(@Param("repo_id")String repo_id);
 
+    String getLastCommitId(@Param("commit_id")String commit_id);
+
+
 
 
 

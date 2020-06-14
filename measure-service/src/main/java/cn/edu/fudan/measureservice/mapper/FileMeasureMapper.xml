@@ -55,6 +55,25 @@
             commit_time
     </select>
 
+    <select id="getCcnByCommitIdAndFilePath" parameterType="String" resultType="Integer">
+        SELECT
+            ccn
+        FROM
+            file_measure
+        WHERE
+            commit_id = #{commit_id}
+            and
+            file_path = #{file_path}
+    </select>
+
+    <select id="getDevHistoryFileInfo" parameterType="String" resultType="java.util.HashMap">
+        SELECT
+            file_path, commit_id, ccn, add_lines, del_lines
+        FROM
+            file_measure
+        WHERE
+            commit_id = #{commit_id}
+    </select>
 
 
 

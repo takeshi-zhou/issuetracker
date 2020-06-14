@@ -9,4 +9,11 @@ public interface MeasureDevHistoryService {
      * @param endDate
      */
     Object getDevHistoryCommitInfo(String repoId, String beginDate, String endDate);
+
+    /**
+     * 根据commitId，返回file 相关数据 给前端
+     * @param commitId
+     * @return
+     */
+    Object getDevHistoryFileInfo(String commitId);
 }
