@@ -269,8 +269,20 @@ public class MeasureServiceImpl implements MeasureService {
 
             String developerName = revCommit.getAuthorIdent().getName();
             String developerEmail = revCommit.getAuthorIdent().getEmailAddress();
+            String commitMessage = revCommit.getShortMessage();
+            if (revCommit.getParentCount()!=0){
+                String firstParentCommitId = revCommit.getParent(0).getId().getName();
+                repoMeasure.setFirst_parent_commit_id(firstParentCommitId);
+            }
+            if (revCommit.getParentCount()==2){
+                String secondParentCommitId = revCommit.getParent(1).getId().getName();
+                repoMeasure.setSecond_parent_commit_id(secondParentCommitId);
+            }
             repoMeasure.setDeveloper_name(developerName);
             repoMeasure.setDeveloper_email(developerEmail);
+            repoMeasure.setCommit_message(commitMessage);
+
+
 
             //获取该commit是否是merge
             repoMeasure.setIs_merge(jGitHelper.isMerge(revCommit));
@@ -1481,27 +1493,4 @@ public class MeasureServiceImpl implements MeasureService {
         return res;
     }
 
-    @Override
-    public void startMeasureScan(String repoId, String startCommitId) {
-        JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
-        String branch = projects.getJSONObject(0).getString("branch");
-        String repoPath = null;
-        try {
-            repoPath = restInterfaceManager.getRepoPath(repoId,null);
-            if (repoPath!=null){
-                JGitHelper jGitHelper = new JGitHelper(repoPath);
-                List<String> commitList = jGitHelper.getCommitListByBranchAndBeginCommit(branch, startCommitId);
-                for (int i = 0; i < commitList.size(); i++){
-                    String commitTime = jGitHelper.getCommitTime(commitList.get(i));
-                    logger.info("Start to save measure info: repoId is " + repoId + " commitId is " + commitList.get(i));
-                    saveMeasureData(repoId,commitList.get(i),commitTime,repoPath);
-                }
-            }
-        }finally {
-            if(repoPath!=null) {
-                restInterfaceManager.freeRepoPath(repoId,repoPath);
-            }
-        }
-        logger.info("Measure scan complete!!!");
-    }
 }

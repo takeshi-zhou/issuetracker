@@ -24,6 +24,9 @@ public class RepoMeasure {
     private int del_comment_lines;
     private int changed_files;
     private boolean is_merge;
+    private String commit_message;
+    private String first_parent_commit_id;
+    private String second_parent_commit_id;
 
     public String getUuid() {
         return uuid;
@@ -191,5 +194,29 @@ public class RepoMeasure {
 
     public void setIs_merge(boolean is_merge) {
         this.is_merge = is_merge;
+    }
+
+    public String getCommit_message() {
+        return commit_message;
+    }
+
+    public void setCommit_message(String commit_message) {
+        this.commit_message = commit_message;
+    }
+
+    public String getFirst_parent_commit_id() {
+        return first_parent_commit_id;
+    }
+
+    public void setFirst_parent_commit_id(String first_parent_commit_id) {
+        this.first_parent_commit_id = first_parent_commit_id;
+    }
+
+    public String getSecond_parent_commit_id() {
+        return second_parent_commit_id;
+    }
+
+    public void setSecond_parent_commit_id(String second_parent_commit_id) {
+        this.second_parent_commit_id = second_parent_commit_id;
     }
 }

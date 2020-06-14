@@ -77,6 +77,11 @@ public class DateTimeUtil {
         return LocalDateTime.parse(dateString,dateTimeFormatter);
     }
 
+    public static String UTCTimeToBeijingTime(String UTCTimeString){
+        LocalDateTime date = stringToLocalDate(UTCTimeString);
+        return date.plusHours(8).toString().replace('T',' ');
+    }
+
 
     /**
      * 10位时间戳转Date

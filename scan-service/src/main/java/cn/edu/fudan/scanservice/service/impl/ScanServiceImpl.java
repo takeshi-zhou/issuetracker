@@ -5,6 +5,7 @@ import cn.edu.fudan.scanservice.component.rest.RestInterfaceManager;
 import cn.edu.fudan.scanservice.dao.ScanDao;
 import cn.edu.fudan.scanservice.domain.Scan;
 import cn.edu.fudan.scanservice.service.ScanService;
+import cn.edu.fudan.scanservice.util.DateTimeUtil;
 import cn.edu.fudan.scanservice.util.JGitHelper;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -53,6 +54,15 @@ public class ScanServiceImpl implements ScanService {
         if (commitResponse != null) {
             List<String> scannedCommitId = scanDao.getScannedCommits(repo_id,category);
             JSONArray commitArray = commitResponse.getJSONArray("data");
+
+            //将commit的时间增加8小时（从UTC时间改为北京时间）
+            for (int i = 0; i < commitArray.size(); i++) {
+                JSONObject commit = commitArray.getJSONObject(i);
+                String oldTime = commit.getString("commit_time");
+                String newTime = DateTimeUtil.UTCTimeToBeijingTime(oldTime);
+                commit.put("commit_time", newTime);
+            }
+
             int index = 0;
             if (scannedCommitId.isEmpty()) {
                 //全都没扫过

@@ -3,6 +3,7 @@ package cn.edu.fudan.measureservice.analyzer;
 import cn.edu.fudan.measureservice.domain.Measure;
 import cn.edu.fudan.measureservice.handler.ResultHandler;
 import cn.edu.fudan.measureservice.util.FileUtil;
+import javancss.FunctionMetric;
 import javancss.Javancss;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,8 +16,8 @@ import java.io.IOException;
 @Component
 public class JavaNCSSAnalyzer implements MeasureAnalyzer {
 
-    @Value("${java.ncss.work.home}")
-    private String workHome;
+//    @Value("${java.ncss.work.home}")
+//    private String workHome;
 
     @Value("${result.file.home}")
     private String resultFileHome;
@@ -49,13 +50,15 @@ public class JavaNCSSAnalyzer implements MeasureAnalyzer {
     }
 
     private void invokeJavaNcss(String targetPath,String outPath) throws IOException {
-        String[] asArgs=new String[6];
-        asArgs[0]="-all";
-        asArgs[1]="-xml";
-        asArgs[2]="-recursive";
-        asArgs[3]=targetPath;
-        asArgs[4]="-out";
-        asArgs[5]=outPath;
+        String[] asArgs = new String[6];
+        asArgs[0] = "-all";
+        asArgs[1] = "-xml";
+        asArgs[2] = "-recursive";
+        asArgs[3] = targetPath;
+        asArgs[4] = "-out";
+        asArgs[5] = outPath;
         new Javancss(asArgs);
     }
+
+
 }

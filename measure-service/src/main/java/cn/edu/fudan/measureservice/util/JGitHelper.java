@@ -477,6 +477,11 @@ public class JGitHelper {
         }
     }
 
+    //判断该次commit的提交信息message
+    public String getCommitMessage(RevCommit revCommit){
+        return revCommit.getShortMessage();
+    }
+
     //获取本次commit工作量行数数据（包括新增行数、删除行数、新增注释行、删除注释行、新增空白行、删除空白行）
     public static Map<String, Integer> getLinesData(List<DiffEntry> diffEntryList) throws IOException{
         Map<String,Integer> map = new HashMap<>();
@@ -564,6 +569,109 @@ public class JGitHelper {
         return map;
     }
 
+    //获取本次commit每个文件的工作量行数数据（包括新增行数、删除行数、新增注释行、删除注释行、新增空白行、删除空白行）
+    public static List<Map<String,Object>> getFileLinesData(List<DiffEntry> diffEntryList) throws IOException{
+        List<Map<String,Object>> result = new ArrayList<>();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        DiffFormatter df = new DiffFormatter(out);
+
+        //如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
+        df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);
+        df.setRepository(repository);
+
+        //以下循环是针对每一个有变动的文件
+        for (DiffEntry entry : diffEntryList) {
+            Map<String,Object> map = new HashMap<>();
+            df.format(entry);
+            String diffText = out.toString("UTF-8");
+            String fullName = entry.getNewPath();
+            map.put("filePath",fullName);
+//            System.out.println("正在匹配文件：" + fullName);//变更文件的路径
+//            System.out.println(diffText);
+            int addWhiteLines = 0;
+            int delWhiteLines = 0;
+            int addCommentLines = 0;
+            int delCommentLines = 0;
+            String[] diffLines = diffText.split("\n");
+            for (String line : diffLines){
+                //若是增加的行，则执行以下筛选语句
+                if (line.startsWith("+") && ! line.startsWith("+++")){
+                    //去掉开头的"+"
+                    line = line.substring(1);
+                    //去掉头尾的空白符
+                    line = line.trim();
+                    if (line.matches("^[\\s]*$")){//匹配空白行
+                        addWhiteLines++;
+                    }else if(line.startsWith("//") || line.startsWith("/*")  || line.startsWith("*") || line.endsWith("*/")){//匹配注释行
+                        addCommentLines++;
+                    }
+                }
+                //若是删除的行，则执行以下筛选语句
+                if (line.startsWith("-") && ! line.startsWith("---")){
+                    //去掉开头的"-"
+                    line = line.substring(1);
+                    //去掉头尾的空白符
+                    line = line.trim();
+                    if (line.matches("^[\\s]*$")){//匹配空白行
+                        delWhiteLines++;
+                    }else if(line.startsWith("//") || line.startsWith("/*")  || line.startsWith("*") || line.endsWith("*/")){//匹配注释行
+                        delCommentLines++;
+                    }
+                }
+            }
+
+            // 获取文件差异位置，从而统计差异的行数，如增加行数，减少行数
+            FileHeader fileHeader = df.toFileHeader(entry);
+            List<HunkHeader> hunks = (List<HunkHeader>) fileHeader.getHunks();
+            int addSize = 0;
+            int subSize = 0;
+            for(HunkHeader hunkHeader:hunks){
+                EditList editList = hunkHeader.toEditList();
+                for(Edit edit : editList){
+                    subSize += edit.getEndA()-edit.getBeginA();
+                    addSize += edit.getEndB()-edit.getBeginB();
+                }
+            }
+            int addLines = addSize - addCommentLines - addWhiteLines;
+            int delLines = subSize - delCommentLines - delWhiteLines;
+            map.put("addLines",addLines);
+            map.put("delLines",delLines);
+            result.add(map);
+            out.reset();
+        }
+
+        return result;
+    }
+
+
+
+    /**
+     * 根据diffEntryList获取更改的文件路径List
+     * @param diffEntryList
+     * @return
+     * @throws IOException
+     */
+    public List<String> getChangedFilePathList(List<DiffEntry> diffEntryList) throws IOException {
+        if (diffEntryList == null){
+            return null;
+        } else {
+            List<String> result = new ArrayList<>();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            DiffFormatter df = new DiffFormatter(out);
+            df.setRepository(repository);
+            //以下循环是针对每一个有变动的文件
+            for (DiffEntry entry : diffEntryList) {
+                df.format(entry);
+                String diffText = out.toString("UTF-8");
+                String fullName = entry.getNewPath();
+//                System.out.println("正在匹配文件：" + fullName);//变更文件的路径
+                result.add(fullName);
+            }
+            return result;
+        }
+    }
+
     @SneakyThrows
     public List<DiffEntry> getConflictDiffEntryList (String commit) {
         RevCommit currCommit = revWalk.parseCommit(ObjectId.fromString(commit));
@@ -643,8 +751,9 @@ public class JGitHelper {
 //            jGitHelper.checkout(s);
 //        }
 //        String versionTag="v2.6.19";//定位到某一次Commit，既可以使用Tag，也可以使用其hash
-        String versionTag="8868523b3e4bc97188a018e7e2e54251631c948e";
-        String path="E:\\Project\\FDSELab\\平台相关文档\\开源项目列表\\测试项目\\maven-surefire";
+        String versionTag="fd179bac2fc597f432604d3ba29ab33c1061113e";
+        String path="D:\\Project\\FDSELab\\IssueTracker-Master";
+        JGitHelper jGitHelper = new JGitHelper(path);
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
         builder.addCeilingDirectory(new File(path));
@@ -662,7 +771,12 @@ public class JGitHelper {
             System.out.println("This version is: "+versionTag+", It hash: "+commitName);//如果通过Tag定位，可以获得其SHA-1 Hash Value
             int verCommitTime=verCommit.getCommitTime();
             printTime(verCommitTime);//打印出本次Commit的时间
+            System.out.println("The first parent id is: " + verCommit.getParent(0).getId().getName());
+            System.out.println("The second parent id is: " + verCommit.getParent(1).getId().getName());
 
+
+            System.out.println("The commit id is: " + verCommit.getId().getName());
+            System.out.println("The message is: " + verCommit.getShortMessage());//获取commit的提交信息message
             System.out.println("The author is: "+verCommit.getAuthorIdent().getName());//获得本次Commit Author的姓名
             System.out.println("The author's email is: "+verCommit.getAuthorIdent().getEmailAddress());//获得本次Commit Author的邮箱
 
@@ -673,6 +787,14 @@ public class JGitHelper {
             DiffFormatter df = new DiffFormatter(out);
             df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);//如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
             df.setRepository(repository);
+            if (diffFix != null){
+                List<String> filePathList = jGitHelper.getChangedFilePathList(diffFix);
+                for (String filePath : filePathList){
+                    System.out.println(filePath);
+                }
+            }
+
+
 
             Map<String, Integer> map = getLinesData(diffFix);
             System.out.println("该commit修改的java文件且非test文件数量为：" + getChangedFilesCount(diffFix));

@@ -22,6 +22,9 @@
         <result property="del_comment_lines" column="del_comment_lines"/>
         <result property="changed_files" column="changed_files"/>
         <result property="is_merge" column="is_merge"/>
+        <result property="commit_message" column="commit_message"/>
+        <result property="first_parent_commit_id" column="first_parent_commit_id"/>
+        <result property="second_parent_commit_id" column="second_parent_commit_id"/>
     </resultMap>
 
     <resultMap id="repoMeasureWithDate" type="RepoMeasure">
@@ -46,6 +49,9 @@
         <result property="del_comment_lines" column="del_comment_lines"/>
         <result property="changed_files" column="changed_files"/>
         <result property="is_merge" column="is_merge"/>
+        <result property="commit_message" column="commit_message"/>
+        <result property="first_parent_commit_id" column="first_parent_commit_id"/>
+        <result property="second_parent_commit_id" column="second_parent_commit_id"/>
     </resultMap>
 
 <!--    getCommitBaseByCommit-->
@@ -103,7 +109,10 @@
                add_comment_lines,
                del_comment_lines,
                changed_files,
-               is_merge
+               is_merge,
+               commit_message,
+               first_parent_commit_id,
+               second_parent_commit_id
             )
         values
            (
@@ -127,7 +136,11 @@
               #{add_comment_lines},
               #{del_comment_lines},
               #{changed_files},
-              #{is_merge}
+              #{is_merge},
+              #{commit_message},
+              #{first_parent_commit_id},
+              #{second_parent_commit_id}
+
            )
     </insert>
 
