@@ -6,11 +6,11 @@
         <id property="uuid" column="uuid"/>
         <result property="repoId" column="repo_id"/>
         <result property="commitId" column="commit_id"/>
-        <result property="increasedCloneLines" column="new_clone_lines"/>
-        <result property="selfIncreasedCloneLines" column="self_clone_lines"/>
-        <result property="increasedCloneLinesRate" column="clone_lines_rate"/>
+        <result property="newCloneLines" column="new_clone_lines"/>
+        <result property="selfCloneLines" column="self_clone_lines"/>
+        <result property="addLines" column="add_lines"/>
         <result property="cloneLines" column="clone_lines"/>
-        <result property="addCloneLines" column="add_clone_lines"/>
+        <result property="preCloneLines" column="pre_clone_lines"/>
     </resultMap>
 
     <select id="getCloneMeasure" resultMap="cloneMeasure">
@@ -29,26 +29,30 @@
         commit_id,
         new_clone_lines,
         self_clone_lines,
-        clone_lines_rate,
+        add_lines,
         clone_lines,
-        add_clone_lines
+        pre_clone_lines
         )
         VALUES
         (
         #{uuid},
         #{repoId},
         #{commitId},
-        #{increasedCloneLines},
-        #{selfIncreasedCloneLines},
-        #{increasedCloneLinesRate},
+        #{newCloneLines},
+        #{selfCloneLines},
+        #{addLines},
         #{cloneLines},
-        #{addCloneLines}
+        #{preCloneLines}
         )
     </insert>
 
     <delete id="deleteCloneMeasureByRepoId" parameterType="String">
         delete from clone_measure where repo_id=#{repo_id}
     </delete>
+
+    <select id="getMeasureCountByCommitId" parameterType="String" resultType="Integer">
+        select count(uuid) from clone_measure where repo_id = #{repo_id} and commit_id = #{commit_id}
+    </select>
 
 </mapper>
 

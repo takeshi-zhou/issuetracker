@@ -19,7 +19,7 @@ public class CloneThreadFactory implements ThreadFactory {
     public CloneThreadFactory(String name){
         counter = 1;
         this.name = name;
-        stats = new ArrayList<String>();
+        stats = new ArrayList<>();
     }
 
     @Override
@@ -32,7 +32,7 @@ public class CloneThreadFactory implements ThreadFactory {
 
     public String getStats() {
         StringBuffer buffer = new StringBuffer();
-        stats.forEach(str -> {buffer.append(str);});
+        stats.forEach(str -> buffer.append(str));
 
         return buffer.toString();
     }

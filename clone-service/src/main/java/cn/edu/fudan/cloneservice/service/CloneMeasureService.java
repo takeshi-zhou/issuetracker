@@ -17,14 +17,6 @@ import java.util.Set;
  */
 public interface CloneMeasureService {
 
-
-    DeveloperCloneMeasureData getDeveloperMeasureCloneDataByRepoIdCommitId(String repo_id, String commit_id, String developer_name);
-
-
-    Set<PersonIdent> getDeveloperListByRepoId(String repoId, String commitId);
-
-    RepoCloneMeasureActiveData getCloneActive(String repoId, String since, String until);
-
     CloneMeasure insertCloneMeasure(String repoId, String commitId);
 
     CloneMessage getCloneMeasure(String repoId, String developer, String start, String end);
@@ -32,4 +24,5 @@ public interface CloneMeasureService {
     void deleteCloneMeasureByRepoId(String repoId);
 
     void scanCloneMeasure(String repoId, String startCommitId);
+
 }
