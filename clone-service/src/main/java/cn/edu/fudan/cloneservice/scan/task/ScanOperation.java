@@ -7,6 +7,7 @@ import cn.edu.fudan.cloneservice.scan.domain.CloneScanResult;
 /**
  * @author zyh
  * @date 2020/5/25
+ * 模板设计模式
  */
 public interface ScanOperation {
 

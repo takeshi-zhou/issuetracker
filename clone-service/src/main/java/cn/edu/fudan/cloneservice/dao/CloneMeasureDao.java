@@ -18,10 +18,6 @@ public class CloneMeasureDao {
     @Autowired
     CloneMeasureMapper cloneMeasureMapper;
 
-    public CloneMeasure getCloneMeasure(String repoId, String commitId){
-        return cloneMeasureMapper.getCloneMeasure(repoId, commitId);
-    }
-
     public List<CloneMeasure> getCloneMeasures(String repoId){
         return cloneMeasureMapper.getCloneMeasures(repoId);
     }
@@ -32,5 +28,9 @@ public class CloneMeasureDao {
 
     public void deleteCloneMeasureByRepoId(String repoId){
         cloneMeasureMapper.deleteCloneMeasureByRepoId(repoId);
+    }
+
+    public int getCloneMeasureCount(String repoId, String commitId){
+        return cloneMeasureMapper.getMeasureCountByCommitId(repoId, commitId);
     }
 }

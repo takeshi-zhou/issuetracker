@@ -14,10 +14,11 @@
         <result property="methodName" column="method_name"/>
         <result property="code" column="code"/>
         <result property="category" column="category"/>
+        <result property="num" column="clone_num"/>
     </resultMap>
 
     <insert id="insertCloneLocationList" parameterType="List">
-        insert into clone_location1
+        insert into clone_location
         (
         uuid,
         repo_id,
@@ -29,7 +30,8 @@
         class_name,
         method_name,
         code,
-        category
+        category,
+        clone_num
         )
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
@@ -44,17 +46,18 @@
             #{item.className},
             #{item.methodName},
             #{item.code},
-            #{item.category}
+            #{item.category},
+            #{item.num}
             )
         </foreach>
     </insert>
 
     <select id="getCloneLocations" resultMap="cloneLocation">
-        select * from clone_location1 where repo_id=#{repo_id} and commit_id=#{commit_id}
+        select * from clone_location where repo_id=#{repo_id} and commit_id=#{commit_id}
     </select>
 
     <delete id="deleteCloneLocations" parameterType="String">
-        delete from clone_location1 where repo_id=#{repo_id}
+        delete from clone_location where repo_id=#{repo_id}
     </delete>
 
 </mapper>

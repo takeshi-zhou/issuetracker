@@ -17,7 +17,7 @@ public class CloneMsgQueueManager implements CloneMsgQueue {
     /**
      * 任务总队列，即需要处理的commitId队列
      */
-    public final BlockingQueue<String> cloneMsgQueue;
+    private final BlockingQueue<String> cloneMsgQueue;
 
     private CloneMsgQueueManager(){
         cloneMsgQueue = new LinkedTransferQueue<>();

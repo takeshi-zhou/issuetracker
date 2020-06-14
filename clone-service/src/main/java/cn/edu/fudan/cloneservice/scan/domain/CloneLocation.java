@@ -12,6 +12,7 @@ public class CloneLocation {
      * 记录clone组的组号
      */
     private String category;
+
     private String filePath;
     private String methodLines;
     private String cloneLines;
@@ -19,9 +20,33 @@ public class CloneLocation {
      * 记录是方法级还是片段级
      */
     private String type;
+
     private String className;
     private String methodName;
+    /**
+     * 记录去除空行和注释行的location行数
+     */
+    private int num;
+
     private String code;
+
+    @Override
+    public boolean equals(Object obj){
+        if(this == obj){
+            return true;
+        }
+
+        if(obj == null){
+            return false;
+        }
+
+        if(obj instanceof CloneLocation){
+            CloneLocation cloneLocation = (CloneLocation) obj;
+            return cloneLocation.uuid.equals(this.uuid);
+        }
+
+        return false;
+    }
 
     public String getUuid() {
         return uuid;
@@ -101,6 +126,14 @@ public class CloneLocation {
 
     public void setMethodName(String methodName) {
         this.methodName = methodName;
+    }
+
+    public int getNum() {
+        return num;
+    }
+
+    public void setNum(int num) {
+        this.num = num;
     }
 
     public String getCode() {

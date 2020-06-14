@@ -1,24 +1,44 @@
 package cn.edu.fudan.cloneservice.thread;
 
+import cn.edu.fudan.cloneservice.component.RestInterfaceManager;
+import cn.edu.fudan.cloneservice.scan.task.ScanTask;
+import cn.edu.fudan.cloneservice.service.CloneMeasureService;
+import cn.edu.fudan.cloneservice.util.JGitUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
 /**
  * @author zyh
  * @date 2020/5/5
+ * 多生产者多消费者模式
  */
 @Component
 public class MultiThreadingExtractor {
 
     private static final Logger logger = LoggerFactory.getLogger(MultiThreadingExtractor.class);
 
+    private RestInterfaceManager restInterfaceManager;
+
+    @Autowired
+    public void setRestInterfaceManager(RestInterfaceManager restInterfaceManager) {
+        this.restInterfaceManager = restInterfaceManager;
+    }
+
+    @Autowired
+    private ScanTask scanTask;
+
+    @Autowired
+    private CloneMeasureService cloneMeasureService;
+
     /**
      * clone扫描阶段线程池
+     * 之后对线程池的选择做优化
      */
     private ThreadPoolExecutor scanThreadPool;
 
@@ -37,11 +57,7 @@ public class MultiThreadingExtractor {
      */
     private BlockingQueue<String> measureQueue;
 
-    private int corePoolSize;
-
-    public MultiThreadingExtractor(){
-
-        corePoolSize = 10;
+    public MultiThreadingExtractor(int corePoolSize){
 
         scanQueue = new LinkedTransferQueue<>();
 
@@ -52,39 +68,33 @@ public class MultiThreadingExtractor {
         CloneThreadFactory cloneMeasureThreadFactory = new CloneThreadFactory("cloneMeasure");
 
         scanThreadPool = new ThreadPoolExecutor(corePoolSize, corePoolSize, 10L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(200), cloneScanThreadFactory);
+                new LinkedBlockingQueue<>(2000), cloneScanThreadFactory);
 
         measureThreadPool = new ThreadPoolExecutor(corePoolSize, corePoolSize, 10L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(200), cloneMeasureThreadFactory);
+                new LinkedBlockingQueue<>(2000), cloneMeasureThreadFactory);
 
     }
 
-    @Async("forRequest")
-    public void extract(String repoId, List<String> commitIds){
+    public void extract(String repoId, String startCommitId){
 
         logger.info("start clone scan........");
 
         long start = System.currentTimeMillis();
 
+        extractCommitIds(repoId, startCommitId);
         //可以建立线程池来管理
-        Thread addCommits = new Thread(()->
-                extractCommitIds(commitIds)
-                ,"addCommits");
-
         Thread scan = new Thread(()->
-                scanSynchronously(repoId, measureQueue)
-                ,"addCommits");
+                scanSynchronously(repoId)
+                ,"cloneScan");
 
         Thread measure = new Thread(()->
                 measureSynchronously(repoId)
-                ,"addCommits");
+                ,"cloneMeasure");
 
-        addCommits.start();
         scan.start();
         measure.start();
 
         try {
-            addCommits.join();
             scan.join();
             measure.join();
         } catch (InterruptedException e) {
@@ -93,19 +103,32 @@ public class MultiThreadingExtractor {
 
         long end = System.currentTimeMillis();
 
-        long cost = (end - start)/1000;
+        long cost = (end - start)/(1000*60);
 
         logger.info("repo:{} -> took {} minutes to complete the clone scan and measure scan", repoId, cost);
 
     }
 
-    private void extractCommitIds(List<String> commitIds){
+    private void extractCommitIds(String repoId, String startCommitId) {
 
-        if(commitIds == null){
-            return;
+        String repoPath = null;
+        List<String> commitList = new ArrayList<>();
+        try {
+            repoPath = restInterfaceManager.getRepoPath1(repoId);
+            JGitUtil jGitHelper = new JGitUtil(repoPath);
+            commitList = jGitHelper.getCommitListByBranchAndBeginCommit(startCommitId);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (repoPath != null) {
+                restInterfaceManager.freeRepoPath(repoId, repoPath);
+            }
         }
-
-        for(String commitId : commitIds){
+        //先执行粒度为method，仅需执行一次最近的commit
+        String latestCommitId = commitList.get(commitList.size() - 1);
+        scanTask.runSynchronously(repoId,latestCommitId, "method");
+        for (String commitId : commitList) {
             scanQueue.offer(commitId);
         }
 
@@ -114,26 +137,28 @@ public class MultiThreadingExtractor {
     /**
      * commit列表的消费者，同时也是measure列表的生产者
      */
-    private void scanSynchronously(String repoId, BlockingQueue<String> measureQueue){
+    private void scanSynchronously(String repoId){
 
+        logger.info("start clone scan");
         while (true){
 
             try {
                 //一分钟内取不出就退出
-                String commitId = scanQueue.poll(60, TimeUnit.MINUTES);
+                String commitId = scanQueue.poll(1, TimeUnit.MINUTES);
                 if(commitId == null){
                     break;
                 }
-                //scanThreadPool.submit(new ScanSynchronouslyTask(commitId, repoId, measureQueue));
+                scanThreadPool.submit(()-> {
+                    logger.info("{}-> start scan", Thread.currentThread().getName());
+                    scanTask.runSynchronously(repoId,commitId, "snippet");
+                    measureQueue.offer(commitId);
+                });
 
-                //measureQueue.offer(commitId);
             } catch (InterruptedException e) {
                 logger.info("clone Multithreaded scan filed");
                 e.printStackTrace();
                 break;
             }
-
-
         }
     }
 
@@ -141,25 +166,28 @@ public class MultiThreadingExtractor {
      * measure列表的消费者
      */
     private void measureSynchronously(String repoId){
+
+        logger.info("start clone measure");
         while (true){
 
             try {
                 //10分钟内取不出就退出
-                String commitId = measureQueue.poll(600, TimeUnit.MINUTES);
+                String commitId = measureQueue.poll(10, TimeUnit.MINUTES);
                 if(commitId == null){
                     break;
                 }
-                measureThreadPool.submit(new MeasureTask(commitId, repoId));
+                measureThreadPool.submit(()->{
+                    logger.info("{}-> start measure", Thread.currentThread().getName());
+                    cloneMeasureService.insertCloneMeasure(repoId, commitId);
+                });
 
             } catch (InterruptedException e) {
-                logger.info("");
+                logger.info("clone Multithreaded measure filed");
                 e.printStackTrace();
                 break;
             }
 
-
         }
     }
-
 
 }

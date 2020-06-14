@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.UUID;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zyh
@@ -61,11 +62,12 @@ public class ScanTask {
         //没有共享资源，不需要锁
         //判断当前repoId, commitId, type是否扫描过
         if (scanOperation.isScanned(repoId,commitId,type)) {
-            logger.info("this commit has been scanned");
+            logger.info("{} -> this commit has been scanned", Thread.currentThread().getName());
             send(repoId, commitId, type,"success", "scan success!");
             return;
         }
-        logger.info("this commit ---> {} has not been scanned,start the scan initialization......",commitId);
+
+        logger.info("{} -> this commit ---> {} has not been scanned,start the scan initialization......", Thread.currentThread().getName(), commitId);
 
 //        String identifier= UUID.randomUUID().toString();
 //        Boolean lockResult = false;
@@ -84,7 +86,7 @@ public class ScanTask {
             cloneScanInitialInfo = scanOperation.initialScan(repoId, commitId, type);
             if(!cloneScanInitialInfo.isSuccess()){
                 send(repoId, commitId, type,"failed", "initial failed");
-                logger.error("Initial Failed!");
+                logger.error("{} -> Initial Failed!", Thread.currentThread().getName());
                 return;
             }
             cloneScanResult = scanOperation.doScan(cloneScanInitialInfo);
@@ -105,15 +107,15 @@ public class ScanTask {
             return;
         }
 
-        logger.info("scan complete ->" + cloneScanResult.getDescription());
-        logger.info("start to update scan status");
+        logger.info("{} -> scan complete ->" + cloneScanResult.getDescription(), Thread.currentThread().getName());
+        logger.info("{} -> start to update scan status", Thread.currentThread().getName());
         cloneScanInitialInfo.getCloneScan().setStatus("done");
         if (!scanOperation.updateScan(cloneScanInitialInfo)) {
             send(repoId, commitId, type,"failed", "scan update failed");
-            logger.error("Scan Update Failed!");
+            logger.error("{} -> Scan Update Failed!", Thread.currentThread().getName());
             return;
         }
-        logger.info("scan update complete");
+        logger.info("{} -> scan update complete", Thread.currentThread().getName());
         send(repoId, commitId, type,"success", "all complete");
 
     }

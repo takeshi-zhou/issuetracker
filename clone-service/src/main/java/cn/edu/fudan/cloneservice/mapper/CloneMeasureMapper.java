@@ -40,4 +40,13 @@ public interface CloneMeasureMapper {
      * @param repoId repo id
      */
     void deleteCloneMeasureByRepoId(@Param("repo_id") String repoId);
+
+    /**
+     * 获取对应的clone measure次数，用于检测对应repoId， commitId是否扫描过了
+     * @param repoId repo id
+     * @param commitId commit id
+     * @return 1 or 0
+     */
+    Integer getMeasureCountByCommitId(@Param("repo_id") String repoId,
+                                      @Param("commit_id")String commitId);
 }

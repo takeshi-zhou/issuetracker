@@ -1,5 +1,9 @@
 package cn.edu.fudan.cloneservice.domain;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author zyh
  * @date 2020/4/28
@@ -15,6 +19,10 @@ public class CloneMeasure {
     private int addLines;
     private int cloneLines;
     private int preCloneLines;
+
+    private Map<String, String> addCloneLocationMap;
+
+    private Map<String, String> selfCloneLocationMap;
 
     public String getUuid() {
         return uuid;
@@ -78,5 +86,21 @@ public class CloneMeasure {
 
     public void setPreCloneLines(int preCloneLines) {
         this.preCloneLines = preCloneLines;
+    }
+
+    public Map<String, String> getAddCloneLocationMap() {
+        return addCloneLocationMap;
+    }
+
+    public void setAddCloneLocationMap(Map<String, String> addCloneLocationMap) {
+        this.addCloneLocationMap = addCloneLocationMap;
+    }
+
+    public Map<String, String> getSelfCloneLocationMap() {
+        return selfCloneLocationMap;
+    }
+
+    public void setSelfCloneLocationMap(Map<String, String> selfCloneLocationMap) {
+        this.selfCloneLocationMap = selfCloneLocationMap;
     }
 }

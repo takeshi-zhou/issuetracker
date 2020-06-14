@@ -1,20 +1,29 @@
 package cn.edu.fudan.cloneservice.util;
-import org.eclipse.jdt.core.dom.*;
+
 
 import java.io.*;
-import java.util.Set;
 
 public class ASTUtil {
 
-    public static String getCode(int startLine, int endLine, String filePath) {
+    public CodeLocation getCode(int startLine, int endLine, int cloneStartLine, int cloneEndLine, String filePath) {
         StringBuilder code = new StringBuilder();
-        String s = "";
+        String s;
         int line = 1;
+        int num = 0;
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
             while ((s = bufferedReader.readLine()) != null) {
                 if (line >= startLine && line <= endLine) {
+
                     code.append(s);
                     code.append("/n");
+                    if(line >= cloneStartLine && line <= cloneEndLine){
+                        //判断是否是空行或者注释
+                        if(!s.isEmpty() && !s.trim().startsWith("//")
+                                && !s.trim().startsWith("/**")
+                                && !s.trim().startsWith("*")){
+                            num++;
+                        }
+                    }
                 }
                 line++;
                 if (line > endLine){
@@ -24,25 +33,25 @@ public class ASTUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return code.toString();
+        return new CodeLocation(num, code.toString());
     }
 
-    public static int getIncreasedLineNum(String fileName, String line, int startLine){
-        String s = "";
-        int num = 1;
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName))) {
-            while ((s = bufferedReader.readLine()) != null) {
-                s = s.trim();
-                if(line.equals(s) && num > startLine){
-                    return num;
-                }
-                num++;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    public class CodeLocation{
+        private int num;
+        private String code;
+
+        private CodeLocation(int num, String code){
+            this.code = code;
+            this.num = num;
         }
 
-        return 0;
+        public int getNum() {
+            return num;
+        }
+
+        public String getCode() {
+            return code;
+        }
     }
 
 }

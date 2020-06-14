@@ -14,15 +14,15 @@
     </resultMap>
 
     <select id="getCloneMeasure" resultMap="cloneMeasure">
-    select * from clone_measure1 where repo_id=#{repo_id} and commit_id=#{commit_id} limit 1
+    select * from clone_measure where repo_id=#{repo_id} and commit_id=#{commit_id} limit 1
     </select>
 
     <select id="getCloneMeasures" resultMap="cloneMeasure">
-    select * from clone_measure1 where repo_id=#{repo_id}
+    select * from clone_measure where repo_id=#{repo_id}
     </select>
 
     <insert id="insertCloneMeasure" parameterType="cn.edu.fudan.cloneservice.domain.CloneMeasure">
-        insert into clone_measure1
+        insert into clone_measure
         (
         uuid,
         repo_id,
@@ -47,8 +47,12 @@
     </insert>
 
     <delete id="deleteCloneMeasureByRepoId" parameterType="String">
-        delete from clone_measure1 where repo_id=#{repo_id}
+        delete from clone_measure where repo_id=#{repo_id}
     </delete>
+
+    <select id="getMeasureCountByCommitId" parameterType="String" resultType="Integer">
+        select count(uuid) from clone_measure where repo_id = #{repo_id} and commit_id = #{commit_id}
+    </select>
 
 </mapper>
 

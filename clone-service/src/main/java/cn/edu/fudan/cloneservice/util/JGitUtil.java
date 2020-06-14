@@ -104,10 +104,9 @@ public class JGitUtil {
         return new ArrayList<>(sortByValue(commitMap).keySet());
     }
 
+    public List<String> getCommitList(String repoPath, String startDate, String endDate, String developer) {
 
-    static public List<String> getCommitList(String repoPath, String startDate, String endDate, String developer) {
-
-        List<String> commitIds = new ArrayList<>();
+        Map<String, Long> commitMap = new HashMap<>(512);
 
         FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
         Repository repository;
@@ -127,11 +126,11 @@ public class JGitUtil {
                     long commitTime = commit.getCommitTime() * 1000L;
                     if(developer != null){
                         if (commitTime <= end && commitTime >= start && commit.getAuthorIdent().getName().equals(developer)) {
-                            commitIds.add(commit.getName());
+                            commitMap.put(commit.getName(), commit.getCommitTime() * 1000L);
                         }
                     }else {
                         if (commitTime <= end && commitTime >= start) {
-                            commitIds.add(commit.getName());
+                            commitMap.put(commit.getName(), commit.getCommitTime() * 1000L);
                         }
                     }
 
@@ -148,7 +147,7 @@ public class JGitUtil {
             e.printStackTrace();
         }
         // find the current commit id
-        return commitIds;
+        return new ArrayList<>(sortByValue(commitMap).keySet());
     }
 
     public static boolean isSameDeveloperClone(String repoPath, String commitId, String filePath, String nums){

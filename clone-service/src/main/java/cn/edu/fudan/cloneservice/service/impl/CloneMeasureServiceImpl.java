@@ -6,9 +6,11 @@ import cn.edu.fudan.cloneservice.domain.CloneInfo;
 import cn.edu.fudan.cloneservice.domain.CloneMeasure;
 import cn.edu.fudan.cloneservice.domain.CloneMessage;
 import cn.edu.fudan.cloneservice.domain.CommitChange;
+import cn.edu.fudan.cloneservice.lock.CloneMeasureLock;
 import cn.edu.fudan.cloneservice.scan.dao.CloneLocationDao;
 import cn.edu.fudan.cloneservice.scan.domain.CloneLocation;
 import cn.edu.fudan.cloneservice.service.CloneMeasureService;
+import cn.edu.fudan.cloneservice.thread.ForkJoinRecursiveTask;
 import cn.edu.fudan.cloneservice.util.JGitUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,12 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
     @Autowired
     private CloneLocationDao cloneLocationDao;
 
+    @Autowired
+    private CloneMeasureLock cloneMeasureLock;
+
+    @Autowired
+    private ForkJoinRecursiveTask forkJoinRecursiveTask;
+
 
     @Override
     public CloneMessage getCloneMeasure(String repoId, String developer, String start, String end){
@@ -51,34 +59,41 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
         int allDeleteCloneLines = 0;
         try {
             repoPath = restInterfaceManager.getRepoPath1(repoId);
-            commitIds1 = JGitUtil.getCommitList(repoPath, start, end, developer);
-            commitIds2 = JGitUtil.getCommitList(repoPath, start, end, null);
+            JGitUtil jGitHelper = new JGitUtil(repoPath);
+            commitIds1 = jGitHelper.getCommitList(repoPath, start, end, developer);
+            commitIds2 = jGitHelper.getCommitList(repoPath, start, end, null);
         }finally {
             if(repoPath!=null){
                 restInterfaceManager.freeRepoPath(repoId,repoPath);
             }
         }
         List<CloneMeasure> cloneMeasures = cloneMeasureDao.getCloneMeasures(repoId);
-        for(CloneMeasure cloneMeasure1 : cloneMeasures){
-            for(String commitId : commitIds1){
+        int preCloneLines = 0;
+        for(String commitId : commitIds1){
+            for(CloneMeasure cloneMeasure1 : cloneMeasures){
                 if(cloneMeasure1.getCommitId().equals(commitId)){
                     newCloneLines += cloneMeasure1.getNewCloneLines();
                     selfCloneLines += cloneMeasure1.getSelfCloneLines();
                     //消除clone行数,只计算消除
-                    if(cloneMeasure1.getCloneLines() > 0 && cloneMeasure1.getPreCloneLines() > cloneMeasure1.getCloneLines()){
-                        deleteCloneLines += cloneMeasure1.getPreCloneLines() - cloneMeasure1.getCloneLines();
+                    if(preCloneLines > cloneMeasure1.getCloneLines()){
+                        deleteCloneLines += preCloneLines - cloneMeasure1.getCloneLines();
                     }
+                    preCloneLines = cloneMeasure1.getPreCloneLines();
+                    break;
                 }
             }
         }
+        //重新置为零
+        preCloneLines = 0;
         //计算这个时间段内所有的开发者消除的clone行数
-        for(CloneMeasure cloneMeasure1 : cloneMeasures){
-            for(String commitId : commitIds2){
+        for(String commitId : commitIds2){
+            for(CloneMeasure cloneMeasure1 : cloneMeasures){
                 if(cloneMeasure1.getCommitId().equals(commitId)){
                     //消除clone行数,只计算消除
-                    if(cloneMeasure1.getCloneLines() > 0 && cloneMeasure1.getPreCloneLines() > cloneMeasure1.getCloneLines()){
-                        allDeleteCloneLines += cloneMeasure1.getPreCloneLines() - cloneMeasure1.getCloneLines();
+                    if(preCloneLines > cloneMeasure1.getCloneLines()){
+                        allDeleteCloneLines += preCloneLines - cloneMeasure1.getCloneLines();
                     }
+                    preCloneLines = cloneMeasure1.getPreCloneLines();
                     break;
                 }
             }
@@ -99,23 +114,21 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
         cloneInfoDao.deleteCloneInfo(repoId);
     }
 
+    /**
+     * 获取某个版本的clone行数
+     * 计算的方式有待商榷
+     * @param repoId repo id
+     * @param commitId commit id
+     * @return 行数
+     */
     private int getCloneLines(String repoId, String commitId){
 
         int cloneLinesWithOutTest = 0;
         if(commitId != null){
             int oneLocationCloneLines;
-
-            String className;
-            String fullName;
             List<CloneLocation> cloneLocations = cloneLocationDao.getCloneLocations(repoId, commitId);
             for(CloneLocation location: cloneLocations){
-                className = location.getFilePath().toLowerCase();
-                fullName = className.substring(className.lastIndexOf("/") + 1);
-                if(className.contains("/test/") || fullName.startsWith("test") || fullName.endsWith("test.java") || fullName.endsWith("tests.java")){
-                    continue;
-                }
-                String [] ss = location.getCloneLines().split(",");
-                oneLocationCloneLines = Integer.parseInt(ss[1]) - Integer.parseInt(ss[0]) + 1;
+                oneLocationCloneLines = location.getNum();
                 cloneLinesWithOutTest += oneLocationCloneLines;
 
             }
@@ -128,26 +141,29 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
 
     @Override
     public CloneMeasure insertCloneMeasure(String repoId, String commitId){
+        //如果数据库中有对应的信息则直接返回
+        if(cloneMeasureDao.getCloneMeasureCount(repoId, commitId) > 0){
+            return null;
+        }
         CloneMeasure cloneMeasure = new CloneMeasure();
-        int increasedCloneLines = 0;
-        int increasedSameCloneLines = 0;
         int increasedLines;
-        int preCloneLines;
         int currentCloneLines;
         String repoPath=null;
         Map<String, String> map;
+        //对repoPath加锁
+        cloneMeasureLock.lock();
         try {
             repoPath=restInterfaceManager.getRepoPath(repoId,commitId);
             CommitChange commitChange = JGitUtil.getNewlyIncreasedLines(repoPath, commitId);
-            String preCommitId = JGitUtil.getPreCommitId(repoPath, commitId);
-            preCloneLines = getCloneLines(repoId, preCommitId);
+            //由于多线程这个字段弃用
+            //preCloneLines = getCloneLines(repoId, preCommitId);
             currentCloneLines = getCloneLines(repoId, commitId);
             map = commitChange.getAddMap();
             increasedLines = commitChange.getAddLines();
-            //此处修改为最新的clone location
             List<CloneLocation> cloneLocations = cloneLocationDao.getCloneLocations(repoId, commitId);
+            logger.info("location list size : {}", cloneLocations.size());
             Map<String, List<CloneLocation>> cloneLocationMap = new HashMap<>(512);
-            logger.info("cloneLocation init start!");
+            logger.info("clone measure {} -> cloneLocation init start!", Thread.currentThread().getName());
             //初始化
             for(CloneLocation cloneLocation : cloneLocations){
                 String category = cloneLocation.getCategory();
@@ -159,75 +175,28 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
                     cloneLocationMap.put(category, locations);
                 }
             }
-            logger.info("cloneLocation init success!");
             //key记录repoPath, value记录新增且是clone的行号
-            Map<String, String> addCloneLocationMap = new HashMap<>(512);
+            Map<String, String> addCloneLocationMap;
             //key记录repoPath, value记录新增且是self clone的行号
-            Map<String, String> selfCloneLocationMap = new HashMap<>(512);
-            //遍历此版本所有的clone location
-            for(CloneLocation cloneLocation : cloneLocations){
-                String cloneLines = cloneLocation.getCloneLines();
-                int startLine = Integer.parseInt(cloneLines.split(",")[0]);
-                int endLine = Integer.parseInt(cloneLines.split(",")[1]);
-                for(String filePath: map.keySet()){
-                    if(filePath.equals(cloneLocation.getFilePath())){
+            Map<String, String> selfCloneLocationMap;
 
-                        String[] lines = map.get(filePath).split(",");
-
-                        for(int i = 0; i < lines.length; i++){
-                            if(Integer.parseInt(lines[i]) >= startLine && Integer.parseInt(lines[i]) <= endLine){
-                                logger.info("find increasedCloneLines:"+Integer.parseInt(lines[i])+"-"+filePath);
-                                List<CloneLocation> list = cloneLocationMap.get(cloneLocation.getCategory());
-                                String category = cloneLocation.getCategory();
-                                list.remove(cloneLocation);
-                                for(CloneLocation cloneLocation1 : list){
-                                    String filePath1 = cloneLocation1.getFilePath();
-                                    String cloneLines1 = cloneLocation1.getCloneLines();
-                                    if(JGitUtil.isSameDeveloperClone(repoPath, commitId, filePath1, cloneLines1)){
-                                        increasedSameCloneLines++;
-                                        if(selfCloneLocationMap.containsKey(category + ":" +filePath)){
-                                            String s1 = selfCloneLocationMap.get(category + ":" +filePath) + "," + lines[i];
-                                            selfCloneLocationMap.put(category + ":" +filePath, s1);
-                                        }else {
-                                            selfCloneLocationMap.put(category + ":" +filePath, lines[i]);
-                                        }
-                                        break;
-                                    }
-                                }
-                                increasedCloneLines++;
-                                if(addCloneLocationMap.containsKey(category + ":" +filePath)){
-                                    String s1 = addCloneLocationMap.get(category + ":" +filePath) + "," + lines[i];
-                                    addCloneLocationMap.put(category + ":" +filePath, s1);
-                                }else {
-                                    addCloneLocationMap.put(category + ":" +filePath, lines[i]);
-                                }
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-
+            cloneMeasure = forkJoinRecursiveTask.extract(repoId, commitId, repoPath, cloneLocations, cloneLocationMap, map);
+            addCloneLocationMap = cloneMeasure.getAddCloneLocationMap();
+            selfCloneLocationMap = cloneMeasure.getSelfCloneLocationMap();
             //插入cloneInfo
             List<CloneInfo> cloneInfoList = getCloneInfoList(repoId, commitId, addCloneLocationMap, selfCloneLocationMap);
 
-            String uuid = UUID.randomUUID().toString();
-            cloneMeasure.setUuid(uuid);
-            cloneMeasure.setCommitId(commitId);
-            cloneMeasure.setRepoId(repoId);
-            cloneMeasure.setNewCloneLines(increasedCloneLines);
             cloneMeasure.setAddLines(increasedLines);
-            cloneMeasure.setSelfCloneLines(increasedSameCloneLines);
-            cloneMeasure.setPreCloneLines(preCloneLines);
             cloneMeasure.setCloneLines(currentCloneLines);
             cloneMeasureDao.insertCloneMeasure(cloneMeasure);
-            logger.info("cloneInfoList size : {}", cloneInfoList.size());
+            logger.info("{} -> cloneInfoList size : {}", Thread.currentThread().getName(), cloneInfoList.size());
             if(cloneInfoList.size() > 0){
                 cloneInfoDao.insertCloneInfo(cloneInfoList);
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            cloneMeasureLock.unlock();
             if(repoPath!=null){
                 restInterfaceManager.freeRepoPath(repoId,repoPath);
             }
@@ -246,7 +215,7 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
             if(selfCloneLocationMap.containsKey(clone)){
                 selfCloneLines = selfCloneLocationMap.get(clone);
             }
-            CloneInfo cloneInfo = new CloneInfo(uuid, repoId, commitId, filePath, addCloneLocationMap.get(clone),selfCloneLines, type);
+            CloneInfo cloneInfo = new CloneInfo(uuid, repoId, commitId, filePath, addCloneLocationMap.get(clone), selfCloneLines, type);
             cloneInfoList.add(cloneInfo);
         }
 
@@ -277,6 +246,7 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
             for(String commitId : commitList){
                 insertCloneMeasure(repoId, commitId);
             }
+
         }
 
     }
