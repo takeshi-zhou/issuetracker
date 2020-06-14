@@ -42,6 +42,19 @@
            )
     </insert>
 
+    <select id="getDevHistoryCommitInfo" parameterType="String" resultType="java.util.HashMap">
+        SELECT
+            commit_id,commit_time,developer_name,commit_message,first_parent_commit_id,second_parent_commit_id
+        FROM
+            repo_measure
+        WHERE
+            repo_id = #{repo_id}
+            and
+            DATE(commit_time) BETWEEN #{since} AND #{until}
+        ORDER BY
+            commit_time
+    </select>
+
 
 
 
