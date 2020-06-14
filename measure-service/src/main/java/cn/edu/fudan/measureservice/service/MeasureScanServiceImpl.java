@@ -87,9 +87,9 @@ public class MeasureScanServiceImpl implements MeasureScanService {
     //保存某个项目某个commit的度量信息
     public void saveMeasureData(String repoId, String commitId,String commitTime,String repoPath) {
         try{
-//            Measure measure = getMeasureDataOfOneCommit(repoPath);
-//            saveRepoLevelMeasureData(measure,repoId,commitId,commitTime,repoPath);
-//            savePackageMeasureData(measure,repoId,commitId,commitTime);
+            Measure measure = getMeasureDataOfOneCommit(repoPath);
+            saveRepoLevelMeasureData(measure,repoId,commitId,commitTime,repoPath);
+            savePackageMeasureData(measure,repoId,commitId,commitTime);
             saveFileMeasureData(repoId,commitId,commitTime,repoPath);
         }catch (Exception e){
             e.printStackTrace();
@@ -233,7 +233,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
     //保存某个项目某个commit文件级别的度量
     private void saveFileMeasureData(String repoId, String commitId, String commitTime, String repoPath) {
         FileMeasure fileMeasure = new FileMeasure();
-        fileMeasure.setUuid(UUID.randomUUID().toString());
+
         fileMeasure.setRepoId(repoId);
         fileMeasure.setCommitId(commitId);
         fileMeasure.setCommitTime(commitTime);
@@ -248,9 +248,11 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         //得到变更文件list
         List<String> filePathList = getChangedFilePathList(jGitHelper, repoPath, commitId);
         for (String filePath : filePathList){
+            fileMeasure.setUuid(UUID.randomUUID().toString());
             fileMeasure.setFilePath(filePath);
-            fileMeasure.setCcn(JavaNcss.getFileCcn1(repoPath+'\\'+filePath));
-            fileMeasure.setTotalLine(JavaNcss.getFileTotalLines(repoPath+'\\'+filePath));
+            logger.info("fileFullPath is: "+repoPath+'/'+filePath);
+            fileMeasure.setCcn(JavaNcss.getFileCcn1(repoPath+'/'+filePath));
+            fileMeasure.setTotalLine(JavaNcss.getFileTotalLines(repoPath+'/'+filePath));
 
             //根据filePath，获取对应文件的代码行变动情况
             for (int i = 0; i < fileLinesData.size(); i++){

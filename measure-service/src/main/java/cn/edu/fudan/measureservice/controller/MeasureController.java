@@ -490,20 +490,17 @@ public class MeasureController {
         }
     }
 
-    @PostMapping("/measure/scan")
-    @CrossOrigin
-    public ResponseBean startMeasureScan(@RequestParam("repo-id")String repoId,
-                                    @RequestParam("start-commit-id")String startCommitId){
-        try{
-            measureService.startMeasureScan(repoId,startCommitId);
-            return new ResponseBean(200,"success",null);
-        }catch (Exception e){
-            e.printStackTrace();
-            return new ResponseBean(401,"failed",e.getMessage());
-        }
-    }
-
-
-
+//    @PostMapping("/measure/scan")
+//    @CrossOrigin
+//    public ResponseBean startMeasureScan(@RequestParam("repo-id")String repoId,
+//                                    @RequestParam("start-commit-id")String startCommitId){
+//        try{
+//            measureService.startMeasureScan(repoId,startCommitId);
+//            return new ResponseBean(200,"success",null);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            return new ResponseBean(401,"failed",e.getMessage());
+//        }
+//    }
 
 }
