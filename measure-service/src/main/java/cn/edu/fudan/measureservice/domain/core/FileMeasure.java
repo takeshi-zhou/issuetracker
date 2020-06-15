@@ -21,6 +21,7 @@ public class FileMeasure extends BaseMetrics {
     String commitTime;
     String filePath;
 
+    int diffCcn;
     int ccn;
     int addLine;
     int deleteLine;
@@ -30,4 +31,18 @@ public class FileMeasure extends BaseMetrics {
         super();
     }
 
+    public FileMeasure(FileMeasure f) {
+        super();
+        this.uuid = f.uuid;
+        this.repoId = f.repoId;
+        this.commitId = f.commitId;
+        this.commitTime =  f.commitTime;
+        this.filePath = f.filePath;
+
+        this.diffCcn = f.diffCcn;
+        this.ccn = f.ccn;
+        this.addLine = f.addLine;
+        this.deleteLine = f.deleteLine;
+        this.totalLine = f.totalLine;
+    }
 }

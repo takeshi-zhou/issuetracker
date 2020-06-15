@@ -37,7 +37,7 @@ public class JavaNcss {
                 } ).explore(projectDir);
 
         for (String path : pathList) {
-            int ccn = getFileCcn1(path);
+            int ccn = getOneFileCcn(path);
             result.put(relativePath.get(path), ccn);
         }
         return result;
@@ -55,7 +55,7 @@ public class JavaNcss {
         for (String path : filePathList) {
             // 构造相对地址
             String relativePath = path.replace(preFix, "");
-            int ccn = getFileCcn1(path);
+            int ccn = getOneFileCcn(path);
             result.put(relativePath, ccn);
         }
         return result;
@@ -67,7 +67,7 @@ public class JavaNcss {
      * @param path  文件地址
      * @return 文件的圈复杂度
      */
-    public static int getFileCcn1(String path) {
+    public static int getOneFileCcn(String path) {
 
         File tempFile = new File(path);
         Javancss javancss = new Javancss(tempFile);
@@ -86,7 +86,7 @@ public class JavaNcss {
 
     public static void main(String[] args) {
         String path="D:\\Project\\FDSELab\\IssueTracker-Master\\measure-service\\src\\main\\java\\cn\\edu\\fudan\\measureservice\\analyzer\\JavaNcss.java";
-        System.out.println(getFileCcn1(path));
+        System.out.println(getOneFileCcn(path));
         System.out.println(getFileTotalLines(path));
     }
 
