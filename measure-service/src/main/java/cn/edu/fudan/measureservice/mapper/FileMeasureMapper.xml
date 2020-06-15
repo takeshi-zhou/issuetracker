@@ -13,6 +13,7 @@
         <result property="addLine" column="add_lines"/>
         <result property="deleteLine" column="del_lines"/>
         <result property="totalLine" column="total_lines"/>
+        <result property="diffCcn" column="diff_ccn"/>
     </resultMap>
 
     <insert id="insertOneFileMeasure" >
@@ -23,6 +24,7 @@
                commit_id,
                commit_time,
                file_path,
+                diff_ccn,
                ccn,
                add_lines,
                del_lines,
@@ -35,6 +37,7 @@
               #{commitId},
               #{commitTime},
               #{filePath},
+              #{diffCcn},
               #{ccn},
               #{addLine},
               #{deleteLine},
