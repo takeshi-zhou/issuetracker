@@ -714,7 +714,7 @@ public class JGitHelper {
         tw.setRecursive(true);
         RenameDetector rd = new RenameDetector(repository);
         rd.addAll(DiffEntry.scan(tw));
-        rd.setRenameScore(50);
+        rd.setRenameScore(100);
         return rd.compute();
     }
 
@@ -732,6 +732,21 @@ public class JGitHelper {
 
         return parent2.getCommitTime() > parent1.getCommitTime();
     }
+
+    @SneakyThrows
+    public String getSingleParent(String commit) {
+        RevCommit currCommit = revWalk.parseCommit(ObjectId.fromString(commit));
+        RevCommit[] parentCommits = currCommit.getParents();
+        if (parentCommits.length == 0) {
+            return null;
+        }
+        if (parentCommits.length == 1 || isParent2(parentCommits[1], parentCommits[0], currCommit)) {
+            return parentCommits[0].getName();
+        }
+
+        return parentCommits[1].getName();
+    }
+
 
     public static void main(String[] args) throws ParseException {
         //gitCheckout("E:\\Lab\\project\\IssueTracker-Master", "f8263335ef380d93d6bb93b2876484e325116ac2");

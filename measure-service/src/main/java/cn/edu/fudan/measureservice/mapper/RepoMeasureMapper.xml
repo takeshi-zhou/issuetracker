@@ -338,6 +338,17 @@
             developer_name
     </select>
 
+    <select id="getLastCommitId" parameterType="String" resultType="String">
+        SELECT
+            first_parent_commit_id
+        FROM
+            repo_measure
+        WHERE
+            commit_id= #{commit_id}
+    </select>
+
+
+
 
 
 </mapper>

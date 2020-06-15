@@ -12,9 +12,7 @@ import cn.edu.fudan.measureservice.handler.ResultHandler;
 import cn.edu.fudan.measureservice.mapper.FileMeasureMapper;
 import cn.edu.fudan.measureservice.mapper.PackageMeasureMapper;
 import cn.edu.fudan.measureservice.mapper.RepoMeasureMapper;
-import cn.edu.fudan.measureservice.util.GitUtil;
 import cn.edu.fudan.measureservice.util.JGitHelper;
-import javancss.Javancss;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Repository;
@@ -230,7 +228,10 @@ public class MeasureScanServiceImpl implements MeasureScanService {
 
     }
 
-    //保存某个项目某个commit文件级别的度量
+    /**
+     * 保存某个项目某个commit文件级别的度量
+     * fixme 未考虑rename的情况 目前先在jgitHelper {@link JGitHelper#getDiffEntry} 中修改了rename处理
+     */
     private void saveFileMeasureData(String repoId, String commitId, String commitTime, String repoPath) {
         FileMeasure fileMeasure = new FileMeasure();
 
@@ -247,13 +248,14 @@ public class MeasureScanServiceImpl implements MeasureScanService {
 
         //得到变更文件list
         List<String> filePathList = getChangedFilePathList(jGitHelper, repoPath, commitId);
+
+        List<FileMeasure> fileMeasureList = new ArrayList<>(filePathList.size());
         for (String filePath : filePathList){
             fileMeasure.setUuid(UUID.randomUUID().toString());
             fileMeasure.setFilePath(filePath);
             logger.info("fileFullPath is: "+repoPath+'/'+filePath);
-            fileMeasure.setCcn(JavaNcss.getFileCcn1(repoPath+'/'+filePath));
+            fileMeasure.setCcn(JavaNcss.getOneFileCcn(repoPath+'/'+filePath));
             fileMeasure.setTotalLine(JavaNcss.getFileTotalLines(repoPath+'/'+filePath));
-
             //根据filePath，获取对应文件的代码行变动情况
             for (int i = 0; i < fileLinesData.size(); i++){
                 if (fileLinesData.get(i).get("filePath").equals(filePath)){
@@ -262,26 +264,18 @@ public class MeasureScanServiceImpl implements MeasureScanService {
                     break;
                 }
             }
-
-            try{
-                fileMeasureMapper.insertOneFileMeasure(fileMeasure);
-                logger.info("Successfully insert one record to file_measure table ：repoId is " + repoId + " commitId is " + commitId);
-            } catch (Exception e) {
-                logger.error("Inserting data to DB table failed：");
-                e.printStackTrace();
-            }
-
-
+            fileMeasureList.add(new FileMeasure(fileMeasure));
+        }
+        jGitHelper.checkout(jGitHelper.getSingleParent(commitId));
+        for (FileMeasure f : fileMeasureList){
+            String filePath = f.getFilePath();
+            int preCcn = JavaNcss.getOneFileCcn(repoPath+'/'+filePath);
+            fileMeasure.setDiffCcn(fileMeasure.getCcn() - preCcn);
         }
 
 
-
-
-
-
-
-
-
+        fileMeasureList.forEach(f -> fileMeasureMapper.insertOneFileMeasure(f));
+        logger.info("Successfully insert one record to file_measure table ：repoId is " + repoId + " commitId is " + commitId);
     }
 
 
