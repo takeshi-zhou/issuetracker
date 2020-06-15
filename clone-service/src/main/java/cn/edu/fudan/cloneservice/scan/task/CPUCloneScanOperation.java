@@ -151,15 +151,16 @@ public class CPUCloneScanOperation extends ScanOperationAdapter {
                             Integer.parseInt(fragEnd),
                             filePath);
                     String code = codeLocation.getCode();
-                    int num = codeLocation.getNum();
+                    List<String> num = codeLocation.getNum();
                     //记录clone组内最小的片段行数
-                    if(num < min){
-                        min = num;
+                    if(num.size() < min){
+                        min = num.size();
                     }
                     //具体代码
                     cloneLocation.setCode(code);
                     //去除空行和注释的行数
-                    cloneLocation.setNum(num);
+                    //修改录入的方式
+                    cloneLocation.setNum(String.join(",", num));
                     //插入列表
                     tmpCloneLocationList.add(cloneLocation);
                 }

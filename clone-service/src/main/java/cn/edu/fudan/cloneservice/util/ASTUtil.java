@@ -2,6 +2,8 @@ package cn.edu.fudan.cloneservice.util;
 
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ASTUtil {
 
@@ -9,7 +11,7 @@ public class ASTUtil {
         StringBuilder code = new StringBuilder();
         String s;
         int line = 1;
-        int num = 0;
+        List<String> num = new ArrayList<>();
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
             while ((s = bufferedReader.readLine()) != null) {
                 if (line >= startLine && line <= endLine) {
@@ -21,7 +23,7 @@ public class ASTUtil {
                         if(!s.isEmpty() && !s.trim().startsWith("//")
                                 && !s.trim().startsWith("/**")
                                 && !s.trim().startsWith("*")){
-                            num++;
+                            num.add(line+"");
                         }
                     }
                 }
@@ -37,15 +39,15 @@ public class ASTUtil {
     }
 
     public class CodeLocation{
-        private int num;
+        private List<String> num;
         private String code;
 
-        private CodeLocation(int num, String code){
-            this.code = code;
+        public CodeLocation(List<String> num, String code) {
             this.num = num;
+            this.code = code;
         }
 
-        public int getNum() {
+        public List<String> getNum() {
             return num;
         }
 

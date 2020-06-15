@@ -24,9 +24,9 @@ public class CloneLocation {
     private String className;
     private String methodName;
     /**
-     * 记录去除空行和注释行的location行数
+     * 记录去除空行和注释行的location行号
      */
-    private int num;
+    private String num;
 
     private String code;
 
@@ -128,11 +128,11 @@ public class CloneLocation {
         this.methodName = methodName;
     }
 
-    public int getNum() {
+    public String getNum() {
         return num;
     }
 
-    public void setNum(int num) {
+    public void setNum(String num) {
         this.num = num;
     }
 

@@ -3,6 +3,7 @@ package cn.edu.fudan.cloneservice.thread;
 
 import cn.edu.fudan.cloneservice.domain.CloneMeasure;
 import cn.edu.fudan.cloneservice.scan.domain.CloneLocation;
+import cn.edu.fudan.cloneservice.util.ComputeUtil;
 import cn.edu.fudan.cloneservice.util.JGitUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,14 +77,20 @@ public class ForkJoinRecursiveTask {
                                       Map<String, List<CloneLocation>> cloneLocationMap,
                                       Map<String, String> map){
             CloneMeasure cloneMeasure = new CloneMeasure();
+            //统计不准确，弃用
             int increasedCloneLines = 0;
             int increasedSameCloneLines = 0;
+
             List<CloneLocation> locationList = getSubList(start, end);
             logger.info("{} -> cloneLocation init success!", Thread.currentThread().getName());
-            //key记录repoPath, value记录新增且是clone的行号
+            //key记录repoPath和克隆组id, value记录新增且是clone的行号，记录clone片段的信息,会存在重复
             Map<String, String> addCloneLocationMap = new HashMap<>(512);
-            //key记录repoPath, value记录新增且是self clone的行号
+            //key记录repoPath和克隆组id, value记录新增且是self clone的行号，记录clone片段的信息,会存在重复
             Map<String, String> selfCloneLocationMap = new HashMap<>(512);
+            //用于统计实际的新增clone行数
+            Map<String, List<String>> addMap = new HashMap<>(512);
+            //用于统计实际的新增自重复clone行数
+            Map<String, List<String>> selfMap = new HashMap<>(512);
             //遍历此版本所有的clone location
             for(CloneLocation cloneLocation : locationList){
                 String cloneLines = cloneLocation.getCloneLines();
@@ -98,7 +105,6 @@ public class ForkJoinRecursiveTask {
                             if(Integer.parseInt(lines[i]) >= startLine && Integer.parseInt(lines[i]) <= endLine){
                                 List<CloneLocation> list = cloneLocationMap.get(cloneLocation.getCategory());
                                 String category = cloneLocation.getCategory();
-                                //list.remove(cloneLocation);
                                 for(CloneLocation cloneLocation1 : list){
                                     if(cloneLocation1.equals(cloneLocation)){
                                         continue;
@@ -107,11 +113,13 @@ public class ForkJoinRecursiveTask {
                                     String cloneLines1 = cloneLocation1.getCloneLines();
                                     if(JGitUtil.isSameDeveloperClone(repoPath, commitId, filePath1, cloneLines1)){
                                         increasedSameCloneLines++;
+                                        selfMap = ComputeUtil.putNewNum(selfMap, lines[i], filePath);
                                         selfCloneLocationMap.merge(category + ":" +filePath, lines[i], (v1, v2) -> v1 + "," + v2);
                                         break;
                                     }
                                 }
                                 increasedCloneLines++;
+                                addMap = ComputeUtil.putNewNum(addMap, lines[i], filePath);
                                 addCloneLocationMap.merge(category + ":" +filePath, lines[i], (v1, v2) -> v1 + "," + v2);
                             }
                         }
@@ -124,8 +132,8 @@ public class ForkJoinRecursiveTask {
             cloneMeasure.setUuid(uuid);
             cloneMeasure.setCommitId(commitId);
             cloneMeasure.setRepoId(repoId);
-            cloneMeasure.setNewCloneLines(increasedCloneLines);
-            cloneMeasure.setSelfCloneLines(increasedSameCloneLines);
+            cloneMeasure.setNewCloneLines(ComputeUtil.getCloneLines(addMap));
+            cloneMeasure.setSelfCloneLines(ComputeUtil.getCloneLines(selfMap));
             cloneMeasure.setAddCloneLocationMap(addCloneLocationMap);
             cloneMeasure.setSelfCloneLocationMap(selfCloneLocationMap);
             return cloneMeasure;

@@ -20,9 +20,7 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -222,7 +220,7 @@ public class JGitUtil {
         return spi;
     }
 
-    private static CommitChange getNewlyIncreasedLinesNum(List<DiffEntry> diffEntryList) throws IOException{
+    private static CommitChange getNewlyIncreasedLinesNum(String repoPath, List<DiffEntry> diffEntryList) throws IOException{
 
         CommitChange commitChange = new CommitChange();
 
@@ -247,12 +245,11 @@ public class JGitUtil {
                 for(Edit edit : editList){
                     addLines += edit.getEndB() - edit.getBeginB();
                     for(int i = edit.getBeginB()+1; i <= edit.getEndB(); i++){
-                        if(map.containsKey(fileName)){
-                            String lines = map.get(fileName) + "," + i;
-                            map.put(fileName, lines);
-                        }else {
-                            map.put(fileName, i+"");
+                        //先判断对应文件的行是否是空行或者注释
+                        if(isEmpty(repoPath, fileName, i)){
+                            continue;
                         }
+                        map.merge(fileName, i+"", (v1, v2) -> v1 + "," + v2);
                     }
 
                 }
@@ -264,6 +261,28 @@ public class JGitUtil {
         return commitChange;
     }
 
+    private static boolean isEmpty(String repoPath, String filePath, int num){
+        int line = 0;
+        String s;
+        filePath = repoPath + "/" + filePath;
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
+            while ((s = bufferedReader.readLine()) != null) {
+                line++;
+                if (line == num) {
+                    if(!s.isEmpty() && !s.trim().startsWith("//")
+                            && !s.trim().startsWith("/**")
+                            && !s.trim().startsWith("*")){
+                        return true;
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 
     /**
@@ -413,7 +432,7 @@ public class JGitUtil {
             //获取变更的文件列表
             List<DiffEntry> diffFix = getChangedFileList(revCommit,repository);
             if(diffFix != null){
-                commitChange = getNewlyIncreasedLinesNum(diffFix);
+                commitChange = getNewlyIncreasedLinesNum(repoPath, diffFix);
             }
 
         } catch (IOException e) {
@@ -424,9 +443,4 @@ public class JGitUtil {
 
     }
 
-    public static void main(String[] args) {
-        CommitChange commitChange = getNewlyIncreasedLines("C:\\Users\\Thinkpad\\Desktop\\config\\IssueTracker-Master",
-                "b553c9fb2a99bdb0db5b86d908650511ccaf8f8b");
-        System.out.println(commitChange.getAddMap());
-    }
 }

@@ -37,40 +37,6 @@ public class RestInterfaceManager {
         this.restTemplate = restTemplate;
     }
 
-
-    //-----------------------------------issue service-------------------------------------------------------
-
-
-    public void insertRawIssuesWithLocations(List<JSONObject> rawIssues) {
-        restTemplate.postForObject(issueServicePath + "/inner/raw-issue", rawIssues, JSONObject.class);
-    }
-
-
-    public JSONObject getCommitTime(String commitId,String repoId) {
-        JSONObject result = null;
-
-        int tryCount = 0;
-        while (tryCount < 5) {
-
-            try{
-                String url = commitServicePath + "/commit-time?repo_id=" + repoId + "&commit_id=" +commitId;
-                result = restTemplate.getForObject(url, JSONObject.class);
-                break;
-            }catch (Exception e){
-                e.printStackTrace();
-                try{
-                    TimeUnit.SECONDS.sleep(20);
-                }catch(Exception sleepException){
-                    e.printStackTrace();
-                }
-                tryCount++;
-            }
-        }
-
-        return result;
-
-    }
-
     //---------------------------------------------code service---------------------------------------------------------
     public String getRepoPath(String repoId,String commit_id){
         String repoPath=null;
