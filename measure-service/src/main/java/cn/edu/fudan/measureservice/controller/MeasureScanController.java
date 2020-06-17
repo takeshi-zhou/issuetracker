@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.tools.Tool;
+
 /**
  * description:
  *
@@ -28,8 +30,8 @@ public class MeasureScanController {
      * description 接收请求开始扫描 servicePath + toolName + "/scan", jsonObject, JSONObject.class 接收scan服务的请求进行扫描
      * @param jsonObject : repoId branch beginCommit
      */
-    @PostMapping(value = {"/measure/scan"})
-    public ResponseBean scan(@RequestBody JSONObject jsonObject) {
+    @PostMapping(value = {"/measure/{toolName}"})
+    public ResponseBean scan(@RequestBody JSONObject jsonObject,@PathVariable String toolName) {
         String repoId = "repoId";
         String branch = "branch";
         String beginCommit = "beginCommit";
@@ -38,8 +40,10 @@ public class MeasureScanController {
         beginCommit = jsonObject.getString(beginCommit);
         // TODO 调用 tool scan 流程
         try {
-            // measure service scan
-            measureScanService.scan(repoId, branch, beginCommit);
+            // 调用javancss工具进行扫描 目前measure服务只有这个扫描工具
+            if (toolName.equals("javancss")){
+                measureScanService.scan(repoId, branch, beginCommit);
+            }
             return ResponseBean.builder().code(200).build();
         }catch (Exception e) {
             log.error("measure scan failed! message is {}", e.getMessage());
