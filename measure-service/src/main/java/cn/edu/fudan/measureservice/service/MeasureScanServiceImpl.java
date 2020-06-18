@@ -154,9 +154,9 @@ public class MeasureScanServiceImpl implements MeasureScanService {
      */
     public void saveMeasureData(String repoId, String commitId,String commitTime,String repoPath) {
         try{
-            Measure measure = getMeasureDataOfOneCommit(repoPath);
-            saveRepoLevelMeasureData(measure,repoId,commitId,commitTime,repoPath);
-            savePackageMeasureData(measure,repoId,commitId,commitTime);
+//            Measure measure = getMeasureDataOfOneCommit(repoPath);
+//            saveRepoLevelMeasureData(measure,repoId,commitId,commitTime,repoPath);
+//            savePackageMeasureData(measure,repoId,commitId,commitTime);
             saveFileMeasureData(repoId,commitId,commitTime,repoPath);
         }catch (Exception e){
             e.printStackTrace();
