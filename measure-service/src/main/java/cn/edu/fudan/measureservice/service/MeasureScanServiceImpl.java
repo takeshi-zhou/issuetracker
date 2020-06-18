@@ -69,8 +69,8 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         // 获取地址
         String repoPath = null;
         try {
-//            repoPath = restInterfaceManager.getRepoPath(repoId,null);
-            repoPath = "D:/Project/FDSELab/IssueTracker-Master";
+            repoPath = restInterfaceManager.getRepoPath(repoId,null);
+//            repoPath = "D:/Project/FDSELab/IssueTracker-Master";
             if (repoPath!=null){
                 JGitHelper jGitHelper = new JGitHelper(repoPath);
                 // 获取从 beginCommit 开始的 commit list 列表
@@ -154,9 +154,9 @@ public class MeasureScanServiceImpl implements MeasureScanService {
      */
     public void saveMeasureData(String repoId, String commitId,String commitTime,String repoPath) {
         try{
-//            Measure measure = getMeasureDataOfOneCommit(repoPath);
-//            saveRepoLevelMeasureData(measure,repoId,commitId,commitTime,repoPath);
-//            savePackageMeasureData(measure,repoId,commitId,commitTime);
+            Measure measure = getMeasureDataOfOneCommit(repoPath);
+            saveRepoLevelMeasureData(measure,repoId,commitId,commitTime,repoPath);
+            savePackageMeasureData(measure,repoId,commitId,commitTime);
             saveFileMeasureData(repoId,commitId,commitTime,repoPath);
         }catch (Exception e){
             e.printStackTrace();
