@@ -123,7 +123,13 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         measureScan.setStatus(status);
         measureScan.setStart_scan_time(startScanTime);
         measureScan.setEnd_scan_time(endScanTime);
-        measureScanMapper.insertOneMeasureScan(measureScan);
+        try {
+            measureScanMapper.insertOneMeasureScan(measureScan);
+        } catch (Exception e) {
+            logger.error("向measure_scan表插入数据时报错：");
+            e.printStackTrace();
+        }
+
         return measureScan;
 
     }
