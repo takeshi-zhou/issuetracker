@@ -77,7 +77,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
                 List<String> commitList = jGitHelper.getCommitListByBranchAndBeginCommit(branch, beginCommit);
                 //初始化本次扫描状态信息
                 MeasureScan measureScan = initMeasureScan(repoId,toolName,commitList.get(0),commitList.get(0),commitList.size());
-                Date startScanTime = measureScan.getStart_scan_time();
+                Date startScanTime = measureScan.getStartScanTime();
 
                 // 遍历列表 进行扫描
                 for (int i = 0; i < commitList.size(); i++){
@@ -115,14 +115,14 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         measureScan.setUuid(uuid);
         measureScan.setRepoId(repoId);
         measureScan.setTool(toolName);
-        measureScan.setStart_commit(startCommit);
-        measureScan.setEnd_commit(endCommit);
-        measureScan.setTotal_commit_count(totalCommitCount);
-        measureScan.setScanned_commit_count(scannedCommitCount);
-        measureScan.setScan_time(scanTime);
+        measureScan.setStartCommit(startCommit);
+        measureScan.setEndCommit(endCommit);
+        measureScan.setTotalCommitCount(totalCommitCount);
+        measureScan.setScannedCommitCount(scannedCommitCount);
+        measureScan.setScanTime(scanTime);
         measureScan.setStatus(status);
-        measureScan.setStart_scan_time(startScanTime);
-        measureScan.setEnd_scan_time(endScanTime);
+        measureScan.setStartScanTime(startScanTime);
+        measureScan.setEndScanTime(endScanTime);
         try {
             measureScanMapper.insertOneMeasureScan(measureScan);
         } catch (Exception e) {
@@ -136,11 +136,11 @@ public class MeasureScanServiceImpl implements MeasureScanService {
 
     private void updateMeasureScan(MeasureScan measureScan, String endCommit, int scannedCommitCount,
                                           int scanTime, String status, Date endScanTime){
-        measureScan.setEnd_commit(endCommit);
-        measureScan.setScanned_commit_count(scannedCommitCount);
-        measureScan.setScan_time(scanTime);
+        measureScan.setEndCommit(endCommit);
+        measureScan.setScannedCommitCount(scannedCommitCount);
+        measureScan.setScanTime(scanTime);
         measureScan.setStatus(status);
-        measureScan.setEnd_scan_time(endScanTime);
+        measureScan.setEndScanTime(endScanTime);
         measureScanMapper.updateMeasureScan(measureScan);
     }
 
