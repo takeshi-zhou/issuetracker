@@ -13,12 +13,12 @@ public class MeasureScan {
     String uuid;
     String repoId;
     String tool;
-    String start_commit;
-    String end_commit;
-    int total_commit_count;
-    int scanned_commit_count;
-    int scan_time;
+    String startCommit;
+    String endCommit;
+    int totalCommitCount;
+    int scannedCommitCount;
+    int scanTime;
     String status;
-    Date start_scan_time;
-    Date end_scan_time;
+    Date startScanTime;
+    Date endScanTime;
 }
