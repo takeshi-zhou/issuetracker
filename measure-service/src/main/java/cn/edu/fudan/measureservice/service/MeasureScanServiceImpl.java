@@ -69,7 +69,8 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         // 获取地址
         String repoPath = null;
         try {
-            repoPath = restInterfaceManager.getRepoPath(repoId,null);
+//            repoPath = restInterfaceManager.getRepoPath(repoId,null);
+            repoPath = "D:/Project/FDSELab/IssueTracker-Master";
             if (repoPath!=null){
                 JGitHelper jGitHelper = new JGitHelper(repoPath);
                 // 获取从 beginCommit 开始的 commit list 列表
@@ -138,8 +139,13 @@ public class MeasureScanServiceImpl implements MeasureScanService {
     }
 
 
-
-    //保存某个项目某个commit的度量信息
+    /**保存某个项目某个commit的扫描信息
+     *
+     * @param repoId
+     * @param commitId
+     * @param commitTime
+     * @param repoPath
+     */
     public void saveMeasureData(String repoId, String commitId,String commitTime,String repoPath) {
         try{
             Measure measure = getMeasureDataOfOneCommit(repoPath);
@@ -151,7 +157,11 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         }
     }
 
-    //获取单个项目某个commit的度量值
+    /**获取单个项目某个commit的Measure度量值
+     *
+     * @param repoPath
+     * @return
+     */
     private Measure getMeasureDataOfOneCommit(String repoPath){
         Measure measure=null;
         try{
@@ -165,7 +175,14 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         return measure;
     }
 
-    //保存某个项目某个commit项目级别的度量
+    /**保存某个项目某个commit项目级别的度量
+     *
+     * @param measure
+     * @param repoId
+     * @param commitId
+     * @param commitTime
+     * @param repoPath
+     */
     private void saveRepoLevelMeasureData(Measure measure,String repoId,String commitId,String commitTime,String repoPath){
         try{
             RepoMeasure repoMeasure=new RepoMeasure();
@@ -232,7 +249,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
                     logger.info("Successfully insert one record to repo_measure table ：repoId is " + repoId + " commitId is " + commitId);
                 }
             } catch (Exception e) {
-                logger.error("Inserting data to DB table failed：");
+                logger.error("Inserting data to DB repo_measure table failed：");
                 e.printStackTrace();
             }
 
@@ -243,7 +260,13 @@ public class MeasureScanServiceImpl implements MeasureScanService {
 
     }
 
-    //保存某个项目某个commit包级别的度量
+    /**保存某个项目某个commit包级别的度量
+     *
+     * @param measure
+     * @param repoId
+     * @param commitId
+     * @param commitTime
+     */
     private void savePackageMeasureData(Measure measure,String repoId,String commitId,String commitTime){
         try{
             List<Package> packages =new ArrayList<>();
@@ -328,9 +351,19 @@ public class MeasureScanServiceImpl implements MeasureScanService {
             fileMeasure.setDiffCcn(fileMeasure.getCcn() - preCcn);
         }
 
+        try{
+            fileMeasureList.forEach(
+                    f -> {
+                        if (fileMeasureMapper.sameMeasureOfOneFile(f.getRepoId(),f.getCommitId(),f.getFilePath()) == 0)
+                            fileMeasureMapper.insertOneFileMeasure(f);
+                        logger.info("Successfully insert one record to file_measure table ：repoId is " + f.getRepoId() + " commitId is " + f.getCommitId());
+                    }
+            );
+        } catch (Exception e) {
+            logger.error("Inserting data to DB file_measure table failed：");
+            e.printStackTrace();
+        }
 
-        fileMeasureList.forEach(f -> fileMeasureMapper.insertOneFileMeasure(f));
-        logger.info("Successfully insert one record to file_measure table ：repoId is " + repoId + " commitId is " + commitId);
     }
 
 

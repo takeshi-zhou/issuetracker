@@ -20,4 +20,6 @@ public interface MeasureScanMapper {
 
     void updateMeasureScan(MeasureScan measureScan);
 
+
+
 }
