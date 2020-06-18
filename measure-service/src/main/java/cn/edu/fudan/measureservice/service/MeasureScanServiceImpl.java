@@ -8,8 +8,10 @@ import cn.edu.fudan.measureservice.domain.Measure;
 import cn.edu.fudan.measureservice.domain.Package;
 import cn.edu.fudan.measureservice.domain.RepoMeasure;
 import cn.edu.fudan.measureservice.domain.core.FileMeasure;
+import cn.edu.fudan.measureservice.domain.core.MeasureScan;
 import cn.edu.fudan.measureservice.handler.ResultHandler;
 import cn.edu.fudan.measureservice.mapper.FileMeasureMapper;
+import cn.edu.fudan.measureservice.mapper.MeasureScanMapper;
 import cn.edu.fudan.measureservice.mapper.PackageMeasureMapper;
 import cn.edu.fudan.measureservice.mapper.RepoMeasureMapper;
 import cn.edu.fudan.measureservice.util.JGitHelper;
@@ -45,18 +47,25 @@ public class MeasureScanServiceImpl implements MeasureScanService {
     private RepoMeasureMapper repoMeasureMapper;
     private PackageMeasureMapper packageMeasureMapper;
     private FileMeasureMapper fileMeasureMapper;
+    private MeasureScanMapper measureScanMapper;
 
-    public MeasureScanServiceImpl(MeasureAnalyzer measureAnalyzer, ResultHandler resultHandler, RestInterfaceManager restInterfaceManager, RepoMeasureMapper repoMeasureMapper, PackageMeasureMapper packageMeasureMapper, FileMeasureMapper fileMeasureMapper) {
+    public MeasureScanServiceImpl(MeasureAnalyzer measureAnalyzer, ResultHandler resultHandler, RestInterfaceManager restInterfaceManager, RepoMeasureMapper repoMeasureMapper, PackageMeasureMapper packageMeasureMapper, FileMeasureMapper fileMeasureMapper, MeasureScanMapper measureScanMapper) {
         this.measureAnalyzer = measureAnalyzer;
         this.resultHandler = resultHandler;
         this.restInterfaceManager = restInterfaceManager;
         this.repoMeasureMapper = repoMeasureMapper;
         this.packageMeasureMapper = packageMeasureMapper;
         this.fileMeasureMapper = fileMeasureMapper;
+        this.measureScanMapper = measureScanMapper;
     }
 
     @Override
-    public void scan(String repoId, String branch, String beginCommit) {
+    public void scanByJavancss(String repoId, String branch, String beginCommit, String toolName) {
+        //1. 判断beginCommit是否为空,为空则表示此次为update，不为空表示此次为第一次扫描
+        // 若是update，则获取最近一次扫描的commit_id，作为本次扫描的起始点
+        if (beginCommit == null || "".equals(beginCommit)){
+            beginCommit = repoMeasureMapper.getLastScannedCommitId(repoId);
+        }
         // 获取地址
         String repoPath = null;
         try {
@@ -65,12 +74,25 @@ public class MeasureScanServiceImpl implements MeasureScanService {
                 JGitHelper jGitHelper = new JGitHelper(repoPath);
                 // 获取从 beginCommit 开始的 commit list 列表
                 List<String> commitList = jGitHelper.getCommitListByBranchAndBeginCommit(branch, beginCommit);
+                //初始化本次扫描状态信息
+                MeasureScan measureScan = initMeasureScan(repoId,toolName,commitList.get(0),commitList.get(0),commitList.size());
+                Date startScanTime = measureScan.getStart_scan_time();
+
                 // 遍历列表 进行扫描
                 for (int i = 0; i < commitList.size(); i++){
                     String commitTime = jGitHelper.getCommitTime(commitList.get(i));
-                    logger.info("Start to save measure info: repoId is " + repoId + " commitId is " + commitList.get(i));
+                    logger.info("Start to scan measure info: repoId is " + repoId + " commitId is " + commitList.get(i));
                     saveMeasureData(repoId,commitList.get(i),commitTime,repoPath);
+                    //更新本次扫描状态信息
+                    Date currentTime = new Date();
+                    int scanTime = (int) (currentTime.getTime()-startScanTime.getTime()) / 1000;
+                    String status = "scanning";
+                    if (i == commitList.size()-1){//扫描到最后一个commit
+                        status = "complete";
+                    }
+                    updateMeasureScan(measureScan,commitList.get(i),i+1,scanTime,status,currentTime);
                 }
+
             }
         }finally {
             if(repoPath!=null) {
@@ -78,6 +100,41 @@ public class MeasureScanServiceImpl implements MeasureScanService {
             }
         }
         logger.info("Measure scan complete!!!");
+    }
+
+    private MeasureScan initMeasureScan(String repoId, String toolName, String startCommit,
+                                 String endCommit, int totalCommitCount){
+        String uuid = UUID.randomUUID().toString();
+        int scannedCommitCount = 0;
+        int scanTime = 0;
+        String status = "scanning";
+        Date startScanTime = new Date();
+        Date endScanTime = new Date();
+        MeasureScan measureScan = new MeasureScan();
+        measureScan.setUuid(uuid);
+        measureScan.setRepoId(repoId);
+        measureScan.setTool(toolName);
+        measureScan.setStart_commit(startCommit);
+        measureScan.setEnd_commit(endCommit);
+        measureScan.setTotal_commit_count(totalCommitCount);
+        measureScan.setScanned_commit_count(scannedCommitCount);
+        measureScan.setScan_time(scanTime);
+        measureScan.setStatus(status);
+        measureScan.setStart_scan_time(startScanTime);
+        measureScan.setEnd_scan_time(endScanTime);
+        measureScanMapper.insertOneMeasureScan(measureScan);
+        return measureScan;
+
+    }
+
+    private void updateMeasureScan(MeasureScan measureScan, String endCommit, int scannedCommitCount,
+                                          int scanTime, String status, Date endScanTime){
+        measureScan.setEnd_commit(endCommit);
+        measureScan.setScanned_commit_count(scannedCommitCount);
+        measureScan.setScan_time(scanTime);
+        measureScan.setStatus(status);
+        measureScan.setEnd_scan_time(endScanTime);
+        measureScanMapper.updateMeasureScan(measureScan);
     }
 
 
@@ -93,8 +150,6 @@ public class MeasureScanServiceImpl implements MeasureScanService {
             e.printStackTrace();
         }
     }
-
-
 
     //获取单个项目某个commit的度量值
     private Measure getMeasureDataOfOneCommit(String repoPath){
@@ -230,7 +285,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
 
     /**
      * 保存某个项目某个commit文件级别的度量
-     * fixme 未考虑rename的情况 目前先在jgitHelper {@link JGitHelper#getDiffEntry} 中修改了rename处理
+     * fixme 未考虑rename的情况 目前先在jgitHelper {@link JGitHelper# getDiffEntry} 中修改了rename处理
      */
     private void saveFileMeasureData(String repoId, String commitId, String commitTime, String repoPath) {
         FileMeasure fileMeasure = new FileMeasure();

@@ -38,11 +38,12 @@ public class MeasureScanController {
         repoId = jsonObject.getString(repoId);
         branch = jsonObject.getString(branch);
         beginCommit = jsonObject.getString(beginCommit);
+
         // TODO 调用 tool scan 流程
         try {
             // 调用javancss工具进行扫描 目前measure服务只有这个扫描工具
             if (toolName.equals("javancss")){
-                measureScanService.scan(repoId, branch, beginCommit);
+                measureScanService.scanByJavancss(repoId, branch, beginCommit, toolName);
             }
             return ResponseBean.builder().code(200).build();
         }catch (Exception e) {

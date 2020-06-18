@@ -7,6 +7,7 @@ public interface MeasureScanService {
      * @param repoId
      * @param branch
      * @param beginCommit
+     * @param toolName
      */
-    void scan(String repoId, String branch, String beginCommit);
+    void scanByJavancss(String repoId, String branch, String beginCommit, String toolName);
 }
