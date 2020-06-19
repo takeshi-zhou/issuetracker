@@ -20,6 +20,8 @@ public interface MeasureScanMapper {
 
     void updateMeasureScan(MeasureScan measureScan);
 
+    List<Map<String, Object>> getScanStatus(@Param("repo_id") String repoId);
+
 
 
 }

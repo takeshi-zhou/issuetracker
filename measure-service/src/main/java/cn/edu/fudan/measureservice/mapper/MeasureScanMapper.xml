@@ -75,40 +75,22 @@
         </where>
     </update>
 
-
-
-    <select id="getDevHistoryCommitInfo" parameterType="String" resultType="java.util.HashMap">
+    <select id="getScanStatus" parameterType="String" resultType="java.util.HashMap">
         SELECT
-            commit_id,commit_time,developer_name,commit_message,first_parent_commit_id,second_parent_commit_id
+            scanned_commit_count AS scannedCommitCount,
+            status,
+            scan_time AS scanTime,
+            start_scan_time AS startScanTime,
+            end_scan_time AS endScanTime
         FROM
-            repo_measure
+            measure_scan
         WHERE
             repo_id = #{repo_id}
-            and
-            DATE(commit_time) BETWEEN #{since} AND #{until}
-        ORDER BY
-            commit_time
+        ORDER BY start_scan_time DESC
+        LIMIT 1
     </select>
 
-    <select id="getCcnByCommitIdAndFilePath" parameterType="String" resultType="Integer">
-        SELECT
-            ccn
-        FROM
-            file_measure
-        WHERE
-            commit_id = #{commit_id}
-            and
-            file_path = #{file_path}
-    </select>
 
-    <select id="getDevHistoryFileInfo" parameterType="String" resultType="java.util.HashMap">
-        SELECT
-            file_path, commit_id, ccn, diff_ccn, add_lines, del_lines
-        FROM
-            file_measure
-        WHERE
-            commit_id = #{commit_id}
-    </select>
 
 
 

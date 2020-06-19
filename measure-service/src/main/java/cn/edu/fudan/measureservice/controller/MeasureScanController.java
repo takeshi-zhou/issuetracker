@@ -6,10 +6,7 @@ import cn.edu.fudan.measureservice.service.MeasureScanServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.tools.Tool;
 
@@ -48,6 +45,23 @@ public class MeasureScanController {
             return ResponseBean.builder().code(200).build();
         }catch (Exception e) {
             log.error("measure scan failed! message is {}", e.getMessage());
+            return ResponseBean.builder().code(500).data(e.getMessage()).build();
+        }
+    }
+
+
+    @GetMapping(value = {"/measure/{toolName}/scan-status"})
+    public ResponseBean getScanStatus(@RequestParam String repoId,@PathVariable String toolName) {
+
+        try {
+            //目前measure服务只有这个扫描工具
+            Object result = null;
+            if (toolName.equals("javancss")){
+                result = measureScanService.getScanStatus(repoId);
+            }
+            return ResponseBean.builder().code(200).data(result).build();
+        }catch (Exception e) {
+            log.error("get scan status failed! message is {}", e.getMessage());
             return ResponseBean.builder().code(500).data(e.getMessage()).build();
         }
     }

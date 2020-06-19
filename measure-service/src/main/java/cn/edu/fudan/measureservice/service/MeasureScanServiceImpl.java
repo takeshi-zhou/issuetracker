@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -482,8 +483,18 @@ public class MeasureScanServiceImpl implements MeasureScanService {
     }
 
 
-
-
-
-
+    @Override
+    public Object getScanStatus(String repoId) {
+        List<Map<String, Object>> result = measureScanMapper.getScanStatus(repoId);
+        for (int i = 0; i < result.size(); i++){
+            Map<String, Object> map;
+            map = result.get(i);
+            //将数据库中timeStamp/dateTime类型转换成指定格式的字符串 map.get("commit_time") 这个就是数据库中dateTime类型
+            String startScanTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(map.get("startScanTime"));
+            map.put("startScanTime",startScanTime);
+            String endScanTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(map.get("endScanTime"));
+            map.put("endScanTime",endScanTime);
+        }
+        return result.get(0);
+    }
 }
