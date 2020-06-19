@@ -113,7 +113,7 @@ public class ProjectServiceImpl implements ProjectService {
         String type=projectInfo.getString("type");
         //如果没有规定type的值，默认给bug（即用findbugs扫描）
         if (type == null || type.equals("")){
-            type = "bug";
+            type = "findbugs";
         }
         List<Project> verifyProjectList= projectDao.getProjectsByCondition(accountId,type,name,null);
         if(verifyProjectList.size()>=1){
