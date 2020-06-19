@@ -150,8 +150,8 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
         try {
             repoPath=restInterfaceManager.getRepoPath(repoId,commitId);
             CommitChange commitChange = JGitUtil.getNewlyIncreasedLines(repoPath, commitId);
-            //由于多线程这个字段弃用
-            //preCloneLines = getCloneLines(repoId, preCommitId);
+            JGitUtil jGitHelper = new JGitUtil(repoPath);
+            Date commitTime = new Date(jGitHelper.getLongCommitTime(commitId));
             currentCloneLines = getCloneLines(repoId, commitId);
             map = commitChange.getAddMap();
             increasedLines = commitChange.getAddLines();
@@ -183,6 +183,7 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
 
             cloneMeasure.setAddLines(increasedLines);
             cloneMeasure.setCloneLines(currentCloneLines);
+            cloneMeasure.setCommitTime(commitTime);
             cloneMeasureDao.insertCloneMeasure(cloneMeasure);
             logger.info("{} -> cloneInfoList size : {}", Thread.currentThread().getName(), cloneInfoList.size());
             if(cloneInfoList.size() > 0){
@@ -244,6 +245,12 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
 
         }
 
+    }
+
+    @Override
+    public CloneMeasure getLatestCloneMeasure(String repoId) {
+
+        return cloneMeasureDao.getLatestCloneLines(repoId);
     }
 
 

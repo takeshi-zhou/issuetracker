@@ -28,6 +28,17 @@ public class CloneMeasureController {
         }
     }
 
+    @GetMapping(value = {"/cloneMeasure/latestCloneLines"})
+    public ResponseBean getLatestCloneLines(@RequestParam("repo_id") String repoId){
+
+        try{
+            return new ResponseBean(200,"success",cloneMeasureService.getLatestCloneMeasure(repoId));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
     @GetMapping(value = {"/cloneMeasure/getMeasureClone"})
     public ResponseBean getMeasureCloneData(@RequestParam("repo_id") String repoId,
                                             @RequestParam("developer") String developer,
