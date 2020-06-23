@@ -159,4 +159,21 @@ public class MeasureDeveloperController {
         }
     }
 
+    @GetMapping("/measure/LOC")
+    @CrossOrigin
+    public ResponseBean getLOCByCondition(@RequestParam(value = "repo-id", required = false)String repoId,
+                                    @RequestParam(value = "developer", required = false)String developer,
+                                    @RequestParam(value = "begin-date", required = false)String beginDate,
+                                    @RequestParam(value = "end-date", required = false)String endDate,
+                                          @RequestParam(value = "type", required = false, defaultValue = "total")String type){
+
+        try{
+            return new ResponseBean(200,"success",measureDeveloperService.getLOCByCondition(repoId,developer,beginDate,endDate,type));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+
 }

@@ -121,8 +121,6 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
     @Override
     public Object getCodeChangesByDurationAndDeveloperName(String developer_name, String since, String until, String token, String category,String repoId) {
-        String repoPath=null;
-        int[] lineChanges ;
         CommitBase commitBase = new CommitBase();
         int lineAdds = 0;
         int lineDels = 0;
@@ -537,4 +535,17 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         return new DeveloperMetrics(developer, efficiency, quality, competence);
     }
 
+    @Override
+    public Object getLOCByCondition(String repoId, String developer, String beginDate, String endDate, String type) {
+        int totalLOC = repoMeasureMapper.getLOCByCondition(repoId,developer,beginDate,endDate);
+        if (type.equals("total")){
+            return totalLOC;
+        }
+        if (type.equals("dayAverage")){
+            List<Map<String, Object>> commitDays = repoMeasureMapper.getCommitDays(repoId,developer,beginDate,endDate);
+            int days = commitDays.size();
+            return totalLOC/days;
+        }
+        return ("please input correct type: total or dayAverage !");
+    }
 }

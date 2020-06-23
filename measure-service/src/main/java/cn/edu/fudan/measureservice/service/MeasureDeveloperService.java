@@ -95,4 +95,16 @@ public interface MeasureDeveloperService {
      */
     Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool);
 
+    /**
+     *
+     * @param repoId
+     * @param developer
+     * @param beginDate
+     * @param endDate
+     * @param type
+     * @return 根据条件返回开发者LOC数据
+     */
+    Object getLOCByCondition(String repoId, String developer, String beginDate, String endDate, String type);
+
+
 }

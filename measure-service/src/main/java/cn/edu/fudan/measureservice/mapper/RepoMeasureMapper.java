@@ -64,12 +64,11 @@ public interface RepoMeasureMapper {
 
     List<Map<String, Object>> getDeveloperListByRepoId(@Param("repo_id")String repo_id);
 
-    String getLastCommitId(@Param("commit_id")String commit_id);
-
     String getLastScannedCommitId(@Param("repo_id")String repoId);
 
+    int getLOCByCondition(@Param("repo_id")String repoId,@Param("developer_name")String developerName,@Param("since")String beginDate,@Param("until")String endDate);
 
-
+    List<Map<String, Object>> getCommitDays(@Param("repo_id")String repoId,@Param("developer_name")String developerName,@Param("since")String beginDate,@Param("until")String endDate);
 
 
 }
