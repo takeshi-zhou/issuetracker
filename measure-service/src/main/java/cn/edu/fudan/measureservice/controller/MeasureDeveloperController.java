@@ -96,7 +96,9 @@ public class MeasureDeveloperController {
         }
     }
 
-    //根据时间粒度获取程序员活跃度画像
+    /**
+     *     根据时间粒度获取程序员活跃度画像
+     */
     @GetMapping("/measure/repository/developer-activeness-granularity")
     @CrossOrigin
     public ResponseBean getDeveloperActivenessByGranularity(@RequestParam("repo_id")String repo_id,
@@ -111,7 +113,9 @@ public class MeasureDeveloperController {
         }
     }
 
-    //根据时间段获取程序员活跃度画像
+    /**
+     *     根据时间段获取程序员活跃度画像
+     */
     @GetMapping("/measure/repository/developer-activeness-duration")
     @CrossOrigin
     public ResponseBean getDeveloperActivenessByDuration(@RequestParam("repo_id")String repo_id,

@@ -1,40 +1,16 @@
 package cn.edu.fudan.measureservice.service;
 
-import cn.edu.fudan.measureservice.analyzer.MeasureAnalyzer;
 import cn.edu.fudan.measureservice.component.RestInterfaceManager;
-import cn.edu.fudan.measureservice.domain.Package;
 import cn.edu.fudan.measureservice.domain.*;
-import cn.edu.fudan.measureservice.domain.test.Commit;
-import cn.edu.fudan.measureservice.handler.ResultHandler;
-import cn.edu.fudan.measureservice.mapper.PackageMeasureMapper;
 import cn.edu.fudan.measureservice.mapper.RepoMeasureMapper;
-import cn.edu.fudan.measureservice.portrait.Competence;
-import cn.edu.fudan.measureservice.portrait.DeveloperMetrics;
-import cn.edu.fudan.measureservice.portrait.Efficiency;
-import cn.edu.fudan.measureservice.portrait.Quality;
 import cn.edu.fudan.measureservice.util.DateTimeUtil;
-import cn.edu.fudan.measureservice.util.GitUtil;
-import cn.edu.fudan.measureservice.util.JGitHelper;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.DecimalFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,27 +32,12 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
     private int relativelyActive;
 
 
-    private MeasureAnalyzer measureAnalyzer;
-    private ResultHandler resultHandler;
     private RestInterfaceManager restInterfaceManager;
     private RepoMeasureMapper repoMeasureMapper;
-    private PackageMeasureMapper packageMeasureMapper;
-    private GitUtil gitUtil;
 
-
-    public MeasureRepoServiceImpl(MeasureAnalyzer measureAnalyzer,
-                                  ResultHandler resultHandler,
-                                  RestInterfaceManager restInterfaceManager,
-                                  RepoMeasureMapper repoMeasureMapper,
-                                  PackageMeasureMapper packageMeasureMapper,
-                                  GitUtil gitUtil) {
-        this.measureAnalyzer = measureAnalyzer;
-        this.resultHandler = resultHandler;
-        this.restInterfaceManager=restInterfaceManager;
-        this.repoMeasureMapper=repoMeasureMapper;
-        this.packageMeasureMapper=packageMeasureMapper;
-        this.gitUtil=gitUtil;
-
+    public MeasureRepoServiceImpl(RestInterfaceManager restInterfaceManager, RepoMeasureMapper repoMeasureMapper) {
+        this.restInterfaceManager = restInterfaceManager;
+        this.repoMeasureMapper = repoMeasureMapper;
     }
 
     @Override
@@ -199,7 +160,9 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
         return commitBase;
     }
 
-    //该方法返回一段时间内某个开发者的工作量指标，如果不指定开发者这个参数，则返回所有开发者在该项目中的工作量指标
+    /**
+     *     该方法返回一段时间内某个开发者的工作量指标，如果不指定开发者这个参数，则返回所有开发者在该项目中的工作量指标
+     */
     @Override
     public CommitBaseInfoDuration getCommitBaseInformationByDuration(String repo_id, String since, String until, String developer_name) {
         CommitBaseInfoDuration commitBaseInfoDuration = new CommitBaseInfoDuration();
@@ -314,7 +277,9 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
     }
 
 
-    //jeff 获取一个repo的每月commit次数
+    /**
+     *     获取一个repo的每月commit次数
+     */
     @Override
     public List<CommitCountsMonthly> getCommitCountsMonthly(String repo_id) {
         List<CommitCountsMonthly> result=new ArrayList<>();
@@ -357,7 +322,9 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
         return commitCountsByDuration;
     }
 
-    //把日期格式从“2010.10.10转化为2010-10-10”
+    /**
+     *     把日期格式从“2010.10.10转化为2010-10-10”
+     */
     private String dateFormatChange(String dateStr){
         String newdateStr = dateStr.replace('.','-');
         return newdateStr;

@@ -102,7 +102,9 @@ public class MeasureRepoController {
     }
 
     //不在中汇、不在前端需求、但画图可用
-    //获取一个repo的每月commit次数
+    /**
+     *     获取一个repo的每月commit次数
+     */
     @GetMapping("/measure/repository/commit-counts-monthly")
     @CrossOrigin
     public ResponseBean getRepoCommitCountsMonthly(@RequestParam("repo_id")String repo_id)
