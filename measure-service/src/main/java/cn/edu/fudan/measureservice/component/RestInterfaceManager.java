@@ -1,15 +1,10 @@
 package cn.edu.fudan.measureservice.component;
 
-import cn.edu.fudan.measureservice.domain.Category;
-import cn.edu.fudan.measureservice.domain.CommitCountsMonthly;
-import cn.edu.fudan.measureservice.service.MeasureServiceImpl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.protocol.types.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
