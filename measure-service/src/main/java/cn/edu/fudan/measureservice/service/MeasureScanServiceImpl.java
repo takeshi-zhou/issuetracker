@@ -22,6 +22,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -60,6 +61,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         this.measureScanMapper = measureScanMapper;
     }
 
+    @Async
     @Override
     public void scanByJavancss(String repoId, String branch, String beginCommit, String toolName) {
         //1. 判断beginCommit是否为空,为空则表示此次为update，不为空表示此次为第一次扫描
