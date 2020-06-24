@@ -66,6 +66,8 @@ public interface RepoMeasureMapper {
 
     String getLastCommitId(@Param("commit_id")String commit_id);
 
+    String getLastScannedCommitId(@Param("repo_id")String repoId);
+
 
 
 

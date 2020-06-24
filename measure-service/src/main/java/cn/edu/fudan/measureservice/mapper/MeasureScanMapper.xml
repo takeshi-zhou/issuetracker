@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.fudan.measureservice.mapper.MeasureScanMapper">
+
+    <resultMap id="measureScan" type="MeasureScan">
+        <id property="uuid" column="uuid"/>
+        <result property="repoId" column="repo_id"/>
+        <result property="tool" column="tool"/>
+        <result property="startCommit" column="start_commit"/>
+        <result property="endCommit" column="end_commit"/>
+        <result property="totalCommitCount" column="total_commit_count"/>
+        <result property="scannedCommitCount" column="scanned_commit_count"/>
+        <result property="scanTime" column="scan_time"/>
+        <result property="status" column="status"/>
+        <result property="startScanTime" column="start_scan_time"/>
+        <result property="endScanTime" column="end_scan_time"/>
+    </resultMap>
+
+    <insert id="insertOneMeasureScan" parameterType="MeasureScan">
+        insert into measure_scan
+            (
+               uuid,
+               repo_id,
+               tool,
+               start_commit,
+               end_commit,
+               total_commit_count,
+               scanned_commit_count,
+               scan_time,
+               status,
+               start_scan_time,
+               end_scan_time
+            )
+        values
+           (
+              #{uuid},
+              #{repoId},
+              #{tool},
+              #{startCommit},
+              #{endCommit},
+              #{totalCommitCount},
+              #{scannedCommitCount},
+              #{scanTime},
+              #{status},
+              #{startScanTime},
+              #{endScanTime}
+           )
+    </insert>
+
+    <update id="updateMeasureScan" parameterType="MeasureScan">
+        update measure_scan
+        <trim prefix="set" suffixOverrides=",">
+            <if test="totalCommitCount != null">
+                total_commit_count=#{totalCommitCount},
+            </if>
+            <if test="status != null and status != ''">
+                status=#{status},
+            </if>
+            <if test="scannedCommitCount != null">
+                scanned_commit_count=#{scannedCommitCount},
+            </if>
+            <if test="endCommit != null and endCommit != ''">
+                end_commit=#{endCommit},
+            </if>
+            <if test="scanTime != null">
+                scan_time=#{scanTime},
+            </if>
+            <if test="endScanTime != null">
+                end_scan_time=#{endScanTime},
+            </if>
+        </trim>
+        <where>
+            uuid = #{uuid}
+        </where>
+    </update>
+
+    <select id="getScanStatus" parameterType="String" resultType="java.util.HashMap">
+        SELECT
+            scanned_commit_count AS scannedCommitCount,
+            status,
+            scan_time AS scanTime,
+            start_scan_time AS startScanTime,
+            end_scan_time AS endScanTime
+        FROM
+            measure_scan
+        WHERE
+            repo_id = #{repo_id}
+        ORDER BY start_scan_time DESC
+        LIMIT 1
+    </select>
+
+
+
+
+
+
+</mapper>

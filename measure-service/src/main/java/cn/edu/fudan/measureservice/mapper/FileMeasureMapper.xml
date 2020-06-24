@@ -78,6 +78,9 @@
             commit_id = #{commit_id}
     </select>
 
+    <select id="sameMeasureOfOneFile" resultType="int">
+        select count(*) from file_measure where repo_id = #{repo_id} and commit_id = #{commit_id} and file_path = #{file_path}
+    </select>
 
 
 </mapper>

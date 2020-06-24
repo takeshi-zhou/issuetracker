@@ -344,7 +344,19 @@
         FROM
             repo_measure
         WHERE
-            commit_id= #{commit_id}
+            commit_id = #{commit_id}
+    </select>
+
+    <select id="getLastScannedCommitId" parameterType="String" resultType="String">
+        SELECT
+            commit_id
+        FROM
+            repo_measure
+        WHERE
+            repo_id = #{repo_id}
+        ORDER BY
+            commit_time DESC
+        LIMIT 1;
     </select>
 
 
