@@ -1,5 +1,7 @@
 package cn.edu.fudan.cloneservice.scan.service;
 
+import cn.edu.fudan.cloneservice.scan.domain.CloneRepo;
+
 /**
  * @author zyh
  * @date 2020/5/25
@@ -18,4 +20,11 @@ public interface ScanService {
      * @param repoId
      */
     void deleteCloneScan(String repoId);
+
+    /**
+     * 获取最新的clone repo
+     * @param repoId repo id
+     * @return clone repo
+     */
+    CloneRepo getLatestCloneRepo(String repoId);
 }

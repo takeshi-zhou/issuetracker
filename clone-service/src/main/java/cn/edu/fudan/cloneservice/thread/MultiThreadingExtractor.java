@@ -1,17 +1,27 @@
 package cn.edu.fudan.cloneservice.thread;
 
 import cn.edu.fudan.cloneservice.component.RestInterfaceManager;
+import cn.edu.fudan.cloneservice.scan.dao.CloneRepoDao;
+import cn.edu.fudan.cloneservice.scan.domain.CloneRepo;
 import cn.edu.fudan.cloneservice.scan.task.ScanTask;
 import cn.edu.fudan.cloneservice.service.CloneMeasureService;
 import cn.edu.fudan.cloneservice.util.JGitUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.RequestScope;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author zyh
@@ -19,6 +29,7 @@ import java.util.concurrent.*;
  * 多生产者多消费者模式
  */
 @Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MultiThreadingExtractor {
 
     private static final Logger logger = LoggerFactory.getLogger(MultiThreadingExtractor.class);
@@ -30,11 +41,21 @@ public class MultiThreadingExtractor {
         this.restInterfaceManager = restInterfaceManager;
     }
 
-    @Autowired
+
     private ScanTask scanTask;
 
     @Autowired
+    public void setScanTask(ScanTask scanTask) {
+        this.scanTask = scanTask;
+    }
+
+
     private CloneMeasureService cloneMeasureService;
+
+    @Autowired
+    public void setCloneMeasureService(CloneMeasureService cloneMeasureService) {
+        this.cloneMeasureService = cloneMeasureService;
+    }
 
     /**
      * clone扫描阶段线程池
@@ -57,6 +78,22 @@ public class MultiThreadingExtractor {
      */
     private BlockingQueue<String> measureQueue;
 
+    private AtomicInteger scanCount;
+
+    private CloneRepoDao cloneRepoDao;
+
+    @Autowired
+    public void setCloneRepoDao(CloneRepoDao cloneRepoDao) {
+        this.cloneRepoDao = cloneRepoDao;
+    }
+
+    /**
+     * 需要无参构造函数，可以创建非单例bean
+     */
+    public MultiThreadingExtractor(){
+        this(5);
+    }
+
     public MultiThreadingExtractor(int corePoolSize){
 
         scanQueue = new LinkedTransferQueue<>();
@@ -77,18 +114,22 @@ public class MultiThreadingExtractor {
 
     public void extract(String repoId, String startCommitId){
 
+        scanCount = new AtomicInteger(0);
+
         logger.info("start clone scan........");
 
         long start = System.currentTimeMillis();
 
-        extractCommitIds(repoId, startCommitId);
+        String uuid = UUID.randomUUID().toString();
+
+        extractCommitIds(repoId, startCommitId, uuid);
         //可以建立线程池来管理
         Thread scan = new Thread(()->
                 scanSynchronously(repoId)
                 ,"cloneScan");
 
         Thread measure = new Thread(()->
-                measureSynchronously(repoId)
+                measureSynchronously(repoId, uuid)
                 ,"cloneMeasure");
 
         scan.start();
@@ -102,14 +143,19 @@ public class MultiThreadingExtractor {
         }
 
         long end = System.currentTimeMillis();
-
         long cost = (end - start)/(1000*60);
+        CloneRepo cloneRepo = new CloneRepo();
+        cloneRepo.setUuid(uuid);
+        cloneRepo.setEndScanTime(new Date());
+        cloneRepo.setStatus("complete");
+        cloneRepo.setScanTime((int)((end - start)/1000));
+        cloneRepoDao.updateScan(cloneRepo);
 
         logger.info("repo:{} -> took {} minutes to complete the clone scan and measure scan", repoId, cost);
 
     }
 
-    private void extractCommitIds(String repoId, String startCommitId) {
+    private void extractCommitIds(String repoId, String startCommitId, String cloneRepoUuid) {
 
         String repoPath = null;
         List<String> commitList = new ArrayList<>();
@@ -128,10 +174,26 @@ public class MultiThreadingExtractor {
         //先执行粒度为method，仅需执行一次最近的commit
         String latestCommitId = commitList.get(commitList.size() - 1);
         scanTask.runSynchronously(repoId,latestCommitId, "method");
+        CloneRepo cloneRepo = initCloneRepo(repoId);
+        cloneRepo.setUuid(cloneRepoUuid);
+        cloneRepo.setStartScanTime(new Date());
+        cloneRepo.setStartCommit(startCommitId);
+        cloneRepo.setEndCommit(latestCommitId);
+        cloneRepo.setTotalCommitCount(commitList.size());
+        cloneRepoDao.insertCloneRepo(cloneRepo);
+
         for (String commitId : commitList) {
             scanQueue.offer(commitId);
         }
 
+    }
+
+    private CloneRepo initCloneRepo(String repoId){
+        CloneRepo cloneRepo = new CloneRepo();
+        cloneRepo.setRepoId(repoId);
+        cloneRepo.setStatus("scanning");
+        cloneRepo.setScanCount(cloneRepoDao.getScanCount(repoId)+1);
+        return cloneRepo;
     }
 
     /**
@@ -165,20 +227,24 @@ public class MultiThreadingExtractor {
     /**
      * measure列表的消费者
      */
-    private void measureSynchronously(String repoId){
+    private void measureSynchronously(String repoId, String uuid){
 
         logger.info("start clone measure");
         while (true){
 
             try {
                 //10分钟内取不出就退出
-                String commitId = measureQueue.poll(10, TimeUnit.MINUTES);
+                String commitId = measureQueue.poll(1, TimeUnit.MINUTES);
                 if(commitId == null){
                     break;
                 }
                 measureThreadPool.submit(()->{
                     logger.info("{}-> start measure", Thread.currentThread().getName());
                     cloneMeasureService.insertCloneMeasure(repoId, commitId);
+                    CloneRepo cloneRepo = new CloneRepo();
+                    cloneRepo.setUuid(uuid);
+                    cloneRepo.setScannedCommitCount(scanCount.incrementAndGet());
+                    cloneRepoDao.updateScan(cloneRepo);
                 });
 
             } catch (InterruptedException e) {
