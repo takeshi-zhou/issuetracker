@@ -49,4 +49,11 @@ public interface CloneMeasureMapper {
      */
     Integer getMeasureCountByCommitId(@Param("repo_id") String repoId,
                                       @Param("commit_id")String commitId);
+
+    /**
+     * 获取最新一次commit的clone行数
+     * @param repoId repo id
+     * @return
+     */
+    CloneMeasure getLatestCloneLines(@Param("repo_id") String repoId);
 }

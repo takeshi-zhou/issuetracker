@@ -1,7 +1,6 @@
 package cn.edu.fudan.cloneservice.domain;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -18,7 +17,7 @@ public class CloneMeasure {
     private int selfCloneLines;
     private int addLines;
     private int cloneLines;
-    private int preCloneLines;
+    private Date commitTime;
 
     private Map<String, String> addCloneLocationMap;
 
@@ -80,16 +79,16 @@ public class CloneMeasure {
         this.cloneLines = cloneLines;
     }
 
-    public int getPreCloneLines() {
-        return preCloneLines;
-    }
-
-    public void setPreCloneLines(int preCloneLines) {
-        this.preCloneLines = preCloneLines;
-    }
-
     public Map<String, String> getAddCloneLocationMap() {
         return addCloneLocationMap;
+    }
+
+    public Date getCommitTime() {
+        return commitTime;
+    }
+
+    public void setCommitTime(Date commitTime) {
+        this.commitTime = commitTime;
     }
 
     public void setAddCloneLocationMap(Map<String, String> addCloneLocationMap) {

@@ -65,7 +65,7 @@ public class JGitUtil {
         }
     }
 
-    private Long getLongCommitTime(String version) {
+    public Long getLongCommitTime(String version) {
         try {
             RevCommit revCommit = revWalk.parseCommit(ObjectId.fromString(version));
             return revCommit.getCommitTime() * 1000L;
@@ -102,6 +102,11 @@ public class JGitUtil {
         return new ArrayList<>(sortByValue(commitMap).keySet());
     }
 
+    private boolean isMerge(RevCommit revCommit){
+        RevCommit[] parents = revCommit.getParents();
+        return parents.length == 2;
+    }
+
     public List<String> getCommitList(String repoPath, String startDate, String endDate, String developer) {
 
         Map<String, Long> commitMap = new HashMap<>(512);
@@ -121,6 +126,9 @@ public class JGitUtil {
                 long end = dateFormat.parse(endDate).getTime();
                 Iterable<RevCommit> commits = git.log().call();
                 for (RevCommit commit : commits) {
+                    if(isMerge(commit)){
+                        continue;
+                    }
                     long commitTime = commit.getCommitTime() * 1000L;
                     if(developer != null){
                         if (commitTime <= end && commitTime >= start && commit.getAuthorIdent().getName().equals(developer)) {
@@ -192,7 +200,6 @@ public class JGitUtil {
         return isSameDeveloperClone;
 
     }
-
 
     public static Set<String> getDeveloperList(String repoPath){
         Set<String> spi = new HashSet<>();
