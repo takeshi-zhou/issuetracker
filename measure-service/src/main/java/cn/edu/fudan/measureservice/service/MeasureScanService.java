@@ -1,5 +1,7 @@
 package cn.edu.fudan.measureservice.service;
 
+import cn.edu.fudan.measureservice.domain.dto.RepoResourceDTO;
+
 public interface MeasureScanService {
 
     /**
@@ -18,4 +20,6 @@ public interface MeasureScanService {
      */
     Object getScanStatus(String repoId);
 
+
+    Boolean scan(RepoResourceDTO repoResource, String branch, String beginCommit, String toolName);
 }

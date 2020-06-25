@@ -1,11 +1,10 @@
 package cn.edu.fudan.measureservice.service;
 
-import cn.edu.fudan.measureservice.analyzer.MeasureAnalyzer;
+import cn.edu.fudan.measureservice.analyzer.JavaNcss;
 import cn.edu.fudan.measureservice.component.RestInterfaceManager;
 import cn.edu.fudan.measureservice.domain.*;
 import cn.edu.fudan.measureservice.domain.Package;
 import cn.edu.fudan.measureservice.domain.test.Commit;
-import cn.edu.fudan.measureservice.handler.ResultHandler;
 import cn.edu.fudan.measureservice.mapper.PackageMeasureMapper;
 import cn.edu.fudan.measureservice.mapper.RepoMeasureMapper;
 import cn.edu.fudan.measureservice.portrait.Competence;
@@ -15,19 +14,16 @@ import cn.edu.fudan.measureservice.portrait.Quality;
 import cn.edu.fudan.measureservice.util.DateTimeUtil;
 import cn.edu.fudan.measureservice.util.GitUtil;
 import cn.edu.fudan.measureservice.util.JGitHelper;
-import cn.edu.fudan.measureservice.util.JGitUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.protocol.types.Field;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -59,22 +55,16 @@ public class MeasureServiceImpl implements MeasureService {
     private int relativelyActive;
 
 
-    private MeasureAnalyzer measureAnalyzer;
-    private ResultHandler resultHandler;
     private RestInterfaceManager restInterfaceManager;
     private RepoMeasureMapper repoMeasureMapper;
     private PackageMeasureMapper packageMeasureMapper;
     private GitUtil gitUtil;
 
 
-    public MeasureServiceImpl(MeasureAnalyzer measureAnalyzer,
-                              ResultHandler resultHandler,
-                              RestInterfaceManager restInterfaceManager,
+    public MeasureServiceImpl(RestInterfaceManager restInterfaceManager,
                               RepoMeasureMapper repoMeasureMapper,
                               PackageMeasureMapper packageMeasureMapper,
                               GitUtil gitUtil) {
-        this.measureAnalyzer = measureAnalyzer;
-        this.resultHandler = resultHandler;
         this.restInterfaceManager=restInterfaceManager;
         this.repoMeasureMapper=repoMeasureMapper;
         this.packageMeasureMapper=packageMeasureMapper;
@@ -148,39 +138,6 @@ public class MeasureServiceImpl implements MeasureService {
         return null;
     }
 
-    //监听项目的commit列表的消息,保存度量信息
-    @KafkaListener(id = "measure", topics = {"Measure"}, groupId = "measure")
-    public void commitInfoListener(ConsumerRecord<String, String> consumerRecord, Acknowledgment ack) {
-        List<CommitWithTime> commits=JSONArray.parseArray(consumerRecord.value(),CommitWithTime.class);
-        logger.info("received message from topic -> " + consumerRecord.topic() + " : " + commits.size()+" commits need to scan!");
-        ack.acknowledge();
-        for(CommitWithTime commit:commits){
-            String commitId = commit.getCommitId();
-            String repoId = commit.getRepoId();
-            if (commitId == null || commitId.length() == 0){
-                logger.error("Save measure info failed : commitId is null!");
-                continue;
-            }
-            if (repoId == null || repoId.length() == 0){
-                logger.error("Save measure info failed : repoId is null!");
-                continue;
-            }
-            String repoPath = null;
-            try {
-                repoPath = restInterfaceManager.getRepoPath(repoId,commitId);
-                if (repoPath!=null){
-                    logger.info("Start to save measure info: repoId is " + repoId + " commitId is " + commitId);
-                    saveMeasureData(commit.getRepoId(),commitId,commit.getCommitTime(),repoPath);
-                }
-            }finally {
-                if(repoPath!=null) {
-                    restInterfaceManager.freeRepoPath(repoId,repoPath);
-                }
-            }
-        }
-        logger.info("all complete!!!");
-    }
-
     //保存某个项目某个commit的度量信息
     public void saveMeasureData(String repoId, String commitId,String commitTime,String repoPath) {
         try{
@@ -196,7 +153,7 @@ public class MeasureServiceImpl implements MeasureService {
         Measure measure=null;
         try{
             if(repoPath!=null) {
-                measure=measureAnalyzer.analyze(repoPath,"",resultHandler);
+                measure = JavaNcss.analyse(repoPath);
             }
         }catch (Exception e){
             logger.error("获取某commit的Measure时出错：");
@@ -285,7 +242,7 @@ public class MeasureServiceImpl implements MeasureService {
 
 
             //获取该commit是否是merge
-            repoMeasure.setIs_merge(jGitHelper.isMerge(revCommit));
+            repoMeasure.set_merge(jGitHelper.isMerge(revCommit));
 
             //如果是最初始的那个commit，那么工作量记为0，否则  则进行git diff 对比获取工作量
             boolean isInitCommitByJGit = jGitHelper.isInitCommit(revCommit);
