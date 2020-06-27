@@ -43,6 +43,9 @@ import static cn.edu.fudan.measureservice.util.DateTimeUtil.timeTotimeStamp;
 public class JGitHelper {
     private Logger logger = LoggerFactory.getLogger(JGitHelper.class);
 
+    private static final String JPMS = "module-info.java";
+
+
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
     private static final int MERGE_WITH_CONFLICT = -1;
     private static final int MERGE_WITHOUT_CONFLICT = 2;
@@ -329,8 +332,11 @@ public class JGitHelper {
             if (fullName.endsWith(".java")){
                 //并且去除其中的test文件
                 if (fullName.contains("/test/") ||
+                        fullName.contains("/.mvn/") ||
+                        fullName.contains(JPMS) ||
                         shortName.endsWith("test.java") ||
                         shortName.endsWith("tests.java") ||
+                        shortName.endsWith("enum.java") ||
                         shortName.startsWith("test")){
                     continue;
                 }else {
@@ -390,13 +396,13 @@ public class JGitHelper {
                         if (fullName.endsWith(".java")){
                             //并且去除其中的test文件
                             if (fullName.contains("/test/") ||
+                                    fullName.contains("/.mvn/") ||
+                                    fullName.contains(JPMS) ||
                                     shortName.endsWith("test.java") ||
                                     shortName.endsWith("tests.java") ||
+                                    shortName.endsWith("enum.java") ||
                                     shortName.startsWith("test")){
-                                diffs.remove(i);//去除其中的test文件
-                            }else {
-//                                System.out.println("Entry: " + diffs.get(i));
-                                continue;
+                                diffs.remove(i);//去除其中的test等需要过滤得文件
                             }
                         }else {
                             diffs.remove(i);//去除非java文件

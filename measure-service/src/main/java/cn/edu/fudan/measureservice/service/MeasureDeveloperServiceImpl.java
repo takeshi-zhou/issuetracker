@@ -454,17 +454,17 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
         Quality quality = new Quality();
         //规范性指标
-        double standardScore = -1; //分母为0时返回-1
+        double standardScore = 1; //分母为0时也返回1
         if (totalIssueCount != 0){
             standardScore = developerStandardIssueCount*(1.0)/totalIssueCount == 0 ? 1 : developerStandardIssueCount*(1.0)/totalIssueCount;
         }
         //安全性指标
-        double securityScore = -1;//分母为0时返回-1
+        double securityScore = 1;//分母为0时返回1
         if (totalIssueCount != 0){
             securityScore = developerSecurityIssueCount*(1.0)/totalIssueCount == 0 ? 1 : developerSecurityIssueCount*(1.0)/totalIssueCount;
         }
         //缺陷率指标
-        double issueRate = -1;//分母为0时返回-1
+        double issueRate = 1;//分母为0时返回1
         if (totalNewIssueCount != 0){
             issueRate = developerNewIssueCount*(1.0)/totalNewIssueCount == 0 ? 1 : developerNewIssueCount*(1.0)/totalNewIssueCount;
         }
