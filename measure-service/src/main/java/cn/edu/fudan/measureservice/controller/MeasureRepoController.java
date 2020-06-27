@@ -18,7 +18,6 @@ public class MeasureRepoController {
         this.measureRepoService = measureRepoService;
     }
 
-    //前端需要
     @GetMapping("/measure/repository")
     @CrossOrigin
     public ResponseBean getMeasureDataByRepoId(@RequestParam("repo_id")String repo_id,
@@ -33,7 +32,9 @@ public class MeasureRepoController {
         }
     }
 
-    //属于中汇需求
+    /**
+     * 属于中汇需求
+     */
     @GetMapping("/measure/repository/commit")
     @CrossOrigin
     public ResponseBean getCodeChangesByCommit(@RequestParam("repo_id")String repo_id,
@@ -47,7 +48,6 @@ public class MeasureRepoController {
 
     }
 
-    //中汇、前端都需要
     /**
      *     获取一个repo在一段时间内的某个开发者的commit信息，如果不指定开发者参数，则返回所有开发者commit信息
      */
@@ -67,7 +67,6 @@ public class MeasureRepoController {
 
     }
 
-    //前端需要
     /**
      *     按照不同时间段（since、until），不同聚合粒度（granularity：天/周/月），不同开发者（developerName），获取工作量数据
      */
@@ -87,7 +86,9 @@ public class MeasureRepoController {
         }
     }
 
-    //中汇需要
+    /**
+     * 属于中汇需求
+     */
     @GetMapping("/measure/repository/commit-counts")
     @CrossOrigin
     public ResponseBean getRepoCommitCountsByCommit(@RequestParam("repo_id")String repo_id,
@@ -101,24 +102,9 @@ public class MeasureRepoController {
         }
     }
 
-    //不在中汇、不在前端需求、但画图可用
     /**
-     *     获取一个repo的每月commit次数
+     * 属于中汇需求
      */
-    @GetMapping("/measure/repository/commit-counts-monthly")
-    @CrossOrigin
-    public ResponseBean getRepoCommitCountsMonthly(@RequestParam("repo_id")String repo_id)
-                                                    {
-        try{
-            return new ResponseBean(200,"success",measureRepoService.getCommitCountsMonthly(repo_id));
-        }catch (Exception e){
-            e.printStackTrace();
-            return new ResponseBean(401,"failed",null);
-        }
-    }
-
-
-    //中汇需要
     @GetMapping("/measure/repo-information")
     @CrossOrigin
     public ResponseBean getRepoMeasureByAnalysis(@RequestParam("repo_id")String repo_id,
@@ -147,7 +133,9 @@ public class MeasureRepoController {
 
     }
 
-    //中汇需要
+    /**
+     * 属于中汇需求
+     */
     @GetMapping("/measure/repository/quality")
     @CrossOrigin
     public ResponseBean getRepoQualityByCommit(@RequestParam("repo_id")String repo_id,
@@ -165,7 +153,9 @@ public class MeasureRepoController {
 
     }
 
-    //中汇需要
+    /**
+     * 属于中汇需求
+     */
     @GetMapping("/measure/repository/quality-change")
     @CrossOrigin
     public ResponseBean getRepoQualityChangesByCommit(@RequestParam("repo_id")String repo_id,
@@ -183,7 +173,9 @@ public class MeasureRepoController {
 
     }
 
-    //中汇需要
+    /**
+     * 属于中汇需求
+     */
     @GetMapping("/measure/repository/active")
     @CrossOrigin
     public ResponseBean getRepoActivityByRepoId(@RequestParam("repo_id")String repo_id
@@ -298,7 +290,7 @@ public class MeasureRepoController {
         }
     }
 
-    @ApiOperation(value = "开发者列表", notes = "根据repoid获取开发者列表", httpMethod = "GET")
+    @ApiOperation(value = "开发者列表", notes = "根据repoId获取开发者列表", httpMethod = "GET")
     @GetMapping("/measure/repository/developer-list")
     @CrossOrigin
     public ResponseBean getDeveloperListByRepoId(@RequestParam("repo_id")String repo_id){

@@ -2,14 +2,10 @@ package cn.edu.fudan.measureservice.mapper;
 
 import cn.edu.fudan.measureservice.domain.CommitBase;
 import cn.edu.fudan.measureservice.domain.CommitInfoDeveloper;
-import cn.edu.fudan.measureservice.domain.Developer;
 import cn.edu.fudan.measureservice.domain.RepoMeasure;
-import cn.edu.fudan.measureservice.domain.test.Commit;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -36,25 +32,14 @@ public interface RepoMeasureMapper {
 
     void insertOneRepoMeasure(RepoMeasure repoMeasure);
 
-    RepoMeasure getLatestMeasureData(@Param("repo_id")String repo_id);
-
-    RepoMeasure getFirstMeasureDataAfterDuration(@Param("repo_id")String repo_id,@Param("time_line") Date time_line);
-
-    List<RepoMeasure> getRepoMeasureBetween(@Param("repo_id")String repo_id,@Param("since")String since,@Param("until")String until);
-
     void delRepoMeasureByRepoId(@Param("repo_id")String repo_id);
 
     /**
      * 根据 开发者名字与repo id获取项目度量列表，都可以为null
      *
-     * @param repo_id
-     * @param developer_name
-     * @param counts
      *
      */
     List<RepoMeasure> getRepoMeasureByDeveloperAndRepoId(@Param("repo_id")String repo_id,@Param("developer_name")String developer_name,@Param("counts")int counts,@Param("since")String since,@Param("until")String until);
-
-    List<Commit> getCommits(@Param("repo_id")String repo_id);
 
     List<Map<String, Object>> getDeveloperRankByCommitCount(@Param("repo_id")String repo_id, @Param("since")String since, @Param("until")String until);
 

@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -141,8 +140,7 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
 
     @Override
     public RepoMeasure getRepoMeasureByRepoIdAndCommitId(String repoId, String commitId) {
-        RepoMeasure repoMeasure = repoMeasureMapper.getRepoMeasureByCommit(repoId,commitId);
-        return repoMeasure;
+        return repoMeasureMapper.getRepoMeasureByCommit(repoId,commitId);
     }
 
     @Override
@@ -155,9 +153,7 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
     @Override
     public CommitBase getCommitBaseInformation(String repo_id, String commit_id) {
 
-        CommitBase commitBase = repoMeasureMapper.getCommitBaseInformation(repo_id,commit_id);
-
-        return commitBase;
+        return repoMeasureMapper.getCommitBaseInformation(repo_id,commit_id);
     }
 
     /**
@@ -185,7 +181,7 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
     @Override
     public List<CommitBaseInfoGranularity> getCommitBaseInfoGranularity(String repo_id, String granularity, String since, String until, String developer_name){
         //用于从数据库获取数据
-        CommitBaseInfoDuration commitBaseInfoDuration = new CommitBaseInfoDuration();
+        CommitBaseInfoDuration commitBaseInfoDuration;
         List<CommitBaseInfoGranularity> result=new ArrayList<>();
 
         //获取查询时的日期 也就是今天的日期,也作为查询时间段中的截止日期（如果until合法，就把untilDay的值赋值给today）
@@ -277,39 +273,6 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
     }
 
 
-    /**
-     *     获取一个repo的每月commit次数
-     */
-    @Override
-    public List<CommitCountsMonthly> getCommitCountsMonthly(String repo_id) {
-        List<CommitCountsMonthly> result=new ArrayList<>();
-        String startDateStr = repoMeasureMapper.getStartDateOfRepo(repo_id).substring(0,10);
-        //最早一次commit日期
-        LocalDate startDay=LocalDate.parse(startDateStr,DateTimeUtil.Y_M_D_formatter);
-        LocalDate indexDay = LocalDate.now();
-//        System.out.println(indexDay);
-        int counts = 0;
-        while(indexDay.isAfter(startDay)){
-            //当月第一天
-            LocalDate first = indexDay.with(TemporalAdjusters.firstDayOfMonth());
-            //当月最后一天
-            LocalDate last = indexDay.with(TemporalAdjusters.lastDayOfMonth());
-            counts = getCommitCountsByDuration(repo_id, first.toString(), last.toString());
-            result.add(getCommitMonth(indexDay.toString().substring(0,7), counts));
-            //indexDay 变成上个月最后一天
-            indexDay = first.minusDays(1);
-        }
-        return result;
-    }
-
-    private CommitCountsMonthly getCommitMonth(String time, int counts){
-        CommitCountsMonthly commitCountsMonthly=new CommitCountsMonthly();
-        commitCountsMonthly.setMonth(time);
-        commitCountsMonthly.setCommit_counts(counts);
-        return commitCountsMonthly;
-    }
-
-
     @Override
     public int getCommitCountsByDuration(String repo_id, String since, String until) {
         if (since.compareTo(until)>0 || since.length()>10 || until.length()>10){
@@ -318,16 +281,14 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
         String sinceday = dateFormatChange(since);
         String untilday = dateFormatChange(until);
 
-        int commitCountsByDuration = repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceday, untilday,null);
-        return commitCountsByDuration;
+        return repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceday, untilday,null);
     }
 
     /**
      *     把日期格式从“2010.10.10转化为2010-10-10”
      */
     private String dateFormatChange(String dateStr){
-        String newdateStr = dateStr.replace('.','-');
-        return newdateStr;
+        return dateStr.replace('.','-');
     }
 
 
@@ -346,7 +307,7 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
             int remainIssues = restInterfaceManager.getNumberOfRemainingIssue(repo_id,commit_id,"project",null,token);
 
             if(remainIssues != 0){
-                ratio = lineCounts/ remainIssues;
+                ratio = lineCounts*1.0/ remainIssues;
             }
 
         }
@@ -416,16 +377,16 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
         String nowMonthStr = String.valueOf(nowMonth);
         String nowDayStr = String.valueOf(nowDay);
         if (startMonth<10){
-            startMonthStr = "0" + String.valueOf(startMonth);
+            startMonthStr = "0" + startMonth;
         }
         if (startDay<10){
-            startDayStr = "0" + String.valueOf(startDay);
+            startDayStr = "0" + startDay;
         }
         if (nowMonth<10){
-            nowMonthStr = "0" + String.valueOf(nowMonth);
+            nowMonthStr = "0" + nowMonth;
         }
         if (nowDay<10){
-            nowDayStr = "0" + String.valueOf(nowDay);
+            nowDayStr = "0" + nowDay;
         }
 
         String start = startYear+"."+startMonthStr+"."+startDayStr;
@@ -451,8 +412,7 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
     public Object getDeveloperRankByCommitCount(String repo_id, String since, String until){
         since = dateFormatChange(since);
         until = dateFormatChange(until);
-        List<Map<String, Object>> result = repoMeasureMapper.getDeveloperRankByCommitCount(repo_id, since, until);
-        return result;
+        return repoMeasureMapper.getDeveloperRankByCommitCount(repo_id, since, until);
     }
 
     @Override
@@ -504,8 +464,7 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
     public Object getRepoLOCByDuration(String repo_id, String since, String until){
         since = dateFormatChange(since);
         until = dateFormatChange(until);
-        int result = repoMeasureMapper.getRepoLOCByDuration(repo_id, since, until, null);
-        return result;
+        return repoMeasureMapper.getRepoLOCByDuration(repo_id, since, until, null);
     }
 
     @Override

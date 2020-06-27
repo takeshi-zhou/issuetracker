@@ -27,7 +27,6 @@ public interface MeasureRepoService {
     /**
      * 删除一个项目的所有度量信息
      * @param repoId repo的唯一标识
-     * @return
      */
     void deleteRepoMeasureByRepoId(String repoId);
 
@@ -49,12 +48,6 @@ public interface MeasureRepoService {
     CommitBaseInfoDuration getCommitBaseInformationByDuration(String repo_id, String since, String until, String developer_name);
 
     /**
-     *
-     * @param repo_id
-     * @param granularity
-     * @param since
-     * @param until
-     * @param developer_name
      * @return 按照不同时间段（since、until），不同聚合粒度（granularity：天/周/月），不同开发者（developerName），获取工作量数据
      */
     List<CommitBaseInfoGranularity> getCommitBaseInfoGranularity(String repo_id, String granularity, String since, String until, String developer_name);
@@ -67,13 +60,6 @@ public interface MeasureRepoService {
      * @return repo的一段时间代码提交次数
      */
     int getCommitCountsByDuration(String repo_id, String since, String until);
-
-    /**
-     * 获取一个项目的每月提交次数
-     * @param repo_id repo的唯一标识
-     * @return repo的每月提交次数
-     */
-    List<CommitCountsMonthly> getCommitCountsMonthly(String repo_id);
 
     /**
      * 获取一个项目在某个特定commit快照下代码质量指数
@@ -101,61 +87,39 @@ public interface MeasureRepoService {
 
     /**
      *
-     * @param repo_id
-     * @param since
-     * @param until
      * @return 某段时间内，该项目中提交次数最多的前三名开发者的姓名以及对应的commit次数
      */
     Object getDeveloperRankByCommitCount(String repo_id, String since, String until);
 
     /**
-     *
-     * @param repo_id
-     * @param since
-     * @param until
      * @return 某段时间内，该项目中提交代码行数（LOC）最多的前三名开发者的姓名以及对应的LOC
      */
     Object getDeveloperRankByLoc(String repo_id, String since, String until);
 
     /**
      *
-     * @param repo_id
-     * @param since
-     * @param until
      * @return 某段时间内，该项目每天的所有开发者提交commit的次数
      */
     Object getCommitCountsDaily(String repo_id, String since, String until);
 
     /**
      *
-     * @param repo_id
-     * @param since
-     * @param until
      * @return 获取一段时间内，该repo所有开发者产生的LOC
      */
     Object getRepoLOCByDuration(String repo_id, String since, String until);
 
     /**
      *
-     * @param repo_id
-     * @param since
-     * @param until
      * @return 某段时间内，该项目每天的所有开发者产生的LOC
      */
     Object getLOCDaily(String repo_id, String since, String until);
 
     /**
-     *
-     * @param repo_id
-     * @param since
-     * @param until
      * @return 某段时间内，该项目每天的所有开发者产生的LOC以及commit次数
      */
     Object getCommitCountLOCDaily(String repo_id, String since, String until);
 
     /**
-     *
-     * @param repo_id
      * @return 根据repoid，获取开发者姓名列表
      */
     Object getDeveloperListByRepoId(String repo_id);

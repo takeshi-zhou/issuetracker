@@ -64,44 +64,25 @@ public interface MeasureDeveloperService {
     Object getQualityChangesByDeveloperName(String developer_name, String token, String category, int counts, String project_name);
 
     /**
-     *
-     * @param repo_id
-     * @param granularity
-     * @param developer_name
-     * @return 根据时间粒度获取某段时间内，该项目、该开发者的addlines dellines
+     * @return 根据时间粒度获取某段时间内，该项目、该开发者的addLines delLines
      */
     Object getDeveloperActivenessByGranularity(String repo_id, String granularity, String developer_name);
 
     /**
      *
-     * @param repo_id
-     * @param since
-     * @param until
-     * @param developer_name
-     * @return 根据时间段获取该项目、该开发者的addlines dellines
+     * @return 根据时间段获取该项目、该开发者的addLines delLines
      */
     Object getDeveloperActivenessByDuration(String repo_id, String since, String until, String developer_name);
 
 
     /**
      *
-     * @param repoId
-     * @param developer
-     * @param beginDate
-     * @param endDate
-     * @param token
-     * @param tool
      * @return 返回开发者雷达图数据
      */
     Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool);
 
     /**
      *
-     * @param repoId
-     * @param developer
-     * @param beginDate
-     * @param endDate
-     * @param type
      * @return 根据条件返回开发者LOC数据
      */
     Object getLOCByCondition(String repoId, String developer, String beginDate, String endDate, String type);

@@ -62,14 +62,12 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         String sinceday = dateFormatChange(since);
         String untilday = dateFormatChange(until);
 
-        int commitCountsByDuration = repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceday, untilday,null);
-        return commitCountsByDuration;
+        return repoMeasureMapper.getCommitCountsByDuration(repo_id, sinceday, untilday,null);
     }
 
     //把日期格式从“2010.10.10转化为2010-10-10”
     private String dateFormatChange(String dateStr){
-        String newdateStr = dateStr.replace('.','-');
-        return newdateStr;
+        return dateStr.replace('.','-');
     }
 
     @Override
@@ -88,16 +86,16 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         String nowMonthStr = String.valueOf(nowMonth);
         String nowDayStr = String.valueOf(nowDay);
         if (startMonth<10){
-            startMonthStr = "0" + String.valueOf(startMonth);
+            startMonthStr = "0" + startMonth;
         }
         if (startDay<10){
-            startDayStr = "0" + String.valueOf(startDay);
+            startDayStr = "0" + startDay;
         }
         if (nowMonth<10){
-            nowMonthStr = "0" + String.valueOf(nowMonth);
+            nowMonthStr = "0" + nowMonth;
         }
         if (nowDay<10){
-            nowDayStr = "0" + String.valueOf(nowDay);
+            nowDayStr = "0" + nowDay;
         }
 
         String start = startYear+"."+startMonthStr+"."+startDayStr;
@@ -174,7 +172,6 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
     @Override
     public int getCommitCountByDurationAndDeveloperName(String developerName, String since, String until, String token, String category,String repoId) {
-        String repoPath=null;
         int commitTotalCount = 0;
         if(repoId != null && !repoId.isEmpty()){
             return repoMeasureMapper.getCommitCountsByDuration(repoId,since,until,developerName);

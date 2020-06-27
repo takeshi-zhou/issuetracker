@@ -147,12 +147,8 @@ public class MeasureScanServiceImpl implements MeasureScanService {
 
     /**保存某个项目某个commit的扫描信息
      *
-     * @param repoId
-     * @param commitId
-     * @param commitTime
-     * @param repoPath
      */
-    public void saveMeasureData(String repoId, String commitId,String commitTime,String repoPath) {
+    private void saveMeasureData(String repoId, String commitId, String commitTime, String repoPath) {
         try{
             Measure measure = getMeasureDataOfOneCommit(repoPath);
             saveRepoLevelMeasureData(measure,repoId,commitId,commitTime,repoPath);
@@ -165,12 +161,8 @@ public class MeasureScanServiceImpl implements MeasureScanService {
 
     /**保存某个项目某个commit的扫描信息
      *
-     * @param repoId
-     * @param commitId
-     * @param commitTime
-     * @param repoPath
      */
-    public void saveMeasureData2(String repoId, String commitId,String commitTime,String repoPath) {
+    private void saveMeasureData2(String repoId, String commitId, String commitTime, String repoPath) {
         try{
             Measure measure =  JavaNcss.analyse(repoPath);
             saveRepoLevelMeasureData(measure,repoId,commitId,commitTime,repoPath);
@@ -184,8 +176,6 @@ public class MeasureScanServiceImpl implements MeasureScanService {
 
     /**获取单个项目某个commit的Measure度量值
      *
-     * @param repoPath
-     * @return
      */
     private Measure getMeasureDataOfOneCommit(String repoPath){
         Measure measure = null;
@@ -202,11 +192,6 @@ public class MeasureScanServiceImpl implements MeasureScanService {
 
     /**保存某个项目某个commit项目级别的度量
      *
-     * @param measure
-     * @param repoId
-     * @param commitId
-     * @param commitTime
-     * @param repoPath
      */
     private void saveRepoLevelMeasureData(Measure measure,String repoId,String commitId,String commitTime,String repoPath){
         try{
@@ -286,11 +271,6 @@ public class MeasureScanServiceImpl implements MeasureScanService {
     }
 
     /**保存某个项目某个commit包级别的度量
-     *
-     * @param measure
-     * @param repoId
-     * @param commitId
-     * @param commitTime
      */
     private void savePackageMeasureData(Measure measure,String repoId,String commitId,String commitTime){
         try{
@@ -317,7 +297,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
                     p.setCcn(0.00);
                 } else{
                     double result=(double)ccn/count;
-                    p.setCcn(Double.valueOf(df.format(result)));
+                    p.setCcn(Double.parseDouble(df.format(result)));
                 }
                 packages.add(p);
             }
@@ -360,10 +340,10 @@ public class MeasureScanServiceImpl implements MeasureScanService {
             fileMeasure.setCcn(JavaNcss.getOneFileCcn(repoPath+'/'+filePath));
             fileMeasure.setTotalLine(JavaNcss.getFileTotalLines(repoPath+'/'+filePath));
             //根据filePath，获取对应文件的代码行变动情况
-            for (int i = 0; i < fileLinesData.size(); i++){
-                if (fileLinesData.get(i).get("filePath").equals(filePath)){
-                    fileMeasure.setAddLine(Integer.parseInt(fileLinesData.get(i).get("addLines").toString()));
-                    fileMeasure.setDeleteLine(Integer.parseInt(fileLinesData.get(i).get("delLines").toString()));
+            for (Map<String, Object> fileLinesDatum : fileLinesData) {
+                if (fileLinesDatum.get("filePath").equals(filePath)) {
+                    fileMeasure.setAddLine(Integer.parseInt(fileLinesDatum.get("addLines").toString()));
+                    fileMeasure.setDeleteLine(Integer.parseInt(fileLinesDatum.get("delLines").toString()));
                     break;
                 }
             }
@@ -394,9 +374,6 @@ public class MeasureScanServiceImpl implements MeasureScanService {
 
 
     /**
-     * @param jGitHelper
-     * @param repo_path
-     * @param commit_id
      * @return 通过JGit获取一次commit中开发者的新增行数，删除行数，新增注释行数，删除注释行数
      */
     private Map<String, Integer> getLinesDataByJGit(JGitHelper jGitHelper, String repo_path, String commit_id){
@@ -413,6 +390,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
                 map = JGitHelper.getLinesData(mergeDiffFix);
             } else {
                 List<DiffEntry> diffFix = JGitHelper.getChangedFileList(revCommit,repository);//获取非merge情况变更的文件列表
+                assert diffFix != null;
                 map = JGitHelper.getLinesData(diffFix);
             }
 
@@ -423,9 +401,6 @@ public class MeasureScanServiceImpl implements MeasureScanService {
     }
 
     /**
-     * @param jGitHelper
-     * @param repo_path
-     * @param commit_id
      * @return 通过JGit获取一次commit中每个文件的新增行数，删除行数
      */
     private List<Map<String,Object>> getFileLinesDataByJGit(JGitHelper jGitHelper, String repo_path, String commit_id){
@@ -442,6 +417,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
                 result = JGitHelper.getFileLinesData(mergeDiffFix);
             } else {
                 List<DiffEntry> diffFix = JGitHelper.getChangedFileList(revCommit,repository);//获取非merge情况变更的文件列表
+                assert diffFix != null;
                 result = JGitHelper.getFileLinesData(diffFix);
             }
 
@@ -452,9 +428,6 @@ public class MeasureScanServiceImpl implements MeasureScanService {
     }
 
     /**
-     * @param jGitHelper
-     * @param repo_path
-     * @param commit_id
      * @return 通过JGit获取本次commit修改的文件数量
      */
     private int getChangedFilesCount(JGitHelper jGitHelper, String repo_path, String commit_id){
@@ -468,6 +441,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
             Repository repository = builder.build();
             RevCommit revCommit = jGitHelper.getCurrentRevCommit(repo_path,commit_id);
             List<DiffEntry> diffFix = JGitHelper.getChangedFileList(revCommit,repository);//获取变更的文件列表
+            assert diffFix != null;
             result = JGitHelper.getChangedFilesCount(diffFix);
 
         } catch (IOException e) {
@@ -505,14 +479,14 @@ public class MeasureScanServiceImpl implements MeasureScanService {
     @Override
     public Object getScanStatus(String repoId) {
         List<Map<String, Object>> result = measureScanMapper.getScanStatus(repoId);
-        for (int i = 0; i < result.size(); i++){
+        for (Map<String, Object> stringObjectMap : result) {
             Map<String, Object> map;
-            map = result.get(i);
+            map = stringObjectMap;
             //将数据库中timeStamp/dateTime类型转换成指定格式的字符串 map.get("commit_time") 这个就是数据库中dateTime类型
             String startScanTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(map.get("startScanTime"));
-            map.put("startScanTime",startScanTime);
+            map.put("startScanTime", startScanTime);
             String endScanTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(map.get("endScanTime"));
-            map.put("endScanTime",endScanTime);
+            map.put("endScanTime", endScanTime);
         }
         return result.get(0);
     }

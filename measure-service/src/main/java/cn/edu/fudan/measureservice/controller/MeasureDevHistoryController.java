@@ -2,11 +2,12 @@ package cn.edu.fudan.measureservice.controller;
 
 import cn.edu.fudan.measureservice.domain.ResponseBean;
 import cn.edu.fudan.measureservice.service.MeasureDevHistoryService;
-import cn.edu.fudan.measureservice.service.MeasureScanService;
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * description:
@@ -22,10 +23,6 @@ public class MeasureDevHistoryController {
     private MeasureDevHistoryService measureDevHistoryService;
 
     /**
-     *
-     * @param repoId
-     * @param beginDate
-     * @param endDate
      * @return 开发历史动画 commit相关数据
      */
     @GetMapping("/measure/development-history/commit-info")

@@ -4,7 +4,6 @@ import cn.edu.fudan.measureservice.domain.core.FileMeasure;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 

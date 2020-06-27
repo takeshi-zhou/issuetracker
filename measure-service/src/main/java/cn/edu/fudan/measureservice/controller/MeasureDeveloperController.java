@@ -20,7 +20,9 @@ public class MeasureDeveloperController {
     }
 
 
-    //中汇需要
+    /**
+     * 中汇需要
+     */
     @GetMapping("/measure/developer/code-change")
     @CrossOrigin
     public ResponseBean getCodeChangesByDurationAndDeveloperName(
@@ -40,7 +42,9 @@ public class MeasureDeveloperController {
         }
     }
 
-    //中汇需要
+    /**
+     * 中汇需要
+     */
     @GetMapping("/measure/developer/commit-count")
     @CrossOrigin
     public ResponseBean getCommitCountByDurationAndDeveloperName(
@@ -60,7 +64,9 @@ public class MeasureDeveloperController {
         }
     }
 
-    //中汇需要
+    /**
+     * 中汇需要
+     */
     @GetMapping("/measure/developer/repository-list")
     @CrossOrigin
     public ResponseBean getRepoListByDeveloperName(
@@ -77,7 +83,9 @@ public class MeasureDeveloperController {
         }
     }
 
-    //中汇需要
+    /**
+     * 中汇需要
+     */
     @GetMapping("/measure/developer/quality-changes")
     @CrossOrigin
     public ResponseBean getQualityChangesByDeveloperName(
@@ -133,12 +141,6 @@ public class MeasureDeveloperController {
 
     /**
      *
-     * @param repoId
-     * @param developer
-     * @param beginDate
-     * @param endDate
-     * @param tool
-     * @param request
      * @return 获取开发者雷达图度量数据
      */
     @GetMapping("/measure/portrait")
@@ -159,6 +161,10 @@ public class MeasureDeveloperController {
         }
     }
 
+    /**
+     *
+     *返回用户画像页面得代码行数数据，包括所有项目和单个项目的
+     */
     @GetMapping("/measure/LOC")
     @CrossOrigin
     public ResponseBean getLOCByCondition(@RequestParam(value = "repo-id", required = false)String repoId,
