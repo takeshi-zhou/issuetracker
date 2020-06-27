@@ -1,18 +1,19 @@
 package cn.edu.fudan.measureservice.domain;
 
-
-
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 /**
- * @author WZY
- * @version 1.0
+ * @author fancying
  **/
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ResponseBean implements Serializable {
 
     private int code;
@@ -20,14 +21,5 @@ public class ResponseBean implements Serializable {
     private String msg;
 
     private java.lang.Object data;
-
-    public ResponseBean() {
-    }
-
-    public ResponseBean(int code, String msg, java.lang.Object data) {
-        this.code = code;
-        this.msg = msg;
-        this.data = data;
-    }
 
 }

@@ -70,7 +70,7 @@ public class JGitHelper {
             git = new Git(repository);
             revWalk = new RevWalk(repository);
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
     }
 
@@ -755,82 +755,9 @@ public class JGitHelper {
 
 
     public static void main(String[] args) throws ParseException {
-        //gitCheckout("E:\\Lab\\project\\IssueTracker-Master", "f8263335ef380d93d6bb93b2876484e325116ac2");
-        //String repoPath = "E:\\Lab\\iec-wepm-develop";
-//        String repoPath = "E:\\Project\\FDSELab\\IssueTracker-Master";
-////        String commitId = "75c6507e2139e9bb663abf35037b31478e44c616";
-//        JGitHelper jGitHelper = new JGitHelper(repoPath);
-//        List<String> list = jGitHelper.getAggregationCommit("2019-1-1 00:00:00");
-//        list.stream().forEach(System.out::println);
-
-        //String s[] = jGitHelper.getCommitParents(commitId);
-//        int m = jGitHelper.mergeJudgment(commitId);
-//        System.out.println(m);
-//        String t = jGitHelper.getCommitTime("f61e34233aa536cf5e698b502099e12d1caf77e4");
-//        for (String s : jGitHelper.getCommitListByBranchAndDuration("zhonghui20191012", "2019.10.12-2019.12.16")) {
-//            System.out.println(s);
-//            jGitHelper.checkout(s);
-//        }
-//        String versionTag="v2.6.19";//定位到某一次Commit，既可以使用Tag，也可以使用其hash
-        String versionTag="fd179bac2fc597f432604d3ba29ab33c1061113e";
-        String path="D:\\Project\\FDSELab\\IssueTracker-Master";
-        JGitHelper jGitHelper = new JGitHelper(path);
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        builder.setMustExist(true);
-        builder.addCeilingDirectory(new File(path));
-        builder.findGitDir(new File(path));
-        try {
-            repository=builder.build();
-
-            RevWalk walk = new RevWalk(repository);
-            ObjectId versionId=repository.resolve(versionTag);
-            RevCommit verCommit=walk.parseCommit(versionId);
-            RevCommit[] parents = verCommit.getParents();
-            System.out.println("父节点的数量为：" + parents.length);
-
-            String commitName=verCommit.getName();
-            System.out.println("This version is: "+versionTag+", It hash: "+commitName);//如果通过Tag定位，可以获得其SHA-1 Hash Value
-            int verCommitTime=verCommit.getCommitTime();
-            printTime(verCommitTime);//打印出本次Commit的时间
-            System.out.println("The first parent id is: " + verCommit.getParent(0).getId().getName());
-            System.out.println("The second parent id is: " + verCommit.getParent(1).getId().getName());
-
-
-            System.out.println("The commit id is: " + verCommit.getId().getName());
-            System.out.println("The message is: " + verCommit.getShortMessage());//获取commit的提交信息message
-            System.out.println("The author is: "+verCommit.getAuthorIdent().getName());//获得本次Commit Author的姓名
-            System.out.println("The author's email is: "+verCommit.getAuthorIdent().getEmailAddress());//获得本次Commit Author的邮箱
-
-            List<DiffEntry> diffFix=getChangedFileList(verCommit,repository);//获取变更的文件列表
-
-
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            DiffFormatter df = new DiffFormatter(out);
-            df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);//如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
-            df.setRepository(repository);
-            if (diffFix != null){
-                List<String> filePathList = jGitHelper.getChangedFilePathList(diffFix);
-                for (String filePath : filePathList){
-                    System.out.println(filePath);
-                }
-            }
-
-
-
-            Map<String, Integer> map = getLinesData(diffFix);
-            System.out.println("该commit修改的java文件且非test文件数量为：" + getChangedFilesCount(diffFix));
-            System.out.println("addLines:"+ map.get("addLines"));
-            System.out.println("delLines:"+ map.get("delLines"));
-            System.out.println("addCommentLines:"+ map.get("addCommentLines"));
-            System.out.println("delCommentLines:"+ map.get("delCommentLines"));
-            System.out.println("addWhiteLines:"+ map.get("addWhiteLines"));
-            System.out.println("delWhiteLines:"+ map.get("delWhiteLines"));
-        }
-
-        catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        String repoPath = "E:\\Lab\\scanProject\\IssueTracker-Master";
+        JGitHelper jGitHelper = new JGitHelper(repoPath);
+        System.out.println("t");
     }
 
 

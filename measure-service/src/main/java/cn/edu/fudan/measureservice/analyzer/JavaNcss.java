@@ -1,15 +1,17 @@
 package cn.edu.fudan.measureservice.analyzer;
 
+import cn.edu.fudan.measureservice.domain.*;
+import cn.edu.fudan.measureservice.domain.Objects;
+import cn.edu.fudan.measureservice.domain.Package;
 import cn.edu.fudan.measureservice.util.DirExplorer;
 import cn.edu.fudan.measureservice.util.FileFilter;
 import javancss.FunctionMetric;
 import javancss.Javancss;
+import javancss.ObjectMetric;
+import javancss.PackageMetric;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * description: ncss 调用并得到目标文件
@@ -71,6 +73,7 @@ public class JavaNcss {
 
         File tempFile = new File(path);
         Javancss javancss = new Javancss(tempFile);
+        Object[] p = javancss.getPackage();
         int ccn = 0;
         for (FunctionMetric functionMetric : javancss.getFunctionMetrics()) {
             ccn += functionMetric.ccn;
@@ -84,10 +87,140 @@ public class JavaNcss {
         return javancss.getNcss();
     }
 
+    public static Measure analyse(String repoPath) {
+        List<File> files = new ArrayList<>();
+        new DirExplorer((level, path, file) -> !FileFilter.javaFilenameFilter(path),
+                (level, path, file) -> files.add(file)).explore(new File(repoPath));
+
+        Javancss javancss = new Javancss(files);
+        Total total = getTotal(javancss);
+        total.setFiles(files.size());
+
+        Packages packages = getPackages(javancss);
+        Objects objects = getObjects(javancss);
+        Functions functions = getFunctions(javancss) ;
+
+        return new Measure(total, packages, objects, functions);
+    }
+
+    private static Functions getFunctions(Javancss javancss) {
+        List<Function> functions = new ArrayList<>();
+        double ncss = 0.0;
+        double ccn = 0.0;
+        double javaDocs = 0.0;
+        int size = javancss.getFunctionMetrics().size();
+        for (FunctionMetric f :  javancss.getFunctionMetrics()){
+            ncss += f.ncss;
+            ccn += f.ccn;
+            javaDocs += f.javadocs;
+            functions.add(new Function(f.name, f.ncss, f.ccn, f.javadocs));
+        }
+        FunctionAverage functionAverage = new FunctionAverage(ncss/size, ccn/size, javaDocs/size);
+        return new Functions(functions, functionAverage);
+    }
+
+    private static Objects getObjects(Javancss javancss) {
+        List<OObject> objects = new ArrayList<>();
+        double ncssA = 0.0;
+        double functionsA = 0.0;
+        double classesA = 0.0;
+        double javaDocsA = 0.0;
+        double javaDocsLinesA = 0.0;
+        double singleCommentLinesA = 0.0;
+        double implementationCommentLinesA = 0.0;
+
+        for (ObjectMetric o : javancss.getObjectMetrics()) {
+
+            String name = o.name;
+            int ncss = o.ncss;
+            int functions = o.functions;
+            int classes = o.classes;
+            int javaDocs = o.javadocs;
+            int javaDocsLines = o.javadocsLn;
+            int singleCommentLines = o.singleLn;
+            int implementationCommentLines = o.singleLn + o.multiLn;
+            objects.add(new OObject(name, ncss, functions, classes, javaDocs, javaDocsLines, singleCommentLines, implementationCommentLines));
+            ncssA += ncss;
+            functionsA += functions;
+            classesA += classes;
+            javaDocsA += javaDocs;
+            javaDocsLinesA += javaDocsLines;
+            singleCommentLinesA += singleCommentLines;
+            implementationCommentLinesA += implementationCommentLines;
+
+        }
+        int size = javancss.getObjectMetrics().size();
+        return new Objects(objects, new ObjectAverage(ncssA/size, functionsA/size, classesA/size, javaDocsA/size,
+                javaDocsLinesA/size, singleCommentLinesA/size, implementationCommentLinesA/size));
+    }
+
+    private static Packages getPackages(Javancss javancss) {
+        List<Package> packageList = new ArrayList<>();
+
+        double classesA = 0.0;
+        double functionsA = 0.0;
+        double ncssA = 0.0;
+        double javaDocsA = 0.0;
+
+        for (PackageMetric packageMetric : javancss.getPackageMetrics()) {
+            String uuid = UUID.randomUUID().toString();
+            String name = packageMetric.name;
+            int classes = packageMetric.classes;
+            int functions = packageMetric.functions;
+            int ncss = packageMetric.ncss;
+            int javaDocs = packageMetric.javadocs;
+            int javaDocsLines = packageMetric.javadocsLn;
+            int singleCommentLines = packageMetric.singleLn;
+            int multiCommentLines = packageMetric.multiLn;
+            classesA += classes;
+            functionsA += functions;
+            ncssA += ncss;
+            javaDocsA += javaDocs;
+            Package p = new Package(uuid, name, classes, functions, ncss, javaDocs, javaDocsLines, singleCommentLines, multiCommentLines);
+            packageList.add(p);
+        }
+        int size = javancss.getPackageMetrics().size();
+        PackageAverage packageAverage = new PackageAverage(classesA/size, functionsA/size, ncssA/size, javaDocsA/size);
+        return new Packages(packageList, packageAverage);
+    }
+
+    private static Total getTotal(Javancss javancss) {
+        int files = 0;
+        int classes = 0;
+        int functions = javancss.getFunctions().size();
+        int ncss = javancss.getNcss();
+
+        int javaDocs = 0;
+        int javaDocsLines = 0;
+        int singleCommentLines = 0;
+        int multiCommentLines = 0;
+
+        for (PackageMetric packageMetric : javancss.getPackageMetrics()) {
+            classes += packageMetric.classes;
+
+            javaDocs += packageMetric.javadocs;
+            javaDocsLines += packageMetric.javadocsLn;
+            singleCommentLines += packageMetric.singleLn;
+            multiCommentLines += packageMetric.multiLn;
+        }
+
+
+        return new Total(files, classes, functions, ncss, javaDocs, javaDocsLines, singleCommentLines, multiCommentLines);
+    }
+
     public static void main(String[] args) {
-        String path="D:\\Project\\FDSELab\\IssueTracker-Master\\measure-service\\src\\main\\java\\cn\\edu\\fudan\\measureservice\\analyzer\\JavaNcss.java";
-        System.out.println(getOneFileCcn(path));
-        System.out.println(getFileTotalLines(path));
+        String path1="E:\\Lab\\gitlab\\IssueTracker-Master\\measure-service\\src\\main\\java\\cn\\edu\\fudan\\measureservice\\analyzer\\JavaNcss.java";
+
+        String repoPath = "E:\\Lab\\gitlab\\IssueTracker-Master";
+        List<File> files = new ArrayList<>();
+        new DirExplorer((level, path, file) -> !FileFilter.javaFilenameFilter(path),
+                (level, path, file) -> files.add(file)).explore(new File(repoPath));
+
+        analyse(repoPath);
+
+
+        System.out.println(getOneFileCcn(path1));
+        System.out.println(getFileTotalLines(path1));
     }
 
 }

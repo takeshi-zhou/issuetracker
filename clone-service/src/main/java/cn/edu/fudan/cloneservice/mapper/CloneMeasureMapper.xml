@@ -10,7 +10,7 @@
         <result property="selfCloneLines" column="self_clone_lines"/>
         <result property="addLines" column="add_lines"/>
         <result property="cloneLines" column="clone_lines"/>
-        <result property="preCloneLines" column="pre_clone_lines"/>
+        <result property="commitTime" column="commit_time"/>
     </resultMap>
 
     <select id="getCloneMeasure" resultMap="cloneMeasure">
@@ -31,7 +31,7 @@
         self_clone_lines,
         add_lines,
         clone_lines,
-        pre_clone_lines
+        commit_time
         )
         VALUES
         (
@@ -42,7 +42,7 @@
         #{selfCloneLines},
         #{addLines},
         #{cloneLines},
-        #{preCloneLines}
+        #{commitTime}
         )
     </insert>
 
@@ -52,6 +52,10 @@
 
     <select id="getMeasureCountByCommitId" parameterType="String" resultType="Integer">
         select count(uuid) from clone_measure where repo_id = #{repo_id} and commit_id = #{commit_id}
+    </select>
+
+    <select id="getLatestCloneLines" resultMap="cloneMeasure">
+        select * from clone_measure where repo_id=#{repo_id} order by commit_time desc limit 1
     </select>
 
 </mapper>

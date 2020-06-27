@@ -22,10 +22,10 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-data-mongodb</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.kafka</groupId>
@@ -76,27 +76,34 @@
             <artifactId>dom4j</artifactId>
         </dependency>
 
+
+        <!--         https://mvnrepository.com/artifact/org.codehaus.javancss/javancss-->
         <dependency>
-            <groupId>cn.edu.fudan</groupId>
+            <groupId>org.codehaus.javancss</groupId>
             <artifactId>javancss</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/javancss/1.0/javancss-1.0.jar</systemPath>
+            <version>33.54</version>
         </dependency>
-        <dependency>
-            <groupId>cn.edu.fudan</groupId>
-            <artifactId>ccl</artifactId>
-            <version>1.1.0</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/ccl/1.1.0/ccl-1.1.0.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>cn.edu.fudan</groupId>
-            <artifactId>jhbasic</artifactId>
-            <version>1.1.0</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/jhbasic/1.1.0/jhbasic-1.1.0.jar</systemPath>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>cn.edu.fudan</groupId>-->
+<!--            <artifactId>javancss</artifactId>-->
+<!--            <version>1.0</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${pom.basedir}/lib/javancss/1.0/javancss-1.0.jar</systemPath>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>cn.edu.fudan</groupId>-->
+<!--            <artifactId>ccl</artifactId>-->
+<!--            <version>1.1.0</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${pom.basedir}/lib/ccl/1.1.0/ccl-1.1.0.jar</systemPath>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>cn.edu.fudan</groupId>-->
+<!--            <artifactId>jhbasic</artifactId>-->
+<!--            <version>1.1.0</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${pom.basedir}/lib/jhbasic/1.1.0/jhbasic-1.1.0.jar</systemPath>-->
+<!--        </dependency>-->
 
 
         <!-- mockito -->
@@ -144,7 +151,7 @@
         </dependency>
 
 
-<!--        <dependency>-->
+        <!--        <dependency>-->
 <!--            <groupId>cn.edu.fudan</groupId>-->
 <!--            <artifactId>issue-service</artifactId>-->
 <!--            <version>0.0.1-SNAPSHOT</version>-->

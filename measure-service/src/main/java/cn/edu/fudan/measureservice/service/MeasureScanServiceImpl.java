@@ -1,7 +1,7 @@
 package cn.edu.fudan.measureservice.service;
 
 import cn.edu.fudan.measureservice.analyzer.JavaNcss;
-import cn.edu.fudan.measureservice.analyzer.MeasureAnalyzer;
+import cn.edu.fudan.measureservice.annotation.RepoResource;
 import cn.edu.fudan.measureservice.component.RestInterfaceManager;
 import cn.edu.fudan.measureservice.domain.Function;
 import cn.edu.fudan.measureservice.domain.Measure;
@@ -9,7 +9,7 @@ import cn.edu.fudan.measureservice.domain.Package;
 import cn.edu.fudan.measureservice.domain.RepoMeasure;
 import cn.edu.fudan.measureservice.domain.core.FileMeasure;
 import cn.edu.fudan.measureservice.domain.core.MeasureScan;
-import cn.edu.fudan.measureservice.handler.ResultHandler;
+import cn.edu.fudan.measureservice.domain.dto.RepoResourceDTO;
 import cn.edu.fudan.measureservice.mapper.FileMeasureMapper;
 import cn.edu.fudan.measureservice.mapper.MeasureScanMapper;
 import cn.edu.fudan.measureservice.mapper.PackageMeasureMapper;
@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,17 +44,13 @@ public class MeasureScanServiceImpl implements MeasureScanService {
 
     private Logger logger = LoggerFactory.getLogger(MeasureScanServiceImpl.class);
 
-    private MeasureAnalyzer measureAnalyzer;
-    private ResultHandler resultHandler;
     private RestInterfaceManager restInterfaceManager;
     private RepoMeasureMapper repoMeasureMapper;
     private PackageMeasureMapper packageMeasureMapper;
     private FileMeasureMapper fileMeasureMapper;
     private MeasureScanMapper measureScanMapper;
 
-    public MeasureScanServiceImpl(MeasureAnalyzer measureAnalyzer, ResultHandler resultHandler, RestInterfaceManager restInterfaceManager, RepoMeasureMapper repoMeasureMapper, PackageMeasureMapper packageMeasureMapper, FileMeasureMapper fileMeasureMapper, MeasureScanMapper measureScanMapper) {
-        this.measureAnalyzer = measureAnalyzer;
-        this.resultHandler = resultHandler;
+    public MeasureScanServiceImpl(RestInterfaceManager restInterfaceManager, RepoMeasureMapper repoMeasureMapper, PackageMeasureMapper packageMeasureMapper, FileMeasureMapper fileMeasureMapper, MeasureScanMapper measureScanMapper) {
         this.restInterfaceManager = restInterfaceManager;
         this.repoMeasureMapper = repoMeasureMapper;
         this.packageMeasureMapper = packageMeasureMapper;
@@ -166,16 +163,35 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         }
     }
 
+    /**保存某个项目某个commit的扫描信息
+     *
+     * @param repoId
+     * @param commitId
+     * @param commitTime
+     * @param repoPath
+     */
+    public void saveMeasureData2(String repoId, String commitId,String commitTime,String repoPath) {
+        try{
+            Measure measure =  JavaNcss.analyse(repoPath);
+            saveRepoLevelMeasureData(measure,repoId,commitId,commitTime,repoPath);
+            savePackageMeasureData(measure,repoId,commitId,commitTime);
+            saveFileMeasureData(repoId,commitId,commitTime,repoPath);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
     /**获取单个项目某个commit的Measure度量值
      *
      * @param repoPath
      * @return
      */
     private Measure getMeasureDataOfOneCommit(String repoPath){
-        Measure measure=null;
+        Measure measure = null;
         try{
-            if(repoPath!=null) {
-                measure=measureAnalyzer.analyze(repoPath,"",resultHandler);
+            if(repoPath != null) {
+                measure = JavaNcss.analyse(repoPath);
             }
         }catch (Exception e){
             logger.error("获取某commit的Measure时出错：");
@@ -231,7 +247,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
 
 
             //获取该commit是否是merge
-            repoMeasure.setIs_merge(jGitHelper.isMerge(revCommit));
+            repoMeasure.set_merge(jGitHelper.isMerge(revCommit));
 
             //如果是最初始的那个commit，那么工作量记为0，否则  则进行git diff 对比获取工作量
             boolean isInitCommitByJGit = jGitHelper.isInitCommit(revCommit);
@@ -363,8 +379,9 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         try{
             fileMeasureList.forEach(
                     f -> {
-                        if (fileMeasureMapper.sameMeasureOfOneFile(f.getRepoId(),f.getCommitId(),f.getFilePath()) == 0)
+                        if (fileMeasureMapper.sameMeasureOfOneFile(f.getRepoId(),f.getCommitId(),f.getFilePath()) == 0){
                             fileMeasureMapper.insertOneFileMeasure(f);
+                        }
                         logger.info("Successfully insert one record to file_measure table ：repoId is " + f.getRepoId() + " commitId is " + f.getCommitId());
                     }
             );
@@ -498,5 +515,52 @@ public class MeasureScanServiceImpl implements MeasureScanService {
             map.put("endScanTime",endScanTime);
         }
         return result.get(0);
+    }
+
+
+
+    @Override
+    @RepoResource
+    @Async("taskExecutor")
+    public Boolean scan(RepoResourceDTO repoResource, String branch, String beginCommit, String toolName) {
+        String repoPath = repoResource.getRepoPath();
+        String repoId = repoResource.getRepoId();
+
+        //1. 判断beginCommit是否为空,为空则表示此次为update，不为空表示此次为第一次扫描
+        // 若是update，则获取最近一次扫描的commit_id，作为本次扫描的起始点
+        if (StringUtils.isEmpty(beginCommit)){
+            beginCommit = repoMeasureMapper.getLastScannedCommitId(repoId);
+        }
+
+        if (StringUtils.isEmpty(repoPath)){
+            log.error("repoId:[{}] path is empty", repoId);
+            return false;
+        }
+
+        JGitHelper jGitHelper = new JGitHelper(repoPath);
+        // 获取从 beginCommit 开始的 commit list 列表
+        List<String> commitList = jGitHelper.getCommitListByBranchAndBeginCommit(branch, beginCommit);
+        //初始化本次扫描状态信息
+        MeasureScan measureScan = initMeasureScan(repoId, toolName, commitList.get(0), commitList.get(0), commitList.size());
+        Date startScanTime = measureScan.getStartScanTime();
+
+        int i = 0;
+        // 遍历列表 进行扫描
+        for (String commit : commitList) {
+            String commitTime = jGitHelper.getCommitTime(commit);
+            log.info("Start to scan measure info: repoId is {} commit is {}", repoId, commit );
+            saveMeasureData2(repoId, commit, commitTime, repoPath);
+            //更新本次扫描状态信息
+            Date currentTime = new Date();
+            int scanTime = (int) (currentTime.getTime()-startScanTime.getTime()) / 1000;
+            String status = "scanning";
+            //扫描到最后一个commit
+            if (i == commitList.size()-1){
+                status = "complete";
+            }
+            updateMeasureScan(measureScan, commit, i++, scanTime, status, currentTime);
+        }
+        log.info("Measure scan complete!");
+        return true;
     }
 }

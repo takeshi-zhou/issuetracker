@@ -1,33 +1,15 @@
 package cn.edu.fudan.measureservice.service;
 
-import cn.edu.fudan.measureservice.analyzer.JavaNcss;
-import cn.edu.fudan.measureservice.analyzer.MeasureAnalyzer;
 import cn.edu.fudan.measureservice.component.RestInterfaceManager;
-import cn.edu.fudan.measureservice.domain.Function;
-import cn.edu.fudan.measureservice.domain.Measure;
-import cn.edu.fudan.measureservice.domain.Package;
-import cn.edu.fudan.measureservice.domain.RepoMeasure;
-import cn.edu.fudan.measureservice.domain.core.FileMeasure;
-import cn.edu.fudan.measureservice.handler.ResultHandler;
 import cn.edu.fudan.measureservice.mapper.FileMeasureMapper;
 import cn.edu.fudan.measureservice.mapper.PackageMeasureMapper;
 import cn.edu.fudan.measureservice.mapper.RepoMeasureMapper;
-import cn.edu.fudan.measureservice.util.DateTimeUtil;
-import cn.edu.fudan.measureservice.util.JGitHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**

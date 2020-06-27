@@ -77,9 +77,6 @@ public class ForkJoinRecursiveTask {
                                       Map<String, List<CloneLocation>> cloneLocationMap,
                                       Map<String, String> map){
             CloneMeasure cloneMeasure = new CloneMeasure();
-            //统计不准确，弃用
-            int increasedCloneLines = 0;
-            int increasedSameCloneLines = 0;
 
             List<CloneLocation> locationList = getSubList(start, end);
             logger.info("{} -> cloneLocation init success!", Thread.currentThread().getName());
@@ -112,13 +109,11 @@ public class ForkJoinRecursiveTask {
                                     String filePath1 = cloneLocation1.getFilePath();
                                     String cloneLines1 = cloneLocation1.getCloneLines();
                                     if(JGitUtil.isSameDeveloperClone(repoPath, commitId, filePath1, cloneLines1)){
-                                        increasedSameCloneLines++;
                                         selfMap = ComputeUtil.putNewNum(selfMap, lines[i], filePath);
                                         selfCloneLocationMap.merge(category + ":" +filePath, lines[i], (v1, v2) -> v1 + "," + v2);
                                         break;
                                     }
                                 }
-                                increasedCloneLines++;
                                 addMap = ComputeUtil.putNewNum(addMap, lines[i], filePath);
                                 addCloneLocationMap.merge(category + ":" +filePath, lines[i], (v1, v2) -> v1 + "," + v2);
                             }
