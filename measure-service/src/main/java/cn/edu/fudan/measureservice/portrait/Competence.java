@@ -1,12 +1,21 @@
 package cn.edu.fudan.measureservice.portrait;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * description:
  *
  * @author fancying
  * create: 2020-05-18 21:41
  **/
-public class Competence {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Competence implements Formula{
+
+    // 基础数据
 
     private double nonRepetitiveCodeRate;
     private double nonSelfRepetitiveCodeRate;
@@ -16,62 +25,11 @@ public class Competence {
     private double changedCodeMAXAge;
     private double deletedCodeMAXAge;
 
-    public Competence() {
-    }
 
-    public double getNonRepetitiveCodeRate() {
-        return nonRepetitiveCodeRate;
-    }
+    private double level;
 
-    public void setNonRepetitiveCodeRate(double nonRepetitiveCodeRate) {
-        this.nonRepetitiveCodeRate = nonRepetitiveCodeRate;
-    }
-
-    public double getNonSelfRepetitiveCodeRate() {
-        return nonSelfRepetitiveCodeRate;
-    }
-
-    public void setNonSelfRepetitiveCodeRate(double nonSelfRepetitiveCodeRate) {
-        this.nonSelfRepetitiveCodeRate = nonSelfRepetitiveCodeRate;
-    }
-
-    public double getFocusRange() {
-        return focusRange;
-    }
-
-    public void setFocusRange(double focusRange) {
-        this.focusRange = focusRange;
-    }
-
-    public double getOldCodeModification() {
-        return oldCodeModification;
-    }
-
-    public void setOldCodeModification(double oldCodeModification) {
-        this.oldCodeModification = oldCodeModification;
-    }
-
-    public double getEliminateDuplicateCodeRate() {
-        return eliminateDuplicateCodeRate;
-    }
-
-    public void setEliminateDuplicateCodeRate(double eliminateDuplicateCodeRate) {
-        this.eliminateDuplicateCodeRate = eliminateDuplicateCodeRate;
-    }
-
-    public double getChangedCodeMAXAge() {
-        return changedCodeMAXAge;
-    }
-
-    public void setChangedCodeMAXAge(double changedCodeMAXAge) {
-        this.changedCodeMAXAge = changedCodeMAXAge;
-    }
-
-    public double getDeletedCodeMAXAge() {
-        return deletedCodeMAXAge;
-    }
-
-    public void setDeletedCodeMAXAge(double deletedCodeMAXAge) {
-        this.deletedCodeMAXAge = deletedCodeMAXAge;
+    @Override
+    public double cal() {
+        return 0;
     }
 }
