@@ -52,9 +52,7 @@ public class JGitHelper {
     private Git git;
 
     /**
-     *
      * repoPath 加上了 .git 目录
-     *
      */
     public JGitHelper(String repoPath) {
         String gitDir =  IS_WINDOWS ? repoPath + "\\.git" : repoPath + "/.git";

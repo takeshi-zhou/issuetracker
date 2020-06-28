@@ -4,14 +4,14 @@ import cn.edu.fudan.measureservice.domain.dto.RepoResourceDTO;
 
 public interface MeasureScanService {
 
-    /**
-     * 根据repoId和起始commit，对项目进行度量方面的扫描，即将数据入库
-     * @param repoId
-     * @param branch
-     * @param beginCommit
-     * @param toolName
-     */
-    void scanByJavancss(String repoId, String branch, String beginCommit, String toolName);
+//    /**
+//     * 根据repoId和起始commit，对项目进行度量方面的扫描，即将数据入库
+//     * @param repoId
+//     * @param branch
+//     * @param beginCommit
+//     * @param toolName
+//     */
+//    void scanByJavancss(String repoId, String branch, String beginCommit, String toolName);
 
     /**
      * 根据repoId，获取项目的扫描状态
@@ -20,6 +20,12 @@ public interface MeasureScanService {
      */
     Object getScanStatus(String repoId);
 
-
-    Boolean scan(RepoResourceDTO repoResource, String branch, String beginCommit, String toolName);
+    /**
+     * 根据repoId和起始commit，对项目进行度量方面的扫描，即将数据入库
+     * @param repoResource 代码库信息
+     * @param branch 分支
+     * @param beginCommit 开始扫描的commit
+     * @param toolName 工具名称
+     */
+    void scan(RepoResourceDTO repoResource, String branch, String beginCommit, String toolName);
 }

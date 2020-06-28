@@ -3,13 +3,10 @@ package cn.edu.fudan.measureservice.controller;
 import cn.edu.fudan.measureservice.domain.ResponseBean;
 import cn.edu.fudan.measureservice.domain.dto.RepoResourceDTO;
 import cn.edu.fudan.measureservice.service.MeasureScanService;
-import cn.edu.fudan.measureservice.service.MeasureScanServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import javax.tools.Tool;
 
 /**
  * description:
@@ -41,7 +38,6 @@ public class MeasureScanController {
         try {
             // 调用javancss工具进行扫描 目前measure服务只有这个扫描工具
             if (toolName.equals("javancss")){
-                //measureScanService.scanByJavancss(repoId, branch, beginCommit, toolName);
                 measureScanService.scan(RepoResourceDTO.builder().repoId(repoId).build(), branch, beginCommit, toolName);
             }
             return ResponseBean.builder().code(200).build();
