@@ -38,7 +38,6 @@ public class MeasureScanController {
         try {
             // 调用javancss工具进行扫描 目前measure服务只有这个扫描工具
             if (toolName.equals("javancss")){
-                //measureScanService.scanByJavancss(repoId, branch, beginCommit, toolName);
                 measureScanService.scan(RepoResourceDTO.builder().repoId(repoId).build(), branch, beginCommit, toolName);
             }
             return ResponseBean.builder().code(200).build();

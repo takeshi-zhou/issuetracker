@@ -7,7 +7,7 @@
     <artifactId>measure-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>measure-service</name>
-    <description>Demo project for Spring Boot</description>
+    <description>measure service</description>
 
     <!-- 子模块的parent要使用顶层的父模块-->
     <parent>
@@ -70,12 +70,6 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-        <!--XML文件解析-->
-        <dependency>
-            <groupId>dom4j</groupId>
-            <artifactId>dom4j</artifactId>
-        </dependency>
-
 
         <!--         https://mvnrepository.com/artifact/org.codehaus.javancss/javancss-->
         <dependency>
@@ -83,28 +77,6 @@
             <artifactId>javancss</artifactId>
             <version>33.54</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>cn.edu.fudan</groupId>-->
-<!--            <artifactId>javancss</artifactId>-->
-<!--            <version>1.0</version>-->
-<!--            <scope>system</scope>-->
-<!--            <systemPath>${pom.basedir}/lib/javancss/1.0/javancss-1.0.jar</systemPath>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>cn.edu.fudan</groupId>-->
-<!--            <artifactId>ccl</artifactId>-->
-<!--            <version>1.1.0</version>-->
-<!--            <scope>system</scope>-->
-<!--            <systemPath>${pom.basedir}/lib/ccl/1.1.0/ccl-1.1.0.jar</systemPath>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>cn.edu.fudan</groupId>-->
-<!--            <artifactId>jhbasic</artifactId>-->
-<!--            <version>1.1.0</version>-->
-<!--            <scope>system</scope>-->
-<!--            <systemPath>${pom.basedir}/lib/jhbasic/1.1.0/jhbasic-1.1.0.jar</systemPath>-->
-<!--        </dependency>-->
-
 
         <!-- mockito -->
         <dependency>
@@ -149,22 +121,6 @@
             <artifactId>swagger-bootstrap-ui</artifactId>
             <version>1.6</version>
         </dependency>
-
-
-        <!--        <dependency>-->
-<!--            <groupId>cn.edu.fudan</groupId>-->
-<!--            <artifactId>issue-service</artifactId>-->
-<!--            <version>0.0.1-SNAPSHOT</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
-
-        <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit &ndash;&gt;-->
-        <!--<dependency>-->
-            <!--<groupId>org.eclipse.jgit</groupId>-->
-            <!--<artifactId>org.eclipse.jgit</artifactId>-->
-            <!--<version>5.2.1.201812262042-r</version>-->
-        <!--</dependency>-->
-
     </dependencies>
 
     <build>

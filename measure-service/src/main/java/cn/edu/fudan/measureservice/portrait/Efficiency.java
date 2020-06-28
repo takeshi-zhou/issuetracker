@@ -1,80 +1,100 @@
 package cn.edu.fudan.measureservice.portrait;
 
-import cn.edu.fudan.measureservice.component.RestInterfaceManager;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.kafka.common.protocol.types.Field;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.Resource;
-import java.lang.annotation.Retention;
+import lombok.*;
 
 /**
- * description: 开发人员效率
+ * description: 开发人员效率 某段时间内完成的工作量
  *
  * @author fancying
  * create: 2020-05-18 21:40
  **/
-@Component
-public class Efficiency {
+@Getter
+@Setter
+@NoArgsConstructor
+public class Efficiency implements Formula{
 
-    //提交频率评分
-    private double commitFrequency;
 
-    //代码量评分
-    private double workLoad;
+    // 下面是基础数据 工作量
 
-    //新增逻辑行评分
-    private double newLogicLine;
+    @Setter
+    int commitCount;
+    @Setter
+    int addLine;
+    @Setter
+    int deleteLine;
+    @Setter
+    int addStatement;
+    @Setter
+    int deleteStatement;
 
-    //删除逻辑行评分
-    private double delLogicLine;
 
-    //存活语句数评分
-    private double validStatement;
+    int intervalDay;
+    String duration;
 
-    public Efficiency() {
+    // 以下各个评分由具体的公式计算出来 分值统一在 1 - 10之间
+
+    private static double defaultScore = -1;
+    /**
+     * 提交频率评分
+     * todo 需要考虑排除节假日计算提交频率
+     */
+    private double commitFrequency = defaultScore;
+    private double workLoad = defaultScore;
+    private double newLogicLine = defaultScore;
+    private double delLogicLine = defaultScore;
+    private double validStatement = defaultScore;
+
+
+    private double level = defaultScore;
+
+
+    /**
+     * todo 具体的计算方式
+     */
+    @Override
+    public double cal() {
+        return 0;
+    }
+
+
+    /**
+     * getter
+     */
+
+    public double getLevel(){
+        if (!((Double)defaultScore).equals(level)) {
+            return level;
+        }
+        level = cal();
+
+        return level;
     }
 
     public double getCommitFrequency() {
+        if (!((Double)defaultScore).equals(commitFrequency)) {
+            return commitFrequency;
+        }
+        // todo 具体的计算方式
+        commitFrequency = (double)commitCount / intervalDay;
+
         return commitFrequency;
-    }
-
-    public void setCommitFrequency(double commitFrequency) {
-        this.commitFrequency = commitFrequency;
-    }
-
-    public void setWorkLoad(double workLoad) {
-        this.workLoad = workLoad;
     }
 
     public double getWorkLoad() {
         return workLoad;
     }
 
-    public void setNewLogicLine(double newLogicLine) {
-        this.newLogicLine = newLogicLine;
-    }
-
     public double getNewLogicLine() {
         return newLogicLine;
-    }
-
-    public void setDelLogicLine(double delLogicLine) {
-        this.delLogicLine = delLogicLine;
     }
 
     public double getDelLogicLine() {
         return delLogicLine;
     }
 
-    public void setValidStatement(double validStatement) {
-        this.validStatement = validStatement;
-    }
-
     public double getValidStatement() {
         return validStatement;
     }
+
 }
