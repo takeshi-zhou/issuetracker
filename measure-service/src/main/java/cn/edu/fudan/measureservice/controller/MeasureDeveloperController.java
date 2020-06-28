@@ -141,7 +141,7 @@ public class MeasureDeveloperController {
 
     /**
      *
-     * @return 获取开发者雷达图度量数据
+     * @return 获取开发者雷达图度量基础数据
      */
     @GetMapping("/measure/portrait")
     @CrossOrigin
@@ -175,6 +175,24 @@ public class MeasureDeveloperController {
 
         try{
             return new ResponseBean(200,"success",measureDeveloperService.getLOCByCondition(repoId,developer,beginDate,endDate,type));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+    @GetMapping("/measure/portrait-level")
+    @CrossOrigin
+    public ResponseBean getPortraitLevel(@RequestParam("repo-id")String repoId,
+                                    @RequestParam("developer")String developer,
+                                    @RequestParam("begin-date")String beginDate,
+                                    @RequestParam("end-date")String endDate,
+                                    @RequestParam("tool")String tool,
+                                    HttpServletRequest request){
+
+        try{
+            String token = request.getHeader("token");
+            return new ResponseBean(200,"success",measureDeveloperService.getPortraitLevel(repoId,developer,beginDate,endDate,token,tool));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());

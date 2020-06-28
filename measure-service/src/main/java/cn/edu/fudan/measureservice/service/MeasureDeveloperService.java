@@ -87,5 +87,11 @@ public interface MeasureDeveloperService {
      */
     Object getLOCByCondition(String repoId, String developer, String beginDate, String endDate, String type);
 
+    /**
+     *
+     * @return 返回开发者用户画像评星等级
+     */
+    Object getPortraitLevel(String repoId, String developer, String beginDate, String endDate, String token, String tool);
+
 
 }

@@ -545,4 +545,20 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         }
         return ("please input correct type: total or dayAverage !");
     }
+
+    @Override
+    public Object getPortraitLevel(String repoId, String developer, String beginDate, String endDate, String token, String tool) {
+        Object portrait = getPortrait(repoId,developer,beginDate,endDate,token,tool);
+        DeveloperMetrics baseData = (DeveloperMetrics) portrait;
+        Competence competence = baseData.getCompetence();
+        Efficiency efficiency = baseData.getEfficiency();
+        Quality quality = baseData.getQuality();
+        List<Map<String, Object>> developerList = repoMeasureMapper.getDeveloperListByRepoId(repoId);
+
+        if (developerList.size() >= 20){
+
+        }
+
+        return null;
+    }
 }
