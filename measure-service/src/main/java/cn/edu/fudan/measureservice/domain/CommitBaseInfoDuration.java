@@ -1,8 +1,6 @@
 package cn.edu.fudan.measureservice.domain;
 
 
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class CommitBaseInfoDuration {

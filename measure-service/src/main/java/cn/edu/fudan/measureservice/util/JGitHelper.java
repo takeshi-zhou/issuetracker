@@ -5,7 +5,6 @@
  **/
 package cn.edu.fudan.measureservice.util;
 
-import ch.qos.logback.classic.pattern.SyslogStartConverter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.CheckoutCommand;
@@ -42,6 +41,9 @@ import static cn.edu.fudan.measureservice.util.DateTimeUtil.timeTotimeStamp;
 @Slf4j
 public class JGitHelper {
     private Logger logger = LoggerFactory.getLogger(JGitHelper.class);
+
+    private static final String JPMS = "module-info.java";
+
 
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
     private static final int MERGE_WITH_CONFLICT = -1;
@@ -226,7 +228,7 @@ public class JGitHelper {
         return null;
     }
 
-    public Map<String, List<DiffEntry>> getMappedFileList(String commit) {
+    private Map<String, List<DiffEntry>> getMappedFileList(String commit) {
         Map<String, List<DiffEntry>> result = new HashMap<>(8);
         try {
             RevCommit currCommit = revWalk.parseCommit(ObjectId.fromString(commit));
@@ -274,7 +276,7 @@ public class JGitHelper {
     public List<String> getAggregationCommit(String startTime){
         List<String> aggregationCommits = new ArrayList<>();
         try {
-            int startTimeStamp = Integer.valueOf(timeTotimeStamp(startTime));
+            int startTimeStamp = Integer.parseInt(timeTotimeStamp(startTime));
             int branch = 0;
             Iterable<RevCommit> commits = git.log().call();
             List<RevCommit> commitList = new ArrayList<>();
@@ -294,9 +296,7 @@ public class JGitHelper {
                 if (startTimeStamp<revCommit.getCommitTime()&&branch==1) {aggregationCommits.add(revCommit.getName());}
                 branch += Optional.ofNullable(sonCommitsMap.get(revCommit.getName())).orElse(0)-1;
             }
-        } catch (GitAPIException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (GitAPIException | ParseException e) {
             e.printStackTrace();
         }
 
@@ -313,7 +313,7 @@ public class JGitHelper {
     }
 
     //获取某次commit修改的文件数量
-    public static int getChangedFilesCount(List<DiffEntry> diffEntryList) throws IOException {
+    public static int getChangedFilesCount(List<DiffEntry> diffEntryList) {
         int result = 0;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         for (DiffEntry entry : diffEntryList) {
@@ -327,8 +327,11 @@ public class JGitHelper {
             if (fullName.endsWith(".java")){
                 //并且去除其中的test文件
                 if (fullName.contains("/test/") ||
+                        fullName.contains("/.mvn/") ||
+                        fullName.contains(JPMS) ||
                         shortName.endsWith("test.java") ||
                         shortName.endsWith("tests.java") ||
+                        shortName.endsWith("enum.java") ||
                         shortName.startsWith("test")){
                     continue;
                 }else {
@@ -388,13 +391,13 @@ public class JGitHelper {
                         if (fullName.endsWith(".java")){
                             //并且去除其中的test文件
                             if (fullName.contains("/test/") ||
+                                    fullName.contains("/.mvn/") ||
+                                    fullName.contains(JPMS) ||
                                     shortName.endsWith("test.java") ||
                                     shortName.endsWith("tests.java") ||
+                                    shortName.endsWith("enum.java") ||
                                     shortName.startsWith("test")){
-                                diffs.remove(i);//去除其中的test文件
-                            }else {
-//                                System.out.println("Entry: " + diffs.get(i));
-                                continue;
+                                diffs.remove(i);//去除其中的test等需要过滤得文件
                             }
                         }else {
                             diffs.remove(i);//去除非java文件
@@ -414,7 +417,7 @@ public class JGitHelper {
     }
 
     //获取上一次commit（时间轴上最近的那次commit）
-    public static RevCommit getPrevHash(RevCommit commit, Repository repo)  throws  IOException {
+    private static RevCommit getPrevHash(RevCommit commit, Repository repo)  throws  IOException {
         try (RevWalk walk = new RevWalk(repo)) {
             // Starting point
             walk.markStart(commit);
@@ -432,7 +435,7 @@ public class JGitHelper {
         return null;
     }
 
-    //根据repopath 和commitid获取当前commit
+    //根据repoPath 和commitId获取当前commit
     public RevCommit getCurrentRevCommit(String repo_path, String commit_id){
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         builder.setMustExist(true);
@@ -443,8 +446,7 @@ public class JGitHelper {
 
             RevWalk walk = new RevWalk(repository);
             ObjectId versionId=repository.resolve(commit_id);
-            RevCommit verCommit=walk.parseCommit(versionId);
-            return verCommit;
+            return walk.parseCommit(versionId);
 
         }
         catch (IOException e) {
@@ -458,21 +460,13 @@ public class JGitHelper {
     //判断当前commit是否是最初始的那个commit
     public boolean isInitCommit(RevCommit revCommit){
         RevCommit[] parents = revCommit.getParents();
-        if (parents.length == 0){
-            return true;
-        }else{
-            return false;
-        }
+        return parents.length == 0;
     }
 
     //判断该次commit是否是merge
     public boolean isMerge(RevCommit revCommit){
         RevCommit[] parents = revCommit.getParents();
-        if (parents.length == 2){
-            return true;
-        }else{
-            return false;
-        }
+        return parents.length == 2;
     }
 
     //判断该次commit的提交信息message
@@ -646,9 +640,6 @@ public class JGitHelper {
 
     /**
      * 根据diffEntryList获取更改的文件路径List
-     * @param diffEntryList
-     * @return
-     * @throws IOException
      */
     public List<String> getChangedFilePathList(List<DiffEntry> diffEntryList) throws IOException {
         if (diffEntryList == null){
