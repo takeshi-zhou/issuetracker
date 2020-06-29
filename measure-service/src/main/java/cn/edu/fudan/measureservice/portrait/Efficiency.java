@@ -18,21 +18,30 @@ public class Efficiency implements Formula{
     // 下面是基础数据 工作量
 
     @Setter
-    int commitCount;
+    int developerCommitCount;
     @Setter
-    int addLine;
+    int totalCommitCount;
     @Setter
-    int deleteLine;
+    int developerLOC;
     @Setter
-    int addStatement;
+    int totalLOC;
     @Setter
-    int deleteStatement;
+    int developerAddStatement;
+    @Setter
+    int totalAddStatement;
+    @Setter
+    int developerDelStatement;
+    @Setter
+    int totalDelStatement;
+    @Setter
+    int developerValidLine;
+    @Setter
+    int totalValidLine;
+    @Setter
+    int developerNumber;
 
 
-    int intervalDay;
-    String duration;
-
-    // 以下各个评分由具体的公式计算出来 分值统一在 1 - 10之间
+    // 以下各个评分由具体的公式计算出来,在getter方法中实现
 
     private static double defaultScore = -1;
     /**
@@ -46,14 +55,32 @@ public class Efficiency implements Formula{
     private double validStatement = defaultScore;
 
 
-    private double level = defaultScore;
+    private double level = 0;
 
 
     /**
      * todo 具体的计算方式
+     * @return
      */
     @Override
     public double cal() {
+        double efficiencyValue = 0.2*commitFrequency + 0.2*workLoad + 0.2*newLogicLine + 0.2*delLogicLine + 0.2*validStatement;
+
+        if (efficiencyValue >= 0 && efficiencyValue <= 0.5/developerNumber){
+            return 1;
+        }
+        if (efficiencyValue > 0.5/developerNumber && efficiencyValue <= 0.67/developerNumber){
+            return 2;
+        }
+        if (efficiencyValue > 0.67/developerNumber && efficiencyValue <= 1.0/developerNumber){
+            return 3;
+        }
+        if (efficiencyValue > 1.0/developerNumber && efficiencyValue <= 1.5/developerNumber){
+            return 4;
+        }
+        if (efficiencyValue > 1.5/developerNumber){
+            return 5;
+        }
         return 0;
     }
 
@@ -75,25 +102,45 @@ public class Efficiency implements Formula{
         if (!((Double)defaultScore).equals(commitFrequency)) {
             return commitFrequency;
         }
-        // todo 具体的计算方式
-        commitFrequency = (double)commitCount / intervalDay;
+        //  具体的计算方式
+        commitFrequency = (double)developerCommitCount / totalCommitCount;
 
         return commitFrequency;
     }
 
     public double getWorkLoad() {
+        if (!((Double)defaultScore).equals(workLoad)) {
+            return workLoad;
+        }
+        // 具体的计算方式
+        workLoad = (double)developerLOC / totalLOC;
         return workLoad;
     }
 
     public double getNewLogicLine() {
+        if (!((Double)defaultScore).equals(newLogicLine)) {
+            return newLogicLine;
+        }
+        //  具体的计算方式
+        newLogicLine = developerAddStatement*(1.0)/totalAddStatement;
         return newLogicLine;
     }
 
     public double getDelLogicLine() {
+        if (!((Double)defaultScore).equals(delLogicLine)) {
+            return delLogicLine;
+        }
+        // 具体的计算方式
+        delLogicLine = (totalDelStatement == 0) ? -1 : developerDelStatement*(1.0)/totalDelStatement;
         return delLogicLine;
     }
 
     public double getValidStatement() {
+        if (!((Double)defaultScore).equals(validStatement)) {
+            return validStatement;
+        }
+        //具体的计算方式
+        validStatement = (totalValidLine == 0) ? -1 : developerValidLine*(1.0)/totalValidLine;
         return validStatement;
     }
 

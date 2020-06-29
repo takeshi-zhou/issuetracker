@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * description: 记录开发人员整理的画像
+ * description: 记录开发人员整体的画像
  *
  * @author fancying
  * create: 2020-06-28 22:35
@@ -20,6 +20,8 @@ public class DeveloperPortrait {
 
     private Date firstCommitDate;
     private int totalLine;
+    private int dayAverageLine;
+    private int totalCommitCount;
     private String developerName;
     private String developerType;
 

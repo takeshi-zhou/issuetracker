@@ -21,10 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Slf4j
@@ -375,26 +372,28 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
     @Override
     public Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool) {
+        List<Map<String, Object>> developerList = repoMeasureMapper.getDeveloperListByRepoId(repoId);
+        int developerNumber = developerList.size();
+        //todo 根据repoId获取repoName
+        String repoName = "testName";
+        //todo 获取第一次提交commit的日期
+        Date firstCommitDate = null;
+
         //--------------------------以下是开发效率相关指标-----------------------------
         Efficiency efficiency = new Efficiency();
+        efficiency.setDeveloperNumber(developerNumber);
 
         //提交频率指标
         int totalCommitCount = getCommitCountsByDuration(repoId, beginDate, endDate);
         int developerCommitCount = repoMeasureMapper.getCommitCountsByDuration(repoId, beginDate, endDate, developer);
-        double commitFrequency = -1;
-        if (totalCommitCount != 0){
-            commitFrequency = developerCommitCount*(1.0)/totalCommitCount;
-        }
-        efficiency.setCommitFrequency(commitFrequency);
+        efficiency.setTotalCommitCount(totalCommitCount);
+        efficiency.setDeveloperCommitCount(developerCommitCount);
 
         //代码量指标
         int developerLOC = repoMeasureMapper.getRepoLOCByDuration(repoId, beginDate, endDate, developer);
         int totalLOC = repoMeasureMapper.getRepoLOCByDuration(repoId, beginDate, endDate, "");
-        double workLoad = -1;
-        if (totalLOC != 0){
-            workLoad = developerLOC*(1.0)/totalLOC;
-        }
-        efficiency.setWorkLoad(workLoad);
+        efficiency.setTotalLOC(totalLOC);
+        efficiency.setDeveloperLOC(developerLOC);
 
         //获取代码新增、删除逻辑行数数据
         JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
@@ -412,10 +411,10 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
             totalAddStatement += statements.getJSONObject(str).getIntValue("ADD");
             totalDelStatement += statements.getJSONObject(str).getIntValue("DELETE");
         }
-        //新增逻辑行指标
-        efficiency.setNewLogicLine((totalAddStatement == 0) ? -1 : developerAddStatement*(1.0)/totalAddStatement);
-        //删除逻辑行指标
-        efficiency.setDelLogicLine((totalDelStatement == 0) ? -1 : developerDelStatement*(1.0)/totalDelStatement);
+        efficiency.setDeveloperAddStatement(developerAddStatement);
+        efficiency.setTotalAddStatement(totalAddStatement);
+        efficiency.setDeveloperDelStatement(developerDelStatement);
+        efficiency.setTotalDelStatement(totalDelStatement);
 
         JSONObject validLines = restInterfaceManager.getValidLine(repoId, beginDate, endDate, branch);
         int developerValidLine = 0;
@@ -426,9 +425,11 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
             }
             totalValidLine += validLines.getIntValue(key);
         }
+        efficiency.setDeveloperValidLine(developerValidLine);
+        efficiency.setTotalValidLine(totalValidLine);
         //有效代码行指标
         efficiency.setValidStatement((totalValidLine == 0) ? -1 : developerValidLine*(1.0)/totalValidLine);
-//
+
         //----------------------------------以下是代码质量相关指标-------------------------------------
         //个人规范类issue数
         int developerStandardIssueCount = restInterfaceManager.getIssueCountByConditions(developer, repoId, beginDate, endDate, tool, "standard", token);
@@ -450,31 +451,12 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         }
 
         Quality quality = new Quality();
-        //规范性指标
-        double standardScore = 1; //分母为0时也返回1
-        if (totalIssueCount != 0){
-            standardScore = developerStandardIssueCount*(1.0)/totalIssueCount == 0 ? 1 : developerStandardIssueCount*(1.0)/totalIssueCount;
-        }
-        //安全性指标
-        double securityScore = 1;//分母为0时返回1
-        if (totalIssueCount != 0){
-            securityScore = developerSecurityIssueCount*(1.0)/totalIssueCount == 0 ? 1 : developerSecurityIssueCount*(1.0)/totalIssueCount;
-        }
-        //缺陷率指标
-        double issueRate = 1;//分母为0时返回1
-        if (totalNewIssueCount != 0){
-            issueRate = developerNewIssueCount*(1.0)/totalNewIssueCount == 0 ? 1 : developerNewIssueCount*(1.0)/totalNewIssueCount;
-        }
-        //总体问题密度指标
-        double issueDensity = -1;//分母为0时返回-1
-        if (totalLOC != 0){
-            issueDensity = developerNewIssueCount*(1.0)/totalLOC == 0 ? 1 : developerNewIssueCount*(1.0)/totalLOC;
-        }
-
-        quality.setStandard(standardScore);
-        quality.setSecurity(securityScore);
-        quality.setIssueRate(issueRate);
-        quality.setIssueDensity(issueDensity);
+        quality.setDeveloperNewIssueCount(developerNewIssueCount);
+        quality.setDeveloperSecurityIssueCount(developerSecurityIssueCount);
+        quality.setDeveloperStandardIssueCount(developerStandardIssueCount);
+        quality.setTotalIssueCount(totalIssueCount);
+        quality.setTotalNewIssueCount(totalNewIssueCount);
+        quality.setTotalLOC(totalLOC);
 
         //----------------------------------开发能力相关指标-------------------------------------
         int developerAddLine = repoMeasureMapper.getAddLinesByDuration(repoId, beginDate, endDate, developer);
@@ -495,41 +477,22 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         int repoAge = restInterfaceManager.getRepoAge(repoId, endDate);
 
         Competence competence = new Competence();
-        double nonRepetitiveCodeRate = -1;
-        if (developerAddLine != 0){
-            nonRepetitiveCodeRate = (developerAddLine - increasedCloneLines)*(1.0)/developerAddLine;
-        }
-
-        double nonSelfRepetitiveCodeRate = -1;
-        if (developerAddLine != 0){
-            nonSelfRepetitiveCodeRate = (developerAddLine - selfIncreasedCloneLines)*(1.0)/developerAddLine;
-        }
-
-        double focusRange = -1;
-        if (totalChangedFile != 0){
-            focusRange = (developerFocusFile)*(1.0)/totalChangedFile;
-        }
-
-        double eliminateDuplicateCodeRate = -1;
-        if (allEliminateCloneLines != 0){
-            eliminateDuplicateCodeRate = (eliminateCloneLines)*(1.0)/allEliminateCloneLines;
-        }
-
-        double oldCodeModification = -1;
-        if (repoAge != 0){
-            oldCodeModification = (changedCodeAVGAge + deletedCodeAVGAge)*(1.0)/repoAge;
-        }
-
-
-        competence.setNonRepetitiveCodeRate(nonRepetitiveCodeRate);
-        competence.setNonSelfRepetitiveCodeRate(nonSelfRepetitiveCodeRate);
-        competence.setFocusRange(focusRange);
-        competence.setEliminateDuplicateCodeRate(eliminateDuplicateCodeRate);
-        competence.setOldCodeModification(oldCodeModification);
+        competence.setDeveloperAddStatement(developerAddStatement);
+        competence.setTotalAddStatement(totalAddStatement);
+        competence.setDeveloperAddLine(developerAddLine);
+        competence.setIncreasedCloneLines(increasedCloneLines);
+        competence.setSelfIncreasedCloneLines(selfIncreasedCloneLines);
+        competence.setEliminateCloneLines(eliminateCloneLines);
+        competence.setAllEliminateCloneLines(allEliminateCloneLines);
+        competence.setTotalChangedFile(totalChangedFile);
+        competence.setDeveloperFocusFile(developerFocusFile);
+        competence.setChangedCodeAVGAge(changedCodeAVGAge);
         competence.setChangedCodeMAXAge(changedCodeMAXAge);
+        competence.setChangedCodeMAXAge(deletedCodeAVGAge);
         competence.setDeletedCodeMAXAge(deletedCodeMAXAge);
+        competence.setRepoAge(repoAge);
 
-        return new DeveloperMetrics(developer, efficiency, quality, competence);
+        return new DeveloperMetrics(firstCommitDate, developerLOC, developerCommitCount, repoName, developer, efficiency, quality, competence);
     }
 
     @Override

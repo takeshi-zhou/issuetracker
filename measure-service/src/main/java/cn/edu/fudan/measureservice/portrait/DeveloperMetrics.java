@@ -17,12 +17,8 @@ public class DeveloperMetrics{
 
     private Date firstCommitDate;
     private int totalLine;
-
-    /**
-     * 项目名称 项目名称为 ALL 时 代表的是整体情况
-     */
+    private int totalCommitCount;
     private String repoName;
-
     private String developer;
     private Efficiency efficiency;
     private Quality quality;
@@ -30,6 +26,16 @@ public class DeveloperMetrics{
 
     private double level = -1;
 
+    public DeveloperMetrics(Date firstCommitDate, int totalLine, int totalCommitCount, String repoName, String developer, Efficiency efficiency, Quality quality, Competence competence) {
+        this.firstCommitDate = firstCommitDate;
+        this.totalLine = totalLine;
+        this.totalCommitCount = totalCommitCount;
+        this.repoName = repoName;
+        this.developer = developer;
+        this.efficiency = efficiency;
+        this.quality = quality;
+        this.competence = competence;
+    }
 
     public DeveloperMetrics(String developer, Efficiency efficiency, Quality quality, Competence competence) {
         this.developer = developer;
