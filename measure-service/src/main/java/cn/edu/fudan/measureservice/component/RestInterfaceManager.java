@@ -55,9 +55,11 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(accountServicePath+"/user/accountId?userToken={userToken}",String.class,urlParameters);
     }
 
-    //-----------------------------------------------project service-------------------------------------------------
-    public String getRepoIdOfProject(String projectId) {
-        return restTemplate.getForObject(projectServicePath + "/inner/project/repo-id?project-id=" + projectId, String.class);
+    //----------------------------------commit service----------------------------------------------------
+    public JSONArray getCommitList(String repo_id){
+        JSONObject response = restTemplate.getForObject(commitServicePath  + "?repo_id=" + repo_id + "&is_whole=true",JSONObject.class);
+        JSONArray data = response.getJSONArray("data");
+        return data;
     }
 
     public JSONArray getCommitsOfRepo(String repoId){
@@ -70,6 +72,14 @@ public class RestInterfaceManager {
 
     public JSONObject getCommitByCommitId(String commitId){
         return restTemplate.getForObject(commitServicePath+"/"+ commitId,JSONObject.class);
+    }
+    public JSONObject getFirstCommitDate(String developerName){
+        return restTemplate.getForObject(commitServicePath+"/first-commit?author="+ developerName,JSONObject.class).getJSONObject("data");
+    }
+
+    //-----------------------------------------------project service-------------------------------------------------
+    public String getRepoIdOfProject(String projectId) {
+        return restTemplate.getForObject(projectServicePath + "/inner/project/repo-id?project-id=" + projectId, String.class);
     }
 
     public JSONObject getProjectListByCondition(String token,String category,String name,String module){
@@ -216,15 +226,6 @@ public class RestInterfaceManager {
         String body = responseEntity.getBody().toString();
         JSONObject result = JSONObject.parseObject(body);
         return result.getJSONArray("data");
-    }
-
-
-
-    //----------------------------------commit service----------------------------------------------------
-    public JSONArray getCommitList(String repo_id){
-        JSONObject response = restTemplate.getForObject(commitServicePath  + "?repo_id=" + repo_id + "&is_whole=true",JSONObject.class);
-        JSONArray data = response.getJSONArray("data");
-        return data;
     }
 
     //--------------------------------code-tracker service------------------------------------------------

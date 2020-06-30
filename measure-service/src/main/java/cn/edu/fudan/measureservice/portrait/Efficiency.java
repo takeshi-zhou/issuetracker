@@ -9,8 +9,7 @@ import lombok.*;
  * @author fancying
  * create: 2020-05-18 21:40
  **/
-@Getter
-@Setter
+@AllArgsConstructor
 @NoArgsConstructor
 public class Efficiency implements Formula{
 
@@ -64,7 +63,7 @@ public class Efficiency implements Formula{
      */
     @Override
     public double cal() {
-        double efficiencyValue = 0.2*commitFrequency + 0.2*workLoad + 0.2*newLogicLine + 0.2*delLogicLine + 0.2*validStatement;
+        double efficiencyValue = 0.25*commitFrequency + 0.25*workLoad + 0.25*newLogicLine + 0.25*delLogicLine;
 
         if (efficiencyValue >= 0 && efficiencyValue <= 0.5/developerNumber){
             return 1;
@@ -90,7 +89,7 @@ public class Efficiency implements Formula{
      */
 
     public double getLevel(){
-        if (!((Double)defaultScore).equals(level)) {
+        if (level != 0) {
             return level;
         }
         level = cal();

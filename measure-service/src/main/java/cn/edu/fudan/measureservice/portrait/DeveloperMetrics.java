@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -15,7 +17,7 @@ import java.util.Date;
 @Data
 public class DeveloperMetrics{
 
-    private Date firstCommitDate;
+    private LocalDate firstCommitDate;
     private int totalLine;
     private int totalCommitCount;
     private String repoName;
@@ -24,9 +26,7 @@ public class DeveloperMetrics{
     private Quality quality;
     private Competence competence;
 
-    private double level = -1;
-
-    public DeveloperMetrics(Date firstCommitDate, int totalLine, int totalCommitCount, String repoName, String developer, Efficiency efficiency, Quality quality, Competence competence) {
+    public DeveloperMetrics(LocalDate firstCommitDate, int totalLine, int totalCommitCount, String repoName, String developer, Efficiency efficiency, Quality quality, Competence competence) {
         this.firstCommitDate = firstCommitDate;
         this.totalLine = totalLine;
         this.totalCommitCount = totalCommitCount;

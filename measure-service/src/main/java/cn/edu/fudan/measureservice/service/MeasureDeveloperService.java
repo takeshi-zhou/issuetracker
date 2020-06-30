@@ -1,5 +1,7 @@
 package cn.edu.fudan.measureservice.service;
 
+import java.text.ParseException;
+
 public interface MeasureDeveloperService {
 
     /**
@@ -79,7 +81,7 @@ public interface MeasureDeveloperService {
      *
      * @return 返回开发者雷达图数据
      */
-    Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool);
+    Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool) throws ParseException;
 
     /**
      *
@@ -91,7 +93,7 @@ public interface MeasureDeveloperService {
      *
      * @return 返回开发者用户画像评星等级
      */
-    Object getPortraitLevel(String repoId, String developer, String beginDate, String endDate, String token, String tool);
+    Object getPortraitLevel(String repoId, String developer, String beginDate, String endDate, String token, String tool) throws ParseException;
 
 
 }

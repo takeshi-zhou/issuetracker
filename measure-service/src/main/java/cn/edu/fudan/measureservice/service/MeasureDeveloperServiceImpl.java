@@ -19,8 +19,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import sun.util.calendar.BaseCalendar;
+import sun.util.calendar.LocalGregorianCalendar;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -371,13 +377,29 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
     }
 
     @Override
-    public Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool) {
+    public Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool) throws ParseException {
         List<Map<String, Object>> developerList = repoMeasureMapper.getDeveloperListByRepoId(repoId);
         int developerNumber = developerList.size();
-        //todo 根据repoId获取repoName
-        String repoName = "testName";
-        //todo 获取第一次提交commit的日期
-        Date firstCommitDate = null;
+        JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
+        String branch = projects.getJSONObject(0).getString("branch");
+        String repoName = projects.getJSONObject(0).getString("name");
+
+        //获取第一次提交commit的日期
+        LocalDateTime firstCommitDateTime;
+        LocalDate firstCommitDate = null;
+        JSONObject firstCommitDateData = restInterfaceManager.getFirstCommitDate(developer);
+        JSONArray repoDateList = firstCommitDateData.getJSONArray("repos");
+        for(int i=0;i<repoDateList.size();i++) {
+            if (repoDateList.getJSONObject(i).get("repo_id").equals(repoId)){
+                String dateString = repoDateList.getJSONObject(i).getString("first_commit_time");
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                firstCommitDateTime = LocalDateTime.parse(dateString, fmt);
+                firstCommitDateTime = firstCommitDateTime.plusHours(8);
+                firstCommitDate = firstCommitDateTime.toLocalDate();
+                break;
+            }
+        }
+
 
         //--------------------------以下是开发效率相关指标-----------------------------
         Efficiency efficiency = new Efficiency();
@@ -396,8 +418,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         efficiency.setDeveloperLOC(developerLOC);
 
         //获取代码新增、删除逻辑行数数据
-        JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
-        String branch = projects.getJSONObject(0).getString("branch");
+
         JSONObject statements = restInterfaceManager.getStatements(repoId, beginDate, endDate, branch);
         int developerAddStatement = 0;
         int totalAddStatement = 0;
@@ -427,8 +448,6 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         }
         efficiency.setDeveloperValidLine(developerValidLine);
         efficiency.setTotalValidLine(totalValidLine);
-        //有效代码行指标
-        efficiency.setValidStatement((totalValidLine == 0) ? -1 : developerValidLine*(1.0)/totalValidLine);
 
         //----------------------------------以下是代码质量相关指标-------------------------------------
         //个人规范类issue数
@@ -491,6 +510,8 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         competence.setChangedCodeMAXAge(deletedCodeAVGAge);
         competence.setDeletedCodeMAXAge(deletedCodeMAXAge);
         competence.setRepoAge(repoAge);
+        competence.setDeveloperValidLine(developerValidLine);
+        competence.setTotalValidLine(totalValidLine);
 
         return new DeveloperMetrics(firstCommitDate, developerLOC, developerCommitCount, repoName, developer, efficiency, quality, competence);
     }
@@ -510,7 +531,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
     }
 
     @Override
-    public Object getPortraitLevel(String repoId, String developer, String beginDate, String endDate, String token, String tool) {
+    public Object getPortraitLevel(String repoId, String developer, String beginDate, String endDate, String token, String tool) throws ParseException {
         Object portrait = getPortrait(repoId,developer,beginDate,endDate,token,tool);
         DeveloperMetrics baseData = (DeveloperMetrics) portrait;
         Competence competence = baseData.getCompetence();

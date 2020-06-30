@@ -11,7 +11,6 @@ import lombok.Setter;
  * @author fancying
  * create: 2020-05-18 21:41
  **/
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Competence implements Formula{
@@ -25,7 +24,9 @@ public class Competence implements Formula{
     @Setter
     private int developerAddLine;
     @Setter
-    private int surviveRate;
+    private int developerValidLine;
+    @Setter
+    private int totalValidLine;
     @Setter
     private int increasedCloneLines;
     @Setter
@@ -59,11 +60,11 @@ public class Competence implements Formula{
     private double focusRange = defaultScore;
     private double eliminateDuplicateCodeRate = defaultScore;
     private double oldCodeModification = defaultScore;
+    private double surviveRate;
     private double level = 0;
 
     @Override
     public double cal() {
-        //todo 差一个存活率指标
         level = 0.5*surviveRate + 0.2*nonRepetitiveCodeRate + 0.3*(developerAddStatement*1.0/totalAddStatement);
         if (level >=0 && level <= 0.9){
             return 1;
@@ -141,6 +142,18 @@ public class Competence implements Formula{
             return eliminateDuplicateCodeRate;
         }
         return eliminateDuplicateCodeRate;
+    }
+
+    public double getSurviveRate() {
+        if (!((Double)defaultScore).equals(surviveRate)) {
+            return surviveRate;
+        }
+        //  具体的计算方式
+        if (totalValidLine != 0){
+            surviveRate = (developerValidLine)*(1.0)/totalValidLine;
+            return surviveRate;
+        }
+        return surviveRate;
     }
 
     public double getLevel() {

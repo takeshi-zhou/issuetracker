@@ -12,7 +12,6 @@ import lombok.Setter;
  * @author fancying
  * create: 2020-05-18 21:40
  **/
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Quality implements Formula{
