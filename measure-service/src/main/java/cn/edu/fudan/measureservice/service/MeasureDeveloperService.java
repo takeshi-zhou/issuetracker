@@ -93,7 +93,7 @@ public interface MeasureDeveloperService {
      *
      * @return 返回开发者用户画像评星等级
      */
-    Object getPortraitLevel(String repoId, String developer, String beginDate, String endDate, String token, String tool) throws ParseException;
+    Object getPortraitLevel(String developer, String beginDate, String endDate, String token, String tool) throws ParseException;
 
 
 }

@@ -6,10 +6,7 @@ import cn.edu.fudan.measureservice.domain.CommitBase;
 import cn.edu.fudan.measureservice.domain.CommitInfoDeveloper;
 import cn.edu.fudan.measureservice.domain.RepoMeasure;
 import cn.edu.fudan.measureservice.mapper.RepoMeasureMapper;
-import cn.edu.fudan.measureservice.portrait.Competence;
-import cn.edu.fudan.measureservice.portrait.DeveloperMetrics;
-import cn.edu.fudan.measureservice.portrait.Efficiency;
-import cn.edu.fudan.measureservice.portrait.Quality;
+import cn.edu.fudan.measureservice.portrait.*;
 import cn.edu.fudan.measureservice.util.DateTimeUtil;
 import cn.edu.fudan.measureservice.util.GitUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -377,7 +374,22 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
     }
 
     @Override
-    public Object getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool) throws ParseException {
+    public Object getLOCByCondition(String repoId, String developer, String beginDate, String endDate, String type) {
+        int totalLOC = repoMeasureMapper.getLOCByCondition(repoId,developer,beginDate,endDate);
+        if (type.equals("total")){
+            return totalLOC;
+        }
+        if (type.equals("dayAverage")){
+            List<Map<String, Object>> commitDays = repoMeasureMapper.getCommitDays(repoId,developer,beginDate,endDate);
+            int days = commitDays.size();
+            return totalLOC/days;
+        }
+        return ("please input correct type: total or dayAverage !");
+    }
+
+
+    @Override
+    public DeveloperMetrics getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool) throws ParseException {
         List<Map<String, Object>> developerList = repoMeasureMapper.getDeveloperListByRepoId(repoId);
         int developerNumber = developerList.size();
         JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
@@ -516,33 +528,34 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         return new DeveloperMetrics(firstCommitDate, developerLOC, developerCommitCount, repoName, developer, efficiency, quality, competence);
     }
 
-    @Override
-    public Object getLOCByCondition(String repoId, String developer, String beginDate, String endDate, String type) {
-        int totalLOC = repoMeasureMapper.getLOCByCondition(repoId,developer,beginDate,endDate);
-        if (type.equals("total")){
-            return totalLOC;
-        }
-        if (type.equals("dayAverage")){
-            List<Map<String, Object>> commitDays = repoMeasureMapper.getCommitDays(repoId,developer,beginDate,endDate);
-            int days = commitDays.size();
-            return totalLOC/days;
-        }
-        return ("please input correct type: total or dayAverage !");
-    }
 
     @Override
-    public Object getPortraitLevel(String repoId, String developer, String beginDate, String endDate, String token, String tool) throws ParseException {
-        Object portrait = getPortrait(repoId,developer,beginDate,endDate,token,tool);
-        DeveloperMetrics baseData = (DeveloperMetrics) portrait;
-        Competence competence = baseData.getCompetence();
-        Efficiency efficiency = baseData.getEfficiency();
-        Quality quality = baseData.getQuality();
-        List<Map<String, Object>> developerList = repoMeasureMapper.getDeveloperListByRepoId(repoId);
-
-        if (developerList.size() >= 20){
-
+    public Object getPortraitLevel(String developer, String beginDate, String endDate, String token, String tool) throws ParseException {
+        //获取developerMetricsList
+        List<String> repoList = repoMeasureMapper.getRepoListByDeveloper(developer);
+        List<DeveloperMetrics> developerMetricsList = new ArrayList<>();
+        for (String repoId : repoList) {
+            DeveloperMetrics metrics = getPortrait(repoId, developer, beginDate, endDate, token, tool);
+            developerMetricsList.add(metrics);
         }
+        //获取第一次提交commit的日期
+        LocalDateTime firstCommitDateTime;
+        LocalDate firstCommitDate = null;
+        JSONObject firstCommitDateData = restInterfaceManager.getFirstCommitDate(developer);
+        JSONObject repoDateList = firstCommitDateData.getJSONObject("repos_summary");
+        String dateString = repoDateList.getString("first_commit_time_summary");
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        firstCommitDateTime = LocalDateTime.parse(dateString, fmt);
+        firstCommitDateTime = firstCommitDateTime.plusHours(8);
+        firstCommitDate = firstCommitDateTime.toLocalDate();
 
-        return null;
+        int totalCommitCount = repoMeasureMapper.getCommitCountsByDuration(null, null, null, developer);
+        int totalLOC = repoMeasureMapper.getLOCByCondition(null,developer,null,null);
+        List<Map<String, Object>> commitDays = repoMeasureMapper.getCommitDays(null,developer,null,null);
+        int days = commitDays.size();
+        int dayAverageLOC = totalLOC/days;
+        //todo 日后需要添加程序员类型接口 目前统一认为是java后端工程师
+        String developerType = "Java后端工程师";
+        return new DeveloperPortrait(firstCommitDate,totalLOC,dayAverageLOC,totalCommitCount,developer,developerType,developerMetricsList);
     }
 }

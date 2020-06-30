@@ -194,10 +194,26 @@
     <select id="getCommitCountsByDuration" resultType="int">
         select
              COUNT(*) as commit_counts
-        from repo_measure where repo_id = #{repo_id} and DATE(commit_time) BETWEEN #{since} AND #{until}
-        <if test="developer_name != null and developer_name != ''" >
-            and developer_name = #{developer_name}
-        </if>
+        from repo_measure
+        <where>
+            <trim prefixOverrides="and">
+                <if test="developer_name != null and developer_name != '' ">
+                    and developer_name = #{developer_name}
+                </if>
+
+                <if test="repo_id != null and repo_id != '' ">
+                    and repo_id = #{repo_id}
+                </if>
+
+                <if test="since != null and since != '' ">
+                    and <![CDATA[ commit_time >= #{since} ]]>
+                </if>
+
+                <if test="until != null and until != '' ">
+                    and <![CDATA[ commit_time <= #{until} ]]>
+                </if>
+            </trim>
+        </where>
     </select>
 
     <select id="getChangedFilesByDuration" resultType="int">
@@ -411,6 +427,15 @@
             </trim>
         </where>
         group by commitDays
+    </select>
+
+    <select id="getRepoListByDeveloper" parameterType="String" resultType="String">
+        SELECT
+            DISTINCT (repo_id)
+        FROM
+            repo_measure
+        WHERE
+            developer_name = #{developer_name}
     </select>
 
 
