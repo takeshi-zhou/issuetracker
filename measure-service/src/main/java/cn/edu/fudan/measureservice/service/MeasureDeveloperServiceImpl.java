@@ -479,6 +479,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         }
 
         Quality quality = new Quality();
+        quality.setDeveloperNumber(developerNumber);
         quality.setDeveloperNewIssueCount(developerNewIssueCount);
         quality.setDeveloperSecurityIssueCount(developerSecurityIssueCount);
         quality.setDeveloperStandardIssueCount(developerStandardIssueCount);
@@ -505,6 +506,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         int repoAge = restInterfaceManager.getRepoAge(repoId, endDate);
 
         Competence competence = new Competence();
+        competence.setDeveloperNumber(developerNumber);
         competence.setDeveloperAddStatement(developerAddStatement);
         competence.setTotalAddStatement(totalAddStatement);
         competence.setDeveloperAddLine(developerAddLine);
