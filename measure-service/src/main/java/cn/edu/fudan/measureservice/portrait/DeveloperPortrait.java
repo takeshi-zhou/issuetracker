@@ -49,7 +49,7 @@ public class DeveloperPortrait {
             return level;
         }
         //  具体的计算方式
-        level = (value + quality + efficiency) / 3;
+        level = (getValue() + getQuality() + getEfficiency()) / 3;
         return level;
     }
 

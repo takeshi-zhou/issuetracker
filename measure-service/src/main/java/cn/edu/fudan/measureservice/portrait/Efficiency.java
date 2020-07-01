@@ -9,6 +9,7 @@ import lombok.*;
  * @author fancying
  * create: 2020-05-18 21:40
  **/
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Efficiency implements Formula{

@@ -11,6 +11,7 @@ import lombok.Setter;
  * @author fancying
  * create: 2020-05-18 21:41
  **/
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Competence implements Formula{
@@ -60,7 +61,7 @@ public class Competence implements Formula{
     private double focusRange = defaultScore;
     private double eliminateDuplicateCodeRate = defaultScore;
     private double oldCodeModification = defaultScore;
-    private double surviveRate;
+    private double surviveRate = defaultScore;
     private double level = 0;
 
     @Override
@@ -145,7 +146,7 @@ public class Competence implements Formula{
     }
 
     public double getSurviveRate() {
-        if (!((Double)defaultScore).equals(surviveRate)) {
+        if (defaultScore != surviveRate) {
             return surviveRate;
         }
         //  具体的计算方式

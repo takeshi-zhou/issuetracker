@@ -184,14 +184,11 @@ public class MeasureDeveloperController {
     @GetMapping("/measure/portrait-level")
     @CrossOrigin
     public ResponseBean getPortraitLevel(@RequestParam("developer")String developer,
-                                    @RequestParam("begin-date")String beginDate,
-                                    @RequestParam("end-date")String endDate,
-                                    @RequestParam("tool")String tool,
                                     HttpServletRequest request){
 
         try{
             String token = request.getHeader("token");
-            return new ResponseBean(200,"success",measureDeveloperService.getPortraitLevel(developer,beginDate,endDate,token,tool));
+            return new ResponseBean(200,"success",measureDeveloperService.getPortraitLevel(developer,token));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());

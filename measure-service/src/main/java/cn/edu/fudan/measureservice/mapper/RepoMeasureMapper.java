@@ -57,4 +57,9 @@ public interface RepoMeasureMapper {
 
     List<String> getRepoListByDeveloper(@Param("developer_name")String developerName);
 
+    String getFirstCommitDateOfOneRepo(@Param("repo_id") String repo_id);
+
+    String getLastCommitDateOfOneRepo(@Param("repo_id") String repo_id);
+
+
 }
