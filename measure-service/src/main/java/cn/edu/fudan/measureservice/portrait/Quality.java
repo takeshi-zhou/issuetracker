@@ -39,7 +39,7 @@ public class Quality implements Formula{
     private double standard = defaultScore;
     private double security = defaultScore;
     private double issueRate = defaultScore;
-    private double issueDensity = defaultScore;
+    private double issueDensity = defaultScore;//平均每100行代码，产生的缺陷数
     private double standardLevel = defaultScore;
     private double securityLevel = defaultScore;
     private double issueRateLevel = defaultScore;
@@ -122,8 +122,8 @@ public class Quality implements Formula{
             return issueDensity;
         }
         //  具体的计算方式
-        if (developerNewIssueCount != 0){
-            issueDensity = totalLOC*1.0/developerNewIssueCount;
+        if (totalLOC != 0){
+            issueDensity = developerNewIssueCount*100.0/totalLOC;
             return issueDensity;
         }
         return issueDensity;
@@ -218,11 +218,11 @@ public class Quality implements Formula{
             return issueDensityLevel;
         }
         //具体的计算方式
-        if (issueDensity >= 0 && issueDensity <= 100){
+        if (1/issueDensity >= 0 && 1/issueDensity <= 100){
             issueDensityLevel = 1;
             return issueDensityLevel;
         }
-        if (issueDensity > 100 && issueDensity <= 150){
+        if (1/issueDensity > 100 && 1/issueDensity <= 150){
             issueDensityLevel = 2;
             return issueDensityLevel;
         }
@@ -230,11 +230,11 @@ public class Quality implements Formula{
             issueDensityLevel = 3;
             return issueDensityLevel;
         }
-        if (issueDensity > 200 && issueDensity <= 300){
+        if (1/issueDensity > 200 && 1/issueDensity <= 300){
             issueDensityLevel = 4;
             return issueDensityLevel;
         }
-        if (issueDensity > 300){
+        if (1/issueDensity > 300){
             issueDensityLevel = 5;
             return issueDensityLevel;
         }

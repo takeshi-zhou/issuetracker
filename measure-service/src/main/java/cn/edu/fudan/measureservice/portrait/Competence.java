@@ -257,11 +257,11 @@ public class Competence implements Formula{
             oldCodeModificationLevel = 1;
             return oldCodeModificationLevel;
         }
-        if (oldCodeModification >= 0.05 && oldCodeModification < 0.1){
+        if (oldCodeModification >= 0.05 && oldCodeModification < 0.08){
             oldCodeModificationLevel = 2;
             return oldCodeModificationLevel;
         }
-        if (oldCodeModification >= 0.1 && oldCodeModification < 0.2){
+        if (oldCodeModification >= 0.08 && oldCodeModification < 0.2){
             oldCodeModificationLevel = 3;
             return oldCodeModificationLevel;
         }

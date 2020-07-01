@@ -145,36 +145,16 @@ public class MeasureDeveloperController {
      */
     @GetMapping("/measure/portrait")
     @CrossOrigin
-    public ResponseBean getPortrait(@RequestParam("repo-id")String repoId,
-                                    @RequestParam("developer")String developer,
-                                    @RequestParam("begin-date")String beginDate,
-                                    @RequestParam("end-date")String endDate,
-                                    @RequestParam("tool")String tool,
+    public ResponseBean getPortrait(@RequestParam(value = "repo-id")String repoId,
+                                    @RequestParam(value = "developer")String developer,
+                                    @RequestParam(value = "begin-date", required = false, defaultValue = "")String beginDate,
+                                    @RequestParam(value = "end-date", required = false, defaultValue = "")String endDate,
+                                    @RequestParam(value = "tool", required = false, defaultValue = "sonarqube")String tool,
                                     HttpServletRequest request){
 
         try{
             String token = request.getHeader("token");
             return new ResponseBean(200,"success",measureDeveloperService.getPortrait(repoId,developer,beginDate,endDate,token,tool));
-        }catch (Exception e){
-            e.printStackTrace();
-            return new ResponseBean(401,"failed",e.getMessage());
-        }
-    }
-
-    /**
-     *
-     *返回用户画像页面得代码行数数据，包括所有项目和单个项目的
-     */
-    @GetMapping("/measure/LOC")
-    @CrossOrigin
-    public ResponseBean getLOCByCondition(@RequestParam(value = "repo-id", required = false)String repoId,
-                                    @RequestParam(value = "developer", required = false)String developer,
-                                    @RequestParam(value = "begin-date", required = false)String beginDate,
-                                    @RequestParam(value = "end-date", required = false)String endDate,
-                                          @RequestParam(value = "type", required = false, defaultValue = "total")String type){
-
-        try{
-            return new ResponseBean(200,"success",measureDeveloperService.getLOCByCondition(repoId,developer,beginDate,endDate,type));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());
@@ -189,6 +169,26 @@ public class MeasureDeveloperController {
         try{
             String token = request.getHeader("token");
             return new ResponseBean(200,"success",measureDeveloperService.getPortraitLevel(developer,token));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+    /**
+     *
+     *返回用户画像页面得代码行数数据，包括所有项目和单个项目的
+     */
+    @GetMapping("/measure/LOC")
+    @CrossOrigin
+    public ResponseBean getLOCByCondition(@RequestParam(value = "repo-id", required = false)String repoId,
+                                          @RequestParam(value = "developer", required = false)String developer,
+                                          @RequestParam(value = "begin-date", required = false)String beginDate,
+                                          @RequestParam(value = "end-date", required = false)String endDate,
+                                          @RequestParam(value = "type", required = false, defaultValue = "total")String type){
+
+        try{
+            return new ResponseBean(200,"success",measureDeveloperService.getLOCByCondition(repoId,developer,beginDate,endDate,type));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());

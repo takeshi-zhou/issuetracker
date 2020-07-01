@@ -387,13 +387,19 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
     @Override
     public DeveloperMetrics getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool) throws ParseException {
+        if (beginDate.equals("")){
+            beginDate = repoMeasureMapper.getFirstCommitDateOfOneRepo(repoId);
+        }
+        if (endDate.equals("")){
+            endDate = repoMeasureMapper.getLastCommitDateOfOneRepo(repoId);
+        }
         List<Map<String, Object>> developerList = repoMeasureMapper.getDeveloperListByRepoId(repoId);
         int developerNumber = developerList.size();
         JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
         String branch = projects.getJSONObject(0).getString("branch");
         String repoName = projects.getJSONObject(0).getString("name");
 
-        //获取第一次提交commit的日期
+        //获取程序员在本项目中第一次提交commit的日期
         LocalDateTime firstCommitDateTime;
         LocalDate firstCommitDate = null;
         JSONObject firstCommitDateData = restInterfaceManager.getFirstCommitDate(developer);
