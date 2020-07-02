@@ -37,9 +37,9 @@ public class scanController {
         }
     }
 
-    @GetMapping(value = {"/clone/saga-cpu"})
+    @GetMapping(value = {"/clone/saga-cpu/scan-status"})
     @CrossOrigin
-    public Object getCloneRepo(@RequestParam("repo_id") String repoId) {
+    public Object getCloneRepo(@RequestParam("repoId") String repoId) {
         try {
 
             return new ResponseBean(200, "scan msg send success!", scanService.getLatestCloneRepo(repoId));
