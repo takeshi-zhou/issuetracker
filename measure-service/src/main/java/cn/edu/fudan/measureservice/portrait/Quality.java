@@ -52,19 +52,19 @@ public class Quality implements Formula{
     @Override
     public double cal() {
         levelScore = getLevelScore();
-        if (levelScore >= 0 && levelScore <= 0.3){
+        if (levelScore >= 0 && levelScore <= 0.5/developerNumber){
             return 5;
         }
-        if (levelScore > 0.3 && levelScore <= 0.5){
+        if (levelScore > 0.5/developerNumber && levelScore <= 1.0/developerNumber){
             return 4;
         }
-        if (levelScore > 0.5 && levelScore <= 0.7){
+        if (levelScore > 1.0/developerNumber && levelScore <= 2.0/developerNumber){
             return 3;
         }
-        if (levelScore > 0.7 && levelScore <= 0.85){
+        if (levelScore > 2.0/developerNumber && levelScore <= 4.0/developerNumber){
             return 2;
         }
-        if (levelScore > 0.85 && levelScore <= 1){
+        if (levelScore > 4.0/developerNumber){
             return 1;
         }
         return 0;

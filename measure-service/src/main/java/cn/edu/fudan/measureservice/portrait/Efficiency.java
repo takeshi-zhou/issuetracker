@@ -73,16 +73,16 @@ public class Efficiency implements Formula{
         if (levelScore >= 0 && levelScore <= 0.5/developerNumber){
             return 1;
         }
-        if (levelScore > 0.5/developerNumber && levelScore <= 0.67/developerNumber){
+        if (levelScore > 0.5/developerNumber && levelScore <= 1.0/developerNumber){
             return 2;
         }
-        if (levelScore > 0.67/developerNumber && levelScore <= 1.0/developerNumber){
+        if (levelScore > 1.0/developerNumber && levelScore <= 1.5/developerNumber){
             return 3;
         }
-        if (levelScore > 1.0/developerNumber && levelScore <= 1.5/developerNumber){
+        if (levelScore > 1.5/developerNumber && levelScore <= 2.0/developerNumber){
             return 4;
         }
-        if (levelScore > 1.5/developerNumber){
+        if (levelScore > 2.0/developerNumber){
             return 5;
         }
         return 0;

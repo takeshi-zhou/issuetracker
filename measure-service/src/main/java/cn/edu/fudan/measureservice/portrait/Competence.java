@@ -75,19 +75,19 @@ public class Competence implements Formula{
     @Override
     public double cal() {
         levelScore = getLevelScore();
-        if (levelScore >=0 && levelScore <= 0.9/developerNumber){
+        if (levelScore >=0 && levelScore <= 3.0/developerNumber){
             return 1;
         }
-        if (levelScore >0.9/developerNumber && levelScore <= 0.93/developerNumber){
+        if (levelScore >3.0/developerNumber && levelScore <= 4.0/developerNumber){
             return 2;
         }
-        if (levelScore >0.93/developerNumber && levelScore <= 0.96/developerNumber){
+        if (levelScore >4.0/developerNumber && levelScore <= 5.0/developerNumber){
             return 3;
         }
-        if (levelScore >0.96/developerNumber && levelScore <= 0.98/developerNumber){
+        if (levelScore >5.0/developerNumber && levelScore <= 6.0/developerNumber){
             return 4;
         }
-        if (levelScore >0.98/developerNumber){
+        if (levelScore >6.0/developerNumber){
             return 5;
         }
         return 0;
