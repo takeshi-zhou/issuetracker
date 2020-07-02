@@ -58,7 +58,7 @@ public class Efficiency implements Formula{
     private double delLogicLineLevel = defaultScore;
     private double validStatementLevel = defaultScore;
 
-
+    private double levelScore = defaultScore;
     private double level = defaultScore;
 
 
@@ -68,21 +68,21 @@ public class Efficiency implements Formula{
      */
     @Override
     public double cal() {
-        double efficiencyValue = 0.25*commitFrequency + 0.25*workLoad + 0.25*newLogicLine + 0.25*delLogicLine;
+        levelScore = getLevelScore();
 
-        if (efficiencyValue >= 0 && efficiencyValue <= 0.5/developerNumber){
+        if (levelScore >= 0 && levelScore <= 0.5/developerNumber){
             return 1;
         }
-        if (efficiencyValue > 0.5/developerNumber && efficiencyValue <= 0.67/developerNumber){
+        if (levelScore > 0.5/developerNumber && levelScore <= 0.67/developerNumber){
             return 2;
         }
-        if (efficiencyValue > 0.67/developerNumber && efficiencyValue <= 1.0/developerNumber){
+        if (levelScore > 0.67/developerNumber && levelScore <= 1.0/developerNumber){
             return 3;
         }
-        if (efficiencyValue > 1.0/developerNumber && efficiencyValue <= 1.5/developerNumber){
+        if (levelScore > 1.0/developerNumber && levelScore <= 1.5/developerNumber){
             return 4;
         }
-        if (efficiencyValue > 1.5/developerNumber){
+        if (levelScore > 1.5/developerNumber){
             return 5;
         }
         return 0;
@@ -99,6 +99,14 @@ public class Efficiency implements Formula{
         }
         level = cal();
         return level;
+    }
+
+    public double getLevelScore() {
+        if (levelScore != defaultScore) {
+            return levelScore;
+        }
+        levelScore = 0.25*commitFrequency + 0.25*workLoad + 0.25*newLogicLine + 0.25*delLogicLine;
+        return levelScore;
     }
 
     public double getCommitFrequency() {

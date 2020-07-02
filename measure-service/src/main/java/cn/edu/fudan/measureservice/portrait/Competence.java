@@ -69,24 +69,25 @@ public class Competence implements Formula{
     private double nonSelfRepetitiveCodeRateLevel = defaultLevel;
     private double eliminateDuplicateCodeRateLevel = defaultLevel;
     private double oldCodeModificationLevel = defaultLevel;
+    private double levelScore = defaultLevel;
     private double level = defaultLevel;
 
     @Override
     public double cal() {
-        level = 0.5*surviveRate + 0.2*nonRepetitiveCodeRate + 0.3*(developerAddStatement*1.0/totalAddStatement);
-        if (level >=0 && level <= 0.9){
+        levelScore = getLevelScore();
+        if (levelScore >=0 && levelScore <= 0.9/developerNumber){
             return 1;
         }
-        if (level >0.9 && level <= 0.93){
+        if (levelScore >0.9/developerNumber && levelScore <= 0.93/developerNumber){
             return 2;
         }
-        if (level >0.93 && level <= 0.96){
+        if (levelScore >0.93/developerNumber && levelScore <= 0.96/developerNumber){
             return 3;
         }
-        if (level >0.96 && level <= 0.98){
+        if (levelScore >0.96/developerNumber && levelScore <= 0.98/developerNumber){
             return 4;
         }
-        if (level >0.98 && level <= 1){
+        if (levelScore >0.98/developerNumber){
             return 5;
         }
         return 0;
@@ -274,6 +275,14 @@ public class Competence implements Formula{
             return oldCodeModificationLevel;
         }
         return oldCodeModificationLevel;
+    }
+
+    public double getLevelScore() {
+        if (levelScore != defaultLevel) {
+            return levelScore;
+        }
+        levelScore = 0.5*surviveRate + 0.2*nonRepetitiveCodeRate + 0.3*(developerAddStatement*1.0/totalAddStatement);
+        return levelScore;
     }
 
     public double getLevel() {

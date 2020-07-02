@@ -44,26 +44,27 @@ public class Quality implements Formula{
     private double securityLevel = defaultScore;
     private double issueRateLevel = defaultScore;
     private double issueDensityLevel = defaultScore;
+    private double levelScore = defaultScore;
     private double level = defaultScore;
 
 
 
     @Override
     public double cal() {
-        level = 0.25*standard + 0.25*security + 0.25*issueRate + 0.25*issueDensity;
-        if (level >= 0 && level <= 0.3){
+        levelScore = getLevelScore();
+        if (levelScore >= 0 && levelScore <= 0.3){
             return 5;
         }
-        if (level > 0.3 && level <= 0.5){
+        if (levelScore > 0.3 && levelScore <= 0.5){
             return 4;
         }
-        if (level > 0.5 && level <= 0.7){
+        if (levelScore > 0.5 && levelScore <= 0.7){
             return 3;
         }
-        if (level > 0.7 && level <= 0.85){
+        if (levelScore > 0.7 && levelScore <= 0.85){
             return 2;
         }
-        if (level > 0.85 && level <= 1){
+        if (levelScore > 0.85 && levelScore <= 1){
             return 1;
         }
         return 0;
@@ -79,6 +80,14 @@ public class Quality implements Formula{
         }
         level = cal();
         return level;
+    }
+
+    public double getLevelScore() {
+        if (levelScore != defaultScore) {
+            return levelScore;
+        }
+        levelScore = 0.25*standard + 0.25*security + 0.25*issueRate + 0.25*issueDensity;
+        return levelScore;
     }
 
     public double getStandard() {
