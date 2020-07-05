@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -570,5 +571,16 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         //todo 日后需要添加程序员类型接口 目前统一认为是java后端工程师
         String developerType = "Java后端工程师";
         return new DeveloperPortrait(firstCommitDate,totalLOC,dayAverageLOC,totalCommitCount,developer,developerType,developerMetricsList);
+    }
+
+    @Override
+    public Object getCommitMsgByCondition(String repoId, String developer, String beginDate, String endDate) {
+        List<Map<String, Object>> commitMsgList = repoMeasureMapper.getCommitMsgByCondition(repoId, developer, beginDate, endDate);
+        for (Map<String, Object> map : commitMsgList) {
+            //将数据库中timeStamp/dateTime类型转换成指定格式的字符串 map.get("commit_time") 这个就是数据库中dateTime类型
+            String commit_time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(map.get("commit_time"));
+            map.put("commit_time", commit_time);
+        }
+        return commitMsgList;
     }
 }
