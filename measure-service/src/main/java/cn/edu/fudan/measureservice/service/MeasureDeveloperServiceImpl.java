@@ -517,13 +517,24 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
                                               int developerValidLine, int totalValidLine){
         int developerAddLine = repoMeasureMapper.getAddLinesByDuration(repoId, beginDate, endDate, developer);
         JSONObject cloneMeasure = restInterfaceManager.getCloneMeasure(repoId, developer, beginDate, endDate);
-        int increasedCloneLines = Integer.parseInt(cloneMeasure.getString("increasedCloneLines"));
-        int selfIncreasedCloneLines = Integer.parseInt(cloneMeasure.getString("selfIncreasedCloneLines"));
-        int eliminateCloneLines = Integer.parseInt(cloneMeasure.getString("eliminateCloneLines"));
-        int allEliminateCloneLines = Integer.parseInt(cloneMeasure.getString("allEliminateCloneLines"));
+        int increasedCloneLines = 0;
+        int selfIncreasedCloneLines = 0;
+        int eliminateCloneLines = 0;
+        int allEliminateCloneLines = 0;
+        if (cloneMeasure != null){
+            increasedCloneLines = Integer.parseInt(cloneMeasure.getString("increasedCloneLines"));
+            selfIncreasedCloneLines = Integer.parseInt(cloneMeasure.getString("selfIncreasedCloneLines"));
+            eliminateCloneLines = Integer.parseInt(cloneMeasure.getString("eliminateCloneLines"));
+            allEliminateCloneLines = Integer.parseInt(cloneMeasure.getString("allEliminateCloneLines"));
+        }
         JSONObject focusMeasure = restInterfaceManager.getFocusFilesCount(repoId, beginDate, endDate);
-        int totalChangedFile = focusMeasure.getIntValue("total");
-        int developerFocusFile = focusMeasure.getJSONObject("developer").getIntValue(developer);
+        int totalChangedFile = 0;
+        int developerFocusFile = 0;
+        if (focusMeasure != null){
+            totalChangedFile = focusMeasure.getIntValue("total");
+            developerFocusFile = focusMeasure.getJSONObject("developer").getIntValue(developer);
+        }
+
         JSONObject changedCodeInfo = restInterfaceManager.getChangedCodeAge(repoId, beginDate, endDate, developer);
         double changedCodeAVGAge = 0;
         int changedCodeMAXAge = 0;
