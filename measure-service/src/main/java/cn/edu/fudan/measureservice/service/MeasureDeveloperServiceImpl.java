@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.Console;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -566,20 +567,24 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         //获取developerMetricsList
         List<String> repoList = repoMeasureMapper.getRepoListByDeveloper(developer);
         List<DeveloperMetrics> developerMetricsList = new ArrayList<>();
+//        LocalDate today = LocalDate.now();
+//        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//        String endDate = df.format(today);
         for (String repoId : repoList) {
             JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
             String tool = projects.getJSONObject(0).getString("type");
+            String repoName = projects.getJSONObject(0).getString("name");
             String beginDate = repoMeasureMapper.getFirstCommitDateOfOneRepo(repoId);
-            LocalDate today = LocalDate.now();
-            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            String endDate = df.format(today);
-
+            String endDate = repoMeasureMapper.getLastCommitDateOfOneRepo(repoId);
             //只添加被sonarqube扫描过的项目，findbugs之后会逐渐被废弃
             if (tool.equals("sonarqube")){
+                logger.info("Start to get portrait of " + developer + " in repo : " + repoName);
                 DeveloperMetrics metrics = getPortrait(repoId, developer, beginDate, endDate, token, tool);
                 developerMetricsList.add(metrics);
+                logger.info("Successfully get portrait of " + developer + " in repo : " + repoName);
             }
         }
+        logger.info("Get portrait of " + developer + " complete!" );
         //获取第一次提交commit的日期
         LocalDateTime firstCommitDateTime;
         LocalDate firstCommitDate = null;
