@@ -9,6 +9,7 @@ import lombok.*;
  * @author fancying
  * create: 2020-05-18 21:40
  **/
+@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

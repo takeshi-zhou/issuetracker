@@ -1,10 +1,7 @@
 package cn.edu.fudan.measureservice.portrait;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * description:
@@ -12,6 +9,7 @@ import lombok.Setter;
  * @author fancying
  * create: 2020-05-18 21:40
  **/
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
