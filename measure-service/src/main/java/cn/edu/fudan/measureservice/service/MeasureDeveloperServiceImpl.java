@@ -567,21 +567,24 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         //获取developerMetricsList
         List<String> repoList = repoMeasureMapper.getRepoListByDeveloper(developer);
         List<DeveloperMetrics> developerMetricsList = new ArrayList<>();
-//        LocalDate today = LocalDate.now();
-//        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//        String endDate = df.format(today);
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String endDate = df.format(today);
         for (String repoId : repoList) {
             JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
-            String tool = projects.getJSONObject(0).getString("type");
-            String repoName = projects.getJSONObject(0).getString("name");
-            String beginDate = repoMeasureMapper.getFirstCommitDateOfOneRepo(repoId);
-            String endDate = repoMeasureMapper.getLastCommitDateOfOneRepo(repoId);
-            //只添加被sonarqube扫描过的项目，findbugs之后会逐渐被废弃
-            if (tool.equals("sonarqube")){
-                logger.info("Start to get portrait of " + developer + " in repo : " + repoName);
-                DeveloperMetrics metrics = getPortrait(repoId, developer, beginDate, endDate, token, tool);
-                developerMetricsList.add(metrics);
-                logger.info("Successfully get portrait of " + developer + " in repo : " + repoName);
+            for (int i = 0; i < projects.size(); i++){
+                String tool = projects.getJSONObject(i).getString("type");
+                String repoName = projects.getJSONObject(i).getString("name");
+                logger.info("Current repo is : " + repoName + ", the issue_scan_type is " + tool);
+                //只添加被sonarqube扫描过的项目，findbugs之后会逐渐被废弃
+                if ("sonarqube".equals(tool)){
+                    String beginDate = repoMeasureMapper.getFirstCommitDateOfOneRepo(repoId);
+//                    String endDate = repoMeasureMapper.getLastCommitDateOfOneRepo(repoId);
+                    logger.info("Start to get portrait of " + developer + " in repo : " + repoName);
+                    DeveloperMetrics metrics = getPortrait(repoId, developer, beginDate, endDate, token, tool);
+                    developerMetricsList.add(metrics);
+                    logger.info("Successfully get portrait of " + developer + " in repo : " + repoName);
+                }
             }
         }
         logger.info("Get portrait of " + developer + " complete!" );
