@@ -78,9 +78,36 @@
             commit_id = #{commit_id}
     </select>
 
-    <select id="sameMeasureOfOneFile" resultType="int">
-        select count(*) from file_measure where repo_id = #{repo_id} and commit_id = #{commit_id} and file_path = #{file_path}
-    </select>
+    <insert id="insertFileMeasureList">
+        insert ignore into file_measure
+        (
+        uuid,
+        repo_id,
+        commit_id,
+        commit_time,
+        file_path,
+        diff_ccn,
+        ccn,
+        add_lines,
+        del_lines,
+        total_lines
+        )
+        VALUES
+        <foreach collection="fileMeasureList" item="item" index="index" separator=",">
+            (
+            #{item.uuid},
+            #{item.repoId},
+            #{item.commitId},
+            #{item.commitTime},
+            #{item.filePath},
+            #{item.diffCcn},
+            #{item.ccn},
+            #{item.addLine},
+            #{item.deleteLine},
+            #{item.totalLine}
+            )
+        </foreach>
+    </insert>
 
 
 </mapper>

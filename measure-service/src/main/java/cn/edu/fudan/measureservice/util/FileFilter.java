@@ -16,6 +16,7 @@ public final class FileFilter {
      * false： 不过滤
      */
     public  static boolean javaFilenameFilter(String path) {
+        path = path.replace("\\","/");
         String[] strs = path.split("/");
         String str = strs[strs.length-1];
         return  !str.toLowerCase().endsWith(".java") ||
