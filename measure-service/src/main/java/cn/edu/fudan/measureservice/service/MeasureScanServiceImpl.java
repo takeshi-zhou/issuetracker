@@ -4,7 +4,6 @@ import cn.edu.fudan.measureservice.analyzer.JavaNcss;
 import cn.edu.fudan.measureservice.annotation.RepoResource;
 import cn.edu.fudan.measureservice.domain.*;
 import cn.edu.fudan.measureservice.domain.Objects;
-import cn.edu.fudan.measureservice.domain.Package;
 import cn.edu.fudan.measureservice.domain.core.FileMeasure;
 import cn.edu.fudan.measureservice.domain.core.MeasureScan;
 import cn.edu.fudan.measureservice.domain.dto.RepoResourceDTO;
