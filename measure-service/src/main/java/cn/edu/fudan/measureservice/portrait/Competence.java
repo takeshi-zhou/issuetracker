@@ -53,8 +53,8 @@ public class Competence implements Formula{
 
     // 以下各个评分由具体的公式计算出来,在getter方法中实现
 
-    private  double defaultScore = 1;
-    private  double defaultLevel = 0;
+    private static double defaultScore = 1;
+    private static double defaultLevel = 0;
 
 
     private double nonRepetitiveCodeRate = defaultScore;
@@ -92,7 +92,7 @@ public class Competence implements Formula{
     }
 
     public double getNonRepetitiveCodeRate() {
-        if (!((Double)defaultScore).equals(nonRepetitiveCodeRate)) {
+        if (defaultScore != nonRepetitiveCodeRate) {
             return nonRepetitiveCodeRate;
         }
         //  具体的计算方式
@@ -104,7 +104,7 @@ public class Competence implements Formula{
     }
 
     public double getNonSelfRepetitiveCodeRate() {
-        if (!((Double)defaultScore).equals(nonSelfRepetitiveCodeRate)) {
+        if (defaultScore != nonSelfRepetitiveCodeRate) {
             return nonSelfRepetitiveCodeRate;
         }
         //  具体的计算方式
@@ -116,7 +116,7 @@ public class Competence implements Formula{
     }
 
     public double getFocusRange() {
-        if (!((Double)defaultScore).equals(focusRange)) {
+        if (defaultScore != focusRange) {
             return focusRange;
         }
         //  具体的计算方式
@@ -128,7 +128,7 @@ public class Competence implements Formula{
     }
 
     public double getOldCodeModification() {
-        if (!((Double)defaultScore).equals(oldCodeModification)) {
+        if (defaultScore != oldCodeModification) {
             return oldCodeModification;
         }
         //  具体的计算方式

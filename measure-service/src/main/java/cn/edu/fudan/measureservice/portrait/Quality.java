@@ -89,7 +89,7 @@ public class Quality implements Formula{
     }
 
     public double getStandard() {
-        if (!((Double)defaultScore).equals(standard)) {
+        if (defaultScore != standard) {
             return standard;
         }
         //  具体的计算方式
@@ -101,7 +101,7 @@ public class Quality implements Formula{
     }
 
     public double getSecurity() {
-        if (!((Double)defaultScore).equals(security)) {
+        if (defaultScore != security) {
             return security;
         }
         //  具体的计算方式
@@ -113,7 +113,7 @@ public class Quality implements Formula{
     }
 
     public double getIssueRate() {
-        if (!((Double)defaultScore).equals(issueRate)) {
+        if (defaultScore != issueRate) {
             return issueRate;
         }
         //  具体的计算方式
@@ -125,7 +125,7 @@ public class Quality implements Formula{
     }
 
     public double getIssueDensity() {
-        if (!((Double)defaultScore).equals(issueDensity)) {
+        if (defaultScore != issueDensity) {
             return issueDensity;
         }
         //  具体的计算方式
