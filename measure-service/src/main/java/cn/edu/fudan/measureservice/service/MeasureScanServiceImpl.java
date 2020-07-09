@@ -274,10 +274,6 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         List<String> filePathList = new ArrayList<>(changedFilePathList.size());
         changedFilePathList.stream().filter(f -> !FileFilter.javaFilenameFilter(f)).forEach(filePathList::add);
 
-        FileMeasure fileMeasure = new FileMeasure();
-        fileMeasure.setRepoId(repoId);
-        fileMeasure.setCommitId(commitId);
-        fileMeasure.setCommitTime(commitTime);
         if (filePathList.size() == 0) {
             return;
         }
@@ -289,8 +285,6 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         //获取本次commit所有文件的代码变更情况
         List<Map<String, Object>> fileLinesData = jGitHelper.getFileLinesData(commitId);
         for (String filePath : filePathList){
-            fileMeasure.setUuid(UUID.randomUUID().toString());
-            fileMeasure.setFilePath(filePath);
             int ccn = 0;
             int totalLine = 0;
             OObject oObject = oObjectMap.get(filePath);
@@ -298,10 +292,9 @@ public class MeasureScanServiceImpl implements MeasureScanService {
                 ccn = oObject.getCcn();
                 totalLine = oObject.getTotalLines();
             } else {
+                // fixme 少量情况下会判空 有时间在看
                 log.error("OObject is null, path is {}", filePath);
             }
-            fileMeasure.setCcn(ccn);
-            fileMeasure.setTotalLine(totalLine);
             int addLines = 0;
             int deleteLines = 0;
             //根据filePath，获取对应文件的代码行变动情况
@@ -312,9 +305,11 @@ public class MeasureScanServiceImpl implements MeasureScanService {
                     break;
                 }
             }
-            fileMeasure.setAddLine(addLines);
-            fileMeasure.setDeleteLine(deleteLines);
-            fileMeasureList.add(new FileMeasure(fileMeasure));
+
+            FileMeasure fileMeasure = FileMeasure.builder().uuid(UUID.randomUUID().toString()).repoId(repoId).commitId(commitId).commitTime(commitTime)
+                    .addLine(addLines).deleteLine(deleteLines).totalLine(totalLine)
+                    .ccn(ccn).diffCcn(0).filePath(filePath).build();
+            fileMeasureList.add(fileMeasure);
         }
 
 
@@ -322,7 +317,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         for (FileMeasure f : fileMeasureList){
             String filePath = f.getFilePath();
             int preCcn = JavaNcss.getOneFileCcn(repoPath+'/'+filePath);
-            fileMeasure.setDiffCcn(fileMeasure.getCcn() - preCcn);
+            f.setDiffCcn(f.getCcn() - preCcn);
         }
 
         try{

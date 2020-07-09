@@ -133,11 +133,6 @@ public class JavaNcss {
 
         for (File f : files) {
             Javancss javancss = new Javancss(f);
-            List<ObjectMetric> objectMetrics = javancss.getObjectMetrics();
-            if (objectMetrics.size() != 1) {
-                continue;
-            }
-            ObjectMetric o = objectMetrics.get(0);
             int ccn = 0;
             for (FunctionMetric functionMetric :  javancss.getFunctionMetrics()){
                 ccn += functionMetric.ccn;
@@ -148,12 +143,12 @@ public class JavaNcss {
             }
 
             String path = f.getPath().replace('\\','/').replaceFirst(repoPath + '/',"");
-            int ncss = o.ncss;
-            int functions = o.functions;
-            int javaDocs = o.javadocs;
-            int javaDocsLines = o.javadocsLn;
-            int singleCommentLines = o.singleLn;
-            int implementationCommentLines = o.singleLn + o.multiLn;
+            int ncss = javancss.getNcss();
+            int functions = javancss.getFunctions().size();
+            int javaDocs = javancss.getJvdc();
+            int javaDocsLines = javancss.getJdcl();
+            int singleCommentLines = javancss.getSl();
+            int implementationCommentLines = javancss.getSl() + javancss.getMl();
             oObjects.add(new OObject(path, ncss, functions, classes, javaDocs, javaDocsLines, singleCommentLines, implementationCommentLines, ccn, ncss));
             ncssA += ncss;
             functionsA += functions;

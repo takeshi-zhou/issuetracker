@@ -83,6 +83,7 @@ public class JGitHelper {
             CheckoutCommand checkoutCommand = git.checkout();
             checkoutCommand.setName(commit).call();
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error("JGitHelper checkout error:{} ", e.getMessage());
         }
     }
