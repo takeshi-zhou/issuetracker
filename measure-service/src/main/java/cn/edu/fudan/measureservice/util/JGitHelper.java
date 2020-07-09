@@ -83,6 +83,7 @@ public class JGitHelper {
             CheckoutCommand checkoutCommand = git.checkout();
             checkoutCommand.setName(commit).call();
         } catch (Exception e) {
+            // todo org.eclipse.jgit.api.errors.JGitInternalException: Exception caught during execution of reset command. Cannot lock 删除git文件夹下面的lock文件
             e.printStackTrace();
             logger.error("JGitHelper checkout error:{} ", e.getMessage());
         }
@@ -610,28 +611,39 @@ public class JGitHelper {
     }
 
     /**
+     * fixme merge 情况可能有问题
      * 通过jgit获取修改文件的路径名 list
      */
     @SneakyThrows
-    public List<String> getChangedFilePathList(String commitId){
+    public Map<DiffEntry.ChangeType, List<String>> getDiffFilePathList(String commitId){
         RevCommit revCommit = getRevCommit(commitId);
         RevCommit[] parentCommits = revCommit.getParents();
         if (parentCommits.length == 0) {
-            return new ArrayList<>(0);
+            return new HashMap<>(0);
         }
         List<DiffEntry> diffEntries = parentCommits.length == 1 ? getDiffEntry(parentCommits[0], revCommit) : getConflictDiffEntryList(commitId);
         if (diffEntries == null){
-            return new ArrayList<>(0);
+            return new HashMap<>(0);
         }
-        List<String> result = new ArrayList<>();
+        Map<DiffEntry.ChangeType, List<String>> result = new HashMap<>(8);
+        for (DiffEntry.ChangeType c : DiffEntry.ChangeType.values()) {
+            result.put(c, new ArrayList<>(8));
+        }
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         DiffFormatter df = new DiffFormatter(out);
         df.setRepository(repository);
         //以下循环是针对每一个有变动的文件
+        // todo 暂时没考虑rename的情况
         for (DiffEntry entry : diffEntries) {
+            List<String> pathList = result.get(entry.getChangeType());
+            entry.getChangeType();
             df.format(entry);
-            String fullName = entry.getNewPath();
-            result.add(fullName);
+            if (entry.getChangeType().equals(DiffEntry.ChangeType.DELETE)) {
+                pathList.add(entry.getOldPath());
+                continue;
+            }
+            pathList.add(entry.getNewPath());
         }
         return result;
     }

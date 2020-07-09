@@ -33,7 +33,7 @@ public class MeasureServiceApplication implements ApplicationRunner {
         //repoId = "1336cb1c-5f6f-11ea-8d15-29e6fabaf15b";
         String repoId = "test";
         String branch = "zhonghui20191012";
-        String beginCommit = "6af96a970abc9f0d2e95730a133e208150035cc7";
+        String beginCommit = "b7750aef0579cc5125ac52040272185d1b787dce";
         measureScanService.scan(RepoResourceDTO.builder().repoId(repoId).build(), branch, beginCommit, "javancss");
     }
 }

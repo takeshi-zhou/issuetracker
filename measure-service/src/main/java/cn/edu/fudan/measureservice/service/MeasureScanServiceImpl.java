@@ -15,6 +15,7 @@ import cn.edu.fudan.measureservice.util.FileFilter;
 import cn.edu.fudan.measureservice.util.JGitHelper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -101,6 +102,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         int i = 1;
         // 遍历列表 进行扫描
         for (String commit : commitList) {
+            jGitHelper.checkout(commit);
             log.info("Start to scan repoId is {} commit is {}", repoId, commit );
             String commitTime = jGitHelper.getCommitTime(commit);
             Measure measure = JavaNcss.analyse(repoPath);
@@ -184,7 +186,8 @@ public class MeasureScanServiceImpl implements MeasureScanService {
                 repoMeasure.setAdd_comment_lines(map.get("addCommentLines"));
                 repoMeasure.setDel_comment_lines(map.get("delCommentLines"));
 
-                List<String> changedFilePathList = jGitHelper.getChangedFilePathList(commitId);
+                Map<DiffEntry.ChangeType, List<String>> filePaths = jGitHelper.getDiffFilePathList(commitId);
+                List<String> changedFilePathList = filePaths.get(DiffEntry.ChangeType.MODIFY);
                 int changedFiles = 0;
                 if (changedFilePathList != null) {
                     for (String s : changedFilePathList) {
@@ -201,7 +204,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
             try{
                 if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
                     repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
-                    log.info("Successfully insert one record to repo_measure table ：repoId is " + repoId + " commitId is " + commitId);
+                    //log.info("Successfully insert one record to repo_measure table ：repoId is " + repoId + " commitId is " + commitId);
                 }
             } catch (Exception e) {
                 log.error("Inserting data to DB repo_measure table failed：");
@@ -267,24 +270,23 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         JGitHelper jGitHelper = jGitHelperT.get();
 
         //得到变更文件list
-        List<String> changedFilePathList = jGitHelper.getChangedFilePathList(commitId);
-        if (changedFilePathList == null) {
-            return;
-        }
-        List<String> filePathList = new ArrayList<>(changedFilePathList.size());
-        changedFilePathList.stream().filter(f -> !FileFilter.javaFilenameFilter(f)).forEach(filePathList::add);
+        Map<DiffEntry.ChangeType, List<String>> diffFilePathList = jGitHelper.getDiffFilePathList(commitId);
 
-        if (filePathList.size() == 0) {
+        List<String> filePaths = new ArrayList<>(10);
+        diffFilePathList.get(DiffEntry.ChangeType.MODIFY).stream().filter(f -> !FileFilter.javaFilenameFilter(f)).forEach(filePaths::add);
+        diffFilePathList.get(DiffEntry.ChangeType.ADD).stream().filter(f -> !FileFilter.javaFilenameFilter(f)).forEach(filePaths::add);
+
+        if (filePaths.size() == 0) {
             return;
         }
-        List<FileMeasure> fileMeasureList = new ArrayList<>(filePathList.size());
+        List<FileMeasure> fileMeasureList = new ArrayList<>(filePaths.size());
         List<OObject> oObjects = objects.getObjects();
         Map<String, OObject> oObjectMap = new HashMap<>(oObjects.size() << 1);
         oObjects.forEach(o -> oObjectMap.put(o.getPath(), o));
 
         //获取本次commit所有文件的代码变更情况
         List<Map<String, Object>> fileLinesData = jGitHelper.getFileLinesData(commitId);
-        for (String filePath : filePathList){
+        for (String filePath : filePaths){
             int ccn = 0;
             int totalLine = 0;
             OObject oObject = oObjectMap.get(filePath);
@@ -293,7 +295,7 @@ public class MeasureScanServiceImpl implements MeasureScanService {
                 totalLine = oObject.getTotalLines();
             } else {
                 // fixme 少量情况下会判空 有时间在看
-                log.error("OObject is null, path is {}", filePath);
+                log.error("OObject is null, filePath is {}", filePath);
             }
             int addLines = 0;
             int deleteLines = 0;
