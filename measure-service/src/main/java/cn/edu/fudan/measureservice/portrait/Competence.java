@@ -1,9 +1,6 @@
 package cn.edu.fudan.measureservice.portrait;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * description:
@@ -11,6 +8,7 @@ import lombok.Setter;
  * @author fancying
  * create: 2020-05-18 21:41
  **/
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -43,11 +41,11 @@ public class Competence implements Formula{
     @Setter
     private int developerFocusFile;
     @Setter
-    private int changedCodeAVGAge;
+    private double changedCodeAVGAge;
     @Setter
     private int changedCodeMAXAge;
     @Setter
-    private int deletedCodeAVGAge;
+    private double deletedCodeAVGAge;
     @Setter
     private int deletedCodeMAXAge;
     @Setter
@@ -94,7 +92,7 @@ public class Competence implements Formula{
     }
 
     public double getNonRepetitiveCodeRate() {
-        if (!((Double)defaultScore).equals(nonRepetitiveCodeRate)) {
+        if (defaultScore != nonRepetitiveCodeRate) {
             return nonRepetitiveCodeRate;
         }
         //  具体的计算方式
@@ -106,7 +104,7 @@ public class Competence implements Formula{
     }
 
     public double getNonSelfRepetitiveCodeRate() {
-        if (!((Double)defaultScore).equals(nonSelfRepetitiveCodeRate)) {
+        if (defaultScore != nonSelfRepetitiveCodeRate) {
             return nonSelfRepetitiveCodeRate;
         }
         //  具体的计算方式
@@ -118,7 +116,7 @@ public class Competence implements Formula{
     }
 
     public double getFocusRange() {
-        if (!((Double)defaultScore).equals(focusRange)) {
+        if (defaultScore != focusRange) {
             return focusRange;
         }
         //  具体的计算方式
@@ -130,7 +128,7 @@ public class Competence implements Formula{
     }
 
     public double getOldCodeModification() {
-        if (!((Double)defaultScore).equals(oldCodeModification)) {
+        if (defaultScore != oldCodeModification) {
             return oldCodeModification;
         }
         //  具体的计算方式
@@ -142,7 +140,7 @@ public class Competence implements Formula{
     }
 
     public double getEliminateDuplicateCodeRate() {
-        if (!((Double)defaultScore).equals(eliminateDuplicateCodeRate)) {
+        if (defaultScore != eliminateDuplicateCodeRate) {
             return eliminateDuplicateCodeRate;
         }
         //  具体的计算方式
