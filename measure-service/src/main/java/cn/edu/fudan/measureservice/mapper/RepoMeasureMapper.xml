@@ -262,6 +262,10 @@
         where repo_id = #{repo_id} ;
     </delete>
 
+    <delete id="delFileMeasureByRepoId" parameterType="String">
+        delete from file_measure
+        where repo_id = #{repo_id} ;
+    </delete>
 
     <select id="getRepoMeasureByDeveloperAndRepoId"  resultMap="repoMeasureWithDate">
         select

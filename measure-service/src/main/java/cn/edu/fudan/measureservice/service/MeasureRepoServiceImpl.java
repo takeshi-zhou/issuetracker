@@ -147,6 +147,7 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
     public void deleteRepoMeasureByRepoId(String repoId) {
         logger.info("measurement info start to delete");
         repoMeasureMapper.delRepoMeasureByRepoId(repoId);
+        repoMeasureMapper.delFileMeasureByRepoId(repoId);
         logger.info("measurement delete completed");
     }
 

@@ -34,6 +34,8 @@ public interface RepoMeasureMapper {
 
     void delRepoMeasureByRepoId(@Param("repo_id")String repo_id);
 
+    void delFileMeasureByRepoId(@Param("repo_id")String repo_id);
+
     /**
      * 根据 开发者名字与repo id获取项目度量列表，都可以为null
      *
