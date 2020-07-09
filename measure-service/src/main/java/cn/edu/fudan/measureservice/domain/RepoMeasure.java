@@ -1,8 +1,17 @@
 package cn.edu.fudan.measureservice.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+/**
+ * @author fancying
+ */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RepoMeasure {
 
     private String uuid;

@@ -35,15 +35,13 @@ import java.util.*;
 public class MeasureScanServiceImpl implements MeasureScanService {
 
     private RepoMeasureMapper repoMeasureMapper;
-    private PackageMeasureMapper packageMeasureMapper;
     private FileMeasureMapper fileMeasureMapper;
     private MeasureScanMapper measureScanMapper;
     private ThreadLocal<JGitHelper> jGitHelperT = new ThreadLocal<>();
 
 
-    public MeasureScanServiceImpl(RepoMeasureMapper repoMeasureMapper, PackageMeasureMapper packageMeasureMapper, FileMeasureMapper fileMeasureMapper, MeasureScanMapper measureScanMapper) {
+    public MeasureScanServiceImpl(RepoMeasureMapper repoMeasureMapper, FileMeasureMapper fileMeasureMapper, MeasureScanMapper measureScanMapper) {
         this.repoMeasureMapper = repoMeasureMapper;
-        this.packageMeasureMapper = packageMeasureMapper;
         this.fileMeasureMapper = fileMeasureMapper;
         this.measureScanMapper = measureScanMapper;
     }
@@ -133,133 +131,71 @@ public class MeasureScanServiceImpl implements MeasureScanService {
      * 保存某个项目某个commit项目级别的度量
      */
     private void saveRepoLevelMeasureData(Measure measure,String repoId,String commitId,String commitTime){
-        try{
-            RepoMeasure repoMeasure=new RepoMeasure();
-            repoMeasure.setUuid(UUID.randomUUID().toString());
-            repoMeasure.setFiles(measure.getTotal().getFiles());
-            repoMeasure.setNcss(measure.getTotal().getNcss());
-            repoMeasure.setClasses(measure.getTotal().getClasses());
-            repoMeasure.setFunctions(measure.getTotal().getFunctions());
-            repoMeasure.setCcn(measure.getFunctions().getFunctionAverage().getNcss());
-            repoMeasure.setJava_docs(measure.getTotal().getJavaDocs());
-            repoMeasure.setJava_doc_lines(measure.getTotal().getJavaDocsLines());
-            repoMeasure.setSingle_comment_lines(measure.getTotal().getSingleCommentLines());
-            repoMeasure.setMulti_comment_lines(measure.getTotal().getMultiCommentLines());
-            repoMeasure.setCommit_id(commitId);
-            repoMeasure.setCommit_time(commitTime);
-            repoMeasure.setRepo_id(repoId);
+        JGitHelper jGitHelper = jGitHelperT.get();
+        RevCommit revCommit = jGitHelper.getRevCommit(commitId);
+        
+        Total total = measure.getTotal();
+        RepoMeasure repoMeasure = RepoMeasure.builder().uuid(UUID.randomUUID().toString()).files(total.getFiles()).ncss(total.getNcss()).classes(total.getClasses())
+                .functions(total.getFunctions()).ccn(measure.getFunctions().getFunctionAverage().getNcss())
+                .java_docs(total.getJavaDocs()).java_doc_lines(total.getJavaDocsLines())
+                .single_comment_lines(total.getSingleCommentLines()).multi_comment_lines(total.getMultiCommentLines())
+                .commit_id(commitId).commit_time(commitTime).repo_id(repoId)
+                .developer_name(revCommit.getAuthorIdent().getName()).developer_email(revCommit.getAuthorIdent().getEmailAddress())
+                .commit_message(revCommit.getShortMessage()).build();
 
+        boolean isMerge = false;
+        int parentNum = revCommit.getParentCount();
+        if (parentNum == 1){
+            String firstParentCommitId = revCommit.getParent(0).getId().getName();
+            repoMeasure.setFirst_parent_commit_id(firstParentCommitId);
+        }
+        if (parentNum == 2){
+            String firstParentCommitId = revCommit.getParent(0).getId().getName();
+            repoMeasure.setFirst_parent_commit_id(firstParentCommitId);
+            String secondParentCommitId = revCommit.getParent(1).getId().getName();
+            repoMeasure.setSecond_parent_commit_id(secondParentCommitId);
+            isMerge = true;
+        }
+        repoMeasure.set_merge(isMerge);
 
-            JGitHelper jGitHelper = jGitHelperT.get();
-            RevCommit revCommit = jGitHelper.getRevCommit(commitId);
+        Map<String, Integer> map = jGitHelper.getLinesData(commitId);
+        //如果是最初始的那个commit，那么工作量记为0，否则  则进行git diff 对比获取工作量
+        if (parentNum == 0 || map == null){
+            repoMeasure.setAdd_lines(0);
+            repoMeasure.setDel_lines(0);
+            repoMeasure.setAdd_comment_lines(0);
+            repoMeasure.setDel_comment_lines(0);
+            repoMeasure.setChanged_files(0);
+        }else{
+            repoMeasure.setAdd_lines(map.get("addLines"));
+            repoMeasure.setDel_lines(map.get("delLines"));
+            repoMeasure.setAdd_comment_lines(map.get("addCommentLines"));
+            repoMeasure.setDel_comment_lines(map.get("delCommentLines"));
 
-            repoMeasure.setDeveloper_name(revCommit.getAuthorIdent().getName());
-            repoMeasure.setDeveloper_email(revCommit.getAuthorIdent().getEmailAddress());
-            repoMeasure.setCommit_message(revCommit.getShortMessage());
-
-            boolean isMerge = false;
-            int parentNum = revCommit.getParentCount();
-            if (parentNum == 1){
-                String firstParentCommitId = revCommit.getParent(0).getId().getName();
-                repoMeasure.setFirst_parent_commit_id(firstParentCommitId);
-            }
-            if (parentNum == 2){
-                String firstParentCommitId = revCommit.getParent(0).getId().getName();
-                repoMeasure.setFirst_parent_commit_id(firstParentCommitId);
-                String secondParentCommitId = revCommit.getParent(1).getId().getName();
-                repoMeasure.setSecond_parent_commit_id(secondParentCommitId);
-                isMerge = true;
-            }
-            repoMeasure.set_merge(isMerge);
-
-            Map<String, Integer> map = jGitHelper.getLinesData(commitId);
-            //如果是最初始的那个commit，那么工作量记为0，否则  则进行git diff 对比获取工作量
-            if (parentNum == 0 || map == null){
-                repoMeasure.setAdd_lines(0);
-                repoMeasure.setDel_lines(0);
-                repoMeasure.setAdd_comment_lines(0);
-                repoMeasure.setDel_comment_lines(0);
-                repoMeasure.setChanged_files(0);
-            }else{
-                repoMeasure.setAdd_lines(map.get("addLines"));
-                repoMeasure.setDel_lines(map.get("delLines"));
-                repoMeasure.setAdd_comment_lines(map.get("addCommentLines"));
-                repoMeasure.setDel_comment_lines(map.get("delCommentLines"));
-
-                Map<DiffEntry.ChangeType, List<String>> filePaths = jGitHelper.getDiffFilePathList(commitId);
-                List<String> changedFilePathList = filePaths.get(DiffEntry.ChangeType.MODIFY);
-                int changedFiles = 0;
-                if (changedFilePathList != null) {
-                    for (String s : changedFilePathList) {
-                        if (! FileFilter.javaFilenameFilter(s)){
-                            changedFiles++;
-                        }
+            Map<DiffEntry.ChangeType, List<String>> filePaths = jGitHelper.getDiffFilePathList(commitId);
+            List<String> changedFilePathList = filePaths.get(DiffEntry.ChangeType.MODIFY);
+            int changedFiles = 0;
+            if (changedFilePathList != null) {
+                for (String s : changedFilePathList) {
+                    if (! FileFilter.javaFilenameFilter(s)){
+                        changedFiles++;
                     }
                 }
-                repoMeasure.setChanged_files(changedFiles);
             }
-
-
-
-            try{
-                if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
-                    repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
-                    //log.info("Successfully insert one record to repo_measure table ：repoId is " + repoId + " commitId is " + commitId);
-                }
-            } catch (Exception e) {
-                log.error("Inserting data to DB repo_measure table failed：");
-                e.printStackTrace();
+            repoMeasure.setChanged_files(changedFiles);
+        }
+        
+        try{
+            if(repoMeasureMapper.sameMeasureOfOneCommit(repoId,commitId)==0) {
+                repoMeasureMapper.insertOneRepoMeasure(repoMeasure);
             }
-
         } catch (Exception e) {
-            log.error("Saving commit measure data failed：repoId is " + repoId + " commitId is " + commitId);
+            log.error("Inserting data to DB repo_measure table failed：");
             e.printStackTrace();
         }
+            
 
     }
-
-//    /**
-//     * 保存某个项目某个commit包级别的度量
-//     */
-//    private void savePackageMeasureData(Measure measure,String repoId,String commitId,String commitTime){
-//        try{
-//            List<Package> packages =new ArrayList<>();
-//            DecimalFormat df=new DecimalFormat("#.00");
-//            for(Package p:measure.getPackages().getPackages()){
-//                p.setUuid(UUID.randomUUID().toString());
-//                p.setCommit_id(commitId);
-//                p.setCommit_time(commitTime);
-//                p.setRepo_id(repoId);
-//                if(packageMeasureMapper.samePackageMeasureExist(repoId,commitId,p.getName())>0) {
-//                    continue;
-//                }
-//                String packageName=p.getName();
-//                int count=0;
-//                int ccn=0;
-//                for(Function function:measure.getFunctions().getFunctions()){
-//                    if(function.getName().startsWith(packageName)){
-//                        count++;
-//                        ccn+=function.getCcn();
-//                    }
-//                }
-//                if(count==0) {
-//                    p.setCcn(0.00);
-//                } else{
-//                    double result=(double)ccn/count;
-//                    p.setCcn(Double.parseDouble(df.format(result)));
-//                }
-//                packages.add(p);
-//            }
-//            if(!packages.isEmpty()){
-//                packageMeasureMapper.insertPackageMeasureDataList(packages);
-//            }
-//        } catch (NumberFormatException e) {
-//            log.error("Saving package measure data failed：");
-//            e.printStackTrace();
-//        }
-//
-//    }
-
 
     /**
      * 保存某个项目某个commit文件级别的度量
@@ -313,7 +249,6 @@ public class MeasureScanServiceImpl implements MeasureScanService {
                     .ccn(ccn).diffCcn(0).filePath(filePath).build();
             fileMeasureList.add(fileMeasure);
         }
-
 
         jGitHelper.checkout(jGitHelper.getSingleParent(commitId));
         for (FileMeasure f : fileMeasureList){

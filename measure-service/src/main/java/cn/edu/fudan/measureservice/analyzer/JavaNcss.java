@@ -7,7 +7,6 @@ import cn.edu.fudan.measureservice.util.DirExplorer;
 import cn.edu.fudan.measureservice.util.FileFilter;
 import javancss.FunctionMetric;
 import javancss.Javancss;
-import javancss.ObjectMetric;
 import javancss.PackageMetric;
 
 import java.io.File;
@@ -20,8 +19,6 @@ import java.util.*;
  * create: 2020-06-10 20:26
  **/
 public class JavaNcss {
-
-    //private static ThreadLocal<String> repoPathT = new ThreadLocal<>();
 
     /**
      * 得到某个地址下面所有文件的圈复杂度
@@ -206,30 +203,12 @@ public class JavaNcss {
 
         for (PackageMetric packageMetric : javancss.getPackageMetrics()) {
             classes += packageMetric.classes;
-
             javaDocs += packageMetric.javadocs;
             javaDocsLines += packageMetric.javadocsLn;
             singleCommentLines += packageMetric.singleLn;
             multiCommentLines += packageMetric.multiLn;
         }
-
-
         return new Total(files, classes, functions, ncss, javaDocs, javaDocsLines, singleCommentLines, multiCommentLines);
     }
-
-//    public static void main(String[] args) {
-//        String path1="E:\\Lab\\gitlab\\IssueTracker-Master\\measure-service\\src\\main\\java\\cn\\edu\\fudan\\measureservice\\analyzer\\JavaNcss.java";
-//
-//        String repoPath = "E:\\Lab\\gitlab\\IssueTracker-Master";
-////        List<File> files = new ArrayList<>();
-////        new DirExplorer((level, path, file) -> !FileFilter.javaFilenameFilter(path),
-////                (level, path, file) -> files.add(file)).explore(new File(repoPath));
-//
-//        Measure m = analyse(repoPath);
-//
-//
-//        System.out.println(getOneFileCcn(path1));
-//        System.out.println(getFileTotalLines(path1));
-//    }
 
 }
