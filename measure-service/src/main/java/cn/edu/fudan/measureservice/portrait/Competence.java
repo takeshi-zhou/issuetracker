@@ -53,8 +53,8 @@ public class Competence implements Formula{
 
     // 以下各个评分由具体的公式计算出来,在getter方法中实现
 
-    private static double defaultScore = 1;
-    private static double defaultLevel = 0;
+    private double defaultScore = 1;
+    private double defaultLevel = 0;
 
 
     private double nonRepetitiveCodeRate = defaultScore;
