@@ -639,11 +639,14 @@ public class JGitHelper {
             List<String> pathList = result.get(entry.getChangeType());
             entry.getChangeType();
             df.format(entry);
-            if (entry.getChangeType().equals(DiffEntry.ChangeType.DELETE)) {
+            if (entry.getChangeType().equals(DiffEntry.ChangeType.DELETE) && entry.getOldPath() != null) {
                 pathList.add(entry.getOldPath());
                 continue;
             }
-            pathList.add(entry.getNewPath());
+            if (entry.getNewPath() != null) {
+                pathList.add(entry.getNewPath());
+            }
+
         }
         return result;
     }
