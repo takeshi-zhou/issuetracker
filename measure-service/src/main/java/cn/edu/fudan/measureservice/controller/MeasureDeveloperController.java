@@ -197,7 +197,7 @@ public class MeasureDeveloperController {
 
     /**
      *
-     *返回用户画像页面得代码行数数据，包括所有项目和单个项目的
+     *返回用户commit msg
      */
     @GetMapping("/measure/commit-msg")
     @CrossOrigin
