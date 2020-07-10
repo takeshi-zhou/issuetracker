@@ -87,6 +87,10 @@ public class MeasureScanServiceImpl implements MeasureScanService {
 
         // 获取从 beginCommit 开始的 commit list 列表
         List<String> commitList = jGitHelper.getCommitListByBranchAndBeginCommit(branch, beginCommit, isUpdate);
+        if (commitList.size() == 0){
+            log.warn("The commitList is null. beginCommit is {}",beginCommit);
+            return;
+        }
         //初始化本次扫描状态信息
         Date startScanTime = new Date();
         MeasureScan measureScan = MeasureScan.builder()
