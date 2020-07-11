@@ -21,6 +21,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.lang.model.util.ElementScanner6;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -213,8 +214,16 @@ public class MeasureScanServiceImpl implements MeasureScanService {
         Map<DiffEntry.ChangeType, List<String>> diffFilePathList = jGitHelper.getDiffFilePathList(commitId);
 
         List<String> filePaths = new ArrayList<>(10);
-        diffFilePathList.get(DiffEntry.ChangeType.MODIFY).stream().filter(f -> !FileFilter.javaFilenameFilter(f)).forEach(filePaths::add);
-        diffFilePathList.get(DiffEntry.ChangeType.ADD).stream().filter(f -> !FileFilter.javaFilenameFilter(f)).forEach(filePaths::add);
+        if (diffFilePathList.containsKey(DiffEntry.ChangeType.MODIFY)){
+            diffFilePathList.get(DiffEntry.ChangeType.MODIFY).stream().filter(f -> !FileFilter.javaFilenameFilter(f)).forEach(filePaths::add);
+        }else {
+            log.warn("diffFilePathList doesn't contain DiffEntry.ChangeType.MODIFY");
+        }
+        if (diffFilePathList.containsKey(DiffEntry.ChangeType.ADD)){
+            diffFilePathList.get(DiffEntry.ChangeType.ADD).stream().filter(f -> !FileFilter.javaFilenameFilter(f)).forEach(filePaths::add);
+        }else {
+            log.warn("diffFilePathList doesn't contain DiffEntry.ChangeType.ADD");
+        }
 
         if (filePaths.size() == 0) {
             return;

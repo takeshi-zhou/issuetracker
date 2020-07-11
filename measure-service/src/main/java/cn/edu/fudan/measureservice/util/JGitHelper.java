@@ -371,9 +371,9 @@ public class JGitHelper {
         for (DiffEntry entry : diffEntryList) {
             df.format(entry);
             String diffText = out.toString("UTF-8");
-//            String fullName = entry.getNewPath();
-//            System.out.println("正在匹配文件：" + fullName);//变更文件的路径
-//            System.out.println(diffText);
+            String fullName = entry.getNewPath();
+            System.out.println("正在匹配文件：" + fullName);//变更文件的路径
+            System.out.println(diffText);
             int addWhiteLines = 0;
             int delWhiteLines = 0;
             int addCommentLines = 0;
@@ -657,8 +657,15 @@ public class JGitHelper {
 
 
     public static void main(String[] args) throws ParseException {
-        String repoPath = "E:\\Lab\\scanProject\\IssueTracker-Master";
+        String repoPath = "D:\\Project\\FDSELab\\开源项目\\IssueTracker-Master";
         JGitHelper jGitHelper = new JGitHelper(repoPath);
-        System.out.println("t");
+        Map<String, Integer> map = jGitHelper.getLinesData("146f6d7856e61cd210a981e635a108b11409b11e");
+        System.out.println("addLines :"+map.get("addLines"));
+        System.out.println("delLines :"+map.get("delLines"));
+        System.out.println("addCommentLines :"+map.get("addCommentLines"));
+        System.out.println("delCommentLines :"+map.get("delCommentLines"));
+        System.out.println("addWhiteLines :"+map.get("addWhiteLines"));
+        System.out.println("delWhiteLines :"+map.get("delWhiteLines"));
     }
+
 }
