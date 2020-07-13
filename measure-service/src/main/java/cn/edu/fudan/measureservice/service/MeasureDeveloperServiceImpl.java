@@ -387,7 +387,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
     @Override
     public DeveloperMetrics getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool) throws ParseException {
         if ("".equals(beginDate) || beginDate == null){
-            beginDate = repoMeasureMapper.getFirstCommitDateOfOneRepo(repoId);
+            beginDate = repoMeasureMapper.getFirstCommitDateByCondition(repoId,developer);
         }
         if ("".equals(endDate) || endDate == null){
             LocalDate today = LocalDate.now();
@@ -589,7 +589,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
                 logger.info("Current repo is : " + repoName + ", the issue_scan_type is " + tool);
                 //只添加被sonarqube扫描过的项目，findbugs之后会逐渐被废弃
                 if ("sonarqube".equals(tool)){
-                    String beginDate = repoMeasureMapper.getFirstCommitDateOfOneRepo(repoId);
+                    String beginDate = repoMeasureMapper.getFirstCommitDateByCondition(repoId,developer);
 //                    String endDate = repoMeasureMapper.getLastCommitDateOfOneRepo(repoId);
                     logger.info("Start to get portrait of " + developer + " in repo : " + repoName);
                     DeveloperMetrics metrics = getPortrait(repoId, developer, beginDate, endDate, token, tool);
@@ -629,5 +629,37 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
             map.put("commit_time", commit_time);
         }
         return commitMsgList;
+    }
+
+    @Override
+    public Object getJiraMeasureInfo(String repoId, String developer, String beginDate, String endDate) {
+        if ("".equals(beginDate) || beginDate == null){
+            beginDate = repoMeasureMapper.getFirstCommitDateByCondition(repoId,developer);
+        }
+        if ("".equals(endDate) || endDate == null){
+            LocalDate today = LocalDate.now();
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            endDate = df.format(today);
+        }
+        List<String> repoList = new ArrayList<>();
+        if ("".equals(repoId) || repoId == null){
+            repoList = repoMeasureMapper.getRepoListByDeveloper(developer);
+        }else {
+            repoList.add(repoId);
+        }
+
+        // 遍历所有repo，进行jira度量统计
+        for (String repo : repoList){
+            // 0. 获取开发者完成的jira任务列表 即jira的ID列表
+
+            // 1. 获取完成jira任务需要的commit数量
+
+            // 2. 获取这些commit的工作日天数
+
+
+        }
+
+
+        return null;
     }
 }

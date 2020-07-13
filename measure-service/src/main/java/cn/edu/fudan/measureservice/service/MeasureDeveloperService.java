@@ -102,6 +102,11 @@ public interface MeasureDeveloperService {
      */
     Object getCommitMsgByCondition(String repoId, String developer, String beginDate, String endDate);
 
+    /**
+     *
+     * @return 返回开发者jira相关的度量数据
+     */
+    Object getJiraMeasureInfo(String repoId, String developer, String beginDate, String endDate);
 
 
 }
