@@ -107,9 +107,8 @@ public class RestInterfaceManager {
         restTemplate.delete(tagServicePath + "/inner/tags/ignore?repo-id=" + repoId + "&account-id=" + account_id);
     }
 
-    //codeTracker
-    public void deleteCodeTeackerOfRepo(String branch, String repoId) {
-        restTemplate.getForObject(codeTrackerServicePath + "/delete?repoUuid=" + repoId + "&branch=" + branch,JSONObject.class);
+    public void deleteCodeTrackerOfRepo(String branch, String repoId) {
+        restTemplate.delete(codeTrackerServicePath + "/codetracker?repoUuid=" + repoId + "&branch=" + branch,JSONObject.class);
     }
 
     public JSONObject getLatestCommitTime(String repoId) {

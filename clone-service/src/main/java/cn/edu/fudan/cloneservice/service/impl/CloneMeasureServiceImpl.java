@@ -136,6 +136,8 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
 
     @Override
     public CloneMeasure insertCloneMeasure(String repoId, String commitId){
+        //对repoPath加锁
+        cloneMeasureLock.lock();
         //如果数据库中有对应的信息则直接返回
         if(cloneMeasureDao.getCloneMeasureCount(repoId, commitId) > 0){
             return null;
@@ -145,8 +147,6 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
         int currentCloneLines;
         String repoPath=null;
         Map<String, String> map;
-        //对repoPath加锁
-        cloneMeasureLock.lock();
         try {
             repoPath=restInterfaceManager.getRepoPath(repoId,commitId);
             CommitChange commitChange = JGitUtil.getNewlyIncreasedLines(repoPath, commitId);
@@ -192,10 +192,10 @@ public class CloneMeasureServiceImpl implements CloneMeasureService {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            cloneMeasureLock.unlock();
             if(repoPath!=null){
                 restInterfaceManager.freeRepoPath(repoId,repoPath);
             }
+            cloneMeasureLock.unlock();
         }
 
         return cloneMeasure;
