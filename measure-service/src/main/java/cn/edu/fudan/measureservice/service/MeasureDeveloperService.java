@@ -96,4 +96,17 @@ public interface MeasureDeveloperService {
     Object getPortraitLevel(String developer, String token) throws ParseException;
 
 
+    /**
+     *
+     * @return 根据条件返回开发者Commit Message数据
+     */
+    Object getCommitMsgByCondition(String repoId, String developer, String beginDate, String endDate);
+
+    /**
+     *
+     * @return 返回开发者jira相关的度量数据
+     */
+    Object getJiraMeasureInfo(String repoId, String developer, String beginDate, String endDate);
+
+
 }

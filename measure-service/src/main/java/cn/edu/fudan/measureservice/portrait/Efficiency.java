@@ -9,6 +9,7 @@ import lombok.*;
  * @author fancying
  * create: 2020-05-18 21:40
  **/
+@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -114,7 +115,7 @@ public class Efficiency implements Formula{
             return commitFrequency;
         }
         //  具体的计算方式
-        commitFrequency = (double)developerCommitCount / totalCommitCount;
+        commitFrequency = (totalCommitCount == 0) ? 0 : (double)developerCommitCount / totalCommitCount;
 
         return commitFrequency;
     }
@@ -124,7 +125,7 @@ public class Efficiency implements Formula{
             return workLoad;
         }
         // 具体的计算方式
-        workLoad = (double)developerLOC / totalLOC;
+        workLoad = (totalLOC == 0) ? 0 : (double)developerLOC / totalLOC;
         return workLoad;
     }
 
@@ -133,7 +134,7 @@ public class Efficiency implements Formula{
             return newLogicLine;
         }
         //  具体的计算方式
-        newLogicLine = developerAddStatement*(1.0)/totalAddStatement;
+        newLogicLine = (totalAddStatement == 0) ? 0 : developerAddStatement*(1.0)/totalAddStatement;
         return newLogicLine;
     }
 
@@ -142,7 +143,7 @@ public class Efficiency implements Formula{
             return delLogicLine;
         }
         // 具体的计算方式
-        delLogicLine = (totalDelStatement == 0) ? -1 : developerDelStatement*(1.0)/totalDelStatement;
+        delLogicLine = (totalDelStatement == 0) ? 0 : developerDelStatement*(1.0)/totalDelStatement;
         return delLogicLine;
     }
 
@@ -151,7 +152,7 @@ public class Efficiency implements Formula{
             return validStatement;
         }
         //具体的计算方式
-        validStatement = (totalValidLine == 0) ? -1 : developerValidLine*(1.0)/totalValidLine;
+        validStatement = (totalValidLine == 0) ? 0 : developerValidLine*(1.0)/totalValidLine;
         return validStatement;
     }
 

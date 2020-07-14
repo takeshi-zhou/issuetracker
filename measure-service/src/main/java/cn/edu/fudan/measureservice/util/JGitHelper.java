@@ -5,6 +5,7 @@
  **/
 package cn.edu.fudan.measureservice.util;
 
+import jdk.nashorn.internal.objects.annotations.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.CheckoutCommand;
@@ -49,6 +50,11 @@ public class JGitHelper {
     private static final int MERGE_WITH_CONFLICT = -1;
     private static final int MERGE_WITHOUT_CONFLICT = 2;
     private static final int NOT_MERGE = 1;
+
+    public static Repository getRepository() {
+        return repository;
+    }
+
     private static Repository repository;
     private RevWalk revWalk;
     private Git git;
@@ -77,6 +83,8 @@ public class JGitHelper {
             CheckoutCommand checkoutCommand = git.checkout();
             checkoutCommand.setName(commit).call();
         } catch (Exception e) {
+            // todo org.eclipse.jgit.api.errors.JGitInternalException: Exception caught during execution of reset command. Cannot lock 删除git文件夹下面的lock文件
+            e.printStackTrace();
             logger.error("JGitHelper checkout error:{} ", e.getMessage());
         }
     }
@@ -136,7 +144,10 @@ public class JGitHelper {
     }
 
 
-    public List<String> getCommitListByBranchAndBeginCommit(String branchName, String beginCommit) {
+    /**
+     * fixme 只能根据commit date来确定需要扫描的commit list【author date会造成乱序问题】
+     */
+    public List<String> getCommitListByBranchAndBeginCommit(String branchName, String beginCommit, Boolean isUpdate) {
         checkout(branchName);
         Map<String, Long> commitMap = new HashMap<>(512);
         Long start = getLongCommitTime(beginCommit);
@@ -147,9 +158,14 @@ public class JGitHelper {
             Iterable<RevCommit> commits = git.log().call();
             for (RevCommit commit : commits) {
                 Long commitTime = commit.getCommitTime() * 1000L;
-                if (commitTime >= start) {
+                if (isUpdate && commitTime > start) {
+                    commitMap.put(commit.getName(), commitTime);
+                    continue;
+                }
+                if (!isUpdate && commitTime >= start) {
                     commitMap.put(commit.getName(), commitTime);
                 }
+
             }
         } catch (GitAPIException e) {
             e.getMessage();
@@ -312,149 +328,9 @@ public class JGitHelper {
         System.out.println("It's commit time: "+date);
     }
 
-    //获取某次commit修改的文件数量
-    public static int getChangedFilesCount(List<DiffEntry> diffEntryList) {
-        int result = 0;
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for (DiffEntry entry : diffEntryList) {
-//            String diffText = out.toString("UTF-8");
-//                System.out.println(diffText);
-            String fullName = entry.getNewPath().toLowerCase();
-            String shortName = fullName.substring(fullName.lastIndexOf('/') + 1);
-//            System.out.println(fullName);//变更文件的路径
-//            System.out.println(shortName);
-            //只统计java文件
-            if (fullName.endsWith(".java")){
-                //并且去除其中的test文件
-                if (fullName.contains("/test/") ||
-                        fullName.contains("/.mvn/") ||
-                        fullName.contains(JPMS) ||
-                        shortName.endsWith("test.java") ||
-                        shortName.endsWith("tests.java") ||
-                        shortName.endsWith("enum.java") ||
-                        shortName.startsWith("test")){
-                    continue;
-                }else {
-                    result += 1;
-                }
-            }else {
-                continue;
-            }
-            out.reset();
-        }
-        return result;
-    }
-
-    //    获取某次commit的修改文件列表(只统计java文件，并且去除test文件)
-    public static List<DiffEntry> getChangedFileList(RevCommit revCommit, Repository repo) {
-        List<DiffEntry> returnDiffs = null;
-
-        try {
-            //默认比较时间轴上最近的那个commit
-            RevCommit previsouCommit=getPrevHash(revCommit,repo);
-
-            String currentName = revCommit.getAuthorIdent().getName();
-            RevCommit[] parents = revCommit.getParents();
-            //merge的情况，获取与当前commit开发者相同的那个commit
-            if (parents.length == 2){
-                if (parents[0].getAuthorIdent().getName().equals(currentName) && !parents[1].getAuthorIdent().getName().equals(currentName)){
-                    previsouCommit=parents[0];
-                }else if (!parents[0].getAuthorIdent().getName().equals(currentName) && parents[1].getAuthorIdent().getName().equals(currentName)){
-                    previsouCommit=parents[1];
-                }
-            }
-            if(previsouCommit==null)
-                return null;
-            ObjectId head=revCommit.getTree().getId();
-
-            ObjectId oldHead=previsouCommit.getTree().getId();
-
-//            System.out.println("Printing diff between the Revisions: " + revCommit.getName() + " and " + previsouCommit.getName());
-
-            // prepare the two iterators to compute the diff between
-            try (ObjectReader reader = repo.newObjectReader()) {
-                CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
-                oldTreeIter.reset(reader, oldHead);
-                CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-                newTreeIter.reset(reader, head);
-
-                // finally get the list of changed files
-                try (Git git = new Git(repo)) {
-                    List<DiffEntry> diffs= git.diff()
-                            .setNewTree(newTreeIter)
-                            .setOldTree(oldTreeIter)
-                            .call();
-                    for(int i = diffs.size() - 1; i >= 0; i--){
-                        String fullName = diffs.get(i).getNewPath().toLowerCase();
-                        String shortName = fullName.substring(fullName.lastIndexOf('/') + 1);
-                        //只统计java文件
-                        if (fullName.endsWith(".java")){
-                            //并且去除其中的test文件
-                            if (fullName.contains("/test/") ||
-                                    fullName.contains("/.mvn/") ||
-                                    fullName.contains(JPMS) ||
-                                    shortName.endsWith("test.java") ||
-                                    shortName.endsWith("tests.java") ||
-                                    shortName.endsWith("enum.java") ||
-                                    shortName.startsWith("test")){
-                                diffs.remove(i);//去除其中的test等需要过滤得文件
-                            }
-                        }else {
-                            diffs.remove(i);//去除非java文件
-                        }
-                    }
-                    returnDiffs=diffs;
-                } catch (GitAPIException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return returnDiffs;
-    }
-
-    //获取上一次commit（时间轴上最近的那次commit）
-    private static RevCommit getPrevHash(RevCommit commit, Repository repo)  throws  IOException {
-        try (RevWalk walk = new RevWalk(repo)) {
-            // Starting point
-            walk.markStart(commit);
-            int count = 0;
-            for (RevCommit rev : walk) {
-                // got the previous commit.
-                if (count == 1) {
-                    return rev;
-                }
-                count++;
-            }
-            walk.dispose();
-        }
-        //Reached end and no previous commits.
-        return null;
-    }
-
-    //根据repoPath 和commitId获取当前commit
-    public RevCommit getCurrentRevCommit(String repo_path, String commit_id){
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        builder.setMustExist(true);
-        builder.addCeilingDirectory(new File(repo_path));
-        builder.findGitDir(new File(repo_path));
-        try{
-            repository=builder.build();
-
-            RevWalk walk = new RevWalk(repository);
-            ObjectId versionId=repository.resolve(commit_id);
-            return walk.parseCommit(versionId);
-
-        }
-        catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return null;
-
+    @SneakyThrows
+    public RevCommit getRevCommit(String commitId){
+        return revWalk.parseCommit(repository.resolve(commitId));
     }
 
     //判断当前commit是否是最初始的那个commit
@@ -493,6 +369,9 @@ public class JGitHelper {
 
         //以下循环是针对每一个有变动的文件
         for (DiffEntry entry : diffEntryList) {
+            if (FileFilter.javaFilenameFilter(entry.getNewPath()) && FileFilter.javaFilenameFilter(entry.getOldPath())){
+                continue;
+            }
             df.format(entry);
             String diffText = out.toString("UTF-8");
 //            String fullName = entry.getNewPath();
@@ -561,13 +440,14 @@ public class JGitHelper {
         return map;
     }
 
-    //获取本次commit每个文件的工作量行数数据（包括新增行数、删除行数、新增注释行、删除注释行、新增空白行、删除空白行）
-    public static List<Map<String,Object>> getFileLinesData(List<DiffEntry> diffEntryList) throws IOException{
+    /**
+     * 获取本次commit每个文件的工作量行数数据（包括新增行数、删除行数、新增注释行、删除注释行、新增空白行、删除空白行）
+     */
+    public List<Map<String,Object>> getFileLinesData(String commitId) throws IOException{
+        List<DiffEntry> diffEntryList = getDiffEntry(commitId);
         List<Map<String,Object>> result = new ArrayList<>();
-
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         DiffFormatter df = new DiffFormatter(out);
-
         //如果加上这句，就是在比较的时候不计算空格，WS的意思是White Space
         df.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);
         df.setRepository(repository);
@@ -579,8 +459,6 @@ public class JGitHelper {
             String diffText = out.toString("UTF-8");
             String fullName = entry.getNewPath();
             map.put("filePath",fullName);
-//            System.out.println("正在匹配文件：" + fullName);//变更文件的路径
-//            System.out.println(diffText);
             int addWhiteLines = 0;
             int delWhiteLines = 0;
             int addCommentLines = 0;
@@ -634,31 +512,6 @@ public class JGitHelper {
         }
 
         return result;
-    }
-
-
-
-    /**
-     * 根据diffEntryList获取更改的文件路径List
-     */
-    public List<String> getChangedFilePathList(List<DiffEntry> diffEntryList) throws IOException {
-        if (diffEntryList == null){
-            return null;
-        } else {
-            List<String> result = new ArrayList<>();
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            DiffFormatter df = new DiffFormatter(out);
-            df.setRepository(repository);
-            //以下循环是针对每一个有变动的文件
-            for (DiffEntry entry : diffEntryList) {
-                df.format(entry);
-                String diffText = out.toString("UTF-8");
-                String fullName = entry.getNewPath();
-//                System.out.println("正在匹配文件：" + fullName);//变更文件的路径
-                result.add(fullName);
-            }
-            return result;
-        }
     }
 
     @SneakyThrows
@@ -737,11 +590,85 @@ public class JGitHelper {
     }
 
 
-    public static void main(String[] args) throws ParseException {
-        String repoPath = "E:\\Lab\\scanProject\\IssueTracker-Master";
-        JGitHelper jGitHelper = new JGitHelper(repoPath);
-        System.out.println("t");
+    /**
+     * @return 通过JGit获取一次commit中开发者的新增行数，删除行数，新增注释行数，删除注释行数
+     */
+    @SneakyThrows
+    public Map<String, Integer> getLinesData(String commitId){
+        RevCommit revCommit = getRevCommit(commitId);
+        RevCommit[] parentCommits = revCommit.getParents();
+        if (parentCommits.length == 0) {
+            return null;
+        }
+        List<DiffEntry> diffEntries = parentCommits.length == 1 ? getDiffEntry(parentCommits[0], revCommit) : getConflictDiffEntryList(commitId);
+        return getLinesData(diffEntries);
     }
 
+    public List<DiffEntry> getDiffEntry(String commitId) {
+        RevCommit revCommit = getRevCommit(commitId);
+        RevCommit[] parentCommits = revCommit.getParents();
+        if (parentCommits.length == 0) {
+            return null;
+        }
+        return parentCommits.length == 1 ? getDiffEntry(parentCommits[0], revCommit) : getConflictDiffEntryList(commitId);
+    }
+
+    /**
+     * fixme merge 情况可能有问题
+     * 通过jgit获取修改文件的路径名 list
+     */
+    @SneakyThrows
+    public Map<DiffEntry.ChangeType, List<String>> getDiffFilePathList(String commitId){
+        RevCommit revCommit = getRevCommit(commitId);
+        RevCommit[] parentCommits = revCommit.getParents();
+        if (parentCommits.length == 0) {
+            return new HashMap<>(0);
+        }
+        List<DiffEntry> diffEntries = parentCommits.length == 1 ? getDiffEntry(parentCommits[0], revCommit) : getConflictDiffEntryList(commitId);
+        if (diffEntries == null){
+            return new HashMap<>(0);
+        }
+        Map<DiffEntry.ChangeType, List<String>> result = new HashMap<>(8);
+        for (DiffEntry.ChangeType c : DiffEntry.ChangeType.values()) {
+            result.put(c, new ArrayList<>(8));
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        DiffFormatter df = new DiffFormatter(out);
+        df.setRepository(repository);
+        //以下循环是针对每一个有变动的文件
+        // todo 暂时没考虑rename的情况
+        for (DiffEntry entry : diffEntries) {
+            List<String> pathList = result.get(entry.getChangeType());
+            entry.getChangeType();
+            df.format(entry);
+            if (entry.getChangeType().equals(DiffEntry.ChangeType.DELETE) && entry.getOldPath() != null) {
+                pathList.add(entry.getOldPath());
+                continue;
+            }
+            if (entry.getNewPath() != null) {
+                pathList.add(entry.getNewPath());
+            }
+
+        }
+        return result;
+    }
+
+
+
+
+
+
+    public static void main(String[] args) throws ParseException {
+        String repoPath = "D:\\Project\\FDSELab\\开源项目\\IssueTracker-Master";
+        JGitHelper jGitHelper = new JGitHelper(repoPath);
+        Map<String, Integer> map = jGitHelper.getLinesData("57c2891947f2907c0ddc97b421a95899bb5428c4");
+        System.out.println("addLines :"+map.get("addLines"));
+        System.out.println("delLines :"+map.get("delLines"));
+        System.out.println("addCommentLines :"+map.get("addCommentLines"));
+        System.out.println("delCommentLines :"+map.get("delCommentLines"));
+        System.out.println("addWhiteLines :"+map.get("addWhiteLines"));
+        System.out.println("delWhiteLines :"+map.get("delWhiteLines"));
+    }
 
 }

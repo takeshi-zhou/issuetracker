@@ -195,5 +195,40 @@ public class MeasureDeveloperController {
         }
     }
 
+    /**
+     *
+     *返回用户commit msg
+     */
+    @GetMapping("/measure/commit-msg")
+    @CrossOrigin
+    public ResponseBean getCommitMsgByCondition(@RequestParam(value = "repo-id", required = false)String repoId,
+                                          @RequestParam(value = "developer", required = false)String developer,
+                                          @RequestParam(value = "begin-date", required = false)String beginDate,
+                                          @RequestParam(value = "end-date", required = false)String endDate){
+
+        try{
+            return new ResponseBean(200,"success",measureDeveloperService.getCommitMsgByCondition(repoId,developer,beginDate,endDate));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+    @GetMapping("/measure/jira")
+    @CrossOrigin
+    public ResponseBean getJiraMeasure(@RequestParam(value = "repo-id", required = false)String repoId,
+                                                @RequestParam(value = "developer", required = false)String developer,
+                                                @RequestParam(value = "begin-date", required = false)String beginDate,
+                                                @RequestParam(value = "end-date", required = false)String endDate){
+
+        try{
+            return new ResponseBean(200,"success",measureDeveloperService.getJiraMeasureInfo(repoId,developer,beginDate,endDate));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+
 
 }

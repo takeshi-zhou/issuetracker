@@ -147,6 +147,7 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
     public void deleteRepoMeasureByRepoId(String repoId) {
         logger.info("measurement info start to delete");
         repoMeasureMapper.delRepoMeasureByRepoId(repoId);
+        repoMeasureMapper.delFileMeasureByRepoId(repoId);
         logger.info("measurement delete completed");
     }
 
@@ -497,7 +498,7 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
         while(untilDay.isAfter(indexDay) || untilDay.isEqual(indexDay)){
             Map<String, Object> map = new HashMap<>();
             int LOC = repoMeasureMapper.getRepoLOCByDuration(repo_id, indexDay.toString(), indexDay.toString(),null);
-            int CommitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, indexDay.toString(), indexDay.toString(),null);
+            int commitCounts = repoMeasureMapper.getCommitCountsByDuration(repo_id, indexDay.toString(), indexDay.plusDays(1).toString(),null);
             //这里只返回有commit的数据，并不是每天都返回
 //            if (CommitCounts > 0){
 //                map.put("commit_date", indexDay.toString());
@@ -508,7 +509,7 @@ public class MeasureRepoServiceImpl implements MeasureRepoService {
             //现在采用返回每天的数据，无论当天是否有commit
             map.put("commit_date", indexDay.toString());
             map.put("LOC", LOC);
-            map.put("commit_count", CommitCounts);
+            map.put("commit_count", commitCounts);
             result.add(map);
             indexDay = indexDay.plusDays(1);
         }

@@ -34,6 +34,8 @@ public interface RepoMeasureMapper {
 
     void delRepoMeasureByRepoId(@Param("repo_id")String repo_id);
 
+    void delFileMeasureByRepoId(@Param("repo_id")String repo_id);
+
     /**
      * 根据 开发者名字与repo id获取项目度量列表，都可以为null
      *
@@ -57,9 +59,12 @@ public interface RepoMeasureMapper {
 
     List<String> getRepoListByDeveloper(@Param("developer_name")String developerName);
 
-    String getFirstCommitDateOfOneRepo(@Param("repo_id") String repo_id);
+    String getFirstCommitDateByCondition(@Param("repo_id") String repo_id,@Param("developer")String developerName);
 
     String getLastCommitDateOfOneRepo(@Param("repo_id") String repo_id);
+
+    List<Map<String, Object>> getCommitMsgByCondition(@Param("repo_id")String repoId,@Param("developer_name")String developerName,@Param("since")String beginDate,@Param("until")String endDate);
+
 
 
 }
