@@ -1,11 +1,5 @@
-/**
- * @description:
- * @author: fancying
- * @create: 2019-06-05 17:16
- **/
 package cn.edu.fudan.measureservice.util;
 
-import jdk.nashorn.internal.objects.annotations.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.CheckoutCommand;
@@ -24,8 +18,6 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -38,24 +30,21 @@ import java.util.stream.Stream;
 
 import static cn.edu.fudan.measureservice.util.DateTimeUtil.timeTotimeStamp;
 
+/**
+ * description:
+ * @author fancying
+ * create: 2019-06-05 17:16
+ **/
 @SuppressWarnings("Duplicates")
 @Slf4j
 public class JGitHelper {
-    private Logger logger = LoggerFactory.getLogger(JGitHelper.class);
-
-    private static final String JPMS = "module-info.java";
-
 
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
     private static final int MERGE_WITH_CONFLICT = -1;
     private static final int MERGE_WITHOUT_CONFLICT = 2;
     private static final int NOT_MERGE = 1;
 
-    public static Repository getRepository() {
-        return repository;
-    }
-
-    private static Repository repository;
+    private Repository repository;
     private RevWalk revWalk;
     private Git git;
 
@@ -85,7 +74,7 @@ public class JGitHelper {
         } catch (Exception e) {
             // todo org.eclipse.jgit.api.errors.JGitInternalException: Exception caught during execution of reset command. Cannot lock 删除git文件夹下面的lock文件
             e.printStackTrace();
-            logger.error("JGitHelper checkout error:{} ", e.getMessage());
+            log.error("JGitHelper checkout error:{} ", e.getMessage());
         }
     }
 
@@ -239,7 +228,7 @@ public class JGitHelper {
             }
             return result;
         }catch (Exception e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -350,8 +339,10 @@ public class JGitHelper {
         return revCommit.getShortMessage();
     }
 
-    //获取本次commit工作量行数数据（包括新增行数、删除行数、新增注释行、删除注释行、新增空白行、删除空白行）
-    public static Map<String, Integer> getLinesData(List<DiffEntry> diffEntryList) throws IOException{
+    /**
+     *获取本次commit工作量行数数据（包括新增行数、删除行数、新增注释行、删除注释行、新增空白行、删除空白行）
+     */
+    public  Map<String, Integer> getLinesData(List<DiffEntry> diffEntryList) throws IOException{
         Map<String,Integer> map = new HashMap<>();
         int sumAddLines = 0;
         int sumDelLines = 0;
