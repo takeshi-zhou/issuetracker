@@ -369,6 +369,9 @@ public class JGitHelper {
 
         //以下循环是针对每一个有变动的文件
         for (DiffEntry entry : diffEntryList) {
+            if (FileFilter.javaFilenameFilter(entry.getNewPath()) && FileFilter.javaFilenameFilter(entry.getOldPath())){
+                continue;
+            }
             df.format(entry);
             String diffText = out.toString("UTF-8");
 //            String fullName = entry.getNewPath();
@@ -659,7 +662,7 @@ public class JGitHelper {
     public static void main(String[] args) throws ParseException {
         String repoPath = "D:\\Project\\FDSELab\\开源项目\\IssueTracker-Master";
         JGitHelper jGitHelper = new JGitHelper(repoPath);
-        Map<String, Integer> map = jGitHelper.getLinesData("146f6d7856e61cd210a981e635a108b11409b11e");
+        Map<String, Integer> map = jGitHelper.getLinesData("57c2891947f2907c0ddc97b421a95899bb5428c4");
         System.out.println("addLines :"+map.get("addLines"));
         System.out.println("delLines :"+map.get("delLines"));
         System.out.println("addCommentLines :"+map.get("addCommentLines"));
