@@ -234,7 +234,7 @@ public class MultiThreadingExtractor {
 
             try {
                 //10分钟内取不出就退出
-                String commitId = measureQueue.poll(1, TimeUnit.MINUTES);
+                String commitId = measureQueue.poll(10, TimeUnit.MINUTES);
                 if(commitId == null){
                     break;
                 }

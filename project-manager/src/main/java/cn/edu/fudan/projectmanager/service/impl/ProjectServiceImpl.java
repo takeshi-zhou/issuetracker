@@ -382,7 +382,7 @@ public class ProjectServiceImpl implements ProjectService {
                 //delete info in redis
                 deleteProjectInfo(repoId, accountId, "bug");
                 deleteProjectInfo(repoId, accountId, "clone");
-                restInterfaceManager.deleteCodeTeackerOfRepo(branch,repoId);
+                restInterfaceManager.deleteCodeTrackerOfRepo(branch,repoId);
                 restInterfaceManager.deleteIgnoreRecord(accountId, repoId);
                 restInterfaceManager.deleteRepoMeasure(repoId);
                 restInterfaceManager.deleteCloneMeasure(repoId);
