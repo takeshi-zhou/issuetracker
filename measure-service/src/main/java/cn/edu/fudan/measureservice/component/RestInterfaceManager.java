@@ -212,7 +212,7 @@ public class RestInterfaceManager {
         ResponseEntity responseEntity = restTemplate.exchange(url.toString(), HttpMethod.GET, request, JSONObject.class);
         String body = responseEntity.getBody().toString();
         JSONObject result = JSONObject.parseObject(body);
-        if(result.get("data") != null){
+        if(result.get("data") != null && !result.getJSONArray("data").isEmpty() ){
             return result.getIntValue("data");
         }
         return 0;
