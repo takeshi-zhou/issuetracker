@@ -212,7 +212,7 @@ public class RestInterfaceManager {
         ResponseEntity responseEntity = restTemplate.exchange(url.toString(), HttpMethod.GET, request, JSONObject.class);
         String body = responseEntity.getBody().toString();
         JSONObject result = JSONObject.parseObject(body);
-        if(result.get("data") != null && !result.getJSONArray("data").isEmpty() ){
+        if(result.get("data") != null){
             return result.getIntValue("data");
         }
         return 0;
@@ -257,6 +257,14 @@ public class RestInterfaceManager {
     public JSONObject getCloneMeasure(String repo_id, String developer, String start, String end){
         return restTemplate.getForObject(uniformServicePath+"/cloneMeasure/getMeasureClone"  + "?repo_id=" + repo_id + "&developer=" + developer + "&start=" + start + "&end=" + end, JSONObject.class).getJSONObject("data");
     }
+
+    //-------------------------------------------jira API-------------------------------------------
+    public JSONArray getJiraInfoByKey(String type, String keyword){
+        return restTemplate.getForObject("http://127.0.0.1:8887/jira/jql"  + "?keyword=" + keyword +  "&type=" + type, JSONObject.class).getJSONArray("data");
+    }
+
+
+
 
 
 
