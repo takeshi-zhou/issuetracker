@@ -229,6 +229,21 @@ public class MeasureDeveloperController {
         }
     }
 
+    @GetMapping("/measure/jira/recentNews")
+    @CrossOrigin
+    public ResponseBean getJiraRecentNews(@RequestParam(value = "repo-id", required = false)String repoId,
+                                       @RequestParam(value = "developer", required = false)String developer,
+                                       @RequestParam(value = "begin-date", required = false)String beginDate,
+                                       @RequestParam(value = "end-date", required = false)String endDate){
+
+        try{
+            return new ResponseBean(200,"success",measureDeveloperService.getJiraRecentNews(repoId,developer,beginDate,endDate));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
 
 
 }
