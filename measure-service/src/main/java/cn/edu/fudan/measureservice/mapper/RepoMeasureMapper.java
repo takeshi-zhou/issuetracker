@@ -61,7 +61,7 @@ public interface RepoMeasureMapper {
 
     String getFirstCommitDateByCondition(@Param("repo_id") String repo_id,@Param("developer")String developerName);
 
-    String getLastCommitDateOfOneRepo(@Param("repo_id") String repo_id);
+    String getLastCommitDateOfOneRepo(@Param("repo_id") String repo_id,@Param("developer")String developerName);
 
     List<Map<String, Object>> getCommitMsgByCondition(@Param("repo_id")String repoId,@Param("developer_name")String developerName,@Param("since")String beginDate,@Param("until")String endDate);
 

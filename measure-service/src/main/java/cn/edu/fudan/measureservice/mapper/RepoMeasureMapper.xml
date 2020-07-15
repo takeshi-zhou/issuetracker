@@ -466,6 +466,10 @@
                 <if test="repo_id != null and repo_id != '' ">
                     and repo_id = #{repo_id}
                 </if>
+
+                <if test="developer != null and developer != '' ">
+                    and developer = #{developer}
+                </if>
             </trim>
         </where>
         order by commit_date desc

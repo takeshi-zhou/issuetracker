@@ -637,9 +637,10 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
             beginDate = repoMeasureMapper.getFirstCommitDateByCondition(repoId,developer);
         }
         if ("".equals(endDate) || endDate == null){
-            LocalDate today = LocalDate.now();
-            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            endDate = df.format(today);
+//            LocalDate today = LocalDate.now();
+//            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//            endDate = df.format(today);
+            endDate = repoMeasureMapper.getLastCommitDateOfOneRepo(repoId,developer);
         }
         List<String> repoList = new ArrayList<>();
         if ("".equals(repoId) || repoId == null){
@@ -655,7 +656,6 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
             // 1. 获取完成jira任务需要的commit数量
 
             // 2. 获取这些commit的工作日天数
-
 
         }
 
