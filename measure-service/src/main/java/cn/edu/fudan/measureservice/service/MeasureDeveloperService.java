@@ -110,9 +110,9 @@ public interface MeasureDeveloperService {
 
     /**
      *
-     * @return 返回jira最近动态
+     * @return 返回最近动态
      */
-    Object getJiraRecentNews(String repoId, String developer, String beginDate, String endDate);
+    Object getDeveloperRecentNews(String repoId, String developer, String beginDate, String endDate);
 
 
 

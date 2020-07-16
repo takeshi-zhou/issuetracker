@@ -664,13 +664,22 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
     }
 
     @Override
-    public Object getJiraRecentNews(String repoId, String developer, String beginDate, String endDate) {
+    public Object getDeveloperRecentNews(String repoId, String developer, String beginDate, String endDate) {
         List<Map<String, Object>> commitMsgList = repoMeasureMapper.getCommitMsgByCondition(repoId, developer, beginDate, endDate);
         for (Map<String, Object> map : commitMsgList) {
             //将数据库中timeStamp/dateTime类型转换成指定格式的字符串 map.get("commit_time") 这个就是数据库中dateTime类型
             String commit_time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(map.get("commit_time"));
             map.put("commit_time", commit_time);
+            //以下操作是为了获取jira信息
+            String commitMessage = map.get("commit_message").toString();
+            String jiraID = commitMessage.split(" ")[0];
+            JSONArray jiraResponse = restInterfaceManager.getJiraInfoByKey("key",jiraID);
+            if (jiraResponse == null || jiraResponse.isEmpty()){
+                map.put("jira_info", "本次commit不含jira单号");
+            }else {
+                map.put("jira_info", jiraResponse.get(0));
+            }
         }
-        return null;
+        return commitMsgList;
     }
 }
