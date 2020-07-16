@@ -589,7 +589,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
                 logger.info("Current repo is : " + repoName + ", the issue_scan_type is " + tool);
                 //只添加被sonarqube扫描过的项目，findbugs之后会逐渐被废弃
                 if ("sonarqube".equals(tool)){
-                    String beginDate = repoMeasureMapper.getFirstCommitDateByCondition(repoId,developer);
+                    String beginDate = repoMeasureMapper.getFirstCommitDateByCondition(repoId,null);
 //                    String endDate = repoMeasureMapper.getLastCommitDateOfOneRepo(repoId);
                     logger.info("Start to get portrait of " + developer + " in repo : " + repoName);
                     DeveloperMetrics metrics = getPortrait(repoId, developer, beginDate, endDate, token, tool);
