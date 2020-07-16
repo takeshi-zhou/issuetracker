@@ -387,7 +387,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
     @Override
     public DeveloperMetrics getPortrait(String repoId, String developer, String beginDate, String endDate, String token, String tool) throws ParseException {
         if ("".equals(beginDate) || beginDate == null){
-            beginDate = repoMeasureMapper.getFirstCommitDateByCondition(repoId,developer);
+            beginDate = repoMeasureMapper.getFirstCommitDateByCondition(repoId,null);
         }
         if ("".equals(endDate) || endDate == null){
             LocalDate today = LocalDate.now();
