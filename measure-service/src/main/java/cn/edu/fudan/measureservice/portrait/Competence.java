@@ -82,10 +82,10 @@ public class Competence implements Formula{
         if (levelScore >0.6/developerNumber && levelScore <= 1.5/developerNumber){
             return 3;
         }
-        if (levelScore >1.5/developerNumber && levelScore <= 5.0/developerNumber){
+        if (levelScore >1.5/developerNumber && levelScore <= 3.0/developerNumber){
             return 4;
         }
-        if (levelScore >5.0/developerNumber){
+        if (levelScore >3.0/developerNumber){
             return 5;
         }
         return 0;
