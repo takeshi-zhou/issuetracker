@@ -279,7 +279,10 @@ public class Competence implements Formula{
         if (levelScore != defaultLevel) {
             return levelScore;
         }
-        levelScore = 0.5*surviveRate + 0.2*focusRange + 0.3*(developerAddStatement*1.0/totalAddStatement);
+        if (totalAddStatement != 0){
+            levelScore = 0.5*surviveRate + 0.2*focusRange + 0.3*(developerAddStatement*1.0/totalAddStatement);
+            return levelScore;
+        }
         return levelScore;
     }
 
