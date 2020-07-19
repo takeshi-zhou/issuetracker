@@ -21,6 +21,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Slf4j
@@ -672,7 +674,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
             map.put("commit_time", commit_time);
             //以下操作是为了获取jira信息
             String commitMessage = map.get("commit_message").toString();
-            String jiraID = commitMessage.split(" ")[0];
+            String jiraID = getJiraIDFromCommitMsg(commitMessage);
             JSONArray jiraResponse = restInterfaceManager.getJiraInfoByKey("key",jiraID);
             if (jiraResponse == null || jiraResponse.isEmpty()){
                 map.put("jira_info", "本次commit不含jira单号");
@@ -682,4 +684,23 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         }
         return commitMsgList;
     }
+
+    /**
+     * 根据commit message 返回 对应的 jira 单号
+     */
+    private String getJiraIDFromCommitMsg(String commitMsg){
+        // 使用Pattern类的compile方法，传入jira单号的正则表达式，得到一个Pattern对象
+        Pattern pattern = Pattern.compile("[A-Z][A-Z0-9]*-[0-9]+");
+        // 调用pattern对象的matcher方法，传入需要匹配的字符串， 得到一个匹配器对象
+        Matcher matcher = pattern.matcher(commitMsg);
+
+        // 从字符串开头，返回匹配到的第一个字符串
+        if (matcher.find()) {
+            // 输出第一次匹配的内容
+            logger.info("jira ID is : {}",matcher.group());
+            return matcher.group();
+        }
+        return "noJiraID" ;
+    }
+
 }
