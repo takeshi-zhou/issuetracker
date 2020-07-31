@@ -446,22 +446,26 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         int totalAddStatement = 0;
         int developerDelStatement = 0;
         int totalDelStatement = 0;
-        for(String str:statements.keySet()){
-            if (str.equals(developer)){
-                developerAddStatement = statements.getJSONObject(str).getIntValue("ADD");
-                developerDelStatement = statements.getJSONObject(str).getIntValue("DELETE");
+        if  (statements != null){
+            for(String str:statements.keySet()){
+                if (str.equals(developer)){
+                    developerAddStatement = statements.getJSONObject(str).getIntValue("ADD");
+                    developerDelStatement = statements.getJSONObject(str).getIntValue("DELETE");
+                }
+                totalAddStatement += statements.getJSONObject(str).getIntValue("ADD");
+                totalDelStatement += statements.getJSONObject(str).getIntValue("DELETE");
             }
-            totalAddStatement += statements.getJSONObject(str).getIntValue("ADD");
-            totalDelStatement += statements.getJSONObject(str).getIntValue("DELETE");
         }
         JSONObject validLines = restInterfaceManager.getValidLine(repoId, beginDate, endDate, branch);
         int developerValidLine = 0;
         int totalValidLine = 0;
-        for(String key:validLines.keySet()){
-            if (key.equals(developer)){
-                developerValidLine = validLines.getIntValue(key);
+        if (validLines != null){
+            for(String key:validLines.keySet()){
+                if (key.equals(developer)){
+                    developerValidLine = validLines.getIntValue(key);
+                }
+                totalValidLine += validLines.getIntValue(key);
             }
-            totalValidLine += validLines.getIntValue(key);
         }
         return Efficiency.builder()
                 .developerNumber(developerNumber)
@@ -488,16 +492,17 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         JSONArray issueList = restInterfaceManager.getNewElmIssueCount(repoId, beginDate, endDate, tool, token);
         int developerNewIssueCount = 0;//个人新增缺陷数
         int totalNewIssueCount = 0;//总新增缺陷数
-        for (int i = 0; i < issueList.size(); i++){
-            JSONObject each = issueList.getJSONObject(i);
-            String developerName = each.getString("developer");
-            int newIssueCount = each.getIntValue("newIssueCount");
-            if (developer.equals(developerName)){
-                developerNewIssueCount = newIssueCount;
+        if (!issueList.isEmpty()){
+            for (int i = 0; i < issueList.size(); i++){
+                JSONObject each = issueList.getJSONObject(i);
+                String developerName = each.getString("developer");
+                int newIssueCount = each.getIntValue("newIssueCount");
+                if (developer.equals(developerName)){
+                    developerNewIssueCount = newIssueCount;
+                }
+                totalNewIssueCount += newIssueCount;
             }
-            totalNewIssueCount += newIssueCount;
         }
-
         return Quality.builder()
                 .developerNumber(developerNumber)
                 .developerNewIssueCount(developerNewIssueCount)
