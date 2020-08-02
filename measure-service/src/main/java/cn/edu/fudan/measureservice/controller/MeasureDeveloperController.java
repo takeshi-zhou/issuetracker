@@ -174,6 +174,19 @@ public class MeasureDeveloperController {
             return new ResponseBean(401,"failed",e.getMessage());
         }
     }
+    @GetMapping("/measure/portrait/competence")
+    @CrossOrigin
+    public ResponseBean getPortraitCompetence(@RequestParam("developer")String developer,
+                                         HttpServletRequest request){
+
+        try{
+            String token = request.getHeader("token");
+            return new ResponseBean(200,"success",measureDeveloperService.getPortraitLevel(developer,token));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
 
     /**
      *
