@@ -1,14 +1,12 @@
 package cn.edu.fudan.measureservice.service.impl;
 
 import cn.edu.fudan.measureservice.component.RestInterfaceManager;
-import cn.edu.fudan.measureservice.domain.*;
+import cn.edu.fudan.measureservice.domain.CodeQuality;
+import cn.edu.fudan.measureservice.domain.CommitBase;
+import cn.edu.fudan.measureservice.domain.CommitInfoDeveloper;
+import cn.edu.fudan.measureservice.domain.RepoMeasure;
 import cn.edu.fudan.measureservice.mapper.RepoMeasureMapper;
 import cn.edu.fudan.measureservice.portrait.*;
-import cn.edu.fudan.measureservice.portrait.DeveloperMetrics;
-import cn.edu.fudan.measureservice.portrait.DeveloperPortrait;
-import cn.edu.fudan.measureservice.portrait.Efficiency;
-import cn.edu.fudan.measureservice.portrait.Quality;
-import cn.edu.fudan.measureservice.portrait2.*;
 import cn.edu.fudan.measureservice.portrait2.Contribution;
 import cn.edu.fudan.measureservice.service.MeasureDeveloperService;
 import cn.edu.fudan.measureservice.util.DateTimeUtil;
@@ -18,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -26,7 +23,10 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -701,7 +701,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         //----------------------------------代码质量相关指标-------------------------------------
         cn.edu.fudan.measureservice.portrait2.Quality quality = getQuality(repoId,developer,beginDate,endDate,tool,token,developerLOC,developerCommitCount);
 
-        //----------------------------------开发能力相关指标-------------------------------------
+        //----------------------------------贡献价值相关指标-------------------------------------
         cn.edu.fudan.measureservice.portrait2.Contribution contribution = getContribution(repoId,beginDate,endDate,developer,developerLOC,branch,developerAddStatement,totalAddStatement);
 
         return new cn.edu.fudan.measureservice.portrait2.DeveloperMetrics(firstCommitDate, developerAddStatement+developerDelStatement, developerCommitCount, repoName, branch, developer, efficiency, quality, contribution);
