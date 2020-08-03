@@ -54,6 +54,13 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
     }
 
     @Override
+    public Object getWorkLoadOfOneDeveloper(String developer, String since, String until, String repoId) {
+        List<Map<String, Object>> workLoadList = repoMeasureMapper.getWorkLoadByCondition(repoId, developer, since, until);
+
+        return workLoadList;
+    }
+
+    @Override
     public int getCommitCountsByDuration(String repo_id, String since, String until) {
         if (since.compareTo(until)>0 || since.length()>10 || until.length()>10){
             throw new RuntimeException("please input correct date");
@@ -839,7 +846,11 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         int dayAverageStatement = totalStatement/workDays;
         //todo 日后需要添加程序员类型接口 目前统一认为是java后端工程师
         String developerType = "Java后端工程师";
-        return new cn.edu.fudan.measureservice.portrait2.DeveloperPortrait(firstCommitDate,totalStatement,dayAverageStatement,totalCommitCount,developer,developerType,developerMetricsList);
+
+        //todo 获取开发者在所有项目中的整个的用户画像
+        cn.edu.fudan.measureservice.portrait2.DeveloperMetrics totalDeveloperMetrics = null;
+
+        return new cn.edu.fudan.measureservice.portrait2.DeveloperPortrait(firstCommitDate,totalStatement,dayAverageStatement,totalCommitCount,developer,developerType,developerMetricsList,totalDeveloperMetrics);
     }
 
 

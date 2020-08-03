@@ -5,6 +5,16 @@ import java.text.ParseException;
 public interface MeasureDeveloperService {
 
     /**
+     * 根据条件获取开发者对应的工作量：新增物理行、删除物理行、修改文件次数、提交次数
+     * @param developer
+     * @param since
+     * @param until
+     * @param repoId
+     * @return
+     */
+    Object getWorkLoadOfOneDeveloper(String developer, String since, String until, String repoId);
+
+    /**
      * 获取一个项目在指定一段时间内提交次数
      * @param repo_id repo的唯一标识
      * @param since 起始时间

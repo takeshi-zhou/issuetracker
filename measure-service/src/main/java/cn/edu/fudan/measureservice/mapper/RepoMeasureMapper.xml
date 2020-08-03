@@ -503,5 +503,32 @@
         ORDER BY commit_time DESC
     </select>
 
+    <select id="getWorkLoadByCondition" parameterType="String" resultType="java.util.HashMap">
+        SELECT
+        developer_name as developerName, sum(add_lines) as addLines, sum(del_lines) as delLines, count(*) as commitCount, sum(changed_files) as changedFiles
+        FROM
+        repo_measure
+        <where>
+            <trim prefixOverrides="and">
+                <if test="developer_name != null and developer_name != '' ">
+                    and developer_name = #{developer_name}
+                </if>
+
+                <if test="repo_id != null and repo_id != '' ">
+                    and repo_id = #{repo_id}
+                </if>
+
+                <if test="since != null and since != '' ">
+                    and <![CDATA[ commit_time >= #{since} ]]>
+                </if>
+
+                <if test="until != null and until != '' ">
+                    and <![CDATA[ commit_time <= #{until} ]]>
+                </if>
+            </trim>
+        </where>
+        group by developerName
+    </select>
+
 
 </mapper>

@@ -25,7 +25,7 @@ public class DeveloperPortrait implements Serializable {
     private String developerType;
 
     private List<DeveloperMetrics> developerMetricsList;
-    private DeveloperMetrics totalDeveloperMetrics;
+    private DeveloperMetrics totalDeveloperMetrics = null;
 
     private static double defaultLevel = 0;
     private double level = defaultLevel;
@@ -33,6 +33,16 @@ public class DeveloperPortrait implements Serializable {
     private double quality = defaultLevel;
     private double efficiency = defaultLevel;
 
+    public DeveloperPortrait(LocalDate firstCommitDate, int totalStatement, int dayAverageStatement, int totalCommitCount, String developerName, String developerType, List<DeveloperMetrics> developerMetricsList, DeveloperMetrics totalDeveloperMetrics) {
+        this.firstCommitDate = firstCommitDate;
+        this.totalStatement = totalStatement;
+        this.dayAverageStatement = dayAverageStatement;
+        this.totalCommitCount = totalCommitCount;
+        this.developerName = developerName;
+        this.developerType = developerType;
+        this.developerMetricsList = developerMetricsList;
+        this.totalDeveloperMetrics = totalDeveloperMetrics;
+    }
 
     public double getLevel() {
         if (defaultLevel != level) {
@@ -85,13 +95,5 @@ public class DeveloperPortrait implements Serializable {
         return efficiency;
     }
 
-    public DeveloperPortrait(LocalDate firstCommitDate, int totalStatement, int dayAverageStatement, int totalCommitCount, String developerName, String developerType, List<DeveloperMetrics> developerMetricsList) {
-        this.firstCommitDate = firstCommitDate;
-        this.totalStatement = totalStatement;
-        this.dayAverageStatement = dayAverageStatement;
-        this.totalCommitCount = totalCommitCount;
-        this.developerName = developerName;
-        this.developerType = developerType;
-        this.developerMetricsList = developerMetricsList;
-    }
+
 }

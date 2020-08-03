@@ -20,6 +20,22 @@ public class MeasureDeveloperController {
     }
 
 
+    @GetMapping("/measure/developer/workLoad")
+    @CrossOrigin
+    public ResponseBean getWorkLoadOfOneDeveloper(
+            @RequestParam(value="developer", required = false)String developer,
+            @RequestParam(value="since",required = false)String since,
+            @RequestParam(value="until",required = false)String until,
+            @RequestParam(value ="repoId" ,required = false)String repoId
+    ){
+        try{
+            return new ResponseBean(200,"success",measureDeveloperService.getWorkLoadOfOneDeveloper(developer,since,until,repoId));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",null);
+        }
+    }
+
     /**
      * 中汇需要
      */
