@@ -645,7 +645,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
 
     @Cacheable(cacheNames = {"developerMetricsNew"})
-    public cn.edu.fudan.measureservice.portrait2.DeveloperMetrics getDeveloperMetrics(String repoId, String developer, String beginDate, String endDate, String token, String tool) throws ParseException {
+    public cn.edu.fudan.measureservice.portrait2.DeveloperMetrics getDeveloperMetrics(String repoId, String developer, String beginDate, String endDate, String token, String tool) {
         if ("".equals(beginDate) || beginDate == null){
             beginDate = repoMeasureMapper.getFirstCommitDateByCondition(repoId,null);
         }
@@ -654,8 +654,8 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
             DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             endDate = df.format(today);
         }
-        List<Map<String, Object>> developerList = repoMeasureMapper.getDeveloperListByRepoId(repoId);
-        int developerNumber = developerList.size();
+//        List<Map<String, Object>> developerList = repoMeasureMapper.getDeveloperListByRepoId(repoId);
+//        int developerNumber = developerList.size();
         JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
         String branch = projects.getJSONObject(0).getString("branch");
         String repoName = projects.getJSONObject(0).getString("name");
@@ -695,13 +695,13 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
             }
         }
 
-        //----------------------------------开发效率相关指标-------------------------------------
+        //开发效率相关指标
         cn.edu.fudan.measureservice.portrait2.Efficiency efficiency = getEfficiency(repoId, beginDate, endDate, developer, branch);
 
-        //----------------------------------代码质量相关指标-------------------------------------
+        //代码质量相关指标
         cn.edu.fudan.measureservice.portrait2.Quality quality = getQuality(repoId,developer,beginDate,endDate,tool,token,developerLOC,developerCommitCount);
 
-        //----------------------------------贡献价值相关指标-------------------------------------
+        //贡献价值相关指标
         cn.edu.fudan.measureservice.portrait2.Contribution contribution = getContribution(repoId,beginDate,endDate,developer,developerLOC,branch,developerAddStatement,totalAddStatement);
 
         return new cn.edu.fudan.measureservice.portrait2.DeveloperMetrics(firstCommitDate, developerAddStatement+developerDelStatement, developerCommitCount, repoName, branch, developer, efficiency, quality, contribution);
