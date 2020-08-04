@@ -708,13 +708,15 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
     }
 
     private cn.edu.fudan.measureservice.portrait2.Efficiency getEfficiency(String repoId,String beginDate, String endDate, String developer, String branch){
-        double jiraBugPerDay = 0;
-        double jiraFeaturePerDay = 0;
-        double solvedSonarIssuePerDay = 0;
+        int jiraBug = 0;
+        int jiraFeature = 0;
+        int solvedSonarIssue = 0;
+        int days = 0;
         return cn.edu.fudan.measureservice.portrait2.Efficiency.builder()
-                .jiraBugPerDay(jiraBugPerDay)
-                .jiraFeaturePerDay(jiraFeaturePerDay)
-                .solvedSonarIssuePerDay(solvedSonarIssuePerDay)
+                .jiraBug(jiraBug)
+                .jiraFeature(jiraFeature)
+                .solvedSonarIssue(solvedSonarIssue)
+                .days(days)
                 .build();
     }
     private cn.edu.fudan.measureservice.portrait2.Quality getQuality(String repoId, String developer, String beginDate, String endDate, String tool, String token, int developerLOC, int developerCommitCount){
@@ -737,8 +739,17 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
             }
         }
 
-        //todo 需要jira提供相关接口
         int developerJiraCount = 0;
+        List<Map<String, Object>> commitMsgList = repoMeasureMapper.getCommitMsgByCondition(repoId, developer, beginDate, endDate);
+        for (Map<String, Object> map : commitMsgList) {
+            //以下操作是为了获取jira信息
+            String commitMessage = map.get("commit_message").toString();
+            String jiraID = getJiraIDFromCommitMsg(commitMessage);
+            if (!"noJiraID".equals(jiraID)){
+                developerJiraCount++;
+            }
+        }
+        //todo 需要jira提供相关接口
         int developerJiraBugCount = 0;
         int totalJiraBugCount = 0;
         return cn.edu.fudan.measureservice.portrait2.Quality.builder()

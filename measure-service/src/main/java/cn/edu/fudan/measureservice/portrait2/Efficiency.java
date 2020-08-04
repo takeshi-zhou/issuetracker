@@ -22,6 +22,11 @@ public class Efficiency implements Formula, Serializable {
 
     private static double defaultScore = 0;
 
+    private int jiraBug;
+    private int jiraFeature;
+    private int solvedSonarIssue;
+    private int days;
+
     private double jiraBugPerDay = defaultScore;
     private double jiraFeaturePerDay = defaultScore;
     private double solvedSonarIssuePerDay = defaultScore;
@@ -45,10 +50,41 @@ public class Efficiency implements Formula, Serializable {
         return 0;
     }
 
-
     /**
      * getter
      */
+    public double getJiraBugPerDay() {
+        if(jiraBugPerDay!=defaultScore){
+            return jiraBugPerDay;
+        }
+        if (days!=0){
+            jiraBugPerDay = jiraBug*1.0/days;
+            return jiraBugPerDay;
+        }
+        return jiraBugPerDay;
+    }
+
+    public double getJiraFeaturePerDay() {
+        if(jiraFeaturePerDay!=defaultScore){
+            return jiraFeaturePerDay;
+        }
+        if (days!=0){
+            jiraFeaturePerDay = jiraFeature*1.0/days;
+            return jiraFeaturePerDay;
+        }
+        return jiraFeaturePerDay;
+    }
+
+    public double getSolvedSonarIssuePerDay() {
+        if(solvedSonarIssuePerDay!=defaultScore){
+            return solvedSonarIssuePerDay;
+        }
+        if (days!=0){
+            solvedSonarIssuePerDay = solvedSonarIssue*1.0/days;
+            return solvedSonarIssuePerDay;
+        }
+        return solvedSonarIssuePerDay;
+    }
 
     public double getLevel(){
         if (level != defaultScore) {
