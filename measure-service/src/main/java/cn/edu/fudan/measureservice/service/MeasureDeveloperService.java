@@ -144,4 +144,12 @@ public interface MeasureDeveloperService {
      */
     Object getDeveloperList(String repoId);
 
+    /**
+     *
+     * @return 返回开发人员参与的项目数
+     */
+    Object getDeveloperInvolvedRepoCount(String developer);
+
+
+
 }

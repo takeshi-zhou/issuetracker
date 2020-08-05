@@ -1123,4 +1123,10 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
         return repoMeasureMapper.getDeveloperListByRepoId(repoId);
     }
+
+    @Override
+    public Object getDeveloperInvolvedRepoCount(String developer) {
+        List<String> repoList = repoMeasureMapper.getRepoListByDeveloper(developer);
+        return repoList.size();
+    }
 }

@@ -305,5 +305,17 @@ public class MeasureDeveloperController {
         }
     }
 
+    @GetMapping("/measure/developer/involvedRepoCount")
+    @CrossOrigin
+    public ResponseBean getDeveloperInvolvedRepoCount(@RequestParam(value = "developer")String developer){
+
+        try{
+            return new ResponseBean(200,"success",measureDeveloperService.getDeveloperInvolvedRepoCount(developer));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
 
 }
