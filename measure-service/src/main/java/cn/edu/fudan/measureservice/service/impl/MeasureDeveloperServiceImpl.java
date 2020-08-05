@@ -696,7 +696,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         }
 
         //开发效率相关指标
-        cn.edu.fudan.measureservice.portrait2.Efficiency efficiency = getEfficiency(repoId, beginDate, endDate, developer, tool);
+        cn.edu.fudan.measureservice.portrait2.Efficiency efficiency = getEfficiency(repoId, beginDate, endDate, developer, tool, token);
 
         //代码质量相关指标
         cn.edu.fudan.measureservice.portrait2.Quality quality = getQuality(repoId,developer,beginDate,endDate,tool,token,developerLOC,developerCommitCount);
@@ -707,7 +707,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         return new cn.edu.fudan.measureservice.portrait2.DeveloperMetrics(firstCommitDate, developerAddStatement+developerDelStatement, developerCommitCount, repoName, branch, developer, efficiency, quality, contribution);
     }
 
-    private cn.edu.fudan.measureservice.portrait2.Efficiency getEfficiency(String repoId,String beginDate, String endDate, String developer, String tool){
+    private cn.edu.fudan.measureservice.portrait2.Efficiency getEfficiency(String repoId,String beginDate, String endDate, String developer, String tool, String token){
 
         int jiraBug = 0;
         int jiraFeature = 0;
@@ -721,7 +721,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
             jiraFeature = jiraFeatureData.getIntValue("totalFeatureNum");
         }
 
-        JSONObject sonarResponse = restInterfaceManager.getDayAvgSolvedIssue(developer,repoId,beginDate,endDate,tool);
+        JSONObject sonarResponse = restInterfaceManager.getDayAvgSolvedIssue(developer,repoId,beginDate,endDate,tool,token);
         if (sonarResponse != null){
             solvedSonarIssue = sonarResponse.getIntValue("solvedIssuesCount");
             days = (int) sonarResponse.getDoubleValue("days");
@@ -763,9 +763,14 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
                 developerJiraCount++;
             }
         }
-        //todo 需要jira提供相关接口
+
         int developerJiraBugCount = 0;
         int totalJiraBugCount = 0;
+        JSONObject jiraBugData = restInterfaceManager.getDefectRate(developer,repoId,beginDate,endDate);
+        if (jiraBugData!=null){
+            developerJiraBugCount = jiraBugData.getIntValue("individual_bugs");
+            totalJiraBugCount = jiraBugData.getIntValue("team_bugs");
+        }
         return cn.edu.fudan.measureservice.portrait2.Quality.builder()
                 .developerStandardIssueCount(developerStandardIssueCount)
                 .totalIssueCount(totalIssueCount)
@@ -801,12 +806,21 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
             increasedCloneLines = Integer.parseInt(cloneMeasure.getString("increasedCloneLines"));
         }
 
-        //todo 需要jira相关API
         int developerAssignedJiraCount = 0;//个人被分配到的jira任务个数（注意不是次数）
         int totalAssignedJiraCount = 0;//团队被分配到的jira任务个数（注意不是次数）
         int developerSolvedJiraCount = 0;//个人解决的jira任务个数（注意不是次数）
         int totalSolvedJiraCount = 0;//团队解决的jira任务个数（注意不是次数）
 
+        JSONObject assignedJiraData = restInterfaceManager.getAssignedJiraRate(developer,repoId,beginDate,endDate);
+        if (assignedJiraData!=null){
+            developerAssignedJiraCount = assignedJiraData.getIntValue("individual_assigned_jira_num");
+            totalAssignedJiraCount = assignedJiraData.getIntValue("team_assigned_jira_num");
+        }
+        JSONObject solvedAssignedJiraData = restInterfaceManager.getSolvedAssignedJiraRate(developer,repoId,beginDate,endDate);
+        if (solvedAssignedJiraData!=null){
+            developerSolvedJiraCount = solvedAssignedJiraData.getIntValue("individual_solved_assigned_jira_num");
+            totalSolvedJiraCount = solvedAssignedJiraData.getIntValue("team_solved_assigned_jira_num");
+        }
         return Contribution.builder()
                 .developerLOC(developerLOC)
                 .totalLOC(totalLOC)

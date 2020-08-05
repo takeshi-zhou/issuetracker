@@ -233,7 +233,11 @@ public class RestInterfaceManager {
         return result.getJSONArray("data");
     }
 
-    public JSONObject getDayAvgSolvedIssue(String developer, String repoId, String since, String until, String tool){
+    public JSONObject getDayAvgSolvedIssue(String developer, String repoId, String since, String until, String tool, String token){
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("token",token);
+        HttpEntity request = new HttpEntity(headers);
         StringBuilder url = new StringBuilder();
         url.append(uniformServicePath).append("/measurement/developer/dayAvgSolvedIssue?developer=").append(developer);
         if (repoId != null && repoId.length()>0){
@@ -248,9 +252,12 @@ public class RestInterfaceManager {
         if (tool != null && tool.length()>0){
             url.append("&tool=").append(tool);
         }
-        JSONObject response = restTemplate.getForObject(url.toString(), JSONObject.class);
-        if(response.getIntValue("code") == 200){
-            return response.getJSONObject("data");
+        ResponseEntity responseEntity = restTemplate.exchange(url.toString(), HttpMethod.GET, request, JSONObject.class);
+        String body = responseEntity.getBody().toString();
+        JSONObject result = JSONObject.parseObject(body);
+
+        if(result.getIntValue("code") == 200){
+            return result.getJSONObject("data");
         }
         return null;
     }
@@ -300,6 +307,66 @@ public class RestInterfaceManager {
         JSONObject response = restTemplate.getForObject(url.toString(), JSONObject.class);
         if(response.getIntValue("code") == 200){
             return response.getJSONArray("data");
+        }
+        return null;
+    }
+
+    public JSONObject getSolvedAssignedJiraRate(String developer, String repoId, String since, String until){
+        StringBuilder url = new StringBuilder();
+        url.append(uniformServicePath).append("/jira/getSolvedAssignedJiraRate?developer=").append(developer);
+        if (repoId != null && repoId.length()>0){
+            url.append("&repo-id=").append(repoId);
+        }
+        if (since != null && since.length()>0){
+            url.append("&begin-date=").append(since);
+        }
+        if (until != null && until.length()>0){
+            url.append("&end-date=").append(until);
+        }
+
+        JSONObject response = restTemplate.getForObject(url.toString(), JSONObject.class);
+        if(response.getIntValue("code") == 200){
+            return response.getJSONObject("data");
+        }
+        return null;
+    }
+
+    public JSONObject getAssignedJiraRate(String developer, String repoId, String since, String until){
+        StringBuilder url = new StringBuilder();
+        url.append(uniformServicePath).append("/jira/getAssignedJiraRate?developer=").append(developer);
+        if (repoId != null && repoId.length()>0){
+            url.append("&repo-id=").append(repoId);
+        }
+        if (since != null && since.length()>0){
+            url.append("&begin-date=").append(since);
+        }
+        if (until != null && until.length()>0){
+            url.append("&end-date=").append(until);
+        }
+
+        JSONObject response = restTemplate.getForObject(url.toString(), JSONObject.class);
+        if(response.getIntValue("code") == 200){
+            return response.getJSONObject("data");
+        }
+        return null;
+    }
+
+    public JSONObject getDefectRate(String developer, String repoId, String since, String until){
+        StringBuilder url = new StringBuilder();
+        url.append(uniformServicePath).append("/jira/getDefectRate?developer=").append(developer);
+        if (repoId != null && repoId.length()>0){
+            url.append("&repo-id=").append(repoId);
+        }
+        if (since != null && since.length()>0){
+            url.append("&begin-date=").append(since);
+        }
+        if (until != null && until.length()>0){
+            url.append("&end-date=").append(until);
+        }
+
+        JSONObject response = restTemplate.getForObject(url.toString(), JSONObject.class);
+        if(response.getIntValue("code") == 200){
+            return response.getJSONObject("data");
         }
         return null;
     }
