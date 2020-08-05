@@ -101,6 +101,14 @@ public interface MeasureDeveloperService {
 
     /**
      *
+     * @return 根据条件返回开发者statement逻辑行数据
+     */
+    Object getStatementByCondition(String repoId, String developer, String beginDate, String endDate);
+
+
+
+    /**
+     *
      * @return 返回开发者用户画像评星等级
      */
     Object getPortraitLevel(String developer, String token) throws ParseException;

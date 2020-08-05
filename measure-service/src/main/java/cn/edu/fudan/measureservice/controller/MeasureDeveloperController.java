@@ -227,6 +227,25 @@ public class MeasureDeveloperController {
 
     /**
      *
+     *返回用户画像页面得代码行数数据，包括所有项目和单个项目的
+     */
+    @GetMapping("/measure/statement")
+    @CrossOrigin
+    public ResponseBean getStatementByCondition(@RequestParam(value = "repo-id", required = false)String repoId,
+                                          @RequestParam(value = "developer", required = false)String developer,
+                                          @RequestParam(value = "begin-date", required = false)String beginDate,
+                                          @RequestParam(value = "end-date", required = false)String endDate){
+
+        try{
+            return new ResponseBean(200,"success",measureDeveloperService.getStatementByCondition(repoId,developer,beginDate,endDate));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
+
+    /**
+     *
      *返回用户commit msg
      */
     @GetMapping("/measure/commit-msg")

@@ -394,6 +394,52 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         return ("please input correct type: total or dayAverage !");
     }
 
+    @Override
+    public Object getStatementByCondition(String repoId, String developer, String beginDate, String endDate) {
+        if ("".equals(beginDate) || beginDate == null){
+            beginDate = repoMeasureMapper.getFirstCommitDateByCondition(repoId,developer);
+        }
+        if ("".equals(endDate) || endDate == null){
+            LocalDate today = LocalDate.now();
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            endDate = df.format(today);
+//            endDate = repoMeasureMapper.getLastCommitDateOfOneRepo(repoId,developer);
+        }
+        List<String> repoList = new ArrayList<>();
+        if ("".equals(repoId) || repoId == null){
+            repoList = repoMeasureMapper.getRepoListByDeveloper(developer);
+        }else {
+            repoList.add(repoId);
+        }
+        // 遍历所有repo，进行度量统计
+        int developerAddStatement = 0;
+        int developerDelStatement = 0;
+        for (String repo : repoList){
+            //获取代码新增、删除逻辑行数数据
+            JSONObject statements = restInterfaceManager.getStatementsByCondition(repo, beginDate, endDate, developer);
+            if  (statements != null){
+                for(String str:statements.keySet()){
+                    if (str.equals(developer)){
+                        developerAddStatement += statements.getJSONObject(str).getIntValue("ADD");
+                        developerDelStatement += statements.getJSONObject(str).getIntValue("DELETE");
+                    }
+                }
+            }
+        }
+        int totalStatement = developerAddStatement + developerDelStatement;
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate sinceDay = LocalDate.parse(beginDate, fmt);
+        LocalDate untilDay = LocalDate.parse(endDate, fmt);
+        int totalDays = (int) (untilDay.toEpochDay()-sinceDay.toEpochDay());
+        int workDays =  totalDays*5/7;
+        double dayAvgStatement = totalStatement*1.0/workDays;
+
+        Map<String,Object> map = new HashMap<>();
+        map.put("totalStatement",totalStatement);
+        map.put("workDays",workDays);
+        map.put("dayAvgStatement",dayAvgStatement);
+        return map;
+    }
 
     @Override
     @Cacheable(cacheNames = {"developerMetrics"})

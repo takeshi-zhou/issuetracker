@@ -267,6 +267,21 @@ public class RestInterfaceManager {
         return restTemplate.getForObject(uniformServicePath+"/statistics/statements"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&branch=" + branch, JSONObject.class).getJSONObject("data");
     }
 
+    public JSONObject getStatementsByCondition(String repoUuid, String beginDate, String endDate, String developer){
+        StringBuilder url = new StringBuilder();
+        url.append(uniformServicePath).append("/statistics/statements?developer=").append(developer);
+        if (repoUuid != null && repoUuid.length()>0){
+            url.append("&repoUuid=").append(repoUuid);
+        }
+        if (beginDate != null && beginDate.length()>0){
+            url.append("&beginDate=").append(beginDate);
+        }
+        if (endDate != null && endDate.length()>0){
+            url.append("&endDate=").append(endDate);
+        }
+        return restTemplate.getForObject(url.toString(), JSONObject.class).getJSONObject("data");
+    }
+
     public JSONObject getValidLine(String repoUuid, String beginDate, String endDate, String branch){
         return restTemplate.getForObject(uniformServicePath+"/statistics/committer/line/valid"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&branch=" + branch, JSONObject.class).getJSONObject("data");
     }
