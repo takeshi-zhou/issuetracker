@@ -1118,4 +1118,9 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         return "noJiraID" ;
     }
 
+    @Override
+    public Object getDeveloperList(String repoId) {
+
+        return repoMeasureMapper.getDeveloperListByRepoId(repoId);
+    }
 }

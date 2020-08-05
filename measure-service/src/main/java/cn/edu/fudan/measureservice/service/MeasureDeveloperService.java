@@ -138,6 +138,10 @@ public interface MeasureDeveloperService {
      */
     Object getDeveloperRecentNews(String repoId, String developer, String beginDate, String endDate);
 
-
+    /**
+     *
+     * @return 返回开发人员列表
+     */
+    Object getDeveloperList(String repoId);
 
 }

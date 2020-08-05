@@ -350,8 +350,13 @@
             developer_name
         FROM
             repo_measure
-        WHERE
-            repo_id = #{repo_id}
+        <where>
+            <trim prefixOverrides="and">
+                <if test="repo_id != null and repo_id != '' ">
+                    and repo_id = #{repo_id}
+                </if>
+            </trim>
+        </where>
         GROUP BY
             developer_name
         ORDER BY

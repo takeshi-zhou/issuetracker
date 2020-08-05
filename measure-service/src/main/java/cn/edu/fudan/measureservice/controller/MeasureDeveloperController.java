@@ -293,6 +293,17 @@ public class MeasureDeveloperController {
         }
     }
 
+    @GetMapping("/measure/developerList")
+    @CrossOrigin
+    public ResponseBean getDeveloperList(@RequestParam(value = "repo-id", required = false)String repoId){
+
+        try{
+            return new ResponseBean(200,"success",measureDeveloperService.getDeveloperList(repoId));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseBean(401,"failed",e.getMessage());
+        }
+    }
 
 
 }
