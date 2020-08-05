@@ -899,6 +899,9 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
      * @return 返回开发者在所有项目当中的整体画像数据
      */
     private cn.edu.fudan.measureservice.portrait2.DeveloperMetrics getTotalDeveloperMetrics(List<cn.edu.fudan.measureservice.portrait2.DeveloperMetrics> developerMetricsList, String developer, LocalDate firstCommitDate){
+        int totalStatement = 0;
+        int totalCommitCount = 0;
+
         //efficiency
         int totalDays = (int) (LocalDate.now().toEpochDay()-firstCommitDate.toEpochDay());
         int workDays =  totalDays*5/7;
@@ -937,6 +940,9 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
             cn.edu.fudan.measureservice.portrait2.Efficiency efficiency = metric.getEfficiency();
             cn.edu.fudan.measureservice.portrait2.Quality quality = metric.getQuality();
             Contribution contribution = metric.getContribution();
+
+            totalStatement += metric.getTotalStatement();
+            totalCommitCount += metric.getTotalCommitCount();
 
             jiraBug += efficiency.getJiraBug();
             jiraFeature += efficiency.getJiraFeature();
@@ -980,7 +986,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
                 .totalAssignedJiraCount(totalAssignedJiraCount).developerSolvedJiraCount(developerSolvedJiraCount)
                 .totalSolvedJiraCount(totalSolvedJiraCount).build();
 
-        return new cn.edu.fudan.measureservice.portrait2.DeveloperMetrics(totalEfficiency,totalQuality,totalContribution);
+        return new cn.edu.fudan.measureservice.portrait2.DeveloperMetrics(totalStatement, totalCommitCount, totalEfficiency,totalQuality,totalContribution);
 
     }
 
