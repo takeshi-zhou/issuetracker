@@ -233,6 +233,28 @@ public class RestInterfaceManager {
         return result.getJSONArray("data");
     }
 
+    public JSONObject getDayAvgSolvedIssue(String developer, String repoId, String since, String until, String tool){
+        StringBuilder url = new StringBuilder();
+        url.append(uniformServicePath).append("/measurement/developer/dayAvgSolvedIssue?developer=").append(developer);
+        if (repoId != null && repoId.length()>0){
+            url.append("&repoId=").append(repoId);
+        }
+        if (since != null && since.length()>0){
+            url.append("&since=").append(since);
+        }
+        if (until != null && until.length()>0){
+            url.append("&until=").append(until);
+        }
+        if (tool != null && tool.length()>0){
+            url.append("&tool=").append(tool);
+        }
+        JSONObject response = restTemplate.getForObject(url.toString(), JSONObject.class);
+        if(response.getIntValue("code") == 200){
+            return response.getJSONObject("data");
+        }
+        return null;
+    }
+
     //--------------------------------code-tracker service------------------------------------------------
     public JSONObject getStatements(String repoUuid, String beginDate, String endDate, String branch){
         return restTemplate.getForObject(uniformServicePath+"/statistics/statements"  + "?repoUuid=" + repoUuid + "&beginDate=" + beginDate + "&endDate=" + endDate + "&branch=" + branch, JSONObject.class).getJSONObject("data");
@@ -262,12 +284,26 @@ public class RestInterfaceManager {
 
     //-------------------------------------------jira API-------------------------------------------
     public JSONArray getJiraInfoByKey(String type, String keyword){
-        JSONObject response = restTemplate.getForObject("http://127.0.0.1:8887/jira/jql"  + "?keyword=" + keyword +  "&type=" + type, JSONObject.class);
+        JSONObject response = restTemplate.getForObject(uniformServicePath+"/jira/jql"  + "?keyword=" + keyword +  "&type=" + type, JSONObject.class);
         if(response.getIntValue("code") == 200){
             return response.getJSONArray("data");
         }
         return null;
     }
+
+    public JSONArray getJiraMsgOfOneDeveloper(String developer, String repoId){
+        StringBuilder url = new StringBuilder();
+        url.append(uniformServicePath).append("/jira/developer_msg?developer=").append(developer);
+        if (repoId != null && repoId.length()>0){
+            url.append("&repo-id=").append(repoId);
+        }
+        JSONObject response = restTemplate.getForObject(url.toString(), JSONObject.class);
+        if(response.getIntValue("code") == 200){
+            return response.getJSONArray("data");
+        }
+        return null;
+    }
+
 
 
 

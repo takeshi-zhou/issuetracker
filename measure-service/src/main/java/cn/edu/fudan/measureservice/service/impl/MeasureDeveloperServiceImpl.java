@@ -696,7 +696,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         }
 
         //开发效率相关指标
-        cn.edu.fudan.measureservice.portrait2.Efficiency efficiency = getEfficiency(repoId, beginDate, endDate, developer, branch);
+        cn.edu.fudan.measureservice.portrait2.Efficiency efficiency = getEfficiency(repoId, beginDate, endDate, developer, tool);
 
         //代码质量相关指标
         cn.edu.fudan.measureservice.portrait2.Quality quality = getQuality(repoId,developer,beginDate,endDate,tool,token,developerLOC,developerCommitCount);
@@ -707,11 +707,25 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         return new cn.edu.fudan.measureservice.portrait2.DeveloperMetrics(firstCommitDate, developerAddStatement+developerDelStatement, developerCommitCount, repoName, branch, developer, efficiency, quality, contribution);
     }
 
-    private cn.edu.fudan.measureservice.portrait2.Efficiency getEfficiency(String repoId,String beginDate, String endDate, String developer, String branch){
+    private cn.edu.fudan.measureservice.portrait2.Efficiency getEfficiency(String repoId,String beginDate, String endDate, String developer, String tool){
+
         int jiraBug = 0;
         int jiraFeature = 0;
         int solvedSonarIssue = 0;
         int days = 0;
+        JSONArray jiraResponse = restInterfaceManager.getJiraMsgOfOneDeveloper(developer, repoId);
+        if (jiraResponse != null){
+            JSONObject jiraBugData = jiraResponse.getJSONObject(4);
+            JSONObject jiraFeatureData = jiraResponse.getJSONObject(5);
+            jiraBug = jiraBugData.getIntValue("totalBugNum");
+            jiraFeature = jiraFeatureData.getIntValue("totalFeatureNum");
+        }
+
+        JSONObject sonarResponse = restInterfaceManager.getDayAvgSolvedIssue(developer,repoId,beginDate,endDate,tool);
+        if (sonarResponse != null){
+            solvedSonarIssue = sonarResponse.getIntValue("solvedIssuesCount");
+            days = (int) sonarResponse.getDoubleValue("days");
+        }
         return cn.edu.fudan.measureservice.portrait2.Efficiency.builder()
                 .jiraBug(jiraBug)
                 .jiraFeature(jiraFeature)
