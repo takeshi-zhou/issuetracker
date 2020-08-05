@@ -36,4 +36,9 @@ public class DeveloperMetrics implements Serializable {
         this.contribution = contribution;
     }
 
+    public DeveloperMetrics(Efficiency efficiency, Quality quality, Contribution contribution) {
+        this.efficiency = efficiency;
+        this.quality = quality;
+        this.contribution = contribution;
+    }
 }

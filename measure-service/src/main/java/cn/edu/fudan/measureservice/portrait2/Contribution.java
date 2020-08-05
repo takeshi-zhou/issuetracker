@@ -33,7 +33,7 @@ public class Contribution implements Formula, Serializable {
 
     // 以下各个评分由具体的公式计算出来,在getter方法中实现
 
-    private Double defaultScore = 1.0;
+    private double defaultScore = 1.0;
 
     private double locContribution = defaultScore;//代码贡献率（个人新增+删除）/（团队新增+删除）
     private double addStatementRate = defaultScore;//个人新增语句/团队新增语句

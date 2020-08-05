@@ -859,9 +859,101 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         String developerType = "Java后端工程师";
 
         //todo 获取开发者在所有项目中的整个的用户画像
-        cn.edu.fudan.measureservice.portrait2.DeveloperMetrics totalDeveloperMetrics = null;
+        cn.edu.fudan.measureservice.portrait2.DeveloperMetrics totalDeveloperMetrics = getTotalDeveloperMetrics(developerMetricsList,developer,firstCommitDate);
 
         return new cn.edu.fudan.measureservice.portrait2.DeveloperPortrait(firstCommitDate,totalStatement,dayAverageStatement,totalCommitCount,developer,developerType,developerMetricsList,totalDeveloperMetrics);
+    }
+
+    /**
+     *
+     * @param developerMetricsList 每个项目的画像数据
+     * @param developer 开发者
+     * @return 返回开发者在所有项目当中的整体画像数据
+     */
+    private cn.edu.fudan.measureservice.portrait2.DeveloperMetrics getTotalDeveloperMetrics(List<cn.edu.fudan.measureservice.portrait2.DeveloperMetrics> developerMetricsList, String developer, LocalDate firstCommitDate){
+        //efficiency
+        int totalDays = (int) (LocalDate.now().toEpochDay()-firstCommitDate.toEpochDay());
+        int workDays =  totalDays*5/7;
+        int jiraBug = 0;
+        int jiraFeature = 0;
+        int solvedSonarIssue = 0;
+
+        //quality
+        int developerStandardIssueCount = 0;
+        int totalIssueCount = 0;//团队总问题数
+        int developerNewIssueCount = 0;//个人引入问题
+        int totalNewIssueCount = 0;//团队引入问题
+        int developerLOC = 0;//个人addLines+delLines
+        int developerCommitCount = 0;//个人提交的commit总数
+        int developerJiraCount = 0;//个人提交的commit当中 关联有jira的个数
+        int developerJiraBugCount = 0;//个人jira任务中属于bug类型的数量
+        int totalJiraBugCount = 0;//团队jira任务中属于bug类型的数量
+
+        //contribution
+        //int developerLOC
+        int totalLOC = 0;
+        int developerAddStatement = 0;
+        int totalAddStatement = 0;
+        int developerAddLine = 0;
+        int developerValidLine = 0;//个人存活语句
+        int totalValidLine = 0;//团队存活语句
+        int increasedCloneLines = 0;//个人新增重复代码行数
+        int developerAssignedJiraCount = 0;//个人被分配到的jira任务个数（注意不是次数）
+        int totalAssignedJiraCount = 0;//团队被分配到的jira任务个数（注意不是次数）
+        int developerSolvedJiraCount = 0;//个人解决的jira任务个数（注意不是次数）
+        int totalSolvedJiraCount = 0;//团队解决的jira任务个数（注意不是次数）
+
+        //对每个项目的数据进行累加，便于求整体的画像数据
+        for (int i = 0; i < developerMetricsList.size(); i++){
+            cn.edu.fudan.measureservice.portrait2.DeveloperMetrics metric = developerMetricsList.get(i);
+            cn.edu.fudan.measureservice.portrait2.Efficiency efficiency = metric.getEfficiency();
+            cn.edu.fudan.measureservice.portrait2.Quality quality = metric.getQuality();
+            Contribution contribution = metric.getContribution();
+
+            jiraBug += efficiency.getJiraBug();
+            jiraFeature += efficiency.getJiraFeature();
+            solvedSonarIssue += efficiency.getSolvedSonarIssue();
+
+            developerStandardIssueCount += quality.getDeveloperStandardIssueCount();
+            totalIssueCount += quality.getTotalIssueCount();
+            developerNewIssueCount += quality.getDeveloperNewIssueCount();
+            totalNewIssueCount += quality.getTotalNewIssueCount();
+            developerLOC += quality.getDeveloperLOC();
+            developerCommitCount += quality.getDeveloperCommitCount();
+            developerJiraCount += quality.getDeveloperJiraCount();
+            developerJiraBugCount += quality.getDeveloperJiraBugCount();
+            totalJiraBugCount += quality.getTotalJiraBugCount();
+
+            totalLOC += contribution.getTotalLOC();
+            developerAddStatement += contribution.getDeveloperAddStatement();
+            totalAddStatement += contribution.getTotalAddStatement();
+            developerAddLine += contribution.getDeveloperAddLine();
+            developerValidLine += contribution.getDeveloperValidLine();
+            totalValidLine += contribution.getTotalValidLine();
+            increasedCloneLines += contribution.getIncreasedCloneLines();
+            developerAssignedJiraCount += contribution.getDeveloperAssignedJiraCount();
+            totalAssignedJiraCount += contribution.getTotalAssignedJiraCount();
+            developerSolvedJiraCount += contribution.getDeveloperSolvedJiraCount();
+            totalSolvedJiraCount += contribution.getTotalSolvedJiraCount();
+        }
+        cn.edu.fudan.measureservice.portrait2.Efficiency totalEfficiency = cn.edu.fudan.measureservice.portrait2.Efficiency.builder()
+                .jiraBug(jiraBug).jiraFeature(jiraFeature).solvedSonarIssue(solvedSonarIssue).days(workDays).build();
+
+        cn.edu.fudan.measureservice.portrait2.Quality totalQuality = cn.edu.fudan.measureservice.portrait2.Quality.builder()
+                .developerStandardIssueCount(developerStandardIssueCount).totalIssueCount(totalIssueCount)
+                .developerNewIssueCount(developerNewIssueCount).totalNewIssueCount(totalNewIssueCount)
+                .developerLOC(developerLOC).developerCommitCount(developerCommitCount).developerJiraCount(developerJiraCount)
+                .developerJiraBugCount(developerJiraBugCount).totalJiraBugCount(totalJiraBugCount).build();
+
+        Contribution totalContribution = Contribution.builder().developerLOC(developerLOC).totalLOC(totalLOC)
+                .developerAddStatement(developerAddStatement).totalAddStatement(totalAddStatement)
+                .developerAddLine(developerAddLine).developerValidLine(developerValidLine).totalValidLine(totalValidLine)
+                .increasedCloneLines(increasedCloneLines).developerAssignedJiraCount(developerAssignedJiraCount)
+                .totalAssignedJiraCount(totalAssignedJiraCount).developerSolvedJiraCount(developerSolvedJiraCount)
+                .totalSolvedJiraCount(totalSolvedJiraCount).build();
+
+        return new cn.edu.fudan.measureservice.portrait2.DeveloperMetrics(totalEfficiency,totalQuality,totalContribution);
+
     }
 
 
