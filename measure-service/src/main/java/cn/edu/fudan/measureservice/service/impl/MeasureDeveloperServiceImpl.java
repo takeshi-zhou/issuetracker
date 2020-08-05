@@ -1120,8 +1120,16 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
     @Override
     public Object getDeveloperList(String repoId) {
-
-        return repoMeasureMapper.getDeveloperListByRepoId(repoId);
+        List<Map<String, Object>> result = new ArrayList<>();
+        List<Map<String, Object>> developerList = repoMeasureMapper.getDeveloperListByRepoId(repoId);
+        for (int i = 0; i < developerList.size(); i++){
+            Map<String,Object> map = developerList.get(i);
+            String developerName = map.get("developer_name").toString();
+            int involvedRepoCount = (int) getDeveloperInvolvedRepoCount(developerName);
+            map.put("involvedRepoCount",involvedRepoCount);
+            result.add(map);
+        }
+        return result;
     }
 
     @Override
