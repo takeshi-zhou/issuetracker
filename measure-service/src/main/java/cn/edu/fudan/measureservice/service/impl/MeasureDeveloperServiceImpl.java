@@ -924,17 +924,17 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
 
         int totalCommitCount = repoMeasureMapper.getCommitCountsByDuration(null, null, null, developer);
-        //todo 获取statement接口
-        int totalStatement = 0;
-        int totalDays = (int) (today.toEpochDay()-firstCommitDate.toEpochDay());
-        int workDays =  totalDays*5/7;
-        int dayAverageStatement = totalStatement/workDays;
+
         //todo 日后需要添加程序员类型接口 目前统一认为是java后端工程师
         String developerType = "Java后端工程师";
 
-        //todo 获取开发者在所有项目中的整个的用户画像
+        // 获取开发者在所有项目中的整个的用户画像
         cn.edu.fudan.measureservice.portrait2.DeveloperMetrics totalDeveloperMetrics = getTotalDeveloperMetrics(developerMetricsList,developer,firstCommitDate);
 
+        int totalStatement = totalDeveloperMetrics.getTotalStatement();
+        int totalDays = (int) (today.toEpochDay()-firstCommitDate.toEpochDay());
+        int workDays =  totalDays*5/7;
+        int dayAverageStatement = totalStatement/workDays;
         return new cn.edu.fudan.measureservice.portrait2.DeveloperPortrait(firstCommitDate,totalStatement,dayAverageStatement,totalCommitCount,developer,developerType,developerMetricsList,totalDeveloperMetrics);
     }
 
