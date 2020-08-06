@@ -490,7 +490,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         //----------------------------------开发能力相关指标-------------------------------------
         Competence competence = getDeveloperCompetence(repoId,beginDate,endDate,developer,developerNumber,developerAddStatement,totalAddStatement,developerValidLine,totalValidLine);
 
-        return new DeveloperMetrics(firstCommitDate, developerLOC, developerCommitCount, repoName, developer, efficiency, quality, competence);
+        return new DeveloperMetrics(firstCommitDate, developerLOC, developerCommitCount, repoName, repoId, developer, efficiency, quality, competence);
     }
 
     private Efficiency getDeveloperEfficiency(String repoId, String beginDate, String endDate, String developer, String branch,
