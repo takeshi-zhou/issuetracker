@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.fudan.cloneservice.mapper.CloneInstanceInfoMapper">
+    <resultMap id="info_result_map" type="cn.edu.fudan.cloneservice.bean.CloneInstanceInfo">
+        <result property="groupID" column="groupID"/>
+        <result property="start_line" column="start_line"/>
+        <result property="end_line" column="end_line"/>
+        <result property="class_name" column="class_name"/>
+        <result property="method_name" column="method_name"/>
+        <result property="file_path" column="file_path"/>
+    </resultMap>
+    <select id="selectInfoByCommitIdAndRepoId" parameterType="String" resultMap="info_result_map">
+        select rawIssue.type, start_line, end_line, class_name, method_name, file_path
+        from rawIssue INNER JOIN location ON rawIssue.uuid = location.rawIssue_id
+        where category = 'clone'
+        and repo_id  = #{repoId}
+        and commit_id = #{commitId}
+    </select>
+</mapper>
