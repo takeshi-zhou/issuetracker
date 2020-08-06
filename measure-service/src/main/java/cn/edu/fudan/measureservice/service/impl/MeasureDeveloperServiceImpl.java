@@ -1080,6 +1080,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         return null;
     }
 
+    @Cacheable(cacheNames = {"developerRecentNews"}, key = "#developer")
     @Override
     public Object getDeveloperRecentNews(String repoId, String developer, String beginDate, String endDate) {
         List<Map<String, Object>> commitMsgList = repoMeasureMapper.getCommitMsgByCondition(repoId, developer, beginDate, endDate);
