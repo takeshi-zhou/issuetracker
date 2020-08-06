@@ -763,8 +763,8 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         if (jiraResponse != null){
             JSONObject jiraBugData = jiraResponse.getJSONObject(4);
             JSONObject jiraFeatureData = jiraResponse.getJSONObject(5);
-            jiraBug = jiraBugData.getIntValue("totalBugNum");
-            jiraFeature = jiraFeatureData.getIntValue("totalFeatureNum");
+            jiraBug = jiraBugData.getIntValue("completedBugNum");
+            jiraFeature = jiraFeatureData.getIntValue("completedFeatureNum");
         }
 
         JSONObject sonarResponse = restInterfaceManager.getDayAvgSolvedIssue(developer,repoId,beginDate,endDate,tool,token);
