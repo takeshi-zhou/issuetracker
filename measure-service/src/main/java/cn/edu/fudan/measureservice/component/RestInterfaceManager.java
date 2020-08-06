@@ -330,13 +330,13 @@ public class RestInterfaceManager {
         StringBuilder url = new StringBuilder();
         url.append(uniformServicePath).append("/jira/getSolvedAssignedJiraRate?developer=").append(developer);
         if (repoId != null && repoId.length()>0){
-            url.append("&repo-id=").append(repoId);
+            url.append("&repo_id=").append(repoId);
         }
         if (since != null && since.length()>0){
-            url.append("&begin-date=").append(since);
+            url.append("&begin_date=").append(since);
         }
         if (until != null && until.length()>0){
-            url.append("&end-date=").append(until);
+            url.append("&end_date=").append(until);
         }
 
         JSONObject response = restTemplate.getForObject(url.toString(), JSONObject.class);
@@ -350,13 +350,13 @@ public class RestInterfaceManager {
         StringBuilder url = new StringBuilder();
         url.append(uniformServicePath).append("/jira/getAssignedJiraRate?developer=").append(developer);
         if (repoId != null && repoId.length()>0){
-            url.append("&repo-id=").append(repoId);
+            url.append("&repo_id=").append(repoId);
         }
         if (since != null && since.length()>0){
-            url.append("&begin-date=").append(since);
+            url.append("&begin_date=").append(since);
         }
         if (until != null && until.length()>0){
-            url.append("&end-date=").append(until);
+            url.append("&end_date=").append(until);
         }
 
         JSONObject response = restTemplate.getForObject(url.toString(), JSONObject.class);
@@ -370,13 +370,13 @@ public class RestInterfaceManager {
         StringBuilder url = new StringBuilder();
         url.append(uniformServicePath).append("/jira/getDefectRate?developer=").append(developer);
         if (repoId != null && repoId.length()>0){
-            url.append("&repo-id=").append(repoId);
+            url.append("&repo_id=").append(repoId);
         }
         if (since != null && since.length()>0){
-            url.append("&begin-date=").append(since);
+            url.append("&begin_date=").append(since);
         }
         if (until != null && until.length()>0){
-            url.append("&end-date=").append(until);
+            url.append("&end_date=").append(until);
         }
 
         JSONObject response = restTemplate.getForObject(url.toString(), JSONObject.class);
