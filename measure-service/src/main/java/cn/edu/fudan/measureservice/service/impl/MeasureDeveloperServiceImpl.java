@@ -509,6 +509,9 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         int totalDelStatement = 0;
         if  (statements != null){
             for(String str:statements.keySet()){
+                if (str.equals("total")){
+                    continue;
+                }
                 if (str.equals(developer)){
                     developerAddStatement = statements.getJSONObject(str).getIntValue("ADD");
                     developerDelStatement = statements.getJSONObject(str).getIntValue("DELETE");
@@ -522,6 +525,9 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         int totalValidLine = 0;
         if (validLines != null){
             for(String key:validLines.keySet()){
+                if (key.equals("total")){
+                    continue;
+                }
                 if (key.equals(developer)){
                     developerValidLine = validLines.getIntValue(key);
                 }
@@ -732,6 +738,9 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         int totalDelStatement = 0;
         if  (statements != null){
             for(String str:statements.keySet()){
+                if (str.equals("total")){
+                    continue;
+                }
                 if (str.equals(developer)){
                     developerAddStatement = statements.getJSONObject(str).getIntValue("ADD");
                     developerDelStatement = statements.getJSONObject(str).getIntValue("DELETE");
@@ -840,6 +849,9 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         int totalValidLine = 0;
         if (validLines != null){
             for(String key:validLines.keySet()){
+                if (key.equals("total")){
+                    continue;
+                }
                 if (key.equals(developer)){
                     developerValidLine = validLines.getIntValue(key);
                 }
