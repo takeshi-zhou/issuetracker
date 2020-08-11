@@ -445,6 +445,14 @@
             repo_measure
         WHERE
             developer_name = #{developer_name}
+
+        <if test="since != null and since != '' ">
+            and <![CDATA[ commit_time >= #{since} ]]>
+        </if>
+
+        <if test="until != null and until != '' ">
+            and <![CDATA[ commit_time <= #{until} ]]>
+        </if>
     </select>
 
     <select id="getFirstCommitDateByCondition" parameterType="String" resultType="String">

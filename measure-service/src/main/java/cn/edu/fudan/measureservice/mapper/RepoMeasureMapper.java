@@ -57,7 +57,7 @@ public interface RepoMeasureMapper {
 
     List<Map<String, Object>> getCommitDays(@Param("repo_id")String repoId,@Param("developer_name")String developerName,@Param("since")String beginDate,@Param("until")String endDate);
 
-    List<String> getRepoListByDeveloper(@Param("developer_name")String developerName);
+    List<String> getRepoListByDeveloper(@Param("developer_name")String developerName,@Param("since")String beginDate,@Param("until")String endDate);
 
     String getFirstCommitDateByCondition(@Param("repo_id") String repo_id,@Param("developer")String developerName);
 

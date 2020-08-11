@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import sun.nio.cs.FastCharsetProvider;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -180,11 +181,13 @@ public class MeasureDeveloperController {
     @GetMapping("/measure/portrait-level")
     @CrossOrigin
     public ResponseBean getPortraitLevel(@RequestParam("developer")String developer,
+                                         @RequestParam(value = "since", required = false)String since,
+                                         @RequestParam(value = "until", required = false)String until,
                                     HttpServletRequest request){
 
         try{
             String token = request.getHeader("token");
-            return new ResponseBean(200,"success",measureDeveloperService.getPortraitLevel(developer,token));
+            return new ResponseBean(200,"success",measureDeveloperService.getPortraitLevel(developer,since,until,token));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());
@@ -194,11 +197,13 @@ public class MeasureDeveloperController {
     @GetMapping("/measure/portrait/competence")
     @CrossOrigin
     public ResponseBean getPortraitCompetence(@RequestParam("developer")String developer,
+                                              @RequestParam(value = "since", required = false)String since,
+                                              @RequestParam(value = "until", required = false)String until,
                                          HttpServletRequest request){
 
         try{
             String token = request.getHeader("token");
-            return new ResponseBean(200,"success",measureDeveloperService.getPortraitCompetence(developer,token));
+            return new ResponseBean(200,"success",measureDeveloperService.getPortraitCompetence(developer,since,until,token));
         }catch (Exception e){
             e.printStackTrace();
             return new ResponseBean(401,"failed",e.getMessage());

@@ -13,6 +13,7 @@ import cn.edu.fudan.measureservice.util.DateTimeUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jgit.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -407,7 +408,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         }
         List<String> repoList = new ArrayList<>();
         if ("".equals(repoId) || repoId == null){
-            repoList = repoMeasureMapper.getRepoListByDeveloper(developer);
+            repoList = repoMeasureMapper.getRepoListByDeveloper(developer,null,null);
         }else {
             repoList.add(repoId);
         }
@@ -649,13 +650,18 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
     @Cacheable(cacheNames = {"portraitLevel"}, key = "#developer")
     @Override
-    public Object getPortraitLevel(String developer, String token) throws ParseException {
+    public Object getPortraitLevel(String developer, String since, String until, String token) throws ParseException {
         //获取developerMetricsList
-        List<String> repoList = repoMeasureMapper.getRepoListByDeveloper(developer);
+        List<String> repoList = repoMeasureMapper.getRepoListByDeveloper(developer,since,until);
+        if (repoList.size()==0){
+            return "选定时间段内无参与项目！";
+        }
         List<DeveloperMetrics> developerMetricsList = new ArrayList<>();
-        LocalDate today = LocalDate.now();
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String endDate = df.format(today);
+        if (StringUtils.isEmptyOrNull(until)){
+            LocalDate today = LocalDate.now();
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            until = df.format(today);
+        }
         for (String repoId : repoList) {
             JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
             for (int i = 0; i < projects.size(); i++){
@@ -664,10 +670,12 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
                 log.info("Current repo is : " + repoName + ", the issue_scan_type is " + tool);
                 //只添加被sonarqube扫描过的项目，findbugs之后会逐渐被废弃
                 if ("sonarqube".equals(tool)){
-                    String beginDate = repoMeasureMapper.getFirstCommitDateByCondition(repoId,null);
+                    if (StringUtils.isEmptyOrNull(since)){
+                        since = repoMeasureMapper.getFirstCommitDateByCondition(repoId,null);
+                    }
 //                    String endDate = repoMeasureMapper.getLastCommitDateOfOneRepo(repoId);
                     log.info("Start to get portrait of " + developer + " in repo : " + repoName);
-                    DeveloperMetrics metrics = getPortrait(repoId, developer, beginDate, endDate, token, tool);
+                    DeveloperMetrics metrics = getPortrait(repoId, developer, since, until, token, tool);
                     developerMetricsList.add(metrics);
                     log.info("Successfully get portrait of " + developer + " in repo : " + repoName);
                 }
@@ -898,13 +906,18 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
     @Cacheable(cacheNames = {"portraitCompetence"}, key = "#developer")
     @Override
-    public Object getPortraitCompetence(String developer, String token) throws ParseException {
+    public Object getPortraitCompetence(String developer,String since,String until, String token) throws ParseException {
         //获取developerMetricsList
-        List<String> repoList = repoMeasureMapper.getRepoListByDeveloper(developer);
+        List<String> repoList = repoMeasureMapper.getRepoListByDeveloper(developer,since,until);
+        if (repoList.size()==0){
+            return "选定时间段内无参与项目！";
+        }
         List<cn.edu.fudan.measureservice.portrait2.DeveloperMetrics> developerMetricsList = new ArrayList<>();
         LocalDate today = LocalDate.now();
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String endDate = df.format(today);
+        if (StringUtils.isEmptyOrNull(until)){
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            until = df.format(today);
+        }
         for (String repoId : repoList) {
             JSONArray projects = restInterfaceManager.getProjectsOfRepo(repoId);
             for (int i = 0; i < projects.size(); i++){
@@ -913,10 +926,12 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
                 log.info("Current repo is : " + repoName + ", the issue_scan_type is " + tool);
                 //只添加被sonarqube扫描过的项目，findbugs之后会逐渐被废弃
                 if ("sonarqube".equals(tool)){
-                    String beginDate = repoMeasureMapper.getFirstCommitDateByCondition(repoId,null);
-//                    String endDate = repoMeasureMapper.getLastCommitDateOfOneRepo(repoId);
+                    if (StringUtils.isEmptyOrNull(since)){
+                        since = repoMeasureMapper.getFirstCommitDateByCondition(repoId,null);
+                    }
+                    //String endDate = repoMeasureMapper.getLastCommitDateOfOneRepo(repoId);
                     log.info("Start to get portrait of " + developer + " in repo : " + repoName);
-                    cn.edu.fudan.measureservice.portrait2.DeveloperMetrics metrics = getDeveloperMetrics(repoId, developer, beginDate, endDate, token, tool);
+                    cn.edu.fudan.measureservice.portrait2.DeveloperMetrics metrics = getDeveloperMetrics(repoId, developer, since, until, token, tool);
                     developerMetricsList.add(metrics);
                     log.info("Successfully get portrait of " + developer + " in repo : " + repoName);
                 }
@@ -1073,7 +1088,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         }
         List<String> repoList = new ArrayList<>();
         if ("".equals(repoId) || repoId == null){
-            repoList = repoMeasureMapper.getRepoListByDeveloper(developer);
+            repoList = repoMeasureMapper.getRepoListByDeveloper(developer,null,null);
         }else {
             repoList.add(repoId);
         }
@@ -1147,7 +1162,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
     @Override
     public Object getDeveloperInvolvedRepoCount(String developer) {
-        List<String> repoList = repoMeasureMapper.getRepoListByDeveloper(developer);
+        List<String> repoList = repoMeasureMapper.getRepoListByDeveloper(developer,null,null);
         return repoList.size();
     }
 }

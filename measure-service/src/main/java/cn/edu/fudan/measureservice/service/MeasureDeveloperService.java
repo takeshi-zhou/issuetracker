@@ -111,13 +111,13 @@ public interface MeasureDeveloperService {
      *
      * @return 返回开发者用户画像评星等级
      */
-    Object getPortraitLevel(String developer, String token) throws ParseException;
+    Object getPortraitLevel(String developer,String since,String until, String token) throws ParseException;
 
     /**
      *
      * @return 返回开发者用户画像开发者能力数据以及评星等级数据
      */
-    Object getPortraitCompetence(String developer, String token) throws ParseException;
+    Object getPortraitCompetence(String developer,String since,String until, String token) throws ParseException;
 
 
     /**
