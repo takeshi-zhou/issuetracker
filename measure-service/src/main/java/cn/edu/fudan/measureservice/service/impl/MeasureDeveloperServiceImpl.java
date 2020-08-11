@@ -648,7 +648,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
     public void reloadCache() {
     }
 
-    @Cacheable(cacheNames = {"portraitLevel"}, key = "#developer")
+    @Cacheable(cacheNames = {"portraitLevel"})
     @Override
     public Object getPortraitLevel(String developer, String since, String until, String token) throws ParseException {
         //获取developerMetricsList
@@ -904,7 +904,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
     }
 
 
-    @Cacheable(cacheNames = {"portraitCompetence"}, key = "#developer")
+    @Cacheable(cacheNames = {"portraitCompetence"})
     @Override
     public Object getPortraitCompetence(String developer,String since,String until, String token) throws ParseException {
         //获取developerMetricsList
@@ -1107,7 +1107,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         return null;
     }
 
-    @Cacheable(cacheNames = {"developerRecentNews"}, key = "#developer")
+    @Cacheable(cacheNames = {"developerRecentNews"})
     @Override
     public Object getDeveloperRecentNews(String repoId, String developer, String beginDate, String endDate) {
         List<Map<String, Object>> commitMsgList = repoMeasureMapper.getCommitMsgByCondition(repoId, developer, beginDate, endDate);
