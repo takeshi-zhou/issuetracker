@@ -15,7 +15,7 @@ import java.time.LocalDate;
 public class DeveloperMetrics implements Serializable {
 
     private LocalDate firstCommitDate;
-    private int totalLine;
+    private int totalLine;//需要改成逻辑行statement
     private int totalCommitCount;
     private String repoName;
     private String repoId;
