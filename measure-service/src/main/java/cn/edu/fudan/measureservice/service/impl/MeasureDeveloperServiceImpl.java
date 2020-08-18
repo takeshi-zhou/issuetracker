@@ -926,9 +926,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
                 log.info("Current repo is : " + repoName + ", the issue_scan_type is " + tool);
                 //只添加被sonarqube扫描过的项目，findbugs之后会逐渐被废弃
                 if ("sonarqube".equals(tool)){
-                    if (StringUtils.isEmptyOrNull(since)){
-                        since = repoMeasureMapper.getFirstCommitDateByCondition(repoId,null);
-                    }
+                    since = repoMeasureMapper.getFirstCommitDateByCondition(repoId,null);
                     //String endDate = repoMeasureMapper.getLastCommitDateOfOneRepo(repoId);
                     log.info("Start to get portrait of " + developer + " in repo : " + repoName);
                     cn.edu.fudan.measureservice.portrait2.DeveloperMetrics metrics = getDeveloperMetrics(repoId, developer, since, until, token, tool);
