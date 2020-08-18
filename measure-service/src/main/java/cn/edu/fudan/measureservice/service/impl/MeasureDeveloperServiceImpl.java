@@ -1165,4 +1165,9 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         List<String> repoList = repoMeasureMapper.getRepoListByDeveloper(developer,null,null);
         return repoList.size();
     }
+
+    @Override
+    public Object getDeveloperInvolvedRepoList(String developer) {
+        return repoMeasureMapper.getRepoListByDeveloper(developer,null,null);
+    }
 }

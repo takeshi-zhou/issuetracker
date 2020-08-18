@@ -150,6 +150,12 @@ public interface MeasureDeveloperService {
      */
     Object getDeveloperInvolvedRepoCount(String developer);
 
+    /**
+     *
+     * @return 返回开发人员参与的项目数
+     */
+    Object getDeveloperInvolvedRepoList(String developer);
+
 
 
 }
