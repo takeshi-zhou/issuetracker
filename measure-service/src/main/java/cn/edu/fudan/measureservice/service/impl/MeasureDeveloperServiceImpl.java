@@ -906,7 +906,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
     @Cacheable(cacheNames = {"portraitCompetence"})
     @Override
-    public Object getPortraitCompetence(String developer,String since,String until, String token) throws ParseException {
+    public Object getPortraitCompetence(String developer,String since,String until, String token) {
         //获取developerMetricsList
         List<String> repoList = repoMeasureMapper.getRepoListByDeveloper(developer,since,until);
         if (repoList.size()==0){
