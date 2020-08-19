@@ -18,10 +18,10 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class Quality implements Formula, Serializable {
     // 基础数据
-    private int developerStandardIssueCount;
-    private int totalIssueCount;//团队总问题数
-    private int developerNewIssueCount;//个人引入问题
-    private int totalNewIssueCount;//团队引入问题
+    private int developerStandardIssueCount;//个人引入规范类问题数
+    private int totalStandardIssueCount;//团队引入规范类问题数
+    private int developerNewIssueCount;//个人引入问题数
+    private int totalNewIssueCount;//团队引入问题数
     private int developerLOC;//个人addLines+delLines
     private int developerCommitCount;//个人提交的commit总数
     private int developerJiraCount;//个人提交的commit当中 关联有jira的个数
@@ -33,7 +33,7 @@ public class Quality implements Formula, Serializable {
     private static double defaultScore = 0;
 
 
-    private double codeStandard = defaultScore;//代码规范性：个人规范类问题数量/团队问题总数
+    private double codeStandard = defaultScore;//代码规范性：个人规范类问题数量/团队规范类问题数量
     private double commitStandard = defaultScore;//提交规范性：个人jira关联数/个人提交数
     private double jiraBugRate = defaultScore;//个人bug/团队bug
     private double issueRate = defaultScore;//个人引入问题/团队引入问题
@@ -77,8 +77,8 @@ public class Quality implements Formula, Serializable {
                 return codeStandard;
             }
             //  具体的计算方式
-            if (totalIssueCount != 0) {
-                codeStandard = developerStandardIssueCount * (1.0) / totalIssueCount;
+            if (totalStandardIssueCount != 0) {
+                codeStandard = developerStandardIssueCount * (1.0) / totalStandardIssueCount;
                 return codeStandard;
             }
             return codeStandard;
@@ -113,7 +113,7 @@ public class Quality implements Formula, Serializable {
                 return issueRate;
             }
             //  具体的计算方式
-            if (totalIssueCount != 0) {
+            if (totalNewIssueCount != 0) {
                 issueRate = developerNewIssueCount * (1.0) / totalNewIssueCount;
                 return issueRate;
             }

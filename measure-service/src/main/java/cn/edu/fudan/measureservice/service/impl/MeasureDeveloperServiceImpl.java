@@ -797,24 +797,14 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
                 .build();
     }
     private cn.edu.fudan.measureservice.portrait2.Quality getQuality(String repoId, String developer, String beginDate, String endDate, String tool, String token, int developerLOC, int developerCommitCount){
-        //个人规范类issue数
+        //个人引入规范类issue数
         int developerStandardIssueCount = restInterfaceManager.getIssueCountByConditions(developer, repoId, beginDate, endDate, tool, "standard", token);
-        //repo总issue数
-        int totalIssueCount = restInterfaceManager.getIssueCountByConditions("", repoId, beginDate, endDate, tool, "", token);
-        JSONArray issueList = restInterfaceManager.getNewElmIssueCount(repoId, beginDate, endDate, tool, token);
-        int developerNewIssueCount = 0;//个人新增缺陷数
-        int totalNewIssueCount = 0;//总新增缺陷数
-        if (!issueList.isEmpty()){
-            for (int i = 0; i < issueList.size(); i++){
-                JSONObject each = issueList.getJSONObject(i);
-                String developerName = each.getString("developer");
-                int newIssueCount = each.getIntValue("newIssueCount");
-                if (developer.equals(developerName)){
-                    developerNewIssueCount = newIssueCount;
-                }
-                totalNewIssueCount += newIssueCount;
-            }
-        }
+        //个人引入issue总数
+        int developerNewIssueCount = restInterfaceManager.getIssueCountByConditions(developer, repoId, beginDate, endDate, tool, null, token);
+        //团队引入规范类issue数
+        int totalStandardIssueCount = restInterfaceManager.getIssueCountByConditions(null, repoId, beginDate, endDate, tool, "standard", token);
+        //团队引入issue总数
+        int totalNewIssueCount = restInterfaceManager.getIssueCountByConditions(null, repoId, beginDate, endDate, tool, null, token);
 
         int developerJiraCount = 0;
         List<Map<String, Object>> commitMsgList = repoMeasureMapper.getCommitMsgByCondition(repoId, developer, beginDate, endDate);
@@ -836,7 +826,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         }
         return cn.edu.fudan.measureservice.portrait2.Quality.builder()
                 .developerStandardIssueCount(developerStandardIssueCount)
-                .totalIssueCount(totalIssueCount)
+                .totalStandardIssueCount(totalStandardIssueCount)
                 .developerNewIssueCount(developerNewIssueCount)
                 .totalNewIssueCount(totalNewIssueCount)
                 .developerLOC(developerLOC)
@@ -982,7 +972,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
 
         //quality
         int developerStandardIssueCount = 0;
-        int totalIssueCount = 0;//团队总问题数
+        int totalStandardIssueCount = 0;
         int developerNewIssueCount = 0;//个人引入问题
         int totalNewIssueCount = 0;//团队引入问题
         int developerLOC = 0;//个人addLines+delLines
@@ -1020,7 +1010,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
             solvedSonarIssue += efficiency.getSolvedSonarIssue();
 
             developerStandardIssueCount += quality.getDeveloperStandardIssueCount();
-            totalIssueCount += quality.getTotalIssueCount();
+            totalStandardIssueCount += quality.getTotalStandardIssueCount();
             developerNewIssueCount += quality.getDeveloperNewIssueCount();
             totalNewIssueCount += quality.getTotalNewIssueCount();
             developerLOC += quality.getDeveloperLOC();
@@ -1045,7 +1035,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
                 .jiraBug(jiraBug).jiraFeature(jiraFeature).solvedSonarIssue(solvedSonarIssue).days(workDays).build();
 
         cn.edu.fudan.measureservice.portrait2.Quality totalQuality = cn.edu.fudan.measureservice.portrait2.Quality.builder()
-                .developerStandardIssueCount(developerStandardIssueCount).totalIssueCount(totalIssueCount)
+                .developerStandardIssueCount(developerStandardIssueCount).totalStandardIssueCount(totalStandardIssueCount)
                 .developerNewIssueCount(developerNewIssueCount).totalNewIssueCount(totalNewIssueCount)
                 .developerLOC(developerLOC).developerCommitCount(developerCommitCount).developerJiraCount(developerJiraCount)
                 .developerJiraBugCount(developerJiraBugCount).totalJiraBugCount(totalJiraBugCount).build();
