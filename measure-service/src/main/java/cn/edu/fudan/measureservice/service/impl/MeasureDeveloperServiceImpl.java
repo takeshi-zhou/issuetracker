@@ -767,7 +767,7 @@ public class MeasureDeveloperServiceImpl implements MeasureDeveloperService {
         //贡献价值相关指标
         cn.edu.fudan.measureservice.portrait2.Contribution contribution = getContribution(repoId,beginDate,endDate,developer,developerLOC,branch,developerAddStatement,totalAddStatement);
 
-        return new cn.edu.fudan.measureservice.portrait2.DeveloperMetrics(firstCommitDate, developerAddStatement+developerDelStatement, developerCommitCount, repoName, branch, developer, efficiency, quality, contribution);
+        return new cn.edu.fudan.measureservice.portrait2.DeveloperMetrics(firstCommitDate, developerAddStatement+developerDelStatement, developerCommitCount, repoName, repoId, branch, developer, efficiency, quality, contribution);
     }
 
     private cn.edu.fudan.measureservice.portrait2.Efficiency getEfficiency(String repoId,String beginDate, String endDate, String developer, String tool, String token){
